@@ -1,0 +1,5 @@
+{
+  "name": "interactive-trip-planner-skill",
+  "private": true,
+  "type": "module"
+}

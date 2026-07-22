@@ -484,6 +484,10 @@
       line-height: 1.45;
     }
 
+    .poi-list-thumb {
+      display: none;
+    }
+
     .section-title {
       margin: 20px 0 10px;
       font-size: 15px;
@@ -1482,6 +1486,27 @@
       background: #c58a1f;
     }
 
+    .mobile-app-bar,
+    .mobile-sheet-handle,
+    .mobile-sheet-footer,
+    .mobile-change-summary {
+      display: none;
+    }
+
+    .mobile-bottom-sheet,
+    .mobile-sheet-view {
+      display: contents;
+    }
+
+    .mobile-day-group {
+      display: none;
+    }
+
+    .mobile-only-label,
+    .mobile-priority-label {
+      display: none;
+    }
+
     @media (min-width: 1100px) {
       .app.detail-browse {
         grid-template-columns: clamp(640px, 43vw, 700px) minmax(0, 1fr);
@@ -1519,50 +1544,268 @@
     }
 
     @media (max-width: 820px) {
+      :root {
+        --mobile-app-bar-height: 64px;
+        --mobile-sheet-compact-height: 43dvh;
+      }
+
       .app {
         display: block;
+        overflow: hidden;
       }
 
       .app.detail-browse {
         display: block;
       }
 
-      aside {
-        max-height: 46vh;
-        border-right: 0;
+      .mobile-app-bar {
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 1100;
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr) 48px 48px;
+        align-items: center;
+        gap: 4px;
+        min-height: var(--mobile-app-bar-height);
+        padding: 8px 10px;
+        background: #fff;
         border-bottom: 1px solid var(--line);
       }
 
+      .mobile-app-bar button,
+      .mobile-sheet-handle,
+      .mobile-sheet-footer button {
+        min-width: 44px;
+        min-height: 44px;
+        color: var(--ink);
+        font: 750 13px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .mobile-app-bar button:focus-visible,
+      .mobile-sheet-handle:focus-visible,
+      .mobile-sheet-footer button:focus-visible {
+        outline: 3px solid rgba(15, 118, 110, 0.22);
+        outline-offset: 1px;
+      }
+
+      .mobile-app-heading {
+        min-width: 0;
+        padding: 0 8px;
+      }
+
+      .mobile-app-heading strong,
+      .mobile-app-heading span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .mobile-app-heading strong {
+        font-size: 17px;
+        line-height: 1.25;
+      }
+
+      .mobile-app-heading span {
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.25;
+      }
+
+      .mobile-app-action {
+        padding: 4px;
+      }
+
+      .mobile-app-action-label {
+        display: block;
+        font-size: 11px;
+      }
+
+      .mobile-bottom-sheet {
+        position: fixed;
+        inset: auto 0 0;
+        z-index: 1050;
+        display: grid;
+        grid-template-rows: 44px minmax(0, 1fr) auto;
+        height: var(--mobile-sheet-compact-height);
+        min-height: 0;
+        overflow: hidden;
+        background: #fff;
+        border-top: 1px solid var(--line);
+        border-radius: 8px 8px 0 0;
+        box-shadow: 0 -6px 18px rgba(23, 33, 43, 0.12);
+        transition: height 180ms ease;
+      }
+
+      .mobile-bottom-sheet[data-sheet-snap="compact"] {
+        height: var(--mobile-sheet-compact-height);
+      }
+
+      .mobile-bottom-sheet[data-sheet-snap="expanded"] {
+        height: calc(100dvh - var(--mobile-app-bar-height));
+      }
+
+      .mobile-sheet-handle {
+        position: relative;
+        display: block;
+        width: 100%;
+        min-height: 44px;
+        padding: 0;
+        background: #fff;
+        border: 0;
+        border-radius: 0;
+      }
+
+      .mobile-sheet-handle::before {
+        content: "";
+        position: absolute;
+        top: 18px;
+        left: 50%;
+        width: 48px;
+        height: 4px;
+        background: #aab4bd;
+        border-radius: 4px;
+        transform: translateX(-50%);
+      }
+
+      .mobile-sheet-view {
+        display: block;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      aside {
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        padding: 14px 16px 18px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        border-right: 0;
+        border-bottom: 0;
+        box-shadow: none;
+      }
+
       #map {
-        height: 54vh;
-        min-height: 54vh;
+        position: fixed;
+        inset: var(--mobile-app-bar-height) 0 0;
+        height: auto;
+        min-height: 0;
+      }
+
+      #map .leaflet-top {
+        top: 8px;
       }
 
       #map .leaflet-control-layers-expanded {
+        position: fixed;
+        top: calc(var(--mobile-app-bar-height) + 8px);
+        right: 8px;
         min-width: 176px;
-        max-height: calc(54vh - 20px);
+        max-height: calc(42dvh - var(--mobile-app-bar-height) - 16px);
         padding: 9px;
+        overflow-y: auto;
+        background: #fff;
+        backdrop-filter: none;
+      }
+
+      #map .leaflet-control-layers-toggle {
+        display: none;
       }
 
       #map .leaflet-control-zoom a {
-        width: 32px;
-        height: 32px;
+        width: 44px;
+        height: 44px;
       }
 
-      .poi-detail-header {
-        top: 0;
+      .mobile-sheet-footer {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+        padding: 7px 10px max(7px, env(safe-area-inset-bottom));
+        background: #f7f9fa;
+        border-top: 1px solid var(--line);
+      }
+
+      .mobile-sheet-footer button {
+        min-width: 0;
+        padding: 5px 3px;
+        font-size: 11px;
+      }
+
+      .mobile-sheet-footer button:disabled {
+        color: #929ba3;
+        cursor: default;
+        opacity: 0.65;
+      }
+
+      .mobile-change-summary {
+        position: absolute;
+        inset: auto 10px 61px;
+        z-index: 3;
+        max-height: 48%;
+        padding: 12px;
+        overflow-y: auto;
+        color: var(--ink);
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 8px 20px rgba(23, 33, 43, 0.16);
+      }
+
+      .mobile-change-summary:not([hidden]) {
+        display: block;
+      }
+
+      .mobile-change-summary h2 {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .mobile-change-summary p,
+      .mobile-change-summary li {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .mobile-change-summary ul {
+        margin: 8px 0 0;
+        padding-left: 18px;
+      }
+
+      .mobile-replan-fallback {
+        width: 100%;
+        min-height: 150px;
+        margin-top: 10px;
+        padding: 9px;
+        color: var(--ink);
+        font: 12px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f7f9fa;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        resize: vertical;
+      }
+
+      aside.detail-mode {
+        padding: 0;
       }
 
       .poi-detail-panel {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: 56px 104px minmax(0, 1fr);
-        height: 46vh;
+        grid-template-rows: 58px minmax(0, 1fr);
+        height: 100%;
       }
 
       .poi-detail-day-rail {
         grid-template-columns: 58px minmax(0, 1fr);
         grid-template-rows: minmax(0, 1fr);
-        height: auto;
+        height: 58px;
         padding: 5px;
         border-right: 0;
         border-bottom: 1px solid var(--line);
@@ -1588,51 +1831,86 @@
         min-height: 44px;
       }
 
+      .poi-detail-day-button.active {
+        background: #0f766e;
+        border-color: #0f766e;
+      }
+
       .poi-detail-day-list-panel {
         display: grid;
-        grid-template-columns: 112px minmax(0, 1fr);
-        height: auto;
+        grid-template-rows: auto minmax(0, 1fr);
+        height: 100%;
+        min-height: 0;
         overflow: hidden;
+        border-right: 0;
+        border-bottom: 0;
+      }
+
+      .poi-detail-day-list-header {
+        position: sticky;
+        top: 0;
+        padding: 10px 14px 8px;
         border-right: 0;
         border-bottom: 1px solid var(--line);
       }
 
-      .poi-detail-day-list-header {
-        position: static;
-        padding: 12px 10px;
-        border-right: 1px solid var(--line);
-        border-bottom: 0;
-      }
-
       .poi-detail-day-list {
-        display: flex;
-        overflow-x: auto;
-        overflow-y: hidden;
+        display: grid;
+        align-content: start;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
       }
 
       .poi-detail-day-transit {
-        flex: 0 0 92px;
-        align-self: stretch;
-        justify-content: center;
-        padding: 6px;
-        text-align: center;
-        border-right: 1px solid #e4e9ed;
-        border-left: 1px solid #e4e9ed;
+        align-self: auto;
+        justify-content: flex-start;
+        min-height: 30px;
+        padding: 4px 12px 4px 42px;
+        text-align: left;
+        border-right: 0;
+        border-left: 0;
       }
 
       .poi-detail-day-transit::before {
-        content: "→";
+        content: "↓";
       }
 
       .poi-detail-day-place {
-        grid-template-columns: 18px minmax(0, 1fr) 24px;
-        flex: 0 0 188px;
+        grid-template-columns: 44px minmax(0, 1fr) auto;
+        min-height: 60px;
+        padding: 7px 6px;
+      }
+
+      .poi-detail-day-place.active {
+        background: #e8f3f1;
+        border-color: #86b8b3;
+      }
+
+      .poi-detail-day-place-handle,
+      .poi-detail-day-place-spacer {
+        min-width: 44px;
+        width: 44px;
+      }
+
+      .poi-detail-day-shift,
+      .poi-detail-day-toggle {
+        width: 44px;
+        height: 44px;
+      }
+
+      .poi-detail-day-place-actions {
+        display: flex;
+        align-items: center;
+        align-self: center;
+        gap: 4px;
+        min-width: 0;
       }
 
       .poi-detail-day-place-shifts {
-        display: grid;
-        align-content: center;
-        gap: 3px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
       }
 
       .poi-detail-day-list-empty {
@@ -1640,14 +1918,39 @@
       }
 
       .poi-detail-main {
-        height: auto;
+        height: 100%;
         min-height: 0;
-        padding: 0 18px 18px;
+        padding: 0 16px 18px;
         overflow-y: auto;
       }
 
       .poi-detail-header {
-        margin: 0 -18px;
+        position: static;
+        top: 0;
+        margin: 0 -16px;
+        padding: 12px 16px;
+      }
+
+      .mobile-bottom-sheet[data-mobile-view="day"] .poi-detail-main {
+        display: none;
+      }
+
+      .mobile-bottom-sheet[data-mobile-view="detail"] .poi-detail-day-list-panel {
+        display: none;
+      }
+
+      .mobile-bottom-sheet[data-mobile-view="candidates"] .trip-overview-heading,
+      .mobile-bottom-sheet[data-mobile-view="candidates"] .day-overview-section-title,
+      .mobile-bottom-sheet[data-mobile-view="candidates"] .day-tools,
+      .mobile-bottom-sheet[data-mobile-view="candidates"] .day-list {
+        display: none;
+      }
+
+      .mobile-bottom-sheet[data-mobile-view="overview"] .poi-list-section-title,
+      .mobile-bottom-sheet[data-mobile-view="overview"] .poi-list-tools,
+      .mobile-bottom-sheet[data-mobile-view="overview"] .poi-list-meta,
+      .mobile-bottom-sheet[data-mobile-view="overview"] .poi-list {
+        display: none;
       }
 
       .summary {
@@ -1655,7 +1958,88 @@
       }
 
       .poi-list-filter-grid {
-        grid-template-columns: 1fr;
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scrollbar-width: thin;
+      }
+
+      .poi-list-filter-grid .poi-list-select {
+        flex: 0 0 150px;
+      }
+
+      .poi-list-item {
+        grid-template-columns: 44px minmax(0, 1fr) auto;
+        min-height: 64px;
+      }
+
+      .poi-list-thumb {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        overflow: hidden;
+        color: #fff;
+        background: var(--place-color, #2f7fb9);
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .poi-list-thumb img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .mobile-day-group {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        margin: 12px 2px 4px;
+        padding-top: 10px;
+        border-top: 1px solid var(--line);
+      }
+
+      .mobile-day-group strong {
+        font-size: 13px;
+      }
+
+      .mobile-day-group span {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .desktop-only-label,
+      .desktop-priority-label {
+        display: none;
+      }
+
+      .mobile-only-label,
+      .mobile-priority-label {
+        display: inline;
+      }
+
+      .poi-list-priorities {
+        width: 94px;
+      }
+
+      .poi-list-priority-btn {
+        min-width: 42px;
+        min-height: 44px;
+      }
+
+      .poi-detail-itinerary-controls .poi-list-select,
+      .poi-detail-itinerary-controls .priority-btn {
+        min-height: 44px;
+      }
+
+      .image-preview-viewer img {
+        height: auto;
+        aspect-ratio: 16 / 9;
       }
 
       h1 {
@@ -1665,9 +2049,29 @@
   </style>
 </head>
 <body>
-  <main class="app" data-canonical-interaction="europe-map-direct-v1">
+  <main class="app" data-canonical-interaction="europe-map-direct-v1" data-mobile-shell="map-first-v1">
+    <header class="mobile-app-bar" id="mobile-app-bar" aria-label="移动端地图导航">
+      <button type="button" class="mobile-app-action" id="mobile-overview-action" data-mobile-view="overview" aria-label="返回全程总览">
+        <span class="mobile-app-action-label">返回</span>
+      </button>
+      <div class="mobile-app-heading">
+        <strong id="mobile-app-title">2026 欧洲秋日节庆行程</strong>
+        <span id="mobile-app-meta">18 天 · 4 个城市</span>
+      </div>
+      <button type="button" class="mobile-app-action" id="mobile-search-action" aria-label="搜索地点">
+        <span class="mobile-app-action-label">搜索</span>
+      </button>
+      <button type="button" class="mobile-app-action" id="mobile-layer-action" aria-label="地图图层" aria-expanded="false">
+        <span class="mobile-app-action-label">图层</span>
+      </button>
+    </header>
+
+    <section class="mobile-bottom-sheet" id="mobile-bottom-sheet" data-mobile-view="overview" data-sheet-snap="compact" aria-label="旅行行程面板">
+      <button type="button" class="mobile-sheet-handle" id="mobile-sheet-handle" aria-label="展开行程面板" aria-expanded="false"></button>
+      <div class="mobile-sheet-view" id="mobile-sheet-view">
     <aside id="sidebar">
       <div class="sidebar-panel" id="itinerary-panel">
+      <div class="trip-overview-heading">
       <h1>2026 欧洲秋日节庆地图</h1>
       <p class="subtitle">巴黎秋季艺术周、蔚蓝海岸、巴塞罗那 Castanyada 与安达卢西亚；住宿和交通均为公开规划级信息。</p>
 
@@ -1677,8 +2081,9 @@
         <div class="metric"><strong>3</strong><span>节庆节点</span></div>
         <div class="metric"><strong id="poi-count">0</strong><span>吃喝玩 POI</span></div>
       </div>
+      </div>
 
-      <div class="section-title">每日行程路线</div>
+      <div class="section-title day-overview-section-title"><span class="desktop-only-label">每日行程路线</span><span class="mobile-only-label">全程安排</span></div>
       <div class="day-tools" aria-label="每日路线控制">
         <div class="route-segment-tabs" aria-label="行程段快速定位">
           <button type="button" data-zoom-city="All">全程</button>
@@ -1696,7 +2101,7 @@
       </div>
       <div class="day-list" id="day-list" aria-live="polite"></div>
 
-      <div class="section-title">地点速查清单</div>
+      <div class="section-title poi-list-section-title">地点速查清单</div>
       <div class="poi-list-tools" aria-label="地点速查筛选">
         <input class="poi-list-search" id="poi-list-search" type="search" placeholder="搜索地点、中文名、街区、关键词">
         <div class="poi-list-filter-grid">
@@ -1742,6 +2147,20 @@
         </div>
       </section>
     </aside>
+      </div>
+      <div class="mobile-sheet-footer" aria-label="行程修改工具">
+        <button type="button" id="mobile-candidates-action" data-mobile-view="candidates">顺路备选</button>
+        <button type="button" id="mobile-undo-action" disabled>撤销上一步</button>
+        <button type="button" id="mobile-change-summary-action" aria-expanded="false">修改汇总</button>
+        <button type="button" id="mobile-replan-action">请 Codex 重新安排</button>
+      </div>
+      <section class="mobile-change-summary" id="mobile-change-summary" aria-live="polite" hidden>
+        <h2>修改汇总</h2>
+        <p id="mobile-change-summary-meta">还没有修改行程。</p>
+        <ul id="mobile-change-summary-list"></ul>
+        <textarea class="mobile-replan-fallback" id="mobile-replan-fallback" aria-label="可手动复制的完整重新安排请求" readonly hidden></textarea>
+      </section>
+    </section>
 
     <div id="map" role="application" aria-label="公开旅行路线地图"></div>
   </main>
@@ -9136,6 +9555,12 @@
     const defaultItineraryAssignmentRules = PUBLIC_TRIP_DATA.defaultAssignments;
 
     const priorityLevels = ["S", "A", "B", "C"];
+    const priorityNaturalLabels = {
+      S: "必去",
+      A: "优先",
+      B: "顺路",
+      C: "留档"
+    };
     const priorityStorageKey = "europe-autumn-2026-sample-priorities-v1";
     const itineraryPlanStorageKey = "europe-autumn-2026-sample-plan-v1";
     const appStateStorageKey = "europe-autumn-2026-sample-map-state-v1";
@@ -9149,6 +9574,12 @@
     const defaultDayViewState = {
       selectedDayId: "",
       showCandidates: true
+    };
+    const defaultMobileState = {
+      viewMode: "overview",
+      previousViewMode: "day",
+      sheetSnap: "compact",
+      layerControlOpen: false
     };
     const defaultLayerState = {
       flight: true,
@@ -9165,6 +9596,42 @@
       localLife: false,
       sight: true
     };
+
+    function normalizeMobileViewMode(mode) {
+      return ["overview", "day", "detail", "candidates"].includes(mode) ? mode : "overview";
+    }
+
+    function normalizeMobileSheetSnap(snap) {
+      return snap === "expanded" ? "expanded" : "compact";
+    }
+
+    function getNextMobileLayerControlState(currentOpen) {
+      return !Boolean(currentOpen);
+    }
+
+    function shouldCollapseLayerControl(viewportWidth) {
+      return Number(viewportWidth) <= 820;
+    }
+
+    function calculateCenteredRailScrollLeft(containerWidth, scrollWidth, itemOffsetLeft, itemWidth) {
+      const maximum = Math.max(0, Number(scrollWidth) - Number(containerWidth));
+      const centered = Number(itemOffsetLeft) - (Number(containerWidth) - Number(itemWidth)) / 2;
+      return Math.min(maximum, Math.max(0, centered));
+    }
+
+    function calculateMobilePoiFocusPanY(currentMarkerPageY, visibleTop, visibleBottom) {
+      return Number(currentMarkerPageY) - (Number(visibleTop) + Number(visibleBottom)) / 2;
+    }
+
+    function createStructuredChange(type, label, before, after, affectedDays) {
+      return {
+        type,
+        label,
+        before: before ?? null,
+        after: after ?? null,
+        affectedDays: [...new Set((affectedDays || []).filter(Boolean))]
+      };
+    }
 
     const slugify = (value) => value
       .toLowerCase()
@@ -9256,10 +9723,12 @@
         return {
           assignments: stored.assignments || {},
           removed: stored.removed || {},
-          dirtyDays: stored.dirtyDays || {}
+          dirtyDays: stored.dirtyDays || {},
+          changes: Array.isArray(stored.changes) ? stored.changes : [],
+          undoStack: Array.isArray(stored.undoStack) ? stored.undoStack : []
         };
       } catch {
-        return { assignments: {}, removed: {}, dirtyDays: {} };
+        return { assignments: {}, removed: {}, dirtyDays: {}, changes: [], undoStack: [] };
       }
     };
 
@@ -9348,6 +9817,13 @@
       ...defaultDayViewState,
       ...(appState.dayView || {})
     };
+    appState.mobile = {
+      ...defaultMobileState,
+      ...(appState.mobile || {}),
+      viewMode: normalizeMobileViewMode(appState.mobile?.viewMode),
+      sheetSnap: normalizeMobileSheetSnap(appState.mobile?.sheetSnap),
+      layerControlOpen: false
+    };
     const markerByPoiId = new Map();
     let activePoiDetailId = "";
 
@@ -9368,6 +9844,23 @@
       }
     }
     const itineraryPlan = loadItineraryPlan();
+    const clonePlainData = (value) => JSON.parse(JSON.stringify(value));
+    const createItinerarySnapshot = () => ({
+      assignments: clonePlainData(itineraryPlan.assignments),
+      removed: clonePlainData(itineraryPlan.removed),
+      dirtyDays: clonePlainData(itineraryPlan.dirtyDays),
+      changes: clonePlainData(itineraryPlan.changes),
+      priorities: clonePlainData(priorities)
+    });
+    const pushUndoSnapshot = () => {
+      itineraryPlan.undoStack.push(createItinerarySnapshot());
+      itineraryPlan.undoStack = itineraryPlan.undoStack.slice(-20);
+    };
+    const recordItineraryChange = (type, label, before, after, affectedDays = []) => {
+      itineraryPlan.changes.push(createStructuredChange(type, label, before, after, affectedDays));
+      itineraryPlan.changes = itineraryPlan.changes.slice(-50);
+      invalidateReplanFallback();
+    };
     const cityLabels = {
       Paris: "巴黎",
       Nice: "尼斯",
@@ -9385,6 +9878,33 @@
       art: "art",
       "local-life": "localLife",
       sight: "sight"
+    };
+
+    const describeChangeEndpoint = (change, value) => {
+      if (change.type === "priority") {
+        return value?.priority ? priorityNaturalLabels[value.priority] || value.priority : "未标记";
+      }
+      if (change.type === "reorder") {
+        return Array.isArray(value) && value.length
+          ? value.map((poiId) => {
+            const item = markerByPoiId.get(poiId)?.item || pois.find((poi) => poi.id === poiId);
+            return item ? getZhName(item) : poiId;
+          }).join(" → ")
+          : "无地点";
+      }
+      if (!value?.dayId) {
+        return "未安排";
+      }
+      const day = dayById[value.dayId];
+      const order = Number(value.order) > 0 ? ` · 第 ${value.order} 站` : " · 住宿基底";
+      return `${day?.short || value.dayId}${order}`;
+    };
+
+    const describeItineraryChange = (change) => {
+      if (!change || !("before" in change) || !("after" in change)) {
+        return change?.label || "未知修改";
+      }
+      return `${change.label}（原：${describeChangeEndpoint(change, change.before)}；新：${describeChangeEndpoint(change, change.after)}）`;
     };
 
     const getPoiAssignment = (poiId) => {
@@ -9419,6 +9939,8 @@
       return !isPoiScheduled(item.id) && item.city === selectedDay.city;
     };
 
+    let visibleDayCandidateIds = new Set();
+
     const shouldShowPoiInCurrentView = (item) => {
       const selectedDay = getVisibleDay();
       if (!selectedDay) {
@@ -9428,7 +9950,10 @@
       if (assignment?.dayId === selectedDay.id) {
         return true;
       }
-      return appState.dayView.showCandidates && isCandidateForSelectedDay(item);
+      if (!appState.dayView.showCandidates || !isCandidateForSelectedDay(item)) {
+        return false;
+      }
+      return visibleDayCandidateIds.has(item.id);
     };
 
     const getPoiPlanLabel = (item) => {
@@ -9441,6 +9966,48 @@
         return `${day?.short || assignment.dayId} 住宿基底`;
       }
       return `${day?.short || assignment.dayId} 第 ${assignment.order} 站`;
+    };
+
+    const getPlanningDistanceKm = (fromCoords, toCoords) => {
+      if (!Array.isArray(fromCoords) || !Array.isArray(toCoords)) {
+        return 0;
+      }
+      return L.latLng(fromCoords).distanceTo(L.latLng(toCoords)) / 1000;
+    };
+
+    const DAY_CANDIDATE_LIMIT = 8;
+    const dayCandidatePriorityRank = { S: 0, A: 1, B: 2, C: 3 };
+
+    const getDayCandidatePois = (dayId, dayPois) => {
+      const day = dayById[dayId];
+      if (!day || day.city === "Transit") {
+        return { items: [], total: 0 };
+      }
+      const scheduledAreas = new Set(dayPois.map(({ item }) => item.area));
+      const scheduledCoords = dayPois.map(({ item }) => item.coords);
+      const anchorCoords = scheduledCoords.length
+        ? scheduledCoords
+        : day.events.map((event) => event.coords).filter(Boolean);
+      const ranked = pois
+        .filter((item) => !isPoiScheduled(item.id) && item.city === day.city && item.category !== "hotel")
+        .map((item) => ({
+          item,
+          priorityRank: dayCandidatePriorityRank[priorities[item.id]] ?? 4,
+          areaRank: scheduledAreas.has(item.area) ? 0 : 1,
+          distance: anchorCoords.length
+            ? Math.min(...anchorCoords.map((coords) => getPlanningDistanceKm(coords, item.coords)))
+            : Infinity
+        }))
+        .sort((left, right) => (
+          left.priorityRank - right.priorityRank
+          || left.areaRank - right.areaRank
+          || left.distance - right.distance
+          || getZhName(left.item).localeCompare(getZhName(right.item), "zh-CN")
+        ));
+      return {
+        items: ranked.slice(0, DAY_CANDIDATE_LIMIT).map(({ item }) => item),
+        total: ranked.length
+      };
     };
 
     const getScheduledMarkerContextLabel = (item, assignment, day, isCurrentDay) => {
@@ -9532,7 +10099,7 @@
         .map((day) => `<option value="${day.id}" ${assignment?.dayId === day.id ? "selected" : ""}>${escapeHtml(day.short)} · ${escapeHtml(cityLabels[day.city] || day.city)}</option>`)
         .join("");
       const priorityButtons = priorityLevels.map((level) => `
-        <button type="button" class="priority-btn ${selectedPriority === level ? "active" : ""}" data-priority="${level}" data-poi-id="${item.id}" aria-label="标记 ${level} 优先级">${level}</button>
+        <button type="button" class="priority-btn ${selectedPriority === level ? "active" : ""}" data-priority="${level}" data-poi-id="${item.id}" aria-label="标记为${priorityNaturalLabels[level]}"><span class="desktop-priority-label">${level}</span><span class="mobile-priority-label">${priorityNaturalLabels[level]}</span></button>
       `).join("");
       return `
         <div class="poi-detail-control-row">
@@ -9577,6 +10144,7 @@
           <div class="poi-detail-actions">
             <a href="${urls.images}" target="_blank" rel="noopener noreferrer">更多图片</a>
             <a href="${urls.xhs}" target="_blank" rel="noopener noreferrer">小红书</a>
+            <a href="${urls.map}" target="_blank" rel="noopener noreferrer">外部地图</a>
             <a href="${urls.official}" target="_blank" rel="noopener noreferrer">${officialLabel}</a>
           </div>
         </section>
@@ -9724,7 +10292,7 @@
       }
 
       daySequenceGuide = L.polyline(points, {
-        color: "#64748b",
+        color: shouldCollapseLayerControl(window.innerWidth) ? "#0f766e" : "#64748b",
         weight: 2,
         opacity: 0.72,
         dashArray: "6 8",
@@ -9794,9 +10362,14 @@
     };
 
     const renderDayList = () => {
-      dayList.innerHTML = itineraryDays.map((day) => `
+      dayList.innerHTML = itineraryDays.map((day, index) => {
+        const previousDay = itineraryDays[index - 1];
+        const groupLabel = !previousDay || previousDay.city !== day.city
+          ? `<div class="mobile-day-group"><strong>${escapeHtml(cityLabels[day.city] || day.city)}</strong><span>${escapeHtml(day.date)}</span></div>`
+          : "";
+        return `${groupLabel}
         <div class="day-card ${appState.dayView.selectedDayId === day.id ? "active" : ""}" style="--day-color:${day.color};" data-day-card="${day.id}">
-          <button type="button" class="day-card-open" data-open-day="${day.id}" aria-pressed="${appState.dayView.selectedDayId === day.id}" aria-label="${appState.dayView.selectedDayId === day.id ? `取消选择 ${day.short}` : `选择 ${day.short}`}：${escapeHtml(day.title)}">
+          <button type="button" class="day-card-open" data-open-day="${day.id}" data-mobile-view="day" aria-pressed="${appState.dayView.selectedDayId === day.id}" aria-label="${appState.dayView.selectedDayId === day.id ? `取消选择 ${day.short}` : `选择 ${day.short}`}：${escapeHtml(day.title)}">
             <span class="day-card-date">${escapeHtml(day.date)} · ${escapeHtml(cityLabels[day.city] || day.city)}</span>
             <span class="day-card-title">${escapeHtml(day.title)}</span>
             <span class="day-card-summary">${escapeHtml(day.summary)}</span>
@@ -9807,8 +10380,8 @@
               ${renderTransitToNext(event.transitToNext)}
             `).join("")}
           </div>
-        </div>
-      `).join("");
+        </div>`;
+      }).join("");
     };
 
     const highlightItineraryDay = (dayId) => {
@@ -9829,7 +10402,11 @@
       if (!targetBounds || !targetBounds.isValid()) {
         return;
       }
-      map.fitBounds(targetBounds.pad(0.18), { animate: false, maxZoom });
+      const options = { animate: false, maxZoom };
+      if (shouldCollapseLayerControl(window.innerWidth)) {
+        options.paddingBottomRight = [0, Math.round(window.innerHeight * 0.56)];
+      }
+      map.fitBounds(targetBounds.pad(0.18), options);
     };
 
     const openDayRoute = (dayId) => {
@@ -9844,6 +10421,7 @@
       refreshItineraryView();
       fitBoundsIfValid(entry.focusBounds, entry.focusFromEventIndex > 0 ? 14 : entry.day.travel ? 7 : 14);
       enterDetailBrowse();
+      setMobileViewMode("day", { sheetSnap: "compact" });
       renderDetailNavigation();
       if (!activePoiDetailId) {
         renderPoiDetailEmpty();
@@ -9887,7 +10465,7 @@
         return;
       }
       const dayPois = getDayPois(selectedDay.id).length;
-      const candidatePois = pois.filter(isCandidateForSelectedDay).length;
+      const candidatePois = getDayCandidatePois(selectedDay.id, getDayPois(selectedDay.id)).items.length;
       const sequenceNote = hasNumberedPoisForDay(selectedDay.id)
         ? "地图用小圆数字和顺序引导线表示当天先后；引导线不代表实际道路，完整交通见下方时间线。"
         : "地图用大圆数字表示当天行程节点。";
@@ -9947,6 +10525,10 @@
     };
 
     const refreshItineraryView = () => {
+      const selectedDay = getVisibleDay();
+      visibleDayCandidateIds = selectedDay
+        ? new Set(getDayCandidatePois(selectedDay.id, getDayPois(selectedDay.id)).items.map((item) => item.id))
+        : new Set();
       setItineraryVisibility();
       syncDaySequenceGuide();
       ensureVisiblePoiCategoryLayers();
@@ -10080,10 +10662,16 @@
         poiListPlan.value = effectivePlan;
       }
       const search = normalizeForSearch(state.search);
+      const selectedDay = getVisibleDay();
+      const nearbyCandidateResult = effectivePlan === "candidates" && selectedDay
+        ? getDayCandidatePois(selectedDay.id, getDayPois(selectedDay.id))
+        : null;
+      const nearbyCandidateIds = nearbyCandidateResult
+        ? new Set(nearbyCandidateResult.items.map((item) => item.id))
+        : null;
       const filteredPois = pois.filter((item) => {
         const priority = priorities[item.id] || "";
         const assignment = getPoiAssignment(item.id);
-        const selectedDay = getVisibleDay();
         const searchable = normalizeForSearch([
           getZhName(item),
           item.name,
@@ -10101,7 +10689,7 @@
         if (effectivePlan === "day" && (!selectedDay || assignment?.dayId !== selectedDay.id)) {
           return false;
         }
-        if (effectivePlan === "candidates" && !isCandidateForSelectedDay(item)) {
+        if (effectivePlan === "candidates" && !nearbyCandidateIds?.has(item.id)) {
           return false;
         }
         if (effectivePlan === "scheduled" && !assignment) {
@@ -10128,7 +10716,9 @@
         return true;
       });
 
-      poiListCount.textContent = `${filteredPois.length} / ${pois.length} 个地点`;
+      poiListCount.textContent = nearbyCandidateResult
+        ? `${filteredPois.length} / ${nearbyCandidateResult.items.length} 个顺路备选`
+        : `${filteredPois.length} / ${pois.length} 个地点`;
       if (!filteredPois.length) {
         poiList.innerHTML = '<div class="poi-list-empty">没有匹配地点，换个关键词或清空筛选。</div>';
         return;
@@ -10147,12 +10737,17 @@
           ? `<button type="button" class="poi-list-priority-btn" data-remove-itinerary="${item.id}" aria-label="${escapeHtml(zhName)} 从行程移除">移</button>`
           : "";
         const priorityButtons = priorityLevels.map((level) => `
-          <button type="button" class="poi-list-priority-btn ${priority === level ? "active" : ""}" data-priority="${level}" data-poi-id="${item.id}" aria-label="${escapeHtml(zhName)} 标记 ${level} 优先级">${level}</button>
+          <button type="button" class="poi-list-priority-btn ${priority === level ? "active" : ""}" data-priority="${level}" data-poi-id="${item.id}" aria-label="${escapeHtml(zhName)} 标记为${priorityNaturalLabels[level]}"><span class="desktop-priority-label">${level}</span><span class="mobile-priority-label">${priorityNaturalLabels[level]}</span></button>
         `).join("");
+        const cachedImage = commonsImageCache.get(item.id)?.[0];
+        const thumbnailHtml = cachedImage
+          ? `<span class="poi-list-thumb" style="--place-color:${poiCategories[item.category].color};"><img src="${escapeHtml(cachedImage.thumb)}" alt="${escapeHtml(cachedImage.title)}" loading="lazy" decoding="async"></span>`
+          : `<span class="poi-list-thumb" style="--place-color:${poiCategories[item.category].color};" aria-hidden="true">${escapeHtml(poiCategories[item.category].short)}</span>`;
 
         return `
           <div class="poi-list-item" data-poi-list-row="${item.id}">
-            <button type="button" class="poi-list-open" data-open-poi="${item.id}">
+            ${thumbnailHtml}
+            <button type="button" class="poi-list-open" data-open-poi="${item.id}" data-mobile-view="detail">
               <span class="poi-list-name">${escapeHtml(zhName)}</span>
               ${originalLine}
               <span class="poi-list-sub">${escapeHtml(cityLabels[item.city] || item.city)} · ${escapeHtml(item.area)} · ${escapeHtml(poiCategories[item.category].label)}</span>
@@ -10162,7 +10757,7 @@
               ${addToTodayButton}
               ${removeButton}
               ${priorityButtons}
-              <button type="button" class="poi-list-priority-btn ${priority ? "" : "active"}" data-priority="" data-poi-id="${item.id}" aria-label="${escapeHtml(zhName)} 清除优先级">清</button>
+              <button type="button" class="poi-list-priority-btn ${priority ? "" : "active"}" data-priority="" data-poi-id="${item.id}" aria-label="${escapeHtml(zhName)} 清除优先级"><span class="desktop-priority-label">清</span><span class="mobile-priority-label">清除</span></button>
             </div>
           </div>
         `;
@@ -10195,6 +10790,19 @@
         map.invalidateSize({ pan: false });
         const zoom = calculatePoiFocusZoom(map.getZoom(), map.getSize());
         map.setView(entry.item.coords, zoom, { animate: false });
+        if (shouldCollapseLayerControl(window.innerWidth)) {
+          const mapRect = map.getContainer().getBoundingClientRect();
+          const appBarRect = document.getElementById("mobile-app-bar").getBoundingClientRect();
+          const sheetRect = document.getElementById("mobile-bottom-sheet").getBoundingClientRect();
+          const markerPoint = map.latLngToContainerPoint(entry.item.coords);
+          const visibleTop = Math.max(mapRect.top, appBarRect.bottom);
+          const visibleBottom = Math.min(mapRect.bottom, sheetRect.top);
+          if (visibleBottom > visibleTop) {
+            const markerPageY = mapRect.top + markerPoint.y;
+            const panY = calculateMobilePoiFocusPanY(markerPageY, visibleTop, visibleBottom);
+            map.panBy([0, panY], { animate: false });
+          }
+        }
       });
     };
 
@@ -10251,13 +10859,25 @@
       ) {
         return;
       }
+      if (currentPoiIds.every((poiId, index) => poiId === orderedPoiIds[index])) {
+        return;
+      }
+      pushUndoSnapshot();
       orderedPoiIds.forEach((poiId, index) => {
         itineraryPlan.assignments[poiId] = { dayId, order: index + 1 };
       });
       markDaysForReroute(dayId);
+      recordItineraryChange(
+        "reorder",
+        `调整 ${dayById[dayId]?.short || dayId} 当天顺序`,
+        currentPoiIds,
+        [...orderedPoiIds],
+        [dayId]
+      );
       saveItineraryPlan(itineraryPlan);
       refreshItineraryView();
       renderDetailNavigation();
+      renderMobileShell();
       saveAppState();
     };
 
@@ -10283,6 +10903,10 @@
         return;
       }
       const current = getPoiAssignment(poiId);
+      if (current?.dayId === dayId) {
+        return;
+      }
+      pushUndoSnapshot();
       itineraryPlan.assignments[poiId] = {
         dayId,
         order: current?.dayId === dayId ? current.order : getNextOrderForDay(dayId)
@@ -10293,9 +10917,18 @@
         normalizeDayPoiOrders(current.dayId);
       }
       markDaysForReroute(dayId, current?.dayId);
+      const item = markerByPoiId.get(poiId).item;
+      recordItineraryChange(
+        current?.dayId ? "move" : "add",
+        `${current?.dayId ? "移动" : "加入"} ${getZhName(item)} 到 ${dayById[dayId].short}`,
+        current ? clonePlainData(current) : null,
+        clonePlainData(getPoiAssignment(poiId)),
+        [dayId, current?.dayId]
+      );
       saveItineraryPlan(itineraryPlan);
       refreshItineraryView();
       refreshPoiPresentation(poiId, refreshDetail);
+      renderMobileShell();
       saveAppState();
     };
 
@@ -10304,15 +10937,27 @@
         return;
       }
       const current = getPoiAssignment(poiId);
+      if (!current) {
+        return;
+      }
+      pushUndoSnapshot();
       delete itineraryPlan.assignments[poiId];
       itineraryPlan.removed[poiId] = true;
       if (current?.dayId) {
         normalizeDayPoiOrders(current.dayId);
         markDaysForReroute(current.dayId);
       }
+      recordItineraryChange(
+        "remove",
+        `从 ${dayById[current.dayId]?.short || current.dayId} 移出 ${getZhName(markerByPoiId.get(poiId).item)}`,
+        clonePlainData(current),
+        null,
+        [current.dayId]
+      );
       saveItineraryPlan(itineraryPlan);
       refreshItineraryView();
       refreshPoiPresentation(poiId, refreshDetail);
+      renderMobileShell();
       saveAppState();
     };
 
@@ -10361,7 +11006,7 @@
       }
     }
 
-    const layerControl = L.control.layers(null, overlayControlEntries, { collapsed: false }).addTo(map);
+    const layerControl = L.control.layers(null, overlayControlEntries, { collapsed: shouldCollapseLayerControl(window.innerWidth) }).addTo(map);
     const layerControlList = layerControl.getContainer().querySelector(".leaflet-control-layers-list");
     const layerControlOverlays = layerControl.getContainer().querySelector(".leaflet-control-layers-overlays");
     const decorateLayerControl = () => {
@@ -10413,8 +11058,21 @@
 
     restoreView();
     requestAnimationFrame(() => requestAnimationFrame(restoreView));
+    let layerControlUsesMobileMode = shouldCollapseLayerControl(window.innerWidth);
     window.addEventListener("resize", () => {
       map.invalidateSize({ pan: false });
+      const nextMobileMode = shouldCollapseLayerControl(window.innerWidth);
+      if (nextMobileMode === layerControlUsesMobileMode) {
+        return;
+      }
+      layerControlUsesMobileMode = nextMobileMode;
+      appState.mobile.layerControlOpen = false;
+      if (nextMobileMode) {
+        layerControl.collapse();
+      } else {
+        layerControl.expand();
+      }
+      renderMobileShell();
     });
 
     map.on("moveend zoomend", () => {
@@ -10451,6 +11109,216 @@
     const poiDetailOriginal = document.getElementById("poi-detail-original");
     const poiDetailItineraryControls = document.getElementById("poi-detail-itinerary-controls");
     const poiDetailContent = document.getElementById("poi-detail-content");
+    const mobileBottomSheet = document.getElementById("mobile-bottom-sheet");
+    const mobileSheetHandle = document.getElementById("mobile-sheet-handle");
+    const mobileAppTitle = document.getElementById("mobile-app-title");
+    const mobileAppMeta = document.getElementById("mobile-app-meta");
+    const mobileOverviewAction = document.getElementById("mobile-overview-action");
+    const mobileSearchAction = document.getElementById("mobile-search-action");
+    const mobileLayerAction = document.getElementById("mobile-layer-action");
+    const mobileCandidatesAction = document.getElementById("mobile-candidates-action");
+    const mobileUndoAction = document.getElementById("mobile-undo-action");
+    const mobileChangeSummaryAction = document.getElementById("mobile-change-summary-action");
+    const mobileReplanAction = document.getElementById("mobile-replan-action");
+    const mobileChangeSummary = document.getElementById("mobile-change-summary");
+    const mobileChangeSummaryMeta = document.getElementById("mobile-change-summary-meta");
+    const mobileChangeSummaryList = document.getElementById("mobile-change-summary-list");
+    const mobileReplanFallback = document.getElementById("mobile-replan-fallback");
+
+    const invalidateReplanFallback = () => {
+      mobileReplanFallback.value = "";
+      mobileReplanFallback.hidden = true;
+      mobileReplanAction.textContent = "请 Codex 重新安排";
+    };
+
+    const setMobileSheetSnap = (snap, { persist = true } = {}) => {
+      const normalized = normalizeMobileSheetSnap(snap);
+      appState.mobile.sheetSnap = normalized;
+      mobileBottomSheet.setAttribute("data-sheet-snap", normalized);
+      const expanded = normalized === "expanded";
+      mobileSheetHandle.setAttribute("aria-expanded", String(expanded));
+      mobileSheetHandle.setAttribute("aria-label", expanded ? "收起行程面板" : "展开行程面板");
+      requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+      if (persist) {
+        saveAppState();
+      }
+    };
+
+    const renderChangeSummary = (open = !mobileChangeSummary.hidden) => {
+      const changes = itineraryPlan.changes || [];
+      const affectedDayIds = [...new Set(changes.flatMap((change) => change.affectedDays || change.affectedDayIds || []))];
+      mobileChangeSummaryMeta.textContent = changes.length
+        ? `${changes.length} 项修改 · 影响 ${affectedDayIds.length} 天 · 正式路线仍需重新复核。`
+        : "还没有修改行程。";
+      mobileChangeSummaryList.innerHTML = changes.length
+        ? changes.map((change) => `<li>${escapeHtml(describeItineraryChange(change))}</li>`).join("")
+        : "";
+      mobileChangeSummary.hidden = !open;
+      mobileChangeSummaryAction.setAttribute("aria-expanded", String(open));
+    };
+
+    const renderMobileShell = () => {
+      const mode = normalizeMobileViewMode(appState.mobile.viewMode);
+      const selectedDay = getVisibleDay();
+      const selectedEntry = activePoiDetailId ? markerByPoiId.get(activePoiDetailId) : null;
+      mobileBottomSheet.setAttribute("data-mobile-view", mode);
+      mobileBottomSheet.setAttribute("data-sheet-snap", normalizeMobileSheetSnap(appState.mobile.sheetSnap));
+
+      if (mode === "day" && selectedDay) {
+        mobileAppTitle.textContent = `${selectedDay.short} · ${cityLabels[selectedDay.city] || selectedDay.city}`;
+        mobileAppMeta.textContent = `${getDayPois(selectedDay.id).length} 个地点`;
+      } else if (mode === "detail" && selectedEntry) {
+        mobileAppTitle.textContent = getZhName(selectedEntry.item);
+        mobileAppMeta.textContent = `${cityLabels[selectedEntry.item.city] || selectedEntry.item.city} · ${poiCategories[selectedEntry.item.category].label}`;
+      } else if (mode === "candidates") {
+        mobileAppTitle.textContent = selectedDay ? `${selectedDay.short} · 顺路备选` : "地点搜索";
+        mobileAppMeta.textContent = selectedDay
+          ? `${getDayCandidatePois(selectedDay.id, getDayPois(selectedDay.id)).items.length} 个顺路候选`
+          : `${pois.length} 个公开地点`;
+      } else {
+        mobileAppTitle.textContent = PUBLIC_TRIP_DATA.trip.title;
+        mobileAppMeta.textContent = `${itineraryDays.length} 天 · ${PUBLIC_TRIP_DATA.trip.cities.length} 个城市`;
+      }
+
+      mobileOverviewAction.querySelector(".mobile-app-action-label").textContent = mode === "detail" ? "返回" : "总览";
+      mobileOverviewAction.setAttribute("aria-label", mode === "detail" ? "返回上一层" : "返回全程总览");
+      mobileLayerAction.setAttribute("aria-expanded", String(Boolean(appState.mobile.layerControlOpen)));
+      mobileUndoAction.disabled = !itineraryPlan.undoStack.length;
+      mobileChangeSummaryAction.textContent = itineraryPlan.changes.length
+        ? `修改(${itineraryPlan.changes.length})`
+        : "修改汇总";
+      mobileReplanAction.disabled = !itineraryPlan.changes.length;
+      renderChangeSummary(!mobileChangeSummary.hidden);
+    };
+
+    const setMobileViewMode = (mode, { sheetSnap } = {}) => {
+      const normalized = normalizeMobileViewMode(mode);
+      const currentMode = normalizeMobileViewMode(appState.mobile.viewMode);
+      if (normalized === "detail" && currentMode !== "detail") {
+        appState.mobile.previousViewMode = currentMode === "overview" && appState.dayView.selectedDayId
+          ? "day"
+          : currentMode;
+      }
+      appState.mobile.viewMode = normalized;
+      if (normalized === "overview" || normalized === "candidates") {
+        itineraryPanel.hidden = false;
+        poiDetailPanel.hidden = true;
+        sidebar.classList.remove("detail-mode");
+        appRoot.classList.remove("detail-browse");
+      } else {
+        itineraryPanel.hidden = true;
+        poiDetailPanel.hidden = false;
+        sidebar.classList.add("detail-mode");
+        appRoot.classList.add("detail-browse");
+      }
+      if (sheetSnap) {
+        setMobileSheetSnap(sheetSnap, { persist: false });
+      }
+      renderMobileShell();
+      requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+      saveAppState();
+    };
+
+    const openMobileCandidates = ({ searchAll = false } = {}) => {
+      const selectedDay = getVisibleDay();
+      appState.dayView.showCandidates = true;
+      appState.poiList.plan = selectedDay && !searchAll ? "candidates" : "all";
+      appState.poiList.city = selectedDay && !searchAll ? selectedDay.city : "";
+      syncPoiListControls();
+      refreshItineraryView();
+      setMobileViewMode("candidates", { sheetSnap: "compact" });
+    };
+
+    const toggleMobileLayerControl = () => {
+      if (!shouldCollapseLayerControl(window.innerWidth)) {
+        return;
+      }
+      const open = getNextMobileLayerControlState(appState.mobile.layerControlOpen);
+      appState.mobile.layerControlOpen = open;
+      if (open) {
+        layerControl.expand();
+      } else {
+        layerControl.collapse();
+      }
+      renderMobileShell();
+      saveAppState();
+    };
+
+    const undoLastItineraryChange = () => {
+      const snapshot = itineraryPlan.undoStack.pop();
+      if (!snapshot) {
+        return;
+      }
+      itineraryPlan.assignments = clonePlainData(snapshot.assignments);
+      itineraryPlan.removed = clonePlainData(snapshot.removed);
+      itineraryPlan.dirtyDays = clonePlainData(snapshot.dirtyDays);
+      itineraryPlan.changes = clonePlainData(snapshot.changes);
+      for (const key of Object.keys(priorities)) {
+        delete priorities[key];
+      }
+      Object.assign(priorities, clonePlainData(snapshot.priorities));
+      savePriorities(priorities);
+      saveItineraryPlan(itineraryPlan);
+      invalidateReplanFallback();
+      refreshItineraryView();
+      renderDetailNavigation();
+      if (activePoiDetailId) {
+        const entry = markerByPoiId.get(activePoiDetailId);
+        if (entry) {
+          renderPoiDetail(entry.item, { preserveScroll: true });
+        }
+      }
+      if (!itineraryPlan.changes.length) {
+        renderChangeSummary(false);
+      }
+      renderMobileShell();
+      saveAppState();
+    };
+
+    const copyReplanRequest = async () => {
+      const changes = itineraryPlan.changes || [];
+      if (!changes.length) {
+        renderChangeSummary(true);
+        return;
+      }
+      const affectedDays = [...new Set(changes.flatMap((change) => change.affectedDays || change.affectedDayIds || []))]
+        .map((dayId) => dayById[dayId]?.short || dayId)
+        .join("、");
+      const requestText = [
+        `请根据我在《${PUBLIC_TRIP_DATA.trip.title}》地图里的选择重新安排行程。`,
+        ...changes.map((change, index) => `${index + 1}. ${describeItineraryChange(change)}`),
+        `受影响日期：${affectedDays || "待复核"}。`,
+        "请重新检查营业时间、预约、交通、同日容量、吃饭和休息，不要把地图中的调整直接当成已验证路线。"
+      ].join("\n");
+      try {
+        await navigator.clipboard.writeText(requestText);
+        mobileReplanFallback.value = "";
+        mobileReplanFallback.hidden = true;
+        mobileReplanAction.textContent = "已复制请求";
+      } catch {
+        mobileReplanFallback.value = requestText;
+        mobileReplanFallback.hidden = false;
+        renderChangeSummary(true);
+        mobileReplanFallback.focus();
+        mobileReplanFallback.select();
+        let copied = false;
+        try {
+          copied = document.execCommand("copy");
+        } catch {
+          copied = false;
+        }
+        mobileReplanAction.textContent = copied ? "已复制请求" : "复制失败，请打开汇总";
+        if (copied) {
+          mobileReplanFallback.value = "";
+          mobileReplanFallback.hidden = true;
+        }
+      }
+      window.setTimeout(() => {
+        mobileReplanAction.textContent = "请 Codex 重新安排";
+      }, 1800);
+    };
+    setMobileSheetSnap(appState.mobile.sheetSnap, { persist: false });
+    renderMobileShell();
     let itineraryScrollTop = typeof appState.sidebarScroll === "number" ? appState.sidebarScroll : 0;
     sidebar.scrollTop = itineraryScrollTop;
     sidebar.addEventListener("scroll", () => {
@@ -10571,11 +11439,32 @@
       `).join("");
     };
 
-    const getPlanningDistanceKm = (fromCoords, toCoords) => {
-      if (!Array.isArray(fromCoords) || !Array.isArray(toCoords)) {
-        return 0;
+    let lastCenteredDetailDayId = "";
+    const centerActiveDetailDay = () => {
+      const selectedDayId = appState.dayView.selectedDayId || "";
+      if (!shouldCollapseLayerControl(window.innerWidth) || !selectedDayId || selectedDayId === lastCenteredDetailDayId) {
+        return;
       }
-      return L.latLng(fromCoords).distanceTo(L.latLng(toCoords)) / 1000;
+      lastCenteredDetailDayId = selectedDayId;
+      requestAnimationFrame(() => {
+        if (appState.dayView.selectedDayId !== selectedDayId) {
+          return;
+        }
+        const activeButton = poiDetailDayRail.querySelector(".poi-detail-day-button.active");
+        if (!activeButton) {
+          return;
+        }
+        const railRect = poiDetailDayRail.getBoundingClientRect();
+        const activeRect = activeButton.getBoundingClientRect();
+        const itemOffsetLeft = activeRect.left - railRect.left + poiDetailDayRail.scrollLeft;
+        const left = calculateCenteredRailScrollLeft(
+          poiDetailDayRail.clientWidth,
+          poiDetailDayRail.scrollWidth,
+          itemOffsetLeft,
+          activeRect.width
+        );
+        poiDetailDayRail.scrollTo({ left, behavior: "smooth" });
+      });
     };
 
     const findMatchingDayEventIndex = (day, item) => {
@@ -10637,41 +11526,6 @@
       };
     };
 
-    const DAY_CANDIDATE_LIMIT = 8;
-    const dayCandidatePriorityRank = { S: 0, A: 1, B: 2, C: 3 };
-
-    const getDayCandidatePois = (dayId, dayPois) => {
-      const day = dayById[dayId];
-      if (!day || day.city === "Transit") {
-        return { items: [], total: 0 };
-      }
-      const scheduledAreas = new Set(dayPois.map(({ item }) => item.area));
-      const scheduledCoords = dayPois.map(({ item }) => item.coords);
-      const anchorCoords = scheduledCoords.length
-        ? scheduledCoords
-        : day.events.map((event) => event.coords).filter(Boolean);
-      const ranked = pois
-        .filter((item) => !isPoiScheduled(item.id) && item.city === day.city && item.category !== "hotel")
-        .map((item) => ({
-          item,
-          priorityRank: dayCandidatePriorityRank[priorities[item.id]] ?? 4,
-          areaRank: scheduledAreas.has(item.area) ? 0 : 1,
-          distance: anchorCoords.length
-            ? Math.min(...anchorCoords.map((coords) => getPlanningDistanceKm(coords, item.coords)))
-            : Infinity
-        }))
-        .sort((left, right) => (
-          left.priorityRank - right.priorityRank
-          || left.areaRank - right.areaRank
-          || left.distance - right.distance
-          || getZhName(left.item).localeCompare(getZhName(right.item), "zh-CN")
-        ));
-      return {
-        items: ranked.slice(0, DAY_CANDIDATE_LIMIT).map(({ item }) => item),
-        total: ranked.length
-      };
-    };
-
     const renderPoiDetailDayList = (dayId) => {
       const day = dayById[dayId];
       if (!day) {
@@ -10686,7 +11540,7 @@
       const candidateResult = getDayCandidatePois(dayId, dayPois);
       const movableDayPois = dayPois.filter(({ assignment }) => Number(assignment.order) > 0);
       const needsReroute = Boolean(itineraryPlan.dirtyDays[dayId]);
-      poiDetailDayHeading.textContent = day.short;
+      poiDetailDayHeading.innerHTML = `<span class="desktop-only-label">${escapeHtml(day.short)}</span><span class="mobile-only-label">当天安排</span>`;
       poiDetailDaySummary.textContent = `${cityLabels[day.city] || day.city} · ${dayPois.length} 个地点${needsReroute ? " · 路线需要重新安排" : ""}`;
       poiDetailDaySummary.classList.toggle("needs-reroute", needsReroute);
       if (day.city === "Transit") {
@@ -10712,7 +11566,7 @@
             ${movable
               ? `<button type="button" class="poi-detail-day-place-handle" data-drag-poi="${item.id}" aria-label="拖动调整 ${escapeHtml(zhName)} 的顺序" title="拖动调整顺序">⠿</button>`
               : '<span class="poi-detail-day-place-spacer" aria-hidden="true"></span>'}
-            <button type="button" class="poi-detail-day-place-open" data-detail-poi="${item.id}" aria-pressed="${active}">
+            <button type="button" class="poi-detail-day-place-open" data-detail-poi="${item.id}" data-mobile-view="detail" aria-pressed="${active}">
               <span class="poi-detail-day-place-order">${escapeHtml(orderLabel)}</span>
               <span class="poi-detail-day-place-copy">
                 <strong>${escapeHtml(zhName)}</strong>
@@ -10742,7 +11596,7 @@
           return `
             <div class="poi-detail-day-place candidate ${active ? "active" : ""}" style="--place-color:${meta.color};">
               <span class="poi-detail-day-place-spacer" aria-hidden="true"></span>
-              <button type="button" class="poi-detail-day-place-open" data-detail-poi="${item.id}" aria-pressed="${active}">
+              <button type="button" class="poi-detail-day-place-open" data-detail-poi="${item.id}" data-mobile-view="detail" aria-pressed="${active}">
                 <span class="poi-detail-day-place-order">${escapeHtml(meta.short)}</span>
                 <span class="poi-detail-day-place-copy">
                   <strong>${escapeHtml(zhName)}</strong>
@@ -10762,6 +11616,7 @@
 
     const renderDetailNavigation = () => {
       renderDetailDayRail();
+      centerActiveDetailDay();
       renderPoiDetailDayList(appState.dayView.selectedDayId || "");
     };
 
@@ -10802,6 +11657,7 @@
       selectDayView(dayId, { fit: false, openFirst: false });
       enterDetailBrowse();
       renderDetailNavigation();
+      setMobileViewMode("day");
     };
 
     const ensurePoiMarkerVisible = (entry) => {
@@ -10847,6 +11703,7 @@
       refreshSelectedPoiMarker(previousPoiId, poiId);
       map.closePopup();
       enterDetailBrowse();
+      setMobileViewMode("detail", { sheetSnap: "compact" });
       renderDetailNavigation();
       renderPoiDetail(entry.item);
       if (focusMap) {
@@ -10865,8 +11722,12 @@
       itineraryPanel.hidden = false;
       sidebar.classList.remove("detail-mode");
       appRoot.classList.remove("detail-browse");
+      appState.mobile.viewMode = "overview";
+      appState.mobile.previousViewMode = "day";
+      appState.mobile.sheetSnap = "compact";
       renderPoiDetailEmpty();
       showAllItineraryRoutes({ fit: true });
+      renderMobileShell();
       requestAnimationFrame(() => {
         sidebar.scrollTop = itineraryScrollTop;
         map.invalidateSize({ pan: false });
@@ -10875,6 +11736,46 @@
     };
 
     poiDetailOverview.addEventListener("click", returnToTripOverview);
+
+    const returnFromMobileDetail = () => {
+      delete appState.openPoiId;
+      const previousMode = normalizeMobileViewMode(appState.mobile.previousViewMode);
+      if (previousMode === "candidates") {
+        syncPoiListControls();
+        renderPoiList();
+        setMobileViewMode("candidates", { sheetSnap: "compact" });
+        return;
+      }
+      if (previousMode === "day" && appState.dayView.selectedDayId) {
+        setMobileViewMode("day", { sheetSnap: "compact" });
+        renderDetailNavigation();
+        return;
+      }
+      returnToTripOverview();
+    };
+
+    mobileSheetHandle.addEventListener("click", () => {
+      setMobileSheetSnap(appState.mobile.sheetSnap === "expanded" ? "compact" : "expanded");
+    });
+    mobileOverviewAction.addEventListener("click", () => {
+      if (appState.mobile.viewMode === "detail") {
+        returnFromMobileDetail();
+        return;
+      }
+      returnToTripOverview();
+    });
+    mobileSearchAction.addEventListener("click", () => {
+      openMobileCandidates({ searchAll: !getVisibleDay() });
+      setMobileSheetSnap("expanded");
+      requestAnimationFrame(() => poiListSearch.focus());
+    });
+    mobileLayerAction.addEventListener("click", toggleMobileLayerControl);
+    mobileCandidatesAction.addEventListener("click", () => openMobileCandidates());
+    mobileUndoAction.addEventListener("click", undoLastItineraryChange);
+    mobileChangeSummaryAction.addEventListener("click", () => {
+      renderChangeSummary(mobileChangeSummary.hidden);
+    });
+    mobileReplanAction.addEventListener("click", copyReplanRequest);
 
     requestAnimationFrame(() => {
       const openEntry = appState.openPoiId ? markerByPoiId.get(appState.openPoiId) : null;
@@ -10886,6 +11787,7 @@
         enterDetailBrowse();
         renderDetailNavigation();
         renderPoiDetailEmpty();
+        setMobileViewMode("day", { sheetSnap: appState.mobile.sheetSnap });
       }
     });
 
@@ -11046,19 +11948,35 @@
       if (!entry) {
         return;
       }
+      const previousPriority = priorities[poiId] || "";
+      if (previousPriority === priority) {
+        return;
+      }
 
+      pushUndoSnapshot();
       if (priority) {
         priorities[poiId] = priority;
       } else {
         delete priorities[poiId];
       }
 
+      const assignment = getPoiAssignment(poiId);
+      recordItineraryChange(
+        "priority",
+        priority
+          ? `把 ${getZhName(entry.item)} 标为${priorityNaturalLabels[priority]}`
+          : `清除 ${getZhName(entry.item)} 的优先级`,
+        { priority: previousPriority },
+        { priority },
+        [assignment?.dayId]
+      );
       savePriorities(priorities);
-      entry.marker.setIcon(poiIcon(entry.item));
-      renderPoiList();
+      saveItineraryPlan(itineraryPlan);
+      refreshItineraryView();
       if (!isListPriority) {
         renderPoiDetail(entry.item, { preserveScroll: true });
       }
+      renderMobileShell();
     });
   </script>
 </body>

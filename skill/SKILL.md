@@ -212,7 +212,7 @@ guides/<trip-slug>/
 发布到只接受文本与代码格式的 REDSkill 平台时，使用专用构建脚本生成发布目录，不直接上传 Codex 本地 skill 原目录：
 
 ```bash
-node scripts/build-redskill-release.js <release-directory> 0.0.2
+node scripts/build-redskill-release.js <release-directory> 0.0.3
 node scripts/test-redskill-release.js <release-directory>
 ```
 

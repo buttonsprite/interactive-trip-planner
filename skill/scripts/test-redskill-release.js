@@ -40,7 +40,11 @@ assert.ok(!packageFiles.some((file) => /(^|\/)agents\/openai\.ya?ml$/i.test(file
 assert.ok(!packageFiles.some((file) => path.basename(file) === ".DS_Store"), ".DS_Store must be omitted");
 
 const packageJson = JSON.parse(fs.readFileSync(path.join(skillRoot, "package.json"), "utf8"));
-assert.equal(packageJson.version, "0.0.2", "release package must identify version 0.0.2");
+const expectedVersion = process.argv[3] || "";
+assert.match(packageJson.version || "", /^\d+\.\d+\.\d+$/, "release package must identify a semantic version");
+if (expectedVersion) {
+  assert.equal(packageJson.version, expectedVersion, `release package must identify version ${expectedVersion}`);
+}
 assert.equal(packageJson.type, "module", "release scripts require ESM mode");
 
 const lightTemplateReadme = fs.readFileSync(path.join(skillRoot, "assets", "guide-template", "README.md"), "utf8");
@@ -100,4 +104,4 @@ for (const testFile of ["test-redskill-package.js", "test-skill-contract.js"]) {
   assert.equal(result.status, 0, `${testFile} failed:\n${result.stdout}${result.stderr}`);
 }
 
-console.log(`REDSkill 0.0.2 release contract passed: ${packageFiles.length} supported files, 2 standalone maps`);
+console.log(`REDSkill ${packageJson.version} release contract passed: ${packageFiles.length} supported files, 2 standalone maps`);

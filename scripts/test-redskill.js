@@ -10,4 +10,4 @@ const repositoryPackage = JSON.parse(fs.readFileSync(path.join(repoRoot, "packag
 const releaseRoot = path.join(repoRoot, "releases", `redskill-${repositoryPackage.version}`);
 const releaseTest = path.join(repoRoot, "skill", "scripts", "test-redskill-release.js");
 
-execFileSync(process.execPath, [releaseTest, releaseRoot], { stdio: "inherit" });
+execFileSync(process.execPath, [releaseTest, releaseRoot, repositoryPackage.version], { stdio: "inherit" });

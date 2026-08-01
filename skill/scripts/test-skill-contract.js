@@ -116,6 +116,17 @@ assert.match(tasteSourceOnlineLogic, /0\.1\.0/);
 assert.match(tasteSourceOnlineLogic, /后续/);
 assert.doesNotMatch(tasteSourceOnlineLogic, /8\+[^\n]*已实现|跨 3 城[^\n]*已完成/);
 
+for (const mode of ["first-visit", "return-visit", "landmark-light", "local-only", "balanced-visitor"]) {
+  assert.match(planning, new RegExp(mode));
+}
+assert.match(skill, /代表性景点/);
+assert.match(planning, /至少评估 3 个/);
+assert.match(planning, /2[–-]4 个代表性主锚点/);
+assert.match(planning, /重型景点[^\n]*每天最多 1 个/);
+assert.match(planning, /同方向[^\n]*(市场|居民广场|社区)/);
+assert.match(sources, /著名景点[^\n]*不能[^\n]*游客多/);
+assert.match(tasteSourceOnlineLogic, /visitor mode/);
+
 for (const testFile of ["test-core-map-state.js", "test-core-map-template.js", "test-europe-public-template.js"]) {
   const result = spawnSync(process.execPath, [path.join(scriptDir, testFile)], { encoding: "utf8" });
   assert.equal(result.status, 0, result.stdout + result.stderr);

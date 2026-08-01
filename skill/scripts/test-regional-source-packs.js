@@ -150,6 +150,12 @@ for (const intent of spainDefault.intents) {
     assert.doesNotMatch(query, /\{[^}]+\}|\[目的地\]|\[旅行月份 年份\]|\[本次偏好词\]/);
   }
 }
+assert.throws(() => runtime.buildQueryMatrix({
+  countryCode: "ES",
+  destination: "Madrid",
+  yearMonth: "2026-11",
+  tasteTerms: ["   "],
+}, { skillRoot }), /tasteTerms.*non-empty strings/i);
 
 const unsupported = runtime.buildQueryMatrix({
   countryCode: "BR",

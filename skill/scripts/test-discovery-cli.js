@@ -164,6 +164,12 @@ try {
       countryCode: "ES",
       destination: "Madrid",
       yearMonth: "2026-11",
+      tasteTerms: ["   "],
+    },
+    {
+      countryCode: "ES",
+      destination: "Madrid",
+      yearMonth: "2026-11",
       localLanguageTags: [7],
     },
     {

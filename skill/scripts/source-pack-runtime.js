@@ -112,8 +112,10 @@ function normalizeRequiredContext(context) {
   });
   const tasteTerms = [];
   for (const term of context.tasteTerms || []) {
-    const normalizedTerm = normalizeQueryFragment(term, { allowEmpty: true });
-    if (normalizedTerm) tasteTerms.push(normalizedTerm);
+    if (typeof term !== "string" || !term.trim()) {
+      throw new Error("tasteTerms must contain only non-empty strings");
+    }
+    tasteTerms.push(normalizeQueryFragment(term));
   }
   return {
     missingContextFields: [],

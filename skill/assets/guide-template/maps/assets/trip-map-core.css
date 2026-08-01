@@ -388,10 +388,98 @@ a {
 
 .place-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
   gap: 9px;
   align-items: center;
   padding: 10px;
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.place-row.is-dragging {
+  position: relative;
+  z-index: 4;
+  border-color: var(--trip-accent);
+  background: var(--trip-surface);
+  box-shadow: 0 14px 32px rgba(25, 34, 31, 0.2);
+  transform: translateY(var(--place-drag-offset, 0));
+}
+
+.place-drag-handle,
+.place-drag-spacer {
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.place-drag-handle {
+  position: relative;
+  display: grid;
+  width: 44px;
+  border: 0;
+  padding: 0;
+  place-items: center;
+  background: transparent;
+  color: var(--trip-accent);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.place-drag-handle::before {
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  left: 5px;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--trip-accent);
+  content: "";
+}
+
+.place-drag-handle:active {
+  cursor: grabbing;
+}
+
+.place-drag-handle span {
+  margin-left: 4px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.place-list {
+  position: relative;
+  transition: box-shadow 120ms ease;
+}
+
+.place-list.edge-scroll-top {
+  box-shadow: inset 0 18px 18px -18px color-mix(in srgb, var(--trip-accent), transparent 40%);
+}
+
+.place-list.edge-scroll-bottom {
+  box-shadow: inset 0 -18px 18px -18px color-mix(in srgb, var(--trip-accent), transparent 40%);
+}
+
+.place-drop-indicator {
+  position: relative;
+  z-index: 5;
+  height: 3px;
+  margin: -1px 10px -2px 44px;
+  border-radius: 999px;
+  background: var(--trip-accent);
+  pointer-events: none;
+}
+
+.place-drop-indicator::before {
+  position: absolute;
+  top: 50%;
+  left: -5px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--trip-accent);
+  content: "";
+  transform: translateY(-50%);
 }
 
 .place-main {
@@ -726,16 +814,19 @@ a {
   }
 
   .place-list {
-    display: flex;
-    overflow-x: auto;
-    margin-right: -16px;
-    padding: 0 16px 8px 0;
-    scroll-snap-type: x proximity;
+    display: grid;
+    max-height: min(54vh, 520px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin-right: 0;
+    padding: 2px 4px 8px 0;
+    overscroll-behavior: contain;
+    scroll-snap-type: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   .place-row-wrap {
-    min-width: min(330px, calc(100vw - 48px));
-    scroll-snap-align: start;
+    min-width: 0;
   }
 
   .place-row {

@@ -1,11 +1,11 @@
 {
   "name": "interactive-trip-planner-repository",
   "private": true,
-  "version": "0.0.3",
+  "version": "0.0.4",
   "type": "module",
   "scripts": {
     "build:redskill": "node scripts/build-redskill.js",
-    "test:skill": "node skill/scripts/build-europe-public-template.js && node skill/scripts/test-core-map-route.js && node skill/scripts/test-core-map-state.js && node skill/scripts/test-core-map-template.js && node skill/scripts/test-europe-public-template.js && node skill/scripts/test-mobile-map-interaction.js && node skill/scripts/test-redskill-package.js && node skill/scripts/test-skill-contract.js",
+    "test:skill": "node skill/scripts/build-europe-public-template.js && node skill/scripts/test-core-map-route.js && node skill/scripts/test-core-map-state.js && node skill/scripts/test-core-map-template.js && node skill/scripts/test-europe-public-template.js && node skill/scripts/test-mobile-map-interaction.js && node skill/scripts/test-route-reorder-interaction.js && node skill/scripts/test-redskill-package.js && node skill/scripts/test-skill-contract.js",
     "test:redskill": "node scripts/test-redskill.js",
     "test": "npm run test:skill && npm run build:redskill && npm run test:redskill"
   },

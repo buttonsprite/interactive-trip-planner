@@ -876,6 +876,46 @@
       display: grid;
       gap: 2px;
       padding: 8px;
+      transition: box-shadow 120ms ease;
+    }
+
+    .poi-detail-day-list.edge-scroll-top {
+      box-shadow: inset 0 42px 28px -24px rgba(15, 118, 110, 0.68);
+    }
+
+    .poi-detail-day-list.edge-scroll-bottom {
+      box-shadow: inset 0 -42px 28px -24px rgba(15, 118, 110, 0.68);
+    }
+
+    .poi-detail-day-drop-indicator {
+      position: relative;
+      height: 3px;
+      margin: 2px 8px 2px 48px;
+      background: #0f766e;
+      border-radius: 999px;
+      box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.14);
+    }
+
+    .poi-detail-day-drop-indicator::before {
+      position: absolute;
+      top: -3px;
+      left: -4px;
+      width: 9px;
+      height: 9px;
+      content: "";
+      background: #0f766e;
+      border-radius: 50%;
+    }
+
+    .poi-detail-day-route-warning {
+      margin: 2px 4px 6px;
+      padding: 7px 9px;
+      color: #7a4b00;
+      font-size: 10px;
+      font-weight: 700;
+      background: #fff4dd;
+      border-left: 3px solid #c58a1f;
+      border-radius: 4px;
     }
 
     .poi-detail-day-section-label {
@@ -902,7 +942,7 @@
 
     .poi-detail-day-place {
       display: grid;
-      grid-template-columns: 18px minmax(0, 1fr) 26px;
+      grid-template-columns: 44px minmax(0, 1fr) 26px;
       gap: 4px;
       width: 100%;
       min-height: 48px;
@@ -954,14 +994,21 @@
     }
 
     .poi-detail-day-place.dragging {
-      opacity: 0.45;
+      z-index: 4;
+      opacity: 0.96;
+      background: #fff;
+      border-color: #0f766e;
+      box-shadow: 0 14px 30px rgba(23, 33, 43, 0.22);
+      transition: none;
     }
 
     .poi-detail-day-place-handle {
+      position: relative;
       display: grid;
       place-items: center;
       align-self: stretch;
-      min-width: 18px;
+      width: 44px;
+      min-width: 44px;
       padding: 0;
       color: #7a8793;
       background: transparent;
@@ -970,6 +1017,17 @@
       font-size: 14px;
       line-height: 1;
       touch-action: none;
+    }
+
+    .poi-detail-day-place-handle::before {
+      position: absolute;
+      top: 7px;
+      bottom: 7px;
+      left: 4px;
+      width: 3px;
+      content: "";
+      background: #0f766e;
+      border-radius: 999px;
     }
 
     .poi-detail-day-place-handle:active {
@@ -986,7 +1044,7 @@
     }
 
     .poi-detail-day-place-spacer {
-      width: 18px;
+      width: 44px;
     }
 
     .poi-detail-day-place-open {
@@ -1521,7 +1579,7 @@
       }
 
       .poi-detail-day-place {
-        grid-template-columns: 20px minmax(0, 1fr) 30px;
+        grid-template-columns: 44px minmax(0, 1fr) 30px;
         gap: 6px;
         min-height: 54px;
         padding: 7px 6px;
@@ -1529,8 +1587,8 @@
 
       .poi-detail-day-place-handle,
       .poi-detail-day-place-spacer {
-        min-width: 20px;
-        width: 20px;
+        min-width: 44px;
+        width: 44px;
       }
 
       .poi-detail-day-toggle {
@@ -9597,6 +9655,16 @@
       sight: true
     };
 
+    function calculateEdgeAutoScrollVelocity(pointerY, top, bottom, threshold = 48, maxSpeed = 14) {
+      if (pointerY < top + threshold) {
+        return -Math.min(maxSpeed, Math.max(0, ((top + threshold - pointerY) / threshold) * maxSpeed));
+      }
+      if (pointerY > bottom - threshold) {
+        return Math.min(maxSpeed, Math.max(0, ((pointerY - (bottom - threshold)) / threshold) * maxSpeed));
+      }
+      return 0;
+    }
+
     function normalizeMobileViewMode(mode) {
       return ["overview", "day", "detail", "candidates"].includes(mode) ? mode : "overview";
     }
@@ -11488,6 +11556,12 @@
       if (index <= 0 || !dayPois[index - 1] || !dayPois[index]) {
         return null;
       }
+      if (itineraryPlan.dirtyDays[dayId]) {
+        return {
+          estimated: true,
+          text: "顺序或安排已调整，交通待复核"
+        };
+      }
       const day = dayById[dayId];
       const fromItem = dayPois[index - 1].item;
       const toItem = dayPois[index].item;
@@ -11611,7 +11685,10 @@
         }).join("")}
       ` : "";
 
-      poiDetailDayList.innerHTML = scheduledHtml + candidateHtml;
+      const routeWarningHtml = needsReroute
+        ? '<div class="poi-detail-day-route-warning">顺序或安排已调整，交通待复核。原路线仅作参考，可用“撤销上一步”恢复最近修改。</div>'
+        : "";
+      poiDetailDayList.innerHTML = routeWarningHtml + scheduledHtml + candidateHtml;
     };
 
     const renderDetailNavigation = () => {
@@ -11791,65 +11868,201 @@
       }
     });
 
+    const DETAIL_SORT_HOLD_MS = 160;
+    const DETAIL_SORT_EDGE_PX = 48;
+    const DETAIL_SORT_MAX_SCROLL_PX = 14;
+    const detailSortIndicator = document.createElement("div");
+    detailSortIndicator.className = "poi-detail-day-drop-indicator";
+    detailSortIndicator.setAttribute("aria-label", "松手后的插入位置");
     let detailPointerSort = null;
+    let detailSortAutoScrollFrame = null;
+
+    const detailSortableRows = () => Array.from(
+      poiDetailDayList.querySelectorAll("[data-sortable-poi]")
+    );
+
+    const placeDetailSortIndicator = (clientY) => {
+      if (!detailPointerSort?.active) {
+        return;
+      }
+      const nextRow = detailSortableRows()
+        .filter((row) => row !== detailPointerSort.row)
+        .find((row) => {
+          const rect = row.getBoundingClientRect();
+          return clientY < rect.top + rect.height / 2;
+        });
+      if (nextRow) {
+        poiDetailDayList.insertBefore(detailSortIndicator, nextRow);
+        return;
+      }
+      const candidateBoundary = poiDetailDayList.querySelector(".poi-detail-day-section-label");
+      poiDetailDayList.insertBefore(detailSortIndicator, candidateBoundary || null);
+    };
+
+    const updateDetailDraggedTransform = () => {
+      if (!detailPointerSort?.active) {
+        return;
+      }
+      const pointerDelta = detailPointerSort.lastY - detailPointerSort.startY;
+      const scrollDelta = poiDetailDayList.scrollTop - detailPointerSort.startScrollTop;
+      detailPointerSort.row.style.transform = `scale(1.015) translateY(${pointerDelta + scrollDelta}px)`;
+    };
+
+    const stopDetailSortAutoScroll = () => {
+      if (detailSortAutoScrollFrame) {
+        cancelAnimationFrame(detailSortAutoScrollFrame);
+      }
+      detailSortAutoScrollFrame = null;
+      poiDetailDayList.classList.remove("edge-scroll-top", "edge-scroll-bottom");
+    };
+
+    const runDetailSortAutoScroll = () => {
+      if (!detailPointerSort?.active) {
+        return;
+      }
+      const rect = poiDetailDayList.getBoundingClientRect();
+      const velocity = calculateEdgeAutoScrollVelocity(
+        detailPointerSort.lastY,
+        rect.top,
+        rect.bottom,
+        DETAIL_SORT_EDGE_PX,
+        DETAIL_SORT_MAX_SCROLL_PX
+      );
+      const previousScrollTop = poiDetailDayList.scrollTop;
+      poiDetailDayList.scrollTop += velocity;
+      poiDetailDayList.classList.toggle("edge-scroll-top", velocity < 0);
+      poiDetailDayList.classList.toggle("edge-scroll-bottom", velocity > 0);
+      if (poiDetailDayList.scrollTop !== previousScrollTop) {
+        detailPointerSort.moved = true;
+        updateDetailDraggedTransform();
+        placeDetailSortIndicator(detailPointerSort.lastY);
+      }
+      detailSortAutoScrollFrame = requestAnimationFrame(runDetailSortAutoScroll);
+    };
+
+    const beginDetailPointerSort = () => {
+      if (!detailPointerSort?.row) {
+        return;
+      }
+      detailPointerSort.active = true;
+      detailPointerSort.startScrollTop = poiDetailDayList.scrollTop;
+      detailPointerSort.row.classList.add("dragging");
+      detailSortIndicator.hidden = false;
+      placeDetailSortIndicator(detailPointerSort.lastY);
+      detailSortAutoScrollFrame = requestAnimationFrame(runDetailSortAutoScroll);
+    };
+
+    const clearDetailSortHold = () => {
+      if (detailPointerSort?.holdTimer) {
+        clearTimeout(detailPointerSort.holdTimer);
+        detailPointerSort.holdTimer = null;
+      }
+    };
+
+    const finishDetailPointerSort = (commit, pointerId = null) => {
+      if (!detailPointerSort || (pointerId !== null && pointerId !== detailPointerSort.pointerId)) {
+        return;
+      }
+      clearDetailSortHold();
+      stopDetailSortAutoScroll();
+      try {
+        if (detailPointerSort.handle.hasPointerCapture?.(detailPointerSort.pointerId)) {
+          detailPointerSort.handle.releasePointerCapture(detailPointerSort.pointerId);
+        }
+      } catch (_error) {
+        // Pointer capture can already be gone after a browser-level cancellation.
+      }
+
+      const { active, moved, row, originalOrder, poiId } = detailPointerSort;
+      if (active && commit && moved && detailSortIndicator.parentNode === poiDetailDayList) {
+        poiDetailDayList.insertBefore(row, detailSortIndicator);
+      }
+      row?.classList.remove("dragging");
+      if (row) {
+        row.style.transform = "";
+      }
+      detailSortIndicator.remove();
+
+      const orderedPoiIds = detailSortableRows().map((sortableRow) =>
+        sortableRow.getAttribute("data-sortable-poi")
+      );
+      const changed = active
+        && commit
+        && moved
+        && orderedPoiIds.some((poiId, index) => poiId !== originalOrder[index]);
+      detailPointerSort = null;
+      if (changed) {
+        reorderDayPois(appState.dayView.selectedDayId, orderedPoiIds);
+        requestAnimationFrame(() => {
+          const reorderedRow = detailSortableRows().find(
+            (sortableRow) => sortableRow.getAttribute("data-sortable-poi") === poiId
+          );
+          reorderedRow?.scrollIntoView({ block: "nearest" });
+        });
+      } else {
+        renderDetailNavigation();
+      }
+    };
 
     poiDetailDayList.addEventListener("pointerdown", (event) => {
       const handle = event.target.closest("[data-drag-poi]");
-      if (!handle || event.button !== 0) {
+      if (!handle || event.button !== 0 || detailPointerSort) {
         return;
       }
       event.preventDefault();
+      const row = handle.closest("[data-sortable-poi]");
+      if (!row) {
+        return;
+      }
       detailPointerSort = {
         poiId: handle.getAttribute("data-drag-poi") || "",
         pointerId: event.pointerId,
         startY: event.clientY,
+        lastY: event.clientY,
+        startScrollTop: poiDetailDayList.scrollTop,
         moved: false,
-        handle
+        active: false,
+        originalOrder: detailSortableRows().map((sortableRow) => sortableRow.getAttribute("data-sortable-poi")),
+        row,
+        handle,
+        holdTimer: null
       };
-      const row = handle.closest("[data-sortable-poi]");
-      row?.classList.add("dragging");
-      handle.setPointerCapture?.(event.pointerId);
+      try {
+        handle.setPointerCapture?.(event.pointerId);
+      } catch (_error) {
+        // The interaction still works while the pointer stays inside the handle.
+      }
+      detailPointerSort.holdTimer = setTimeout(beginDetailPointerSort, DETAIL_SORT_HOLD_MS);
     });
 
     poiDetailDayList.addEventListener("pointermove", (event) => {
       if (!detailPointerSort || event.pointerId !== detailPointerSort.pointerId) {
         return;
       }
-      if (!detailPointerSort.moved && Math.abs(event.clientY - detailPointerSort.startY) < 4) {
+      detailPointerSort.lastY = event.clientY;
+      if (!detailPointerSort.active) {
         return;
       }
       event.preventDefault();
-      detailPointerSort.moved = true;
-      const targetRow = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-sortable-poi]");
-      const draggedRow = detailPointerSort.poiId
-        ? poiDetailDayList.querySelector(`[data-sortable-poi="${detailPointerSort.poiId}"]`)
-        : null;
-      if (!targetRow || !draggedRow || targetRow === draggedRow) {
-        return;
+      if (Math.abs(event.clientY - detailPointerSort.startY) >= 4) {
+        detailPointerSort.moved = true;
       }
-      const targetRect = targetRow.getBoundingClientRect();
-      const insertBefore = event.clientY < targetRect.top + targetRect.height / 2;
-      poiDetailDayList.insertBefore(draggedRow, insertBefore ? targetRow : targetRow.nextSibling);
+      updateDetailDraggedTransform();
+      placeDetailSortIndicator(event.clientY);
     });
 
-    const finishDetailPointerSort = (event, commit) => {
-      if (!detailPointerSort || event.pointerId !== detailPointerSort.pointerId) {
-        return;
+    poiDetailDayList.addEventListener("pointerup", (event) => {
+      finishDetailPointerSort(true, event.pointerId);
+    });
+    poiDetailDayList.addEventListener("pointercancel", (event) => {
+      finishDetailPointerSort(false, event.pointerId);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && detailPointerSort) {
+        event.preventDefault();
+        finishDetailPointerSort(false);
       }
-      detailPointerSort.handle.releasePointerCapture?.(detailPointerSort.pointerId);
-      poiDetailDayList.querySelectorAll(".dragging").forEach((row) => row.classList.remove("dragging"));
-      if (commit && detailPointerSort.moved) {
-        const orderedPoiIds = Array.from(poiDetailDayList.querySelectorAll("[data-sortable-poi]"))
-          .map((row) => row.getAttribute("data-sortable-poi"));
-        reorderDayPois(appState.dayView.selectedDayId, orderedPoiIds);
-      } else {
-        renderDetailNavigation();
-      }
-      detailPointerSort = null;
-    };
-
-    poiDetailDayList.addEventListener("pointerup", (event) => finishDetailPointerSort(event, true));
-    poiDetailDayList.addEventListener("pointercancel", (event) => finishDetailPointerSort(event, false));
+    });
 
     document.addEventListener("change", (event) => {
       const moveSelect = event.target.closest("[data-move-poi]");

@@ -1,6 +1,16 @@
 (function installTripMapCore(root) {
   "use strict";
 
+  function calculateEdgeAutoScrollVelocity(pointerY, top, bottom, threshold = 48, maxSpeed = 14) {
+    if (pointerY < top + threshold) {
+      return -Math.min(maxSpeed, Math.max(0, ((top + threshold - pointerY) / threshold) * maxSpeed));
+    }
+    if (pointerY > bottom - threshold) {
+      return Math.min(maxSpeed, Math.max(0, ((pointerY - (bottom - threshold)) / threshold) * maxSpeed));
+    }
+    return 0;
+  }
+
   function mount({ root: appRoot, trip }) {
     if (!appRoot) throw new Error("找不到旅行地图容器");
     if (!trip || !Array.isArray(trip.pois) || !Array.isArray(trip.days)) {
@@ -22,6 +32,14 @@
     let markerByPoi = new Map();
     let pendingAction = null;
     let shouldFitMap = true;
+    const PLACE_SORT_HOLD_MS = 160;
+    const PLACE_SORT_EDGE_PX = 48;
+    const PLACE_SORT_MAX_SCROLL_PX = 14;
+    const placeDropIndicator = document.createElement("div");
+    placeDropIndicator.className = "place-drop-indicator";
+    placeDropIndicator.setAttribute("aria-hidden", "true");
+    let placePointerSort = null;
+    let placeSortAutoScrollFrame = 0;
 
     applyHashState();
     initializeMap();
@@ -236,6 +254,7 @@
     }
 
     function transitLabel(day, fromPoiId, toPoiId) {
+      if (state.dirtyDays[day.id]) return "顺序或安排已调整，交通待复核";
       const segment = (day.transitSegments || []).find(
         (item) => item.fromPoiId === fromPoiId && item.toPoiId === toPoiId,
       );
@@ -271,9 +290,12 @@
         const order = poi.category === "hotel" ? "宿" : nonHotelOrder(dayId, poiId);
         const transit = index > 0 ? transitLabel(day, ordered[index - 1], poiId) : "";
         const canMove = poi.category !== "hotel";
-        return `<div class="place-row-wrap">
+        return `<div class="place-row-wrap" ${canMove ? `data-sortable-place="${escapeHtml(poiId)}"` : ""}>
           ${transit ? `<div class="place-transit">${escapeHtml(transit)}</div>` : ""}
           <div class="place-row ${state.view.selectedPoiId === poiId ? "is-selected" : ""}">
+            ${canMove
+              ? `<button class="place-drag-handle" type="button" data-drag-place="${escapeHtml(poiId)}" aria-label="长按并拖动${escapeHtml(poi.name_zh || poi.name)}调整顺序" title="拖动调整顺序"><span aria-hidden="true">⠿</span></button>`
+              : '<span class="place-drag-spacer" aria-hidden="true"></span>'}
             <button class="place-main" type="button" data-open-place="${escapeHtml(poiId)}">
               <span class="place-order ${poi.category === "hotel" ? "hotel" : ""}">${escapeHtml(order)}</span>
               <span><span class="place-name">${escapeHtml(poi.name_zh || poi.name)}</span><span class="place-meta">${escapeHtml(routeStop(day, poiId)?.time || "时间待定")} · ${escapeHtml(categoryLabel(poi))}</span></span>
@@ -292,7 +314,7 @@
           <div class="day-meta">${escapeHtml(day.date)} · ${escapeHtml(day.city)}</div>
           <h2>${escapeHtml(day.title)}</h2>
           <p>${escapeHtml(day.summary)}</p>
-          ${state.dirtyDays[day.id] ? '<div class="route-status">路线需要重新安排。地图保留原正式路线作为参考，不会自动连接新增地点。</div>' : ""}
+          ${state.dirtyDays[day.id] ? '<div class="route-status">顺序或安排已调整，交通待复核。地图保留原正式路线作为参考，不会自动连接新增地点。</div>' : ""}
         </section>
         <section class="section-block"><div class="section-heading-row"><h3 class="section-title">当天安排</h3><span class="muted">${ordered.filter((id) => pois.get(id)?.category !== "hotel").length} / ${Number(day.capacity || 6)} 个主要地点</span></div><div class="place-list">${rows || '<div class="empty-state">这一天还没有安排地点。</div>'}</div></section>
         <section class="section-block"><h3 class="section-title">顺路候选</h3><div class="quick-list">${candidates.map((poi) => `<button class="quick-place" type="button" data-open-place="${escapeHtml(poi.id)}"><span class="place-name">${escapeHtml(poi.name_zh || poi.name)}</span><span class="place-meta">${escapeHtml(poi.area)} · ${escapeHtml(priorityLabel(poi.id))}</span></button>`).join("") || '<div class="empty-state">当前没有额外候选。</div>'}</div></section>`;
@@ -488,7 +510,176 @@
       renderAll({ preserveMapView: true });
     }
 
+    function sortablePlaceRows(list) {
+      return [...list.querySelectorAll(".place-row-wrap[data-sortable-place]")];
+    }
+
+    function updatePlaceDropIndicator(session) {
+      const candidates = sortablePlaceRows(session.list).filter((row) => row !== session.wrap);
+      const next = candidates.find((row) => {
+        const rect = row.getBoundingClientRect();
+        return session.pointerY < rect.top + rect.height / 2;
+      });
+      if (next) session.list.insertBefore(placeDropIndicator, next);
+      else session.list.appendChild(placeDropIndicator);
+    }
+
+    function updatePlaceDragOffset(session) {
+      const scrollDelta = session.list.scrollTop - session.startScrollTop;
+      session.row.style.setProperty(
+        "--place-drag-offset",
+        `${session.pointerY - session.startY + scrollDelta}px`,
+      );
+    }
+
+    function stopPlaceSortAutoScroll() {
+      if (placeSortAutoScrollFrame) root.cancelAnimationFrame(placeSortAutoScrollFrame);
+      placeSortAutoScrollFrame = 0;
+      if (!placePointerSort) return;
+      placePointerSort.list.classList.remove("edge-scroll-top", "edge-scroll-bottom");
+    }
+
+    function runPlaceSortAutoScroll() {
+      const session = placePointerSort;
+      if (!session?.active) {
+        placeSortAutoScrollFrame = 0;
+        return;
+      }
+      const rect = session.list.getBoundingClientRect();
+      const velocity = calculateEdgeAutoScrollVelocity(
+        session.pointerY,
+        rect.top,
+        rect.bottom,
+        PLACE_SORT_EDGE_PX,
+        PLACE_SORT_MAX_SCROLL_PX,
+      );
+      session.list.classList.toggle("edge-scroll-top", velocity < 0);
+      session.list.classList.toggle("edge-scroll-bottom", velocity > 0);
+      if (velocity) {
+        const before = session.list.scrollTop;
+        session.list.scrollTop += velocity;
+        if (session.list.scrollTop !== before) {
+          updatePlaceDragOffset(session);
+          updatePlaceDropIndicator(session);
+        }
+      }
+      placeSortAutoScrollFrame = root.requestAnimationFrame(runPlaceSortAutoScroll);
+    }
+
+    function releasePlacePointer(session) {
+      try {
+        if (session.handle.hasPointerCapture(session.pointerId)) {
+          session.handle.releasePointerCapture(session.pointerId);
+        }
+      } catch (_error) {
+        // The pointer may already have been released by the browser.
+      }
+    }
+
+    function resetPlacePointerSort() {
+      const session = placePointerSort;
+      if (!session) return;
+      root.clearTimeout(session.holdTimer);
+      stopPlaceSortAutoScroll();
+      session.row.classList.remove("is-dragging");
+      session.row.style.removeProperty("--place-drag-offset");
+      placeDropIndicator.remove();
+      releasePlacePointer(session);
+      placePointerSort = null;
+    }
+
+    function activatePlacePointerSort(session) {
+      if (placePointerSort !== session) return;
+      session.active = true;
+      session.startScrollTop = session.list.scrollTop;
+      session.row.classList.add("is-dragging");
+      updatePlaceDropIndicator(session);
+      placeSortAutoScrollFrame = root.requestAnimationFrame(runPlaceSortAutoScroll);
+    }
+
+    function placeSortTargetIndex(session) {
+      const order = (state.orders[session.dayId] || []).filter((poiId) => poiId !== session.poiId);
+      let next = placeDropIndicator.nextElementSibling;
+      while (next && !next.matches(".place-row-wrap[data-sortable-place]")) {
+        next = next.nextElementSibling;
+      }
+      if (!next) return order.length;
+      const nextIndex = order.indexOf(next.dataset.sortablePlace);
+      return nextIndex >= 0 ? nextIndex : order.length;
+    }
+
+    function finishPlacePointerSort(event, { cancel = false } = {}) {
+      const session = placePointerSort;
+      if (!session || (event && event.pointerId !== session.pointerId)) return;
+      const wasActive = session.active;
+      const toIndex = wasActive && !cancel ? placeSortTargetIndex(session) : session.originalIndex;
+      resetPlacePointerSort();
+      if (!wasActive || cancel || toIndex === session.originalIndex) return;
+      requestAction({ type: "move-order", poiId: session.poiId, toIndex });
+      root.requestAnimationFrame(() => {
+        const reorderedRow = sortablePlaceRows($("#day-place-list").querySelector(".place-list"))
+          .find((row) => row.dataset.sortablePlace === session.poiId);
+        reorderedRow?.scrollIntoView({ block: "nearest" });
+      });
+    }
+
+    function bindPlaceSorting() {
+      const dayPlaceList = $("#day-place-list");
+      dayPlaceList.addEventListener("pointerdown", (event) => {
+        const handle = event.target.closest("[data-drag-place]");
+        if (!handle || (event.pointerType === "mouse" && event.button !== 0)) return;
+        const wrap = handle.closest(".place-row-wrap[data-sortable-place]");
+        const list = handle.closest(".place-list");
+        const row = handle.closest(".place-row");
+        const dayId = state.view.activeDayId;
+        const poiId = handle.dataset.dragPlace;
+        if (!wrap || !list || !row || !dayId || !poiId) return;
+        resetPlacePointerSort();
+        const session = {
+          pointerId: event.pointerId,
+          pointerY: event.clientY,
+          startY: event.clientY,
+          startScrollTop: list.scrollTop,
+          dayId,
+          poiId,
+          originalIndex: (state.orders[dayId] || []).indexOf(poiId),
+          handle,
+          wrap,
+          row,
+          list,
+          active: false,
+          holdTimer: 0,
+        };
+        placePointerSort = session;
+        try {
+          handle.setPointerCapture(event.pointerId);
+        } catch (_error) {
+          // Pointer capture is an enhancement; document-level events still finish the gesture.
+        }
+        session.holdTimer = root.setTimeout(
+          () => activatePlacePointerSort(session),
+          PLACE_SORT_HOLD_MS,
+        );
+      });
+
+      dayPlaceList.addEventListener("pointermove", (event) => {
+        const session = placePointerSort;
+        if (!session || event.pointerId !== session.pointerId) return;
+        session.pointerY = event.clientY;
+        if (!session.active) {
+          if (Math.abs(event.clientY - session.startY) > 10) resetPlacePointerSort();
+          return;
+        }
+        event.preventDefault();
+        updatePlaceDragOffset(session);
+        updatePlaceDropIndicator(session);
+      });
+      dayPlaceList.addEventListener("pointerup", (event) => finishPlacePointerSort(event));
+      dayPlaceList.addEventListener("pointercancel", (event) => finishPlacePointerSort(event, { cancel: true }));
+    }
+
     function bindEvents() {
+      bindPlaceSorting();
       appRoot.addEventListener("click", (event) => {
         const openDay = event.target.closest("[data-open-day]");
         const selectDayButton = event.target.closest("[data-select-day]");
@@ -542,6 +733,10 @@
       $("#close-replan").addEventListener("click", closeReplanDialog);
       $("#copy-replan").addEventListener("click", copyReplanPrompt);
       document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && placePointerSort) {
+          finishPlacePointerSort(null, { cancel: true });
+          return;
+        }
         if (event.key !== "Escape") return;
         if (!$("#impact-dialog").hidden) closeImpactDialog();
         else if (!$("#replan-dialog").hidden) closeReplanDialog();

@@ -127,7 +127,22 @@ export function validateTasteModels({ skillRoot = defaultSkillRoot } = {}) {
       assert.equal(trip.authorization?.ownerConfirmed, true, entry.id + " representative trip ownerConfirmed must be true");
       assert.equal(trip.authorization?.publicReuse, true, entry.id + " representative trip publicReuse must be true");
       assert.equal(trip.authorization?.privacyReviewed, true, entry.id + " representative trip privacyReviewed must be true");
-      const sampleRoot = resolveInside(skillRoot, path.relative(skillRoot, path.resolve(directory, trip.path)), entry.id + " representative path");
+      const resolvedSampleRoot = path.resolve(directory, trip.path);
+      let sampleRoot;
+      if (model.sourceType === "curator-owned") {
+        const resolvedModelDirectory = path.resolve(directory);
+        assert.ok(
+          resolvedSampleRoot === resolvedModelDirectory || resolvedSampleRoot.startsWith(resolvedModelDirectory + path.sep),
+          entry.id + " curator-owned representative path must stay inside model directory",
+        );
+        sampleRoot = resolvedSampleRoot;
+      } else {
+        sampleRoot = resolveInside(
+          skillRoot,
+          path.relative(skillRoot, resolvedSampleRoot),
+          entry.id + " representative path",
+        );
+      }
       for (const required of requiredSampleFiles) {
         const file = path.join(sampleRoot, required);
         assert.ok(fs.existsSync(file), entry.id + " sample missing " + required);

@@ -47,6 +47,13 @@ try {
     content: "CC-BY-4.0",
     attribution: "Fixture Curator",
   };
+  const curatorTripId = "curator-owned-tokyo";
+  const sharedSampleRoot = path.resolve(curatorDirectory, curatorModel.representativeTrips[0].path);
+  const curatorExampleRoot = path.join(curatorDirectory, "examples", curatorTripId);
+  fs.cpSync(sharedSampleRoot, curatorExampleRoot, { recursive: true });
+  curatorModel.representativeTrips[0].id = curatorTripId;
+  curatorModel.representativeTrips[0].path = "examples/" + curatorTripId;
+  curatorModel.representativeTrips[0].representativeReason = "Fixture curator-owned complete example.";
   writeJson(curatorModelPath, curatorModel);
   const tasteRegistryPath = path.join(tasteRoot, "index.json");
   const tasteRegistry = readJson(tasteRegistryPath);
@@ -85,6 +92,15 @@ try {
     sourcePackId,
   ]);
 
+  curatorModel.representativeTrips[0].path = "../../samples/golden/tokyo-rail-neon-craft";
+  writeJson(curatorModelPath, curatorModel);
+  assert.throws(
+    () => validateTasteModels({ skillRoot: fixtureSkillRoot }),
+    /curator-owned representative path.*inside model directory/i,
+  );
+  curatorModel.representativeTrips[0].path = "examples/" + curatorTripId;
+  writeJson(curatorModelPath, curatorModel);
+
   curatorModel.owner.confirmed = false;
   writeJson(curatorModelPath, curatorModel);
   assert.throws(() => validateTasteModels({ skillRoot: fixtureSkillRoot }), /owner.*confirmed/i);
@@ -96,7 +112,20 @@ try {
   curatorModel.representativeTrips[0].authorization.privacyReviewed = true;
   writeJson(curatorModelPath, curatorModel);
 
-  const nestedExecutable = path.join(curatorDirectory, "nested", "bypass.js");
+  const privateExampleNote = path.join(curatorExampleRoot, "docs", "private-owner-note.md");
+  fs.writeFileSync(privateExampleNote, "Private source path: /Users/fixture-curator/private-trip\n");
+  assert.throws(() => validateTasteModels({ skillRoot: fixtureSkillRoot }), /privacy scan/i);
+  fs.rmSync(privateExampleNote);
+
+  const unsupportedExampleFile = path.join(curatorExampleRoot, "docs", "notes.txt");
+  fs.writeFileSync(unsupportedExampleFile, "unsupported curator example format\n");
+  assert.throws(
+    () => validateTasteModels({ skillRoot: fixtureSkillRoot }),
+    /unsupported model file.*examples.*notes\.txt/i,
+  );
+  fs.rmSync(unsupportedExampleFile);
+
+  const nestedExecutable = path.join(curatorExampleRoot, "nested", "bypass.js");
   fs.mkdirSync(path.dirname(nestedExecutable), { recursive: true });
   fs.writeFileSync(nestedExecutable, "export default true;\n");
   assert.throws(() => validateTasteModels({ skillRoot: fixtureSkillRoot }), /contains executable.*nested.*bypass\.js/i);

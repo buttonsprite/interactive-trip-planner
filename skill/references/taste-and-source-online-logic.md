@@ -6,8 +6,8 @@
 - 一主一辅时，主模板拥有选点与节奏；辅模板只能补一个领域或视觉倾向。
 - 0.1.0 必须保留“城市手艺与缓慢街区”和“地方风味与夜间半径”两个官方模板，但 registry 可追加 `curator-owned` community 模板；贡献者使用独立 owner、license 与 semantic version，不需要修改 Core validator。
 - 城市手艺模板关联 Tokyo golden sample；地方风味模板关联 Barcelona golden sample。Barcelona 的 2 个 market、1 个 food、2 个 bar 与 local-food/market/nightlife 行程角色只构成最低代表证据，不声明完整 food-first 覆盖。
-- 每个模板使用 JSON + Markdown，并关联一个现有完整 golden sample；样本标为 owner 确认的代表性规划或已完成回顾，写明代表理由、授权和脱敏，不冒充亲历。
-- 模型目录递归只允许 JSON/Markdown；非法 owner、授权/隐私声明、受禁评分字段、symlink 或任意层级可执行文件都会被 validator 拒绝。
+- 每个模板使用 JSON + Markdown，并关联完整 docs + data 代表行程；样本标为 owner 确认的代表性规划或已完成回顾，写明代表理由、授权和脱敏，不冒充亲历。两个 `official-playstyle` 可以继续引用项目共享 golden sample。
+- `curator-owned` 的每个代表行程都必须位于自己的 model directory 内，推荐 `examples/<trip-id>/`，不得引用共享 golden、其他 model 或目录外样本。example 会随 model directory 一起递归执行 JSON/Markdown 扩展名、隐私、symlink 和可执行文件扫描；非法 owner、授权/隐私声明、受禁评分字段或外部样本引用都会被 validator 拒绝。
 - 模板只提供轻量视觉偏好，不含地图 HTML。Europe direct-copy interaction v1 和既有地图状态合同未改变。
 - 阶段二按 Global Base 与目的地地区选择来源包。Global、中国大陆、日本、法语区（法国与比利时）是 0.1.0 required subset；registry 可追加满足同一 JSON 合同的新地区包，首发包仍有固定回归。
 - 每个来源包提供 10 类中文、英文和当地语言查询意图；来源记录包含 A/B/C 可访问性合同、检索方法、依赖、agentAccess、fallback、事实边界、复核日期与限制。

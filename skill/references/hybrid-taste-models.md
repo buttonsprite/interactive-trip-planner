@@ -35,7 +35,9 @@ Core 脚本 taste-model-runtime.js 可以给结构化上下文生成 1–3 个�
 - 已授权公开复用并完成脱敏。
 - 复用现有 docs + data，不复制地图 HTML。
 
-模型目录及其子目录只允许 JSON 与 Markdown，不允许可执行脚本、HTML、symlink，也不能出现 `coverage`、`confidence`、`maturity` 字段。每个模板都必须关联完整 docs + data 代表行程，声明代表理由、公开复用授权和隐私复核；非法 owner、缺失授权/脱敏或递归扫描发现可执行文件时拒绝贡献。贡献校验、隐私扫描和运行时脚本全部位于 Core scripts。
+模型目录及其子目录只允许 JSON 与 Markdown，不允许可执行脚本、HTML、symlink，也不能出现 `coverage`、`confidence`、`maturity` 字段。每个模板都必须关联完整 docs + data 代表行程，声明代表理由、公开复用授权和隐私复核。
+
+`official-playstyle` 可以引用项目维护的共享 golden sample。`curator-owned` 必须把自己的完整代表行程放在该 model directory 内，推荐路径为 `examples/<trip-id>/`；不能引用 `../../samples/golden/`、其他 model 或 model directory 外的任何样本。curator example 的 docs + data 与 model directory 一起递归执行扩展名、可执行文件、symlink、受禁字段和隐私扫描。非法 owner、缺失授权/脱敏、外部样本引用或递归扫描失败时拒绝贡献。贡献校验、隐私扫描和运行时脚本全部位于 Core scripts。
 
 ## 视觉边界
 

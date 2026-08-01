@@ -27,6 +27,8 @@ Global Base 的当地语言 query 使用 `{local:<token>}`，由 `assets/source-
 
 等级只描述可访问性，不评价内容质量。每条来源仍必须记录 search method、登录或工具依赖、agentAccess、fallback、fact boundary、lastVerified 和 limitations。
 
+对已明确选择的 URL，可运行 `probe-source-access.js` 取得有界的 access-only 信号：它只检查 `http`/`https`、最多 4 并发、HEAD 不跟随 redirect，405/501 才做小范围 GET；请求使用原始 URL，输出 URL 才移除 query/fragment，并附 `httpStatus`（网络失败为 `null`），绝不回显 header、正文或凭据。来源记录里的 `fallback` 不能被这个命令自动访问：主访问 `reachable` 时它是安全化的 `available` 线索，其他状态才是 `fallback-required`，仍只能由调用方根据结果和来源合同再决定是否使用。任何 probe 状态都不能代替来源的 fact boundary，更不能证明地点存在、营业、可订或安全。
+
 ## 具名本地编辑源
 
 不得使用“当地媒体”或 “local media” 作为来源记录。每个本地编辑源必须有名称、URL、覆盖地区、beat、search method、可用于什么和不能证明什么，并选择一个 subtype：

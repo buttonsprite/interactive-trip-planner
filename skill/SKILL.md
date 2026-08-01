@@ -70,9 +70,10 @@ description: Use when 用户想规划旅行、制作旅游攻略、寻找适合�
 ```bash
 node skill/scripts/recommend-taste-models.js --context <context.json>
 node skill/scripts/build-source-query-matrix.js --context <context.json>
+node skill/scripts/probe-source-access.js --context <sources.json>
 ```
 
-两个命令也接受 `--stdin`；只能选择一种输入方式。前者返回推荐、有效输入词表和未知词，未知词不会影响排序；后者返回 query matrix，必须先检查 `status`，若为 `needs-local-language-terms` 则补充词条后再查询。
+三个命令也接受 `--stdin`；每次只能选择一种输入方式。前者返回推荐、有效输入词表和未知词，未知词不会影响排序；后者返回 query matrix，必须先检查 `status`，若为 `needs-local-language-terms` 则补充词条后再查询。第三个命令只接收 `{ "sources": [{ "id": "...", "url": "...", "fallback": "..." }], "timeoutMs": ..., "concurrency": ... }`：它只接受无用户名和密码的 `http`/`https` URL，最多并发 4 个，输出安全化 URL、检查时间、HTTP 方法、`httpStatus` 和访问状态。请求时保留原 URL 的 query/fragment，只有输出会移除它们。它不自动访问 `fallback`；有 fallback 时成功结果标为 `available`，主访问非成功时标为 `fallback-required`，二者都只输出安全化 fallback URL。Probe 不输出 query、fragment、headers、正文或凭据；`fallback` 只供调用方在明确失败后人工选择后备来源。Probe 是 access-only：可访问性不能证明某个地点存在、正在营业、适合路线或安全，仍须按来源层级逐项复核。
 
 数量基线：地点池通常准备为正式路线预计使用量的 2-3 倍。每个完整旅行日约 12-18 个可地图化地点，其中只有 1-3 个主锚点；其余组成完整备选路线、吃饭休息选择、当地生活和扩展候选。抵达、离开和纯移动日按 6-10 个低强度候选计算。数量必须同时满足分类覆盖，不能搜索 18 个景点却没有餐厅、休息和当地生活；不同停留天数、主题加权和分层复核口径见 `references/source-verification.md`。
 

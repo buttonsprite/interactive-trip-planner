@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "0.1.0",
+  "id": "city-craft-rhythm",
+  "name": "城市手艺与缓慢街区",
+  "summary": "以建筑、手艺、市场和街区生活理解城市，每天控制主锚点并保留观察与休息。",
+  "sourceType": "official-playstyle",
+  "version": "0.1.0",
+  "status": "official",
+  "owner": {
+    "name": "interactive-trip-planner maintainers",
+    "type": "project-maintainers",
+    "confirmed": true
+  },
+  "license": {
+    "content": "CC-BY-4.0",
+    "attribution": "Interactive Trip Planner official model"
+  },
+  "applicability": {
+    "destinationContexts": ["dense-city", "historic-city", "design-city"],
+    "playStyles": ["architecture", "neighborhood-walk", "art", "markets"],
+    "paces": ["unhurried", "balanced"],
+    "companions": ["solo", "couple", "friends"],
+    "interests": ["craft", "art", "architecture", "markets", "local-life"]
+  },
+  "recommendation": {
+    "why": "适合用建筑、手艺与街区生活建立城市理解，并把休息和观察留在路线里。",
+    "tradeoff": "会降低跨区打卡密度，也不会为了热门榜单牺牲街区连续性。"
+  },
+  "corePrinciples": [
+    "先理解城市的材料、生产与生活空间，再决定哪些著名地点进入主线。",
+    "每天保留一至两个真正需要时间的主锚点，其余地点服务同一街区的连续体验。",
+    "市场、书店、工坊、公共空间和咖啡休息共同构成当地生活，不把它们当作景点间填充。"
+  ],
+  "antiPreferences": [
+    "只按热度串联跨区景点",
+    "用同质化网红店替代当地生产与街区语境"
+  ],
+  "dayGrammar": {
+    "mainAnchors": "1-2",
+    "preferredSequence": [
+      "morning-neighborhood",
+      "craft-or-architecture-anchor",
+      "local-lunch",
+      "market-or-public-space",
+      "rest",
+      "optional-evening"
+    ],
+    "paceOwner": "primary-model"
+  },
+  "representativeTrips": [
+    {
+      "id": "barcelona-modernisme-night-atlas",
+      "path": "../../samples/golden/barcelona-modernisme-night-atlas",
+      "sampleType": "owner-confirmed-representative-plan",
+      "representativeReason": "完整样本同时呈现建筑主锚点、市场与老城生活、预约约束、休息和克制的夜间收束。",
+      "authorization": {
+        "ownerConfirmed": true,
+        "publicReuse": true,
+        "privacyReviewed": true
+      }
+    }
+  ]
+}

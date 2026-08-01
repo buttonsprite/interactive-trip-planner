@@ -36,6 +36,10 @@ const unsupported = packageFiles
   .filter((file) => !allowedExtensions.has(path.extname(file).toLowerCase()))
   .map((file) => path.relative(packageRoot, file));
 assert.deepEqual(unsupported, [], `unsupported REDSkill files: ${unsupported.join(", ")}`);
+const forbiddenReleaseExtensions = packageFiles
+  .filter((file) => [".yaml", ".yml", ".jsonl"].includes(path.extname(file).toLowerCase()))
+  .map((file) => path.relative(packageRoot, file));
+assert.deepEqual(forbiddenReleaseExtensions, [], `forbidden REDSkill files: ${forbiddenReleaseExtensions.join(", ")}`);
 assert.ok(!packageFiles.some((file) => /(^|\/)agents\/openai\.ya?ml$/i.test(file)), "Codex-only openai.yaml must be omitted");
 assert.ok(!packageFiles.some((file) => path.basename(file) === ".DS_Store"), ".DS_Store must be omitted");
 
@@ -91,6 +95,8 @@ const publicText = packageFiles
 for (const pattern of [
   /\/Users\/cyx/i,
   /file:\/\//i,
+  /\b(?:AMAP_KEY|AMAP_SECURITY_KEY)\s*[:=]\s*\S+/i,
+  /\bAIza[0-9A-Za-z_-]{20,}\b/,
   /Airbnb/i,
   /51240589/,
   /\bAF\d{3,4}\b/,
@@ -99,7 +105,13 @@ for (const pattern of [
   assert.doesNotMatch(publicText, pattern, `privacy scan found ${pattern}`);
 }
 
-for (const testFile of ["test-redskill-package.js", "test-skill-contract.js"]) {
+for (const testFile of [
+  "test-redskill-package.js",
+  "test-hybrid-taste-models.js",
+  "test-regional-source-packs.js",
+  "test-amap-cli.js",
+  "test-skill-contract.js",
+]) {
   const result = spawnSync(process.execPath, [path.join(skillRoot, "scripts", testFile)], { encoding: "utf8" });
   assert.equal(result.status, 0, `${testFile} failed:\n${result.stdout}${result.stderr}`);
 }

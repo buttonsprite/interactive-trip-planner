@@ -1,6 +1,6 @@
 # Interactive Trip Planner
 
-一套面向对话式旅行规划的 Codex Skill：从目标与约束澄清、事实复核、每日路线设计，到可继续修改和重新安排的动态地图。
+一套面向对话式旅行规划的 Codex Skill：从目标与约束澄清、生活品味模板、地区来源检索、事实复核和每日路线设计，到可继续修改和重新安排的动态地图。
 
 仓库同时维护两个发布面：
 
@@ -36,7 +36,7 @@ npm run build:redskill
 npm test
 ```
 
-`npm test` 会验证 Core 路线与状态规则、两套地图模板、skill contract，以及 REDSkill 的格式和隐私边界。
+`npm test` 会验证 Core 路线与状态规则、两套地图模板、Hybrid Taste Model、Regional Source Pack、skill contract，以及 REDSkill 的格式和隐私边界。
 
 ## 发布
 

@@ -5,6 +5,7 @@
 ## 目录
 
 - 搜索前建立任务单
+- 选择地区来源包
 - 六层搜索顺序
 - 查询词怎么写
 - 来源矩阵
@@ -16,6 +17,14 @@
 - 停止搜索的条件
 - 给用户的表达
 - 常见错误
+
+## 选择地区来源包
+
+0.1.0 开始，完整规划先读取 references/regional-source-packs.md，并从 assets/source-packs/index.json 选择 Global Base 与一个匹配的地区包。当前只有中国大陆、日本、法语区（法国与比利时）三个地区包；其他目的地使用 Global Base、目的地官方入口与三语动态搜索，不能把尚未维护的地区写成已覆盖。
+
+每条来源先按 A/B/C 可访问性探测，再进入搜索漏斗。B/C 级入口不是默认自动成功；失败时执行记录内的 fallback。编辑发现必须使用具名本地编辑源，并声明 city-life-culture、food-drink、events-listing、local-news 或 industry-specialist subtype，不保存模糊的“当地媒体”记录。
+
+十类查询意图、三语 query、来源字段、搜索漏斗和中国大陆 amap-gui 降级见 references/regional-source-packs.md。能力探测不能替代实际搜索，地图坐标也不能替代真实路线。
 
 ## 搜索前建立任务单
 

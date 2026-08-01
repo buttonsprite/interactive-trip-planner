@@ -118,6 +118,12 @@ const nightlifeRecommendation = runtime.recommendTasteModels({
 }, { skillRoot });
 assert.equal(nightlifeRecommendation.recommendations[0].id, "food-nightlife-locality");
 
+const destinationRecommendation = runtime.recommendTasteModels({
+  destination: "Bangkok",
+  destinationContexts: ["food-city", "nightlife-city"],
+}, { skillRoot });
+assert.equal(destinationRecommendation.recommendations[0].id, "food-nightlife-locality");
+
 assert.deepEqual(runtime.recommendTasteModels({ useTasteModel: false }, { skillRoot }), {
   mode: "none",
   recommendations: [],

@@ -26,14 +26,16 @@ Core 脚本 taste-model-runtime.js 可以给结构化上下文生成 1–3 个�
 
 ## 代表行程
 
-0.1.0 的两个官方模板分别关联一个现有 golden sample。样本 brief 明确：
+0.1.0 必须包含两个官方模板，但 registry 不是只允许两个模板的封闭名单。官方模板是 required subset；贡献者可以追加 `curator-owned` 模板，使用独立 owner、license 与 semantic version，并以 `community` 状态加入 registry。通用 validator 不要求社区模板伪装成 official，也不把版本锁到 0.1.0。
+
+两个首发官方模板分别关联一个现有 golden sample：城市手艺模板关联 Tokyo，地方风味模板关联 Barcelona。Barcelona 现有数据只有 2 个 market、1 个 food 与 2 个 bar，因此它只作为市场、地方小吃和夜间短半径组合的最低代表证据，不证明完整 food-first 店型与餐次。每个样本 brief 明确：
 
 - 它是 owner 确认的代表性规划，不声明实际执行经历。
 - 为什么能代表模板。
 - 已授权公开复用并完成脱敏。
 - 复用现有 docs + data，不复制地图 HTML。
 
-模型目录只允许 JSON 与 Markdown。贡献校验、隐私扫描和运行时脚本全部位于 Core scripts。
+模型目录及其子目录只允许 JSON 与 Markdown，不允许可执行脚本、HTML、symlink，也不能出现 `coverage`、`confidence`、`maturity` 字段。每个模板都必须关联完整 docs + data 代表行程，声明代表理由、公开复用授权和隐私复核；非法 owner、缺失授权/脱敏或递归扫描发现可执行文件时拒绝贡献。贡献校验、隐私扫描和运行时脚本全部位于 Core scripts。
 
 ## 视觉边界
 

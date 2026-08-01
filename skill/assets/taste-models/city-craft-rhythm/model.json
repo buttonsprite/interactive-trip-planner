@@ -49,10 +49,10 @@
   },
   "representativeTrips": [
     {
-      "id": "barcelona-modernisme-night-atlas",
-      "path": "../../samples/golden/barcelona-modernisme-night-atlas",
+      "id": "tokyo-rail-neon-craft",
+      "path": "../../samples/golden/tokyo-rail-neon-craft",
       "sampleType": "owner-confirmed-representative-plan",
-      "representativeReason": "完整样本同时呈现建筑主锚点、市场与老城生活、预约约束、休息和克制的夜间收束。",
+      "representativeReason": "完整样本用轨道轴控制跨区，以博物馆、设计街区、书店与手艺购物、公共空间和夜景组织五天；实际数据包含 museum、shopping、neighborhood、art 与 market 类别，行程包含 design-walk、books-design 和 neighborhood 角色。",
       "authorization": {
         "ownerConfirmed": true,
         "publicReuse": true,

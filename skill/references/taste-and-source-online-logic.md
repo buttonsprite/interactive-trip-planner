@@ -4,12 +4,14 @@
 
 - 阶段一可根据目的地、玩法、节奏、同行人与兴趣推荐最多 3 个生活品味模板；用户可单选、不选或选择一主一辅。
 - 一主一辅时，主模板拥有选点与节奏；辅模板只能补一个领域或视觉倾向。
-- 官方目录目前只有“城市手艺与缓慢街区”和“地方风味与夜间半径”两个差异模板。
-- 每个模板使用 JSON + Markdown，并关联一个现有完整 golden sample；样本标为 owner 确认的代表性规划、已授权和已脱敏，不声明实际执行经历。
+- 0.1.0 必须保留“城市手艺与缓慢街区”和“地方风味与夜间半径”两个官方模板，但 registry 可追加 `curator-owned` community 模板；贡献者使用独立 owner、license 与 semantic version，不需要修改 Core validator。
+- 城市手艺模板关联 Tokyo golden sample；地方风味模板关联 Barcelona golden sample。Barcelona 的 2 个 market、1 个 food、2 个 bar 与 local-food/market/nightlife 行程角色只构成最低代表证据，不声明完整 food-first 覆盖。
+- 每个模板使用 JSON + Markdown，并关联一个现有完整 golden sample；样本标为 owner 确认的代表性规划或已完成回顾，写明代表理由、授权和脱敏，不冒充亲历。
+- 模型目录递归只允许 JSON/Markdown；非法 owner、授权/隐私声明、受禁评分字段、symlink 或任意层级可执行文件都会被 validator 拒绝。
 - 模板只提供轻量视觉偏好，不含地图 HTML。Europe direct-copy interaction v1 和既有地图状态合同未改变。
-- 阶段二按 Global Base 与目的地地区选择来源包。当前地区包为中国大陆、日本、法语区（法国与比利时）。
+- 阶段二按 Global Base 与目的地地区选择来源包。Global、中国大陆、日本、法语区（法国与比利时）是 0.1.0 required subset；registry 可追加满足同一 JSON 合同的新地区包，首发包仍有固定回归。
 - 每个来源包提供 10 类中文、英文和当地语言查询意图；来源记录包含 A/B/C 可访问性合同、检索方法、依赖、agentAccess、fallback、事实边界、复核日期与限制。
-- 中国大陆可运行 check-amap-cli.js 探测可选增强；探测不输出密钥、不执行路线，失败时返回结构化降级。
+- 中国大陆可运行 check-amap-cli.js 探测可选增强；两个凭据变量必须是 trim 后非空字符串。探测不输出密钥、不执行路线，缺变量、空字符串、全空白、CLI 缺失时均返回结构化降级。
 - 地点说明使用“为什么符合这个模板”和“为什么安排在这里”；只在真实异常时显示“需要临近复核”，不增加常驻来源 badge。
 
 ## 保持不变
@@ -20,7 +22,7 @@
 
 ## 后续而非当前能力
 
-- 更多海外地区包、城市差异包与地区 owner 维护流程。
+- 更多经过资料维护的海外地区包、城市差异包，以及社区审核与发布流程。
 - 在样本以外城市进行跨地区 blind evaluation。
 - 社区在线目录、订阅、远程训练或自动学习。
 

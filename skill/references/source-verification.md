@@ -20,7 +20,7 @@
 
 ## 选择地区来源包
 
-0.1.0 开始，完整规划先读取 references/regional-source-packs.md，并从 assets/source-packs/index.json 选择 Global Base 与一个匹配的地区包。当前只有中国大陆、日本、法语区（法国与比利时）三个地区包；其他目的地使用 Global Base、目的地官方入口与三语动态搜索，不能把尚未维护的地区写成已覆盖。
+0.1.0 开始，完整规划先读取 references/regional-source-packs.md，并从 assets/source-packs/index.json 选择 Global Base 与一个匹配的地区包。Global、中国大陆、日本、法语区（法国与比利时）是首发 required subset；registry 可以加入通过通用 validator 的新地区包。其他尚无有效 pack 的目的地使用 Global Base、目的地官方入口与三语动态搜索，不能把尚未维护的地区写成已覆盖。
 
 每条来源先按 A/B/C 可访问性探测，再进入搜索漏斗。B/C 级入口不是默认自动成功；失败时执行记录内的 fallback。编辑发现必须使用具名本地编辑源，并声明 city-life-culture、food-drink、events-listing、local-news 或 industry-specialist subtype，不保存模糊的“当地媒体”记录。
 

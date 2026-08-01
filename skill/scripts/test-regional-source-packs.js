@@ -28,22 +28,24 @@ const editorialSubtypes = new Set([
   "local-news",
   "industry-specialist",
 ]);
+const requiredInitialPackIds = ["global-base", "china-mainland", "japan", "france-belgium"];
 
 const runtime = await import("./source-pack-runtime.js");
 const registry = runtime.loadSourceRegistry({ skillRoot });
 assert.equal(registry.schemaVersion, "0.1.0");
 assert.deepEqual(new Set(registry.accessClasses), new Set(["A", "B", "C"]));
-assert.deepEqual(
-  new Set(registry.packs.map((pack) => pack.id)),
-  new Set(["global-base", "china-mainland", "japan", "france-belgium"]),
-);
+for (const packId of requiredInitialPackIds) {
+  const initialPack = registry.packs.find((entry) => entry.id === packId);
+  assert.ok(initialPack, "0.1.0 missing initial source pack " + packId);
+  assert.equal(initialPack.version, "0.1.0", packId + " initial regression version changed");
+}
 
 for (const entry of registry.packs) {
   const packPath = path.join(sourceRoot, entry.path);
   assert.ok(fs.existsSync(packPath), "missing " + entry.id);
   const pack = JSON.parse(fs.readFileSync(packPath, "utf8"));
   assert.equal(pack.id, entry.id);
-  assert.equal(pack.version, "0.1.0");
+  assert.equal(pack.version, entry.version);
   assert.deepEqual(pack.languageStrategy.required, ["zh", "en", "destination-local"]);
   assert.ok(pack.languageStrategy.localLanguageTags.length >= 1);
   assert.deepEqual(pack.queryIntents.map((intent) => intent.id), canonicalIntents);

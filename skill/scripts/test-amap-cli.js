@@ -29,6 +29,22 @@ assert.equal(missingCredentials.credentialsConfigured, false);
 assert.equal(missingCredentials.routePlanningAvailable, false);
 assert.deepEqual(missingCredentials.missingRequirements, ["AMAP_KEY", "AMAP_SECURITY_KEY"]);
 
+const emptyCredential = probeAmapCapability({
+  env: { AMAP_KEY: "", AMAP_SECURITY_KEY: "configured" },
+  commandExists: () => true,
+});
+assert.equal(emptyCredential.status, "missing-credentials");
+assert.equal(emptyCredential.credentialsConfigured, false);
+assert.deepEqual(emptyCredential.missingRequirements, ["AMAP_KEY"]);
+
+const whitespaceCredentials = probeAmapCapability({
+  env: { AMAP_KEY: "   ", AMAP_SECURITY_KEY: "\t\n" },
+  commandExists: () => true,
+});
+assert.equal(whitespaceCredentials.status, "missing-credentials");
+assert.equal(whitespaceCredentials.credentialsConfigured, false);
+assert.deepEqual(whitespaceCredentials.missingRequirements, ["AMAP_KEY", "AMAP_SECURITY_KEY"]);
+
 const capabilityReady = probeAmapCapability({ env: { ...secrets }, commandExists: () => true });
 assert.equal(capabilityReady.status, "available");
 assert.equal(capabilityReady.routePlanningAvailable, true);

@@ -50,10 +50,10 @@
   },
   "representativeTrips": [
     {
-      "id": "tokyo-rail-neon-craft",
-      "path": "../../samples/golden/tokyo-rail-neon-craft",
+      "id": "barcelona-modernisme-night-atlas",
+      "path": "../../samples/golden/barcelona-modernisme-night-atlas",
       "sampleType": "owner-confirmed-representative-plan",
-      "representativeReason": "完整样本以交通轴控制跨区，并把市场、咖啡、餐饮与夜景作为不同角色组织进高密度城市。",
+      "representativeReason": "现有样本为市场到夜间短半径提供最低代表证据：实际数据有 2 个 market、1 个 food 和 2 个 bar，正式行程包含 local-food、market 与 nightlife 角色。它证明角色与夜间收束方式，不声称已经覆盖完整的 food-first 店型与餐次。",
       "authorization": {
         "ownerConfirmed": true,
         "publicReuse": true,

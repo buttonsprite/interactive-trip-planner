@@ -18,8 +18,7 @@ assert.equal(registry.selectionContract.allowSkip, true);
 assert.equal(registry.selectionContract.hybrid.maxModels, 2);
 assert.deepEqual(registry.selectionContract.hybrid.primaryOwns, ["place-selection", "pace"]);
 assert.deepEqual(registry.selectionContract.hybrid.secondaryContributionTypes, ["domain", "visual"]);
-assert.equal(registry.models.length, 2, "0.1.0 must ship exactly two official models");
-assert.equal(new Set(registry.models.map((model) => model.id)).size, 2);
+assert.equal(new Set(registry.models.map((model) => model.id)).size, registry.models.length);
 
 const requiredModelFiles = [
   "model.json",
@@ -29,6 +28,22 @@ const requiredModelFiles = [
   "visual-references.md",
 ];
 const prohibitedModelKeys = new Set(["coverage", "confidence", "maturity"]);
+const allowedRepresentativeSampleTypes = new Set(["owner-confirmed-representative-plan", "completed-trip-review"]);
+const requiredOfficialModels = new Map([
+  ["city-craft-rhythm", {
+    representativeTripId: "tokyo-rail-neon-craft",
+    requiredCategories: ["market", "museum", "shopping", "neighborhood", "art"],
+    requiredRouteRoles: ["design-walk", "neighborhood", "books-design"],
+  }],
+  ["food-nightlife-locality", {
+    representativeTripId: "barcelona-modernisme-night-atlas",
+    requiredCategories: ["market", "food", "bar"],
+    requiredRouteRoles: ["local-food", "market", "nightlife"],
+  }],
+]);
+for (const modelId of requiredOfficialModels.keys()) {
+  assert.ok(registry.models.some((entry) => entry.id === modelId), "0.1.0 missing official model " + modelId);
+}
 
 function walkObject(value, visit) {
   if (Array.isArray(value)) return value.forEach((item) => walkObject(item, visit));
@@ -40,8 +55,6 @@ function walkObject(value, visit) {
 }
 
 for (const entry of registry.models) {
-  assert.equal(entry.status, "official");
-  assert.equal(entry.version, "0.1.0");
   const directory = path.join(modelRoot, entry.path);
   for (const file of requiredModelFiles) {
     assert.ok(fs.existsSync(path.join(directory, file)), entry.id + " missing " + file);
@@ -54,17 +67,14 @@ for (const entry of registry.models) {
 
   const model = JSON.parse(fs.readFileSync(path.join(directory, "model.json"), "utf8"));
   assert.equal(model.id, entry.id);
-  assert.equal(model.sourceType, "official-playstyle");
-  assert.equal(model.owner.type, "project-maintainers");
   assert.equal(model.owner.confirmed, true);
-  assert.equal(model.license.content, "CC-BY-4.0");
   assert.ok(model.representativeTrips.length >= 1, entry.id + " needs a representative trip");
   assert.ok(model.corePrinciples.length >= 3);
   assert.ok(model.antiPreferences.length >= 2);
   walkObject(model, (key) => assert.ok(!prohibitedModelKeys.has(key), entry.id + " uses forbidden " + key));
 
   for (const trip of model.representativeTrips) {
-    assert.equal(trip.sampleType, "owner-confirmed-representative-plan");
+    assert.ok(allowedRepresentativeSampleTypes.has(trip.sampleType));
     assert.equal(trip.authorization.ownerConfirmed, true);
     assert.equal(trip.authorization.publicReuse, true);
     assert.equal(trip.authorization.privacyReviewed, true);
@@ -81,10 +91,7 @@ for (const entry of registry.models) {
       assert.ok(fs.existsSync(path.join(sampleRoot, required)), entry.id + " sample missing " + required);
     }
     const brief = fs.readFileSync(path.join(sampleRoot, "docs", "sample-brief.md"), "utf8");
-    assert.match(brief, /owner 确认的代表性规划/);
-    assert.match(brief, /授权/);
-    assert.match(brief, /脱敏/);
-    assert.doesNotMatch(brief, /已完成回顾|亲历/);
+    assert.match(brief, /\S/);
   }
 
   const visual = JSON.parse(fs.readFileSync(path.join(directory, "visual-profile.json"), "utf8"));
@@ -94,6 +101,34 @@ for (const entry of registry.models) {
   }
   assert.equal(visual.moodboard, "visual-references.md");
   assert.doesNotMatch(JSON.stringify(visual), /<html|\.html\b/i);
+
+  const officialExpectation = requiredOfficialModels.get(entry.id);
+  if (officialExpectation) {
+    assert.equal(entry.status, "official");
+    assert.equal(entry.version, "0.1.0");
+    assert.equal(model.sourceType, "official-playstyle");
+    assert.equal(model.owner.type, "project-maintainers");
+    assert.equal(model.license.content, "CC-BY-4.0");
+    assert.equal(model.representativeTrips[0].id, officialExpectation.representativeTripId);
+    assert.equal(model.representativeTrips[0].sampleType, "owner-confirmed-representative-plan");
+    const sampleRoot = path.resolve(directory, model.representativeTrips[0].path);
+    const brief = fs.readFileSync(path.join(sampleRoot, "docs", "sample-brief.md"), "utf8");
+    assert.match(brief, /owner 确认的代表性规划/);
+    assert.match(brief, /授权/);
+    assert.match(brief, /脱敏/);
+    assert.doesNotMatch(brief, /已完成回顾|亲历/);
+    const poisDocument = JSON.parse(fs.readFileSync(path.join(sampleRoot, "data", "pois.json"), "utf8"));
+    const pois = Array.isArray(poisDocument) ? poisDocument : poisDocument.pois;
+    const categories = new Set(pois.map((poi) => poi.category));
+    for (const category of officialExpectation.requiredCategories) {
+      assert.ok(categories.has(category), entry.id + " representative sample missing actual category " + category);
+    }
+    const itinerary = JSON.parse(fs.readFileSync(path.join(sampleRoot, "data", "itinerary.json"), "utf8"));
+    const routeRoles = new Set(itinerary.flatMap((day) => day.routeStops.map((stop) => stop.role)));
+    for (const role of officialExpectation.requiredRouteRoles) {
+      assert.ok(routeRoles.has(role), entry.id + " representative itinerary missing actual role " + role);
+    }
+  }
 }
 
 const cityRecommendation = runtime.recommendTasteModels({
@@ -150,5 +185,5 @@ assert.throws(() => runtime.composeTasteSelection({
 
 const validator = spawnSync(process.execPath, [path.join(scriptDir, "validate-taste-models.js")], { encoding: "utf8" });
 assert.equal(validator.status, 0, validator.stdout + validator.stderr);
-assert.match(validator.stdout, /2 official taste models validated/);
+assert.match(validator.stdout, /2 taste models validated/);
 console.log("Hybrid Taste Model contract passed");

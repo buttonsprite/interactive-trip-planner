@@ -23,7 +23,7 @@ export function probeAmapCapability({
   const cliAvailable = Boolean(commandExists("amap-gui"));
   const requiredCredentialNames = ["AMAP_KEY", "AMAP_SECURITY_KEY"];
   const missingRequirements = requiredCredentialNames.filter(
-    (name) => !Object.prototype.hasOwnProperty.call(env, name),
+    (name) => typeof env[name] !== "string" || !env[name].trim(),
   );
   const credentialsConfigured = missingRequirements.length === 0;
   const status = !cliAvailable
@@ -43,7 +43,7 @@ export function probeAmapCapability({
       "使用高德公开网页或 URI 入口人工复核地点和移动关系。",
       "使用其他可访问的公开地图搜索，并明确标记未完成 amap-gui 路网复核。",
     ],
-    factBoundary: "能力探测只确认命令与凭据名称是否存在，不执行搜索或路线，也不证明任何路线结果。",
+    factBoundary: "能力探测只确认命令存在且所需凭据变量为非空字符串，不输出凭据值，不执行搜索或路线，也不证明任何路线结果。",
   };
 }
 

@@ -7,9 +7,7 @@ import { fileURLToPath } from "node:url";
 import { loadSourceRegistry } from "./source-pack-runtime.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const skillRoot = path.resolve(scriptDir, "..");
-const sourceRoot = path.join(skillRoot, "assets", "source-packs");
-const requiredPackIds = ["global-base", "china-mainland", "japan", "france-belgium"];
+const defaultSkillRoot = path.resolve(scriptDir, "..");
 const requiredIntents = [
   "date-bound-events",
   "local-food-structure",
@@ -39,28 +37,97 @@ function walk(value, visit) {
   }
 }
 
-const registry = loadSourceRegistry({ skillRoot });
-assert.deepEqual(registry.packs.map((entry) => entry.id), requiredPackIds);
-for (const entry of registry.packs) {
-  const pack = entry.pack;
-  assert.equal(pack.id, entry.id);
-  assert.equal(pack.version, "0.1.0");
-  assert.deepEqual(pack.languageStrategy.required, ["zh", "en", "destination-local"]);
-  assert.deepEqual(pack.queryIntents.map((intent) => intent.id), requiredIntents);
-  const roles = new Set(pack.sources.flatMap((source) => source.roles));
-  for (const role of requiredRoles) assert.ok(roles.has(role), pack.id + " missing " + role);
-  assert.ok(pack.sources.some((source) => source.kind === "local-editorial"), pack.id + " needs named editorial");
-  for (const source of pack.sources) {
-    assert.ok(registry.accessClasses.includes(source.access.class));
-    assert.ok(source.access.searchMethod && source.access.agentAccess);
-    assert.ok(source.access.fallback.length);
-    assert.ok(source.factBoundary.canSupport.length && source.factBoundary.cannotProve.length);
-    assert.match(source.lastVerified, /^\d{4}-\d{2}-\d{2}$/);
-    assert.ok(source.limitations.length);
-    assert.ok(!/^(当地媒体|local media)$/i.test(source.name));
-  }
-  walk(pack, (key) => assert.ok(!prohibitedKeys.has(key), pack.id + " uses prohibited key " + key));
-  const publicText = fs.readFileSync(path.join(sourceRoot, entry.path), "utf8");
-  for (const pattern of sensitivePatterns) assert.doesNotMatch(publicText, pattern, pack.id + " privacy scan found " + pattern);
+function assertNonEmptyString(value, label) {
+  assert.ok(typeof value === "string" && value.trim(), label + " must be a non-empty string");
 }
-console.log(registry.packs.length + " regional source packs validated");
+
+function assertSemanticVersion(value, label) {
+  assertNonEmptyString(value, label);
+  assert.match(value, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, label + " must be a semantic version");
+}
+
+function resolveInside(root, requestedPath, label) {
+  assertNonEmptyString(requestedPath, label);
+  const resolvedRoot = path.resolve(root);
+  const resolved = path.resolve(resolvedRoot, requestedPath);
+  assert.ok(resolved.startsWith(resolvedRoot + path.sep), label + " must stay inside " + resolvedRoot);
+  return resolved;
+}
+
+export function validateSourcePacks({ skillRoot = defaultSkillRoot } = {}) {
+  const registry = loadSourceRegistry({ skillRoot });
+  const sourceRoot = path.join(skillRoot, "assets", "source-packs");
+  assert.equal(registry.schemaVersion, "0.1.0");
+  assert.deepEqual(new Set(registry.accessClasses), new Set(["A", "B", "C"]));
+  assert.ok(Array.isArray(registry.packs) && registry.packs.length >= 1, "source registry needs at least one pack");
+  assert.equal(new Set(registry.packs.map((entry) => entry.id)).size, registry.packs.length, "source pack ids must be unique");
+  const editorialSubtypes = new Set(registry.editorialSubtypes);
+  assert.deepEqual(editorialSubtypes, new Set([
+    "city-life-culture",
+    "food-drink",
+    "events-listing",
+    "local-news",
+    "industry-specialist",
+  ]));
+
+  for (const entry of registry.packs) {
+    assertNonEmptyString(entry.id, "registry source pack id");
+    assertSemanticVersion(entry.version, entry.id + " registry version");
+    assert.ok(Array.isArray(entry.countryCodes) && entry.countryCodes.length >= 1, entry.id + " needs countryCodes");
+    const packPath = resolveInside(sourceRoot, entry.path, entry.id + " registry path");
+    assert.ok(fs.statSync(packPath).isFile(), entry.id + " path must be a file");
+    assert.equal(path.extname(packPath), ".json", entry.id + " pack must be JSON");
+    const pack = entry.pack;
+    assert.equal(pack.schemaVersion, "0.1.0", entry.id + " pack schemaVersion must be 0.1.0");
+    assert.equal(pack.id, entry.id);
+    assert.equal(pack.version, entry.version, entry.id + " registry/pack version mismatch");
+    assertSemanticVersion(pack.version, entry.id + " pack version");
+    assert.deepEqual(pack.languageStrategy.required, ["zh", "en", "destination-local"]);
+    assert.ok(Array.isArray(pack.languageStrategy.localLanguageTags) && pack.languageStrategy.localLanguageTags.length >= 1);
+    assert.deepEqual(pack.queryIntents.map((intent) => intent.id), requiredIntents);
+    for (const intent of pack.queryIntents) {
+      for (const language of ["zh", "en", "local"]) {
+        assert.ok(Array.isArray(intent.terms[language]) && intent.terms[language].length >= 1, pack.id + "/" + intent.id + " missing " + language + " terms");
+        assertNonEmptyString(intent.queryTemplates[language], pack.id + "/" + intent.id + " " + language + " query template");
+      }
+      assert.ok(Array.isArray(intent.sourceRoles) && intent.sourceRoles.length >= 1, pack.id + "/" + intent.id + " needs sourceRoles");
+    }
+
+    assert.ok(Array.isArray(pack.sources) && pack.sources.length >= 3, pack.id + " needs official, context and spatial paths");
+    const roles = new Set(pack.sources.flatMap((source) => source.roles));
+    for (const role of requiredRoles) assert.ok(roles.has(role), pack.id + " missing " + role);
+    assert.ok(pack.sources.some((source) => source.kind === "local-editorial"), pack.id + " needs named editorial");
+    for (const source of pack.sources) {
+      assertNonEmptyString(source.id, pack.id + " source id");
+      assertNonEmptyString(source.name, pack.id + "/" + source.id + " source name");
+      assert.ok(!/^(当地媒体|local media)$/i.test(source.name), pack.id + "/" + source.id + " must use a named source");
+      assert.ok(registry.accessClasses.includes(source.access.class), pack.id + "/" + source.id + " invalid access class");
+      assertNonEmptyString(source.access.searchMethod, pack.id + "/" + source.id + " searchMethod");
+      assert.equal(typeof source.access.loginRequired, "boolean", pack.id + "/" + source.id + " loginRequired must be boolean");
+      assert.ok(Object.prototype.hasOwnProperty.call(source.access, "toolDependency"), pack.id + "/" + source.id + " missing toolDependency");
+      assertNonEmptyString(source.access.agentAccess, pack.id + "/" + source.id + " agentAccess");
+      assert.ok(Array.isArray(source.access.fallback) && source.access.fallback.length >= 1, pack.id + "/" + source.id + " needs fallback");
+      assert.ok(Array.isArray(source.factBoundary.canSupport) && source.factBoundary.canSupport.length >= 1, pack.id + "/" + source.id + " needs canSupport");
+      assert.ok(Array.isArray(source.factBoundary.cannotProve) && source.factBoundary.cannotProve.length >= 1, pack.id + "/" + source.id + " needs cannotProve");
+      assert.match(source.lastVerified, /^\d{4}-\d{2}-\d{2}$/, pack.id + "/" + source.id + " invalid lastVerified");
+      assert.ok(Array.isArray(source.limitations) && source.limitations.length >= 1, pack.id + "/" + source.id + " needs limitations");
+      if (source.kind === "local-editorial") {
+        assert.ok(editorialSubtypes.has(source.subtype), pack.id + "/" + source.id + " invalid editorial subtype");
+        assert.ok(Array.isArray(source.coverageRegions) && source.coverageRegions.length >= 1, pack.id + "/" + source.id + " needs coverageRegions");
+        assert.ok(Array.isArray(source.beats) && source.beats.length >= 1, pack.id + "/" + source.id + " needs beats");
+      }
+      if (source.access.class !== "A") assert.notEqual(source.access.agentAccess, "default-automatic");
+    }
+    walk(pack, (key) => assert.ok(!prohibitedKeys.has(key), pack.id + " uses prohibited key " + key));
+    const publicText = fs.readFileSync(packPath, "utf8");
+    for (const pattern of sensitivePatterns) assert.doesNotMatch(publicText, pattern, pack.id + " privacy scan found " + pattern);
+  }
+
+  return { packCount: registry.packs.length, registry };
+}
+
+const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isDirectRun) {
+  const result = validateSourcePacks();
+  console.log(result.packCount + " regional source packs validated");
+}

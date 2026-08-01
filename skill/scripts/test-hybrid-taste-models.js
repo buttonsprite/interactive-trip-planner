@@ -143,6 +143,31 @@ assert.ok(cityRecommendation.recommendations.length >= 1 && cityRecommendation.r
 assert.equal(cityRecommendation.recommendations[0].id, "city-craft-rhythm");
 assert.match(cityRecommendation.recommendations[0].why, /\S/);
 assert.match(cityRecommendation.recommendations[0].tradeoff, /\S/);
+assert.deepEqual(cityRecommendation.unknownTerms, {
+  destinationContexts: [],
+  playStyles: [],
+  paces: [],
+  companions: [],
+  interests: [],
+});
+assert.deepEqual(cityRecommendation.inputVocabulary, {
+  destinationContexts: ["dense-city", "historic-city", "design-city", "food-city", "nightlife-city", "market-city"],
+  playStyles: ["architecture", "neighborhood-walk", "art", "markets", "food", "nightlife", "bar-hopping"],
+  paces: ["unhurried", "balanced", "late-and-lively"],
+  companions: ["solo", "couple", "friends"],
+  interests: ["craft", "art", "architecture", "markets", "local-life", "local-food", "cocktails", "wine", "nightlife"],
+});
+
+const unknownTermRecommendation = runtime.recommendTasteModels({
+  interests: ["street-life"],
+}, { skillRoot });
+assert.deepEqual(unknownTermRecommendation.unknownTerms, {
+  destinationContexts: [],
+  playStyles: [],
+  paces: [],
+  companions: [],
+  interests: ["street-life"],
+});
 
 const nightlifeRecommendation = runtime.recommendTasteModels({
   destination: "Osaka",

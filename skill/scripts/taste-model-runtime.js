@@ -22,21 +22,49 @@ export function loadTasteRegistry({ skillRoot = defaultSkillRoot } = {}) {
 
 function normalizeTerms(values) {
   return new Set((Array.isArray(values) ? values : [values])
-    .filter(Boolean)
-    .map((value) => String(value).trim().toLowerCase()));
+    .map((value) => String(value || "").trim().toLowerCase())
+    .filter(Boolean));
 }
 
-function matchScore(model, context) {
+const vocabularyFields = [
+  ["destinationContexts", "destinationContexts"],
+  ["playStyles", "playStyles"],
+  ["paces", "pace"],
+  ["companions", "companions"],
+  ["interests", "interests"],
+];
+
+export function getTasteInputVocabulary({ skillRoot = defaultSkillRoot } = {}) {
+  const registry = loadTasteRegistry({ skillRoot });
+  return Object.fromEntries(vocabularyFields.map(([vocabularyField]) => [
+    vocabularyField,
+    [...new Set(registry.models.flatMap((entry) => entry.model.applicability[vocabularyField]))],
+  ]));
+}
+
+function contextTerms(context, field) {
+  return normalizeTerms(context[field]);
+}
+
+function unknownTerms(context, vocabulary) {
+  return Object.fromEntries(vocabularyFields.map(([vocabularyField, contextField]) => {
+    const known = new Set(vocabulary[vocabularyField].map((value) => value.toLowerCase()));
+    return [vocabularyField, [...contextTerms(context, contextField)].filter((value) => !known.has(value))];
+  }));
+}
+
+function matchScore(model, context, vocabulary) {
   const fields = [
-    ["destinationContexts", context.destinationContexts],
-    ["playStyles", context.playStyles],
-    ["paces", context.pace],
-    ["companions", context.companions],
-    ["interests", context.interests],
+    ["destinationContexts", "destinationContexts"],
+    ["playStyles", "playStyles"],
+    ["paces", "pace"],
+    ["companions", "companions"],
+    ["interests", "interests"],
   ];
-  return fields.reduce((total, [field, values]) => {
-    const wanted = normalizeTerms(values);
-    return total + model.applicability[field].filter((value) => wanted.has(value.toLowerCase())).length;
+  return fields.reduce((total, [field, contextField]) => {
+    const vocabularyTerms = new Set(vocabulary[field].map((value) => value.toLowerCase()));
+    const wanted = [...contextTerms(context, contextField)].filter((value) => vocabularyTerms.has(value));
+    return total + model.applicability[field].filter((value) => wanted.includes(value.toLowerCase())).length;
   }, 0);
 }
 
@@ -49,8 +77,9 @@ export function recommendTasteModels(context = {}, { skillRoot = defaultSkillRoo
     };
   }
   const registry = loadTasteRegistry({ skillRoot });
+  const inputVocabulary = getTasteInputVocabulary({ skillRoot });
   const ranked = registry.models
-    .map((entry, index) => ({ entry, index, score: matchScore(entry.model, context) }))
+    .map((entry, index) => ({ entry, index, score: matchScore(entry.model, context, inputVocabulary) }))
     .sort((left, right) => right.score - left.score || left.index - right.index);
   const matching = ranked.filter((item) => item.score > 0);
   const selected = (matching.length ? matching : ranked.slice(0, 1))
@@ -64,6 +93,8 @@ export function recommendTasteModels(context = {}, { skillRoot = defaultSkillRoo
       why: entry.model.recommendation.why,
       tradeoff: entry.model.recommendation.tradeoff,
     })),
+    unknownTerms: unknownTerms(context, inputVocabulary),
+    inputVocabulary,
   };
 }
 

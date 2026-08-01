@@ -22,7 +22,7 @@
 - 不提供无限比例调参，不允许两套模板同时控制路线骨架。
 - 用户本次选择只覆盖本次旅行，不自动改写公开模板。
 
-Core 脚本 taste-model-runtime.js 可以给结构化上下文生成 1–3 个候选，也可以校验单选与混合边界。Agent 仍需用自然语言解释推荐，不向旅行者展示内部结构。
+Core 脚本 taste-model-runtime.js 可以给结构化上下文生成 1–3 个候选，也可以校验单选与混合边界。`recommend-taste-models.js` 是面向 Agent 的 JSON CLI：以 `--context <file>` 或 `--stdin` 读取一次 JSON，输出推荐、输入词表和按字段归类的未知输入词；未知词不会参与排序。Agent 仍需用自然语言解释推荐，不向旅行者展示内部结构。
 
 ## 代表行程
 

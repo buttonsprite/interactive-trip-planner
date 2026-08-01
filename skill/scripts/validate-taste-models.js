@@ -96,6 +96,7 @@ export function validateTasteModels({ skillRoot = defaultSkillRoot } = {}) {
     const model = entry.model;
     assert.equal(model.schemaVersion, "0.1.0", entry.id + " model schemaVersion must be 0.1.0");
     assert.equal(model.id, entry.id);
+    assertNonEmptyString(model.name, entry.id + " name");
     assert.equal(model.status, entry.status, entry.id + " registry/model status mismatch");
     assert.equal(model.version, entry.version, entry.id + " registry/model version mismatch");
     assertSemanticVersion(model.version, entry.id + " model version");
@@ -114,6 +115,13 @@ export function validateTasteModels({ skillRoot = defaultSkillRoot } = {}) {
     }
     assertNonEmptyString(model.license?.content, entry.id + " license.content");
     assertNonEmptyString(model.license?.attribution, entry.id + " license.attribution");
+    for (const field of ["destinationContexts", "playStyles", "paces", "companions", "interests"]) {
+      const values = model.applicability?.[field];
+      assert.ok(Array.isArray(values) && values.length >= 1, entry.id + " applicability." + field + " must be a non-empty array");
+      for (const value of values) assertNonEmptyString(value, entry.id + " applicability." + field + " item");
+    }
+    assertNonEmptyString(model.recommendation?.why, entry.id + " recommendation.why");
+    assertNonEmptyString(model.recommendation?.tradeoff, entry.id + " recommendation.tradeoff");
     assert.ok(Array.isArray(model.corePrinciples) && model.corePrinciples.length >= 3, entry.id + " needs at least three core principles");
     assert.ok(Array.isArray(model.antiPreferences) && model.antiPreferences.length >= 2, entry.id + " needs at least two anti-preferences");
     assert.ok(Array.isArray(model.representativeTrips) && model.representativeTrips.length >= 1, entry.id + " needs a representative trip");
@@ -150,7 +158,13 @@ export function validateTasteModels({ skillRoot = defaultSkillRoot } = {}) {
       }
     }
 
+    const sourcePolicy = JSON.parse(fs.readFileSync(path.join(directory, "source-policy.json"), "utf8"));
+    assert.equal(sourcePolicy.schemaVersion, "0.1.0", entry.id + " source-policy schemaVersion must be 0.1.0");
+    assert.equal(sourcePolicy.modelId, entry.id, entry.id + " source-policy modelId must match model id");
+
     const visual = JSON.parse(fs.readFileSync(path.join(directory, "visual-profile.json"), "utf8"));
+    assert.equal(visual.schemaVersion, "0.1.0", entry.id + " visual profile schemaVersion must be 0.1.0");
+    assert.equal(visual.modelId, entry.id, entry.id + " visual profile modelId must match model id");
     assert.ok(Array.isArray(visual.keywords) && visual.keywords.length >= 3 && visual.keywords.length <= 5, entry.id + " needs 3-5 visual keywords");
     for (const field of ["informationDensity", "tone", "imageStrategy", "marker", "color", "material", "moodboard"]) {
       assertNonEmptyString(visual[field], entry.id + " visual profile " + field);

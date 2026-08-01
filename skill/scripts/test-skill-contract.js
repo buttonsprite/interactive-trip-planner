@@ -119,9 +119,15 @@ assert.match(sourcePackReference, /不得使用[^\n]*(当地媒体|local media)/
 assert.match(tasteSourceOnlineLogic, /当前已实现/);
 assert.match(tasteSourceOnlineLogic, /0\.1\.0/);
 assert.match(tasteSourceOnlineLogic, /后续/);
+assert.match(tasteSourceOnlineLogic, /developer-preview contract slice/);
+assert.match(tasteSourceOnlineLogic, /PRD V1 public acceptance/);
+assert.match(tasteSourceOnlineLogic, /8 个海外 Regional Source Pack/);
+assert.match(tasteSourceOnlineLogic, /每个 taste model 至少 3 个 unseen cities/);
 assert.doesNotMatch(tasteSourceOnlineLogic, /8\+[^\n]*已实现|跨 3 城[^\n]*已完成/);
 
 if (repositoryReadme !== null) {
+  assert.match(repositoryReadme, /developer-preview contract slice/);
+  assert.match(repositoryReadme, /PRD V1 public acceptance/);
   for (const command of [
     "recommend-taste-models.js",
     "build-source-query-matrix.js",

@@ -1,7 +1,7 @@
 # First-Visit Balance and Discovery Runtime Design
 
-**Date:** 2026-08-01  
-**Status:** Approved direction, pending implementation  
+**Date:** 2026-08-01
+**Status:** Approved direction, pending implementation
 **Target:** `interactive-trip-planner` 0.1.0 feature branch
 
 ## Goal

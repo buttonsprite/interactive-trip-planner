@@ -2,6 +2,7 @@
   "schemaVersion": "0.1.0",
   "languageTag": "es",
   "countryCodes": ["ES"],
+  "defaultCountryCodes": ["ES"],
   "terms": {
     "events-calendar": "agenda cultural",
     "local-dishes": "platos locales",

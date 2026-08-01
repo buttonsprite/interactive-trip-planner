@@ -9,6 +9,8 @@ description: Use when 用户想规划旅行、制作旅游攻略、寻找适合�
 
 核心原则：先理解用户想怎样旅行，再寻找地点和规划路线；地图是主要使用界面，交付不是终点。所有给旅行者看的内容使用自然语言，并尽量跟随用户当前主要对话语言；内部数据和开发术语不出现在聊天和地图界面。
 
+0.1.0 是尚未发布的 developer-preview contract slice，只表示本 Skill 当前实现的可验证子集，不等于 PRD V1 public acceptance。在 8 个海外 Regional Source Pack、每个 taste model 至少 3 个 unseen cities 评估与更强 representative evidence 全部满足前，不得宣称 public V1 ready。
+
 ## 开始时向用户说明
 
 完整规划开始前，用 2-3 句话说明流程，不直接进入酒店清单、景点清单或地图制作：
@@ -73,7 +75,7 @@ node skill/scripts/build-source-query-matrix.js --context <context.json>
 node skill/scripts/probe-source-access.js --context <sources.json>
 ```
 
-三个命令也接受 `--stdin`；每次只能选择一种输入方式。前者返回推荐、有效输入词表和未知词，未知词不会影响排序；后者返回 query matrix，必须先检查 `status`，若为 `needs-local-language-terms` 则补充词条后再查询。第三个命令只接收 `{ "sources": [{ "id": "...", "url": "...", "fallback": "..." }], "timeoutMs": ..., "concurrency": ... }`：它只接受无用户名和密码的 `http`/`https` URL，最多并发 4 个，输出安全化 URL、检查时间、HTTP 方法、`httpStatus` 和访问状态。请求时保留原 URL 的 query/fragment，只有输出会移除它们。它不自动访问 `fallback`；有 fallback 时成功结果标为 `available`，主访问非成功时标为 `fallback-required`，二者都只输出安全化 fallback URL。Probe 不输出 query、fragment、headers、正文或凭据；`fallback` 只供调用方在明确失败后人工选择后备来源。Probe 是 access-only：可访问性不能证明某个地点存在、正在营业、适合路线或安全，仍须按来源层级逐项复核。
+三个命令也接受 `--stdin`；每次只能选择一种输入方式。Taste 推荐只在至少一个已知词命中模板时输出 recommendations；否则返回 `needs-clarification`、空 recommendations、未知词与输入词表。Query matrix 必须提供有效 `countryCode`、`destination` 与 `yearMonth`；缺失时返回 `needs-context` 和空 intents，错误类型则拒绝。输出前会清理多余 whitespace，且 `ready` / `needs-local-language-terms` 的任何 query 都不含占位符。第三个命令接收 `{ "sources": [...] }`：每个 source 必须有安全 `id` 和无内嵌凭据的 `http`/`https` `url`，可使用顶层 URL `fallback`，也可直接传入正式 pack 中带 `access.fallback` 字符串数组的 source。Probe 不自动访问 fallback；顶层 URL 只输出移除 query/fragment 的安全 URL，`access.fallback` 只输出 availability 与 option count，不回显任意文本。Probe 不输出 headers、正文或凭据；它是 access-only，不能证明地点存在、正在营业、适合路线或安全。
 
 数量基线：地点池通常准备为正式路线预计使用量的 2-3 倍。每个完整旅行日约 12-18 个可地图化地点，其中只有 1-3 个主锚点；其余组成完整备选路线、吃饭休息选择、当地生活和扩展候选。抵达、离开和纯移动日按 6-10 个低强度候选计算。数量必须同时满足分类覆盖，不能搜索 18 个景点却没有餐厅、休息和当地生活；不同停留天数、主题加权和分层复核口径见 `references/source-verification.md`。
 

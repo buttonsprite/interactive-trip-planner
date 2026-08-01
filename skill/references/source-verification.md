@@ -28,9 +28,9 @@
 
 ### 安全来源访问探测
 
-当需要先判断某个已选来源当前是否可访问时，可把**明确请求的**来源交给 `node skill/scripts/probe-source-access.js --context <sources.json>`，或使用 `--stdin`。输入是 `{ "sources": [{ "id": "...", "url": "...", "fallback": "..." }], "timeoutMs": ..., "concurrency": ... }`；只允许无内嵌用户名或密码的 `http`/`https` URL，`concurrency` 最大为 4。请求保留原 URL 的 query/fragment，输出才会移除它们，避免展示脱敏改变实际访问的资源。
+当需要先判断某个已选来源当前是否可访问时，可把**明确请求的**来源交给 `node skill/scripts/probe-source-access.js --context <sources.json>`，或使用 `--stdin`。输入是 `{ "sources": [{ "id": "...", "url": "...", "fallback": "..." }], "timeoutMs": ..., "concurrency": ... }`，也可直接传入已验证的 pack source（其 fallback 在 `source.access.fallback` 字符串数组中）；只允许无内嵌用户名或密码的 `http`/`https` URL，`concurrency` 最大为 4。请求保留原 URL 的 query/fragment，输出才会移除它们，避免展示脱敏改变实际访问的资源。
 
-Probe 先以不跟随跳转的 HEAD 检查；只有 405/501 才以 `Range: bytes=0-1023` 的 GET 降级，且不会读取响应正文。结果只描述 `reachable`、`redirected`、`rate-limited`、`access-blocked`、`server-error`、`not-found` 或 `network-error` 等访问状态，并给出 `httpStatus`（网络失败为 `null`）；不输出 headers、cookie、authorization、正文、凭据或原始 query。`fallback` 只是调用方后续选择的线索，Probe 不会自动访问它；主访问为 `reachable` 时给出安全化的 `available` 线索，其他状态才标记安全化 URL 为 `fallback-required`。
+Probe 先以不跟随跳转的 HEAD 检查；只有 405/501 才以 `Range: bytes=0-1023` 的 GET 降级，且不会读取响应正文。结果只描述 `reachable`、`redirected`、`rate-limited`、`access-blocked`、`server-error`、`not-found` 或 `network-error` 等访问状态，并给出 `httpStatus`（网络失败为 `null`）；401/407 与其他非 404/429 的 4xx 归为 `access-blocked`，只有 5xx 归为 `server-error`。不输出 headers、cookie、authorization、正文、凭据或原始 query。顶层 URL fallback 仅输出安全化 URL；`source.access.fallback` 只输出 availability 与 option count，不回显原文。Probe 不会自动访问任何 fallback；主访问为 `reachable` 时标记 `available`，其他状态标记 `fallback-required`。
 
 这是 access-only 信号，不能证明 POI、场馆或餐厅真实存在、仍在营业、可订、适合用户、路线可行或安全。访问成功后仍必须回到官网、经营方、主办方、票务或交通方复核具体事实；失败也不等于来源内容错误。
 

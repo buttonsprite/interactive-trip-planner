@@ -15,9 +15,9 @@ Regional Source Pack 描述地区信息生态和检索方法。一次任务只�
 
 Global Base 的当地语言 query 使用 `{local:<token>}`，由 `assets/source-packs/local-language-lexicons/` 内置的轻量词库解析。它们只提供稳定检索词，不包含来源、访问性或地区信息生态，因此不是 Regional Source Pack，也不表示一个国家已经有地区包覆盖。
 
-调用 `buildQueryMatrix` 时以 `localLanguageTags` 请求变体；调用方可用 `localLanguageTerms` 按 language tag 覆盖或补齐词条。每个 intent 只输出词条完整的 `{ languageTag, query }` 变体；缺词时省略该变体，并返回 `status: needs-local-language-terms` 与按语言、intent、token 列出的 `missingLocalTerms`。完整时状态为 `ready`。已有地区包不依赖词库：其当地语言模板仍按该包的首个当地语言 tag 输出。
+调用 `buildQueryMatrix` 时，runtime 先按 `countryCode` 选择 lexicon 中的默认语言，再把显式 `localLanguageTags` 按顺序追加并去重。Spain 默认是 `es`；显式请求 `ca` 时结果为 `es`、`ca`。内置 lexicon 只在其 `countryCodes` 内生效，因此 Brazil 显式请求 `es` 也不会复用 Spain 词条；调用方仍可用 `localLanguageTerms` 提供自己的 `es` 词条。每个 intent 只输出词条完整的 `{ languageTag, query }` 变体；缺词时省略该变体，并返回 `status: needs-local-language-terms` 与按语言、intent、token 列出的 `missingLocalTerms`。完整时状态为 `ready`。已有地区包不依赖词库：其当地语言模板仍按该包的首个当地语言 tag 输出。
 
-`build-source-query-matrix.js` 是面向 Agent 的 JSON CLI：以 `--context <file>` 或 `--stdin` 读取一次 JSON，并原样输出 runtime 的 query matrix。调用方必须检查 `status`；`needs-local-language-terms` 时先补全 `localLanguageTerms`，不能把占位符当作当地语言查询。
+`build-source-query-matrix.js` 是面向 Agent 的 JSON CLI：以 `--context <file>` 或 `--stdin` 读取一次 JSON，并原样输出 runtime 的 query matrix。`countryCode`、`destination` 和 `yearMonth` 是必需 context；缺失时返回 `status: needs-context`、`missingContextFields` 和空 intents，错误类型或 country code 格式则拒绝。`tasteTerms` 可选且默认为空；输出 query 会压缩多余 whitespace。调用方必须检查 `status`；`needs-local-language-terms` 时先补全 `localLanguageTerms`。`ready` 和 `needs-local-language-terms` 输出的所有 query 都不会包含 `{...}`、`[目的地]`、`[旅行月份 年份]` 或 `[本次偏好词]`。
 
 ## 可访问性
 
@@ -27,7 +27,7 @@ Global Base 的当地语言 query 使用 `{local:<token>}`，由 `assets/source-
 
 等级只描述可访问性，不评价内容质量。每条来源仍必须记录 search method、登录或工具依赖、agentAccess、fallback、fact boundary、lastVerified 和 limitations。
 
-对已明确选择的 URL，可运行 `probe-source-access.js` 取得有界的 access-only 信号：它只检查 `http`/`https`、最多 4 并发、HEAD 不跟随 redirect，405/501 才做小范围 GET；请求使用原始 URL，输出 URL 才移除 query/fragment，并附 `httpStatus`（网络失败为 `null`），绝不回显 header、正文或凭据。来源记录里的 `fallback` 不能被这个命令自动访问：主访问 `reachable` 时它是安全化的 `available` 线索，其他状态才是 `fallback-required`，仍只能由调用方根据结果和来源合同再决定是否使用。任何 probe 状态都不能代替来源的 fact boundary，更不能证明地点存在、营业、可订或安全。
+对已明确选择的 URL，可运行 `probe-source-access.js` 取得有界的 access-only 信号：它只检查 `http`/`https`、最多 4 并发、HEAD 不跟随 redirect，405/501 才做小范围 GET；请求使用原始 URL，输出 URL 才移除 query/fragment，并附 `httpStatus`（网络失败为 `null`），绝不回显 header、正文或凭据。顶层 URL `fallback` 保持兼容，仅输出安全化 URL；正式 pack 的 `source.access.fallback` 字符串数组也可直接识别，但只输出 `{ status, available: true, optionCount }`，不回显任意文本或 secret。两种 fallback 都不会被自动访问：主访问 `reachable` 时标为 `available`，其他状态标为 `fallback-required`。401 与 407 归为 `access-blocked`；只有 5xx 归为 `server-error`。任何 probe 状态都不能代替来源的 fact boundary，更不能证明地点存在、营业、可订或安全。
 
 ## 具名本地编辑源
 

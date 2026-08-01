@@ -28,6 +28,9 @@ const server = http.createServer((request, response) => {
   if (pathname === "/redirect") return finish(302, { location: "/ok?token=redirect-secret" });
   if (pathname === "/not-found") return finish(404, {});
   if (pathname === "/blocked") return finish(403, {});
+  if (pathname === "/auth-required") return finish(401, {});
+  if (pathname === "/proxy-auth-required") return finish(407, {});
+  if (pathname === "/client-error") return finish(422, {});
   if (pathname === "/limited") return finish(429, {});
   if (pathname === "/error") return finish(503, {});
   if (pathname === "/body-secret") return finish(200, { "content-type": "text/plain" }, "body-secret-value");
@@ -102,6 +105,8 @@ try {
       { id: "redirect", url: baseUrl + "/redirect" },
       { id: "missing", url: baseUrl + "/not-found", fallback: baseUrl + "/fallback?token=missing-fallback-secret#fragment" },
       { id: "blocked", url: baseUrl + "/blocked" },
+      { id: "authRequired", url: baseUrl + "/auth-required" },
+      { id: "clientError", url: baseUrl + "/client-error" },
       { id: "limited", url: baseUrl + "/limited" },
       { id: "error", url: baseUrl + "/error" },
       { id: "headUnsupported", url: baseUrl + "/head-unsupported" },
@@ -119,6 +124,8 @@ try {
   assert.equal(byId.redirect.status, "redirected");
   assert.equal(byId.missing.status, "not-found");
   assert.equal(byId.blocked.status, "access-blocked");
+  assert.equal(byId.authRequired.status, "access-blocked");
+  assert.equal(byId.clientError.status, "access-blocked");
   assert.equal(byId.limited.status, "rate-limited");
   assert.equal(byId.error.status, "server-error");
   assert.equal(byId.slow.status, "network-error");
@@ -128,6 +135,8 @@ try {
   assert.equal(byId.redirect.httpStatus, 302);
   assert.equal(byId.missing.httpStatus, 404);
   assert.equal(byId.blocked.httpStatus, 403);
+  assert.equal(byId.authRequired.httpStatus, 401);
+  assert.equal(byId.clientError.httpStatus, 422);
   assert.equal(byId.limited.httpStatus, 429);
   assert.equal(byId.error.httpStatus, 503);
   assert.equal(byId.headUnsupported.httpStatus, 206);
@@ -138,6 +147,38 @@ try {
   assert.equal(requests.headUnsupportedRange, "bytes=0-1023");
   assert.equal(requests.fallback, 0);
   assert.doesNotMatch(JSON.stringify(result), /body-secret-value|query-secret|fallback-secret|Authorization/i);
+
+  const proxyAuthResult = await probeSources({
+    sources: [{ id: "proxyAuthRequired", url: baseUrl + "/proxy-auth-required" }],
+  }, {
+    fetchImpl: async () => ({ status: 407, body: null }),
+    now: () => "2026-08-01T00:00:00.000Z",
+  });
+  assert.equal(proxyAuthResult.results[0].status, "access-blocked");
+  assert.equal(proxyAuthResult.results[0].httpStatus, 407);
+
+  const globalPack = JSON.parse(fs.readFileSync(
+    path.join(scriptDir, "..", "assets", "source-packs", "global-base.json"),
+    "utf8",
+  ));
+  const formalSource = globalPack.sources[0];
+  const formalAvailable = await probeSources({
+    sources: [{ ...formalSource, url: baseUrl + "/ok" }],
+  }, { now: () => "2026-08-01T00:00:00.000Z" });
+  assert.deepEqual(formalAvailable.results[0].fallback, {
+    status: "available",
+    available: true,
+    optionCount: formalSource.access.fallback.length,
+  });
+  const formalRequired = await probeSources({
+    sources: [{ ...formalSource, url: baseUrl + "/not-found" }],
+  }, { now: () => "2026-08-01T00:00:00.000Z" });
+  assert.deepEqual(formalRequired.results[0].fallback, {
+    status: "fallback-required",
+    available: true,
+    optionCount: formalSource.access.fallback.length,
+  });
+  assert.doesNotMatch(JSON.stringify([formalAvailable, formalRequired]), new RegExp(formalSource.access.fallback[0]));
 
   await assert.rejects(
     probeSources({ sources: [{ id: "ftp", url: "ftp://127.0.0.1/ignored" }] }),

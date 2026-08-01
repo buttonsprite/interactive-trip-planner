@@ -161,6 +161,9 @@ assert.deepEqual(cityRecommendation.inputVocabulary, {
 const unknownTermRecommendation = runtime.recommendTasteModels({
   interests: ["street-life"],
 }, { skillRoot });
+assert.equal(unknownTermRecommendation.mode, "needs-clarification");
+assert.deepEqual(unknownTermRecommendation.recommendations, []);
+assert.match(unknownTermRecommendation.explanation, /known|clarif|确认|偏好/i);
 assert.deepEqual(unknownTermRecommendation.unknownTerms, {
   destinationContexts: [],
   playStyles: [],
@@ -168,6 +171,24 @@ assert.deepEqual(unknownTermRecommendation.unknownTerms, {
   companions: [],
   interests: ["street-life"],
 });
+assert.deepEqual(
+  runtime.recommendTasteModels({ destination: "Paris" }, { skillRoot }).recommendations,
+  [],
+);
+assert.equal(
+  runtime.recommendTasteModels({ destination: "Paris" }, { skillRoot }).mode,
+  "needs-clarification",
+);
+assert.deepEqual(
+  runtime.recommendTasteModels({
+    destinationContexts: ["unknown-context"],
+    playStyles: ["unknown-style"],
+    pace: "unknown-pace",
+    companions: ["unknown-companion"],
+    interests: ["unknown-interest"],
+  }, { skillRoot }).recommendations,
+  [],
+);
 
 const nightlifeRecommendation = runtime.recommendTasteModels({
   destination: "Osaka",

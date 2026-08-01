@@ -2,6 +2,7 @@
   "schemaVersion": "0.1.0",
   "languageTag": "ca",
   "countryCodes": ["ES"],
+  "defaultCountryCodes": [],
   "terms": {
     "events-calendar": "agenda cultural",
     "local-dishes": "plats locals",

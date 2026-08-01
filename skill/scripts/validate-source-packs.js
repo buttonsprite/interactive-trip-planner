@@ -58,6 +58,23 @@ function assertSemanticVersion(value, label) {
   assert.match(value, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, label + " must be a semantic version");
 }
 
+function assertStringArray(value, label, { allowEmpty = false } = {}) {
+  assert.ok(Array.isArray(value) && (allowEmpty || value.length >= 1), label + " must be an array" + (allowEmpty ? "" : " with at least one item"));
+  for (const item of value) assertNonEmptyString(item, label + " item");
+}
+
+function assertSafeHttpUrl(value, label) {
+  assertNonEmptyString(value, label);
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    assert.fail(label + " must be a valid http/https URL");
+  }
+  assert.ok(["http:", "https:"].includes(parsed.protocol), label + " must use http or https");
+  assert.ok(!parsed.username && !parsed.password, label + " must not contain username, password, or embedded credentials");
+}
+
 function resolveInside(root, requestedPath, label) {
   assertNonEmptyString(requestedPath, label);
   const resolvedRoot = path.resolve(root);
@@ -69,11 +86,31 @@ function resolveInside(root, requestedPath, label) {
 function validateLocalLexicons(sourceRoot) {
   const lexiconRoot = path.join(sourceRoot, "local-language-lexicons");
   assert.ok(fs.statSync(lexiconRoot).isDirectory(), "local language lexicon directory must exist");
-  for (const filename of fs.readdirSync(lexiconRoot).filter((entry) => path.extname(entry) === ".json")) {
+  const entries = fs.readdirSync(lexiconRoot, { withFileTypes: true });
+  const languageTags = new Set();
+  const defaultCountries = new Set();
+  for (const entry of entries) {
+    assert.ok(!entry.isSymbolicLink(), "lexicon directory contains symbolic link " + entry.name);
+    assert.ok(entry.isFile() && path.extname(entry.name) === ".json", "lexicon directory may contain only JSON files: " + entry.name);
+    const filename = entry.name;
     const lexicon = JSON.parse(fs.readFileSync(path.join(lexiconRoot, filename), "utf8"));
     assert.equal(lexicon.schemaVersion, "0.1.0");
     assert.match(lexicon.languageTag, /^[a-z]{2}(?:-[A-Z]{2})?$/);
+    assert.equal(path.basename(filename, ".json"), lexicon.languageTag, "lexicon filename must match languageTag");
+    assert.ok(!languageTags.has(lexicon.languageTag), "lexicon languageTag values must be unique");
+    languageTags.add(lexicon.languageTag);
+    assertStringArray(lexicon.countryCodes, lexicon.languageTag + " countryCodes");
+    assertStringArray(lexicon.defaultCountryCodes, lexicon.languageTag + " defaultCountryCodes", { allowEmpty: true });
+    assert.equal(new Set(lexicon.countryCodes).size, lexicon.countryCodes.length, lexicon.languageTag + " countryCodes must be unique");
+    assert.equal(new Set(lexicon.defaultCountryCodes).size, lexicon.defaultCountryCodes.length, lexicon.languageTag + " defaultCountryCodes must be unique");
+    for (const countryCode of lexicon.countryCodes) assert.match(countryCode, /^[A-Z]{2}$/, lexicon.languageTag + " countryCodes must use two-letter uppercase codes");
+    for (const countryCode of lexicon.defaultCountryCodes) {
+      assert.ok(lexicon.countryCodes.includes(countryCode), lexicon.languageTag + " defaultCountryCodes must be a subset of countryCodes");
+      assert.ok(!defaultCountries.has(countryCode), "each country may have only one default lexicon; defaults must be unique");
+      defaultCountries.add(countryCode);
+    }
     assert.deepEqual(new Set(Object.keys(lexicon.terms)), requiredGlobalLocalTokens);
+    for (const [token, term] of Object.entries(lexicon.terms)) assertNonEmptyString(term, lexicon.languageTag + " term " + token);
     assert.doesNotMatch(JSON.stringify(lexicon), /https?:|<script|\/Users\//i);
   }
 }
@@ -99,6 +136,8 @@ export function validateSourcePacks({ skillRoot = defaultSkillRoot } = {}) {
     assertNonEmptyString(entry.id, "registry source pack id");
     assertSemanticVersion(entry.version, entry.id + " registry version");
     assert.ok(Array.isArray(entry.countryCodes) && entry.countryCodes.length >= 1, entry.id + " needs countryCodes");
+    assert.equal(new Set(entry.countryCodes).size, entry.countryCodes.length, entry.id + " countryCodes must be unique");
+    for (const countryCode of entry.countryCodes) assert.match(countryCode, /^(?:\*|[A-Z]{2})$/, entry.id + " invalid countryCode " + countryCode);
     const packPath = resolveInside(sourceRoot, entry.path, entry.id + " registry path");
     assert.ok(fs.statSync(packPath).isFile(), entry.id + " path must be a file");
     assert.equal(path.extname(packPath), ".json", entry.id + " pack must be JSON");
@@ -119,12 +158,14 @@ export function validateSourcePacks({ skillRoot = defaultSkillRoot } = {}) {
     }
 
     assert.ok(Array.isArray(pack.sources) && pack.sources.length >= 3, pack.id + " needs official, context and spatial paths");
+    assert.equal(new Set(pack.sources.map((source) => source.id)).size, pack.sources.length, pack.id + " source ids must be unique");
     const roles = new Set(pack.sources.flatMap((source) => source.roles));
     for (const role of requiredRoles) assert.ok(roles.has(role), pack.id + " missing " + role);
     assert.ok(pack.sources.some((source) => source.kind === "local-editorial"), pack.id + " needs named editorial");
     for (const source of pack.sources) {
       assertNonEmptyString(source.id, pack.id + " source id");
       assertNonEmptyString(source.name, pack.id + "/" + source.id + " source name");
+      assertSafeHttpUrl(source.url, pack.id + "/" + source.id + " source url");
       assert.ok(!/^(当地媒体|local media)$/i.test(source.name), pack.id + "/" + source.id + " must use a named source");
       assert.ok(registry.accessClasses.includes(source.access.class), pack.id + "/" + source.id + " invalid access class");
       assertNonEmptyString(source.access.searchMethod, pack.id + "/" + source.id + " searchMethod");
@@ -132,6 +173,7 @@ export function validateSourcePacks({ skillRoot = defaultSkillRoot } = {}) {
       assert.ok(Object.prototype.hasOwnProperty.call(source.access, "toolDependency"), pack.id + "/" + source.id + " missing toolDependency");
       assertNonEmptyString(source.access.agentAccess, pack.id + "/" + source.id + " agentAccess");
       assert.ok(Array.isArray(source.access.fallback) && source.access.fallback.length >= 1, pack.id + "/" + source.id + " needs fallback");
+      for (const fallback of source.access.fallback) assertNonEmptyString(fallback, pack.id + "/" + source.id + " fallback option");
       assert.ok(Array.isArray(source.factBoundary.canSupport) && source.factBoundary.canSupport.length >= 1, pack.id + "/" + source.id + " needs canSupport");
       assert.ok(Array.isArray(source.factBoundary.cannotProve) && source.factBoundary.cannotProve.length >= 1, pack.id + "/" + source.id + " needs cannotProve");
       assert.match(source.lastVerified, /^\d{4}-\d{2}-\d{2}$/, pack.id + "/" + source.id + " invalid lastVerified");

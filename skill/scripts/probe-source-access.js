@@ -41,6 +41,18 @@ function readBoundedInteger(value, fallback, label, maximum) {
   return value;
 }
 
+function normalizeFallback(source) {
+  if (source.fallback !== undefined) {
+    return { kind: "url", url: normalizeUrl(source.fallback).outputUrl };
+  }
+  if (source.access?.fallback === undefined) return undefined;
+  const options = source.access.fallback;
+  if (!Array.isArray(options) || options.length < 1 || options.some((option) => typeof option !== "string" || !option.trim())) {
+    throw new Error("source access fallback must be a non-empty string array");
+  }
+  return { kind: "options", optionCount: options.length };
+}
+
 function normalizeInput(input) {
   if (!input || Array.isArray(input) || Object.getPrototypeOf(input) !== Object.prototype) {
     throw new Error("Probe input must be a JSON object.");
@@ -57,7 +69,7 @@ function normalizeInput(input) {
     if (sourceIds.has(source.id)) throw new Error("source ids must be unique");
     sourceIds.add(source.id);
     const url = normalizeUrl(source.url);
-    const fallback = source.fallback === undefined ? undefined : normalizeUrl(source.fallback).outputUrl;
+    const fallback = normalizeFallback(source);
     return { id: source.id, requestUrl: url.requestUrl, url: url.outputUrl, fallback };
   });
 
@@ -71,10 +83,22 @@ function normalizeInput(input) {
 function statusFor(responseStatus) {
   if (responseStatus >= 200 && responseStatus < 300) return "reachable";
   if (responseStatus >= 300 && responseStatus < 400) return "redirected";
-  if (responseStatus === 403) return "access-blocked";
   if (responseStatus === 404) return "not-found";
   if (responseStatus === 429) return "rate-limited";
-  return "server-error";
+  if (responseStatus >= 400 && responseStatus < 500) return "access-blocked";
+  if (responseStatus >= 500 && responseStatus < 600) return "server-error";
+  return "network-error";
+}
+
+function fallbackResult(fallback, status) {
+  if (!fallback) return undefined;
+  const fallbackStatus = status === "reachable" ? "available" : "fallback-required";
+  if (fallback.kind === "url") return { status: fallbackStatus, url: fallback.url };
+  return {
+    status: fallbackStatus,
+    available: true,
+    optionCount: fallback.optionCount,
+  };
 }
 
 async function cancelBody(response) {
@@ -107,13 +131,13 @@ async function requestSource(source, { fetchImpl, timeoutMs }) {
     await cancelBody(response);
     const status = statusFor(response.status);
     const result = { id: source.id, url: source.url, status, method, httpStatus: response.status };
-    if (source.fallback) {
-      result.fallback = { status: status === "reachable" ? "available" : "fallback-required", url: source.fallback };
-    }
+    const fallback = fallbackResult(source.fallback, status);
+    if (fallback) result.fallback = fallback;
     return result;
   } catch {
     const result = { id: source.id, url: source.url, status: "network-error", method, httpStatus: null };
-    if (source.fallback) result.fallback = { status: "fallback-required", url: source.fallback };
+    const fallback = fallbackResult(source.fallback, "network-error");
+    if (fallback) result.fallback = fallback;
     return result;
   }
 }

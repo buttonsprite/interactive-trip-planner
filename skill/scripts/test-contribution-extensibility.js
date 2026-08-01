@@ -5,7 +5,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { selectSourcePacks } from "./source-pack-runtime.js";
+import { buildQueryMatrix, selectSourcePacks } from "./source-pack-runtime.js";
+import { recommendTasteModels } from "./taste-model-runtime.js";
 import { validateSourcePacks } from "./validate-source-packs.js";
 import { validateTasteModels } from "./validate-taste-models.js";
 
@@ -20,6 +21,18 @@ function readJson(file) {
 
 function writeJson(file, value) {
   fs.writeFileSync(file, JSON.stringify(value, null, 2) + "\n");
+}
+
+function assertRejectedMutation(file, validate, mutate, expected) {
+  const original = readJson(file);
+  const changed = structuredClone(original);
+  mutate(changed);
+  writeJson(file, changed);
+  try {
+    assert.throws(validate, expected);
+  } finally {
+    writeJson(file, original);
+  }
 }
 
 try {
@@ -55,6 +68,14 @@ try {
   curatorModel.representativeTrips[0].path = "examples/" + curatorTripId;
   curatorModel.representativeTrips[0].representativeReason = "Fixture curator-owned complete example.";
   writeJson(curatorModelPath, curatorModel);
+  const curatorSourcePolicyPath = path.join(curatorDirectory, "source-policy.json");
+  const curatorSourcePolicy = readJson(curatorSourcePolicyPath);
+  curatorSourcePolicy.modelId = curatorId;
+  writeJson(curatorSourcePolicyPath, curatorSourcePolicy);
+  const curatorVisualProfilePath = path.join(curatorDirectory, "visual-profile.json");
+  const curatorVisualProfile = readJson(curatorVisualProfilePath);
+  curatorVisualProfile.modelId = curatorId;
+  writeJson(curatorVisualProfilePath, curatorVisualProfile);
   const tasteRegistryPath = path.join(tasteRoot, "index.json");
   const tasteRegistry = readJson(tasteRegistryPath);
   tasteRegistry.models.push({
@@ -91,6 +112,93 @@ try {
     "global-base",
     sourcePackId,
   ]);
+  assert.equal(recommendTasteModels({ interests: ["craft"] }, { skillRoot: fixtureSkillRoot }).mode, "recommended");
+  assert.equal(buildQueryMatrix({
+    countryCode: "ES",
+    destination: "Madrid",
+    yearMonth: "2026-11",
+  }, { skillRoot: fixtureSkillRoot }).status, "ready");
+
+  for (const field of ["destinationContexts", "playStyles", "paces", "companions", "interests"]) {
+    assertRejectedMutation(
+      curatorModelPath,
+      () => validateTasteModels({ skillRoot: fixtureSkillRoot }),
+      (model) => { delete model.applicability[field]; },
+      new RegExp("applicability.*" + field, "i"),
+    );
+  }
+  assertRejectedMutation(
+    curatorModelPath,
+    () => validateTasteModels({ skillRoot: fixtureSkillRoot }),
+    (model) => { model.name = " "; },
+    /name.*non-empty/i,
+  );
+  for (const field of ["why", "tradeoff"]) {
+    assertRejectedMutation(
+      curatorModelPath,
+      () => validateTasteModels({ skillRoot: fixtureSkillRoot }),
+      (model) => { model.recommendation[field] = ""; },
+      new RegExp("recommendation.*" + field, "i"),
+    );
+  }
+  for (const [file, field, value] of [
+    [curatorSourcePolicyPath, "schemaVersion", "9.9.9"],
+    [curatorSourcePolicyPath, "modelId", "other-model"],
+    [curatorVisualProfilePath, "schemaVersion", "9.9.9"],
+    [curatorVisualProfilePath, "modelId", "other-model"],
+  ]) {
+    assertRejectedMutation(
+      file,
+      () => validateTasteModels({ skillRoot: fixtureSkillRoot }),
+      (document) => { document[field] = value; },
+      new RegExp(field + ".*" + (field === "modelId" ? "match" : "0\\.1\\.0"), "i"),
+    );
+  }
+
+  assertRejectedMutation(
+    sourcePackPath,
+    () => validateSourcePacks({ skillRoot: fixtureSkillRoot }),
+    (pack) => { pack.sources[1].id = pack.sources[0].id; },
+    /source ids.*unique/i,
+  );
+  for (const unsafeUrl of ["", "ftp://example.com/source", "https://user:password@example.com/source"]) {
+    assertRejectedMutation(
+      sourcePackPath,
+      () => validateSourcePacks({ skillRoot: fixtureSkillRoot }),
+      (pack) => { pack.sources[0].url = unsafeUrl; },
+      /source url|http|credentials|username|password/i,
+    );
+  }
+
+  const lexiconRoot = path.join(sourceRoot, "local-language-lexicons");
+  const nonJsonLexicon = path.join(lexiconRoot, "notes.txt");
+  fs.writeFileSync(nonJsonLexicon, "not a lexicon\n");
+  assert.throws(() => validateSourcePacks({ skillRoot: fixtureSkillRoot }), /lexicon.*JSON/i);
+  fs.rmSync(nonJsonLexicon);
+
+  const linkedLexicon = path.join(lexiconRoot, "linked-es.json");
+  fs.symlinkSync(path.join(lexiconRoot, "es.json"), linkedLexicon);
+  assert.throws(() => validateSourcePacks({ skillRoot: fixtureSkillRoot }), /lexicon.*symbolic link/i);
+  fs.rmSync(linkedLexicon);
+
+  const mismatchedLexicon = path.join(lexiconRoot, "fr.json");
+  fs.copyFileSync(path.join(lexiconRoot, "es.json"), mismatchedLexicon);
+  assert.throws(() => validateSourcePacks({ skillRoot: fixtureSkillRoot }), /filename.*languageTag/i);
+  fs.rmSync(mismatchedLexicon);
+
+  const caLexiconPath = path.join(lexiconRoot, "ca.json");
+  assertRejectedMutation(
+    caLexiconPath,
+    () => validateSourcePacks({ skillRoot: fixtureSkillRoot }),
+    (lexicon) => { lexicon.defaultCountryCodes = ["FR"]; },
+    /defaultCountryCodes.*subset/i,
+  );
+  assertRejectedMutation(
+    caLexiconPath,
+    () => validateSourcePacks({ skillRoot: fixtureSkillRoot }),
+    (lexicon) => { lexicon.defaultCountryCodes = ["ES"]; },
+    /default.*unique|one default/i,
+  );
 
   curatorModel.representativeTrips[0].path = "../../samples/golden/tokyo-rail-neon-craft";
   writeJson(curatorModelPath, curatorModel);

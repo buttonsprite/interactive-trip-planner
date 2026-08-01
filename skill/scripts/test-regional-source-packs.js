@@ -120,7 +120,7 @@ const spain = runtime.buildQueryMatrix({
   countryCode: "ES",
   destination: "Barcelona",
   yearMonth: "octubre 2026",
-  localLanguageTags: ["es", "ca"],
+  localLanguageTags: ["ca"],
   tasteTerms: ["vida de barrio", "mercado municipal"],
 }, { skillRoot });
 assert.deepEqual(spain.packIds, ["global-base"]);
@@ -138,14 +138,54 @@ for (const intent of spain.intents) {
   assert.doesNotMatch(JSON.stringify(intent.queries.local), /当地语言|\{local:/);
 }
 
+const spainDefault = runtime.buildQueryMatrix({
+  countryCode: "ES",
+  destination: "Madrid",
+  yearMonth: "2026-11",
+}, { skillRoot });
+assert.equal(spainDefault.status, "ready");
+for (const intent of spainDefault.intents) {
+  assert.deepEqual(intent.queries.local.map((item) => item.languageTag), ["es"]);
+  for (const query of [intent.queries.zh, intent.queries.en, ...intent.queries.local.map((item) => item.query)]) {
+    assert.doesNotMatch(query, /\{[^}]+\}|\[目的地\]|\[旅行月份 年份\]|\[本次偏好词\]/);
+  }
+}
+
 const unsupported = runtime.buildQueryMatrix({
   countryCode: "BR",
   destination: "Recife",
-  localLanguageTags: ["pt-BR"],
+  yearMonth: "2026-11",
+  localLanguageTags: ["es"],
 }, { skillRoot });
 assert.equal(unsupported.status, "needs-local-language-terms");
 assert.ok(unsupported.missingLocalTerms.length > 0);
 assert.deepEqual(unsupported.intents[0].queries.local, []);
+
+const brazilCallerTerms = runtime.buildQueryMatrix({
+  countryCode: "BR",
+  destination: "Recife",
+  yearMonth: "2026-11",
+  localLanguageTags: ["es"],
+  localLanguageTerms: {
+    es: {
+      "events-calendar": "agenda brasileira en espanol",
+      "local-dishes": "comida brasilena",
+      "seasonal-produce": "productos brasilenos de temporada",
+      "municipal-market": "mercado municipal brasileno",
+      "neighborhood-life": "vida de barrio brasilena",
+      "live-music": "musica brasilena en vivo",
+      "local-crafts": "artesania brasilena",
+      "rainy-day": "planes de lluvia en Brasil",
+      "current-notices": "avisos actuales de Brasil",
+      "independent-neighborhood": "comercio independiente brasileno",
+    },
+  },
+}, { skillRoot });
+assert.equal(brazilCallerTerms.status, "ready");
+assert.equal(
+  brazilCallerTerms.intents[0].queries.local[0].query,
+  "Recife 2026-11 agenda brasileira en espanol official",
+);
 
 const validator = spawnSync(process.execPath, [path.join(scriptDir, "validate-source-packs.js")], { encoding: "utf8" });
 assert.equal(validator.status, 0, validator.stdout + validator.stderr);

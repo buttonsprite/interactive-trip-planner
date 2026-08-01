@@ -39,26 +39,79 @@ export function loadLocalLexicon(tag, { skillRoot = defaultSkillRoot } = {}) {
 
 function renderQuery(template, context) {
   return template
-    .replaceAll("{destination}", context.destination || "[目的地]")
-    .replaceAll("{yearMonth}", context.yearMonth || "[旅行月份 年份]")
-    .replaceAll("{tasteTerms}", (context.tasteTerms || []).join(" ") || "[本次偏好词]");
+    .replaceAll("{destination}", context.destination)
+    .replaceAll("{yearMonth}", context.yearMonth)
+    .replaceAll("{tasteTerms}", context.tasteTerms.join(" "))
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeRequiredContext(context) {
+  const requiredFields = ["countryCode", "destination", "yearMonth"];
+  const missingContextFields = requiredFields.filter((field) => (
+    context[field] === undefined
+    || context[field] === null
+    || (typeof context[field] === "string" && !context[field].trim())
+  ));
+  if (missingContextFields.length) return { missingContextFields };
+  for (const field of requiredFields) {
+    if (typeof context[field] !== "string") throw new Error(field + " must be a non-empty string");
+  }
+  if (!/^[A-Za-z]{2}$/.test(context.countryCode.trim())) {
+    throw new Error("countryCode must be a two-letter country code");
+  }
+  if (context.localLanguageTags !== undefined && !Array.isArray(context.localLanguageTags)) {
+    throw new Error("localLanguageTags must be an array");
+  }
+  if (context.tasteTerms !== undefined && !Array.isArray(context.tasteTerms)) {
+    throw new Error("tasteTerms must be an array");
+  }
+  return {
+    missingContextFields: [],
+    context: {
+      ...context,
+      countryCode: context.countryCode.trim().toUpperCase(),
+      destination: context.destination.trim().replace(/\s+/g, " "),
+      yearMonth: context.yearMonth.trim().replace(/\s+/g, " "),
+      tasteTerms: (context.tasteTerms || [])
+        .map((term) => String(term || "").trim().replace(/\s+/g, " "))
+        .filter(Boolean),
+    },
+  };
 }
 
 function localTokens(template) {
   return [...template.matchAll(localTokenPattern)].map((match) => match[1]);
 }
 
+function lexiconAppliesToCountry(lexicon, countryCode) {
+  return Array.isArray(lexicon?.countryCodes) && lexicon.countryCodes.includes(countryCode);
+}
+
+function requestedLocalLanguageTags(context, skillRoot) {
+  const lexiconRoot = path.join(skillRoot, "assets", "source-packs", "local-language-lexicons");
+  const countryCode = String(context.countryCode || "").toUpperCase();
+  const defaults = fs.readdirSync(lexiconRoot)
+    .filter((filename) => path.extname(filename) === ".json")
+    .map((filename) => readJson(path.join(lexiconRoot, filename)))
+    .filter((lexicon) => lexicon.defaultCountryCodes?.includes(countryCode))
+    .map((lexicon) => lexicon.languageTag);
+  const explicit = Array.isArray(context.localLanguageTags) ? context.localLanguageTags : [];
+  const tags = [...new Set([...defaults, ...explicit])];
+  return tags.length ? tags : ["destination-local"];
+}
+
 function localTermsFor(tag, context, skillRoot) {
   const lexicon = loadLocalLexicon(tag, { skillRoot });
   const suppliedTerms = context.localLanguageTerms?.[tag];
   return {
-    ...(lexicon?.terms || {}),
+    ...(lexiconAppliesToCountry(lexicon, String(context.countryCode || "").toUpperCase()) ? lexicon.terms : {}),
     ...(suppliedTerms && typeof suppliedTerms === "object" ? suppliedTerms : {}),
   };
 }
 
 function buildGlobalLocalQueries(intent, context, skillRoot, missingLocalTerms) {
-  const tags = context.localLanguageTags || ["destination-local"];
+  const tags = requestedLocalLanguageTags(context, skillRoot);
   const tokens = localTokens(intent.queryTemplates.local);
   const queries = [];
   for (const languageTag of tags) {
@@ -78,6 +131,15 @@ function buildGlobalLocalQueries(intent, context, skillRoot, missingLocalTerms) 
 }
 
 export function buildQueryMatrix(context = {}, { skillRoot = defaultSkillRoot } = {}) {
+  const normalized = normalizeRequiredContext(context);
+  if (normalized.missingContextFields.length) {
+    return {
+      status: "needs-context",
+      missingContextFields: normalized.missingContextFields,
+      intents: [],
+    };
+  }
+  context = normalized.context;
   const registry = loadSourceRegistry({ skillRoot });
   const packIds = selectSourcePacks(context, { skillRoot });
   const activeId = packIds.at(-1);

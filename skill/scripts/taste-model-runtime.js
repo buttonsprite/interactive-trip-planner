@@ -82,8 +82,18 @@ export function recommendTasteModels(context = {}, { skillRoot = defaultSkillRoo
     .map((entry, index) => ({ entry, index, score: matchScore(entry.model, context, inputVocabulary) }))
     .sort((left, right) => right.score - left.score || left.index - right.index);
   const matching = ranked.filter((item) => item.score > 0);
-  const selected = (matching.length ? matching : ranked.slice(0, 1))
-    .slice(0, registry.selectionContract.maxRecommendations);
+  const suppliedUnknownTerms = unknownTerms(context, inputVocabulary);
+  if (!matching.length) {
+    return {
+      mode: "needs-clarification",
+      destination: context.destination || null,
+      recommendations: [],
+      explanation: "当前没有可与已知模板匹配的有效偏好，请先确认玩法、节奏、同行人或兴趣。",
+      unknownTerms: suppliedUnknownTerms,
+      inputVocabulary,
+    };
+  }
+  const selected = matching.slice(0, registry.selectionContract.maxRecommendations);
   return {
     mode: "recommended",
     destination: context.destination || null,
@@ -93,7 +103,7 @@ export function recommendTasteModels(context = {}, { skillRoot = defaultSkillRoo
       why: entry.model.recommendation.why,
       tradeoff: entry.model.recommendation.tradeoff,
     })),
-    unknownTerms: unknownTerms(context, inputVocabulary),
+    unknownTerms: suppliedUnknownTerms,
     inputVocabulary,
   };
 }

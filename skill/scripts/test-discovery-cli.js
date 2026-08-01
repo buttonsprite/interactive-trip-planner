@@ -11,6 +11,18 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "interactive-trip-planner-discovery-cli-"));
 const contextPath = path.join(tempDir, "taste-context.json");
 const spainPath = path.join(tempDir, "spain-context.json");
+const queryWithoutTastePath = path.join(tempDir, "query-without-taste.json");
+const missingLocalTermsPath = path.join(tempDir, "missing-local-terms.json");
+const missingQueryContextPaths = [
+  path.join(tempDir, "missing-country-code.json"),
+  path.join(tempDir, "missing-destination.json"),
+  path.join(tempDir, "missing-year-month.json"),
+];
+const invalidQueryContextPaths = [
+  path.join(tempDir, "invalid-country-code.json"),
+  path.join(tempDir, "invalid-destination.json"),
+  path.join(tempDir, "invalid-year-month.json"),
+];
 const missingPath = path.join(tempDir, "missing-context.json");
 const directoryPath = path.join(tempDir, "context-directory");
 const invalidJsonPath = path.join(tempDir, "invalid-context.json");
@@ -35,6 +47,23 @@ fs.writeFileSync(spainPath, JSON.stringify({
   localLanguageTags: ["es", "ca"],
   tasteTerms: ["vida de barrio", "mercado municipal"],
 }));
+fs.writeFileSync(queryWithoutTastePath, JSON.stringify({
+  countryCode: "ES",
+  destination: "  Madrid  ",
+  yearMonth: "  2026-11  ",
+}));
+fs.writeFileSync(missingLocalTermsPath, JSON.stringify({
+  countryCode: "BR",
+  destination: "Recife",
+  yearMonth: "2026-11",
+  localLanguageTags: ["es"],
+}));
+fs.writeFileSync(missingQueryContextPaths[0], JSON.stringify({ destination: "Madrid", yearMonth: "2026-11" }));
+fs.writeFileSync(missingQueryContextPaths[1], JSON.stringify({ countryCode: "ES", yearMonth: "2026-11" }));
+fs.writeFileSync(missingQueryContextPaths[2], JSON.stringify({ countryCode: "ES", destination: "Madrid" }));
+fs.writeFileSync(invalidQueryContextPaths[0], JSON.stringify({ countryCode: "Spain", destination: "Madrid", yearMonth: "2026-11" }));
+fs.writeFileSync(invalidQueryContextPaths[1], JSON.stringify({ countryCode: "ES", destination: ["Madrid"], yearMonth: "2026-11" }));
+fs.writeFileSync(invalidQueryContextPaths[2], JSON.stringify({ countryCode: "ES", destination: "Madrid", yearMonth: 202611 }));
 fs.mkdirSync(directoryPath);
 fs.writeFileSync(invalidJsonPath, "not json super-secret-body");
 fs.writeFileSync(invalidShapePaths[0], "null");
@@ -53,6 +82,14 @@ function assertFailure(result) {
   assert.equal(result.stdout, "");
   assert.match(result.stderr, /\S/);
   assert.doesNotMatch(result.stderr, /super-secret-body/);
+}
+
+function queryStrings(matrix) {
+  return matrix.intents.flatMap((intent) => [
+    intent.queries.zh,
+    intent.queries.en,
+    ...intent.queries.local.map((item) => item.query),
+  ]);
 }
 
 function runWithUnreadableStdin(script, args) {
@@ -91,6 +128,41 @@ try {
   const queryStdin = run("build-source-query-matrix.js", ["--stdin"], fs.readFileSync(spainPath, "utf8"));
   assert.equal(queryStdin.status, 0, queryStdin.stderr);
   assert.equal(queryStdin.stdout, queries.stdout);
+
+  const queryWithoutTaste = run("build-source-query-matrix.js", ["--context", queryWithoutTastePath]);
+  assert.equal(queryWithoutTaste.status, 0, queryWithoutTaste.stderr);
+  const queryWithoutTasteOutput = JSON.parse(queryWithoutTaste.stdout);
+  assert.equal(queryWithoutTasteOutput.status, "ready");
+  assert.match(queryWithoutTasteOutput.intents[0].queries.zh, /^Madrid 2026-11 /);
+  for (const query of queryStrings(queryWithoutTasteOutput)) {
+    assert.doesNotMatch(query, /\{[^}]+\}|\[目的地\]|\[旅行月份 年份\]|\[本次偏好词\]| {2,}/);
+  }
+
+  const missingLocalTerms = run("build-source-query-matrix.js", ["--context", missingLocalTermsPath]);
+  assert.equal(missingLocalTerms.status, 0, missingLocalTerms.stderr);
+  const missingLocalTermsOutput = JSON.parse(missingLocalTerms.stdout);
+  assert.equal(missingLocalTermsOutput.status, "needs-local-language-terms");
+  for (const query of queryStrings(missingLocalTermsOutput)) {
+    assert.doesNotMatch(query, /\{[^}]+\}|\[目的地\]|\[旅行月份 年份\]|\[本次偏好词\]| {2,}/);
+  }
+
+  for (const missingContextPath of missingQueryContextPaths) {
+    const missingContext = run("build-source-query-matrix.js", ["--context", missingContextPath]);
+    assert.equal(missingContext.status, 0, missingContext.stderr);
+    const output = JSON.parse(missingContext.stdout);
+    assert.equal(output.status, "needs-context");
+    assert.deepEqual(output.intents, []);
+    assert.ok(output.missingContextFields.length >= 1);
+    assert.deepEqual(queryStrings(output), []);
+  }
+  for (const invalidContextPath of invalidQueryContextPaths) {
+    assertFailure(run("build-source-query-matrix.js", ["--context", invalidContextPath]));
+  }
+
+  const unknownTaste = run("recommend-taste-models.js", ["--stdin"], JSON.stringify({ interests: ["street-life"] }));
+  assert.equal(unknownTaste.status, 0, unknownTaste.stderr);
+  assert.equal(JSON.parse(unknownTaste.stdout).mode, "needs-clarification");
+  assert.deepEqual(JSON.parse(unknownTaste.stdout).recommendations, []);
 
   for (const script of cliScripts) {
     for (const shapePath of invalidShapePaths) {

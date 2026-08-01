@@ -3,27 +3,46 @@
 import fs from "node:fs";
 
 export function jsonInputUsage(command) {
-  return `Usage: ${command} (--context <file> | --stdin)\n`;
+  return {
+    status: "usage",
+    usage: `Usage: ${command} (--context <file> | --stdin)`,
+  };
 }
 
-export function readJsonContext(argv, stdin) {
+export function parseJsonInputArgs(argv) {
   if (argv.length === 1 && argv[0] === "--help") return { help: true };
-
-  let source;
   if (argv.length === 2 && argv[0] === "--context") {
-    const contextPath = argv[1];
-    if (!fs.existsSync(contextPath)) throw new Error("Context file does not exist.");
-    if (!fs.statSync(contextPath).isFile()) throw new Error("Context path must be a file.");
-    source = fs.readFileSync(contextPath, "utf8");
-  } else if (argv.length === 1 && argv[0] === "--stdin") {
-    source = stdin;
-  } else {
-    throw new Error("Provide exactly one of --context <file> or --stdin.");
+    return { help: false, mode: "context", contextPath: argv[1] };
   }
+  if (argv.length === 1 && argv[0] === "--stdin") return { help: false, mode: "stdin" };
+  throw new Error("Provide exactly one of --context <file> or --stdin.");
+}
 
+function parseContext(source) {
+  let context;
   try {
-    return { help: false, context: JSON.parse(source) };
+    context = JSON.parse(source);
   } catch {
     throw new Error("Context must contain valid JSON.");
   }
+  if (!context || Array.isArray(context) || Object.getPrototypeOf(context) !== Object.prototype) {
+    throw new Error("Context must be a JSON object.");
+  }
+  return context;
+}
+
+export function readJsonContext(argv, stdin) {
+  const input = parseJsonInputArgs(argv);
+  if (input.help) return input;
+
+  let source = stdin;
+  if (input.mode === "context") {
+    try {
+      if (!fs.statSync(input.contextPath).isFile()) throw new Error("not a file");
+      source = fs.readFileSync(input.contextPath, "utf8");
+    } catch {
+      throw new Error("Context path must be a readable file.");
+    }
+  }
+  return { ...input, context: parseContext(source) };
 }

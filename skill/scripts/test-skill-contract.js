@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(scriptDir, "..");
+const repositoryRoot = path.resolve(skillRoot, "..");
 
 const read = (relativePath) => fs.readFileSync(path.join(skillRoot, relativePath), "utf8");
 
@@ -23,6 +24,10 @@ const sourcePackReference = read("references/regional-source-packs.md");
 const tasteSourceOnlineLogic = read("references/taste-and-source-online-logic.md");
 const template = read("assets/guide-template/maps/itinerary-map.html");
 const goldenDataRoot = path.join(skillRoot, "assets", "samples", "golden");
+const repositoryReadmePath = path.join(repositoryRoot, "README.md");
+const repositoryReadme = fs.existsSync(repositoryReadmePath)
+  ? fs.readFileSync(repositoryReadmePath, "utf8")
+  : null;
 
 assert.match(skill, /面向旅行者的语言/);
 assert.match(skill, /一次旅行设计提案/);
@@ -115,6 +120,22 @@ assert.match(tasteSourceOnlineLogic, /当前已实现/);
 assert.match(tasteSourceOnlineLogic, /0\.1\.0/);
 assert.match(tasteSourceOnlineLogic, /后续/);
 assert.doesNotMatch(tasteSourceOnlineLogic, /8\+[^\n]*已实现|跨 3 城[^\n]*已完成/);
+
+if (repositoryReadme !== null) {
+  for (const command of [
+    "recommend-taste-models.js",
+    "build-source-query-matrix.js",
+    "probe-source-access.js",
+  ]) {
+    assert.match(repositoryReadme, new RegExp(command.replace(".", "\\.")));
+  }
+  assert.match(repositoryReadme, /--context <file>/);
+  assert.match(repositoryReadme, /--stdin/);
+  assert.match(repositoryReadme, /needs-local-language-terms/);
+  assert.match(repositoryReadme, /代表性景点[^\n]*当地生活/);
+  assert.match(repositoryReadme, /仅.*访问.*探测|访问.*探测.*不.*事实复核/);
+  assert.match(repositoryReadme, /Spain[^\n]*Regional Source Pack|西班牙[^\n]*Regional Source Pack/);
+}
 
 for (const mode of ["first-visit", "return-visit", "landmark-light", "local-only", "balanced-visitor"]) {
   assert.match(planning, new RegExp(mode));

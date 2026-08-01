@@ -27,6 +27,26 @@ assert.ok(fs.existsSync(packageJsonPath), "Missing package.json required for ESM
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 assert.equal(packageJson.type, "module", 'package.json must declare "type": "module"');
 
+const requiredDiscoveryRuntimeFiles = [
+  "scripts/test-first-visit-balance.js",
+  "scripts/cli-json-input.js",
+  "scripts/recommend-taste-models.js",
+  "scripts/build-source-query-matrix.js",
+  "scripts/test-discovery-cli.js",
+  "scripts/probe-source-access.js",
+  "scripts/test-source-access-probe.js",
+  "assets/source-packs/local-language-lexicons/es.json",
+  "assets/source-packs/local-language-lexicons/ca.json",
+];
+const missingDiscoveryRuntimeFiles = requiredDiscoveryRuntimeFiles.filter(
+  (relativePath) => !fs.existsSync(path.join(skillRoot, relativePath)),
+);
+assert.deepEqual(
+  missingDiscoveryRuntimeFiles,
+  [],
+  `REDSkill release is missing discovery runtime files: ${missingDiscoveryRuntimeFiles.join(", ")}`,
+);
+
 const scriptFiles = walkFiles(scriptsDir);
 const unsupportedScripts = scriptFiles
   .filter((file) => path.extname(file) !== ".js")

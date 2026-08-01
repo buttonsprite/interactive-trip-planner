@@ -111,6 +111,9 @@ for (const testFile of [
   "test-regional-source-packs.js",
   "test-amap-cli.js",
   "test-contribution-extensibility.js",
+  "test-first-visit-balance.js",
+  "test-discovery-cli.js",
+  "test-source-access-probe.js",
   "test-skill-contract.js",
 ]) {
   const result = spawnSync(process.execPath, [path.join(skillRoot, "scripts", testFile)], { encoding: "utf8" });

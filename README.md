@@ -27,6 +27,24 @@ interactive-trip-planner/
 请使用 $interactive-trip-planner 帮我规划一趟旅行。
 ```
 
+## Discovery CLI
+
+Skill 内置三个面向 Agent 的 JSON CLI，均从 `skill/` 目录调用：
+
+```bash
+node scripts/recommend-taste-models.js --context <file>
+node scripts/build-source-query-matrix.js --context <file>
+node scripts/probe-source-access.js --context <file>
+```
+
+三者都只接受两种 JSON input 模式之一：`--context <file>` 读取一个 JSON 文件，或 `--stdin` 从标准输入读取 JSON；不能同时使用。stdout 只输出 JSON，错误诊断写入 stderr。
+
+- `recommend-taste-models.js` 根据本次旅行上下文推荐 Hybrid Taste Model；未知偏好词会在结构化输出中标出，不会静默参与排序。
+- `build-source-query-matrix.js` 生成搜索任务单，不访问网络。Global Base 若缺少目的地当地语言的必要检索词，会返回 `status: "needs-local-language-terms"` 和缺失词；此时应补充 `localLanguageTerms`，不能把占位符当作当地语言查询。内置 `es` / `ca` 只是一组查询词：Spain 仍没有 Regional Source Pack，西班牙目的地仍只选择 Global Base。
+- `probe-source-access.js` 只做有界的来源访问探测：结果不能证明地点存在、营业、可订、适合路线或安全，也不能替代事实复核。它只接受 `http` / `https` URL，并从输出中移除 query / fragment。
+
+对于首次或到访史未知的普通游客语境，正式路线应把代表性景点与同方向当地生活结合：代表性景点帮助理解城市，市场、居民空间、街区咖啡、社区餐馆或短半径夜生活让路线回到当地日常；不应因为用户偏好 local 就系统性排除前者。
+
 ## 开发与验证
 
 需要 Node.js 18 或更高版本。

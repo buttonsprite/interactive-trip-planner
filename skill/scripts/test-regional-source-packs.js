@@ -107,13 +107,45 @@ assert.deepEqual(queryMatrix.intents.map((intent) => intent.id), canonicalIntent
 for (const intent of queryMatrix.intents) {
   assert.match(intent.queries.zh, /京都/);
   assert.match(intent.queries.en, /京都/);
-  assert.match(intent.queries.local, /京都/);
+  assert.deepEqual(intent.queries.local.map((item) => item.languageTag), ["ja"]);
+  assert.match(intent.queries.local[0].query, /京都/);
 }
 assert.equal(queryMatrix.searchFunnel.length, 8);
 assert.match(queryMatrix.searchFunnel[0], /事实骨架/);
 assert.match(queryMatrix.searchFunnel[3], /访问性/);
 assert.match(queryMatrix.searchFunnel[5], /真实移动/);
 assert.match(queryMatrix.searchFunnel[7], /停止/);
+
+const spain = runtime.buildQueryMatrix({
+  countryCode: "ES",
+  destination: "Barcelona",
+  yearMonth: "octubre 2026",
+  localLanguageTags: ["es", "ca"],
+  tasteTerms: ["vida de barrio", "mercado municipal"],
+}, { skillRoot });
+assert.deepEqual(spain.packIds, ["global-base"]);
+assert.equal(spain.status, "ready");
+assert.deepEqual(spain.intents[0].queries.local, [
+  { languageTag: "es", query: "Barcelona octubre 2026 agenda cultural official" },
+  { languageTag: "ca", query: "Barcelona octubre 2026 agenda cultural official" },
+]);
+assert.deepEqual(spain.intents[1].queries.local, [
+  { languageTag: "es", query: "Barcelona platos locales mercado municipal" },
+  { languageTag: "ca", query: "Barcelona plats locals mercat municipal" },
+]);
+for (const intent of spain.intents) {
+  assert.deepEqual(intent.queries.local.map((item) => item.languageTag), ["es", "ca"]);
+  assert.doesNotMatch(JSON.stringify(intent.queries.local), /当地语言|\{local:/);
+}
+
+const unsupported = runtime.buildQueryMatrix({
+  countryCode: "BR",
+  destination: "Recife",
+  localLanguageTags: ["pt-BR"],
+}, { skillRoot });
+assert.equal(unsupported.status, "needs-local-language-terms");
+assert.ok(unsupported.missingLocalTerms.length > 0);
+assert.deepEqual(unsupported.intents[0].queries.local, []);
 
 const validator = spawnSync(process.execPath, [path.join(scriptDir, "validate-source-packs.js")], { encoding: "utf8" });
 assert.equal(validator.status, 0, validator.stdout + validator.stderr);

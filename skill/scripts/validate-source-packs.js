@@ -21,6 +21,18 @@ const requiredIntents = [
   "taste-specific-discovery",
 ];
 const requiredRoles = ["official-fact", "local-context", "spatial-search"];
+const requiredGlobalLocalTokens = new Set([
+  "events-calendar",
+  "local-dishes",
+  "seasonal-produce",
+  "municipal-market",
+  "neighborhood-life",
+  "live-music",
+  "local-crafts",
+  "rainy-day",
+  "current-notices",
+  "independent-neighborhood",
+]);
 const prohibitedKeys = new Set(["coverage", "confidence", "maturity"]);
 const sensitivePatterns = [
   /\/Users\/[^/\s]+/i,
@@ -54,9 +66,22 @@ function resolveInside(root, requestedPath, label) {
   return resolved;
 }
 
+function validateLocalLexicons(sourceRoot) {
+  const lexiconRoot = path.join(sourceRoot, "local-language-lexicons");
+  assert.ok(fs.statSync(lexiconRoot).isDirectory(), "local language lexicon directory must exist");
+  for (const filename of fs.readdirSync(lexiconRoot).filter((entry) => path.extname(entry) === ".json")) {
+    const lexicon = JSON.parse(fs.readFileSync(path.join(lexiconRoot, filename), "utf8"));
+    assert.equal(lexicon.schemaVersion, "0.1.0");
+    assert.match(lexicon.languageTag, /^[a-z]{2}(?:-[A-Z]{2})?$/);
+    assert.deepEqual(new Set(Object.keys(lexicon.terms)), requiredGlobalLocalTokens);
+    assert.doesNotMatch(JSON.stringify(lexicon), /https?:|<script|\/Users\//i);
+  }
+}
+
 export function validateSourcePacks({ skillRoot = defaultSkillRoot } = {}) {
   const registry = loadSourceRegistry({ skillRoot });
   const sourceRoot = path.join(skillRoot, "assets", "source-packs");
+  validateLocalLexicons(sourceRoot);
   assert.equal(registry.schemaVersion, "0.1.0");
   assert.deepEqual(new Set(registry.accessClasses), new Set(["A", "B", "C"]));
   assert.ok(Array.isArray(registry.packs) && registry.packs.length >= 1, "source registry needs at least one pack");

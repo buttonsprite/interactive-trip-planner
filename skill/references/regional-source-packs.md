@@ -11,6 +11,12 @@ Regional Source Pack 描述地区信息生态和检索方法。一次任务只�
 
 这四个包是首发 required subset，不是 registry 的封闭全集。贡献者可以添加采用同一 10 类意图与来源合同的新 JSON pack，使用自己的 semantic version 与 countryCodes；通用 validator 无需为每个新地区改代码。首发四包继续由固定回归测试锁定。其他尚无有效 pack 的地区使用 Global Base、目的地官方入口与三语动态搜索；不能创建空壳来源包冒充已覆盖。
 
+## Global Base 当地语言词库
+
+Global Base 的当地语言 query 使用 `{local:<token>}`，由 `assets/source-packs/local-language-lexicons/` 内置的轻量词库解析。它们只提供稳定检索词，不包含来源、访问性或地区信息生态，因此不是 Regional Source Pack，也不表示一个国家已经有地区包覆盖。
+
+调用 `buildQueryMatrix` 时以 `localLanguageTags` 请求变体；调用方可用 `localLanguageTerms` 按 language tag 覆盖或补齐词条。每个 intent 只输出词条完整的 `{ languageTag, query }` 变体；缺词时省略该变体，并返回 `status: needs-local-language-terms` 与按语言、intent、token 列出的 `missingLocalTerms`。完整时状态为 `ready`。已有地区包不依赖词库：其当地语言模板仍按该包的首个当地语言 tag 输出。
+
 ## 可访问性
 
 - A：可重复检索。当前环境可以通过公开网页或已配置工具稳定查询，可进入默认漏斗。

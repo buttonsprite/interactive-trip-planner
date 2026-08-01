@@ -12,6 +12,7 @@
 - 模板只提供轻量视觉偏好，不含地图 HTML。Europe direct-copy interaction v1 和既有地图状态合同未改变。
 - 阶段二按 Global Base 与目的地地区选择来源包。Global、中国大陆、日本、法语区（法国与比利时）是 0.1.0 required subset；registry 可追加满足同一 JSON 合同的新地区包，首发包仍有固定回归。
 - 每个来源包提供 10 类中文、英文和当地语言查询意图；来源记录包含 A/B/C 可访问性合同、检索方法、依赖、agentAccess、fallback、事实边界、复核日期与限制。
+- Global Base 的当地语言模板以 `{local:<token>}` 解析为 `{ languageTag, query }` 变体。内置 ES/CA 词库只提供检索词，不能作为 Regional Source Pack 或来源覆盖声明；调用方可通过 `localLanguageTerms` 补充或覆盖某个 language tag 的 token。词条不完整的变体不会输出，并在 `missingLocalTerms` 中按 language tag、intent 与 token 报告，整体状态为 `needs-local-language-terms`；其余情况为 `ready`。地区包自己的无 token 模板继续使用其首个当地语言 tag，不注入 Global 词库。
 - 中国大陆可运行 check-amap-cli.js 探测可选增强；两个凭据变量必须是 trim 后非空字符串。探测不输出密钥、不执行路线，缺变量、空字符串、全空白、CLI 缺失时均返回结构化降级。
 - 地点说明使用“为什么符合这个模板”和“为什么安排在这里”；只在真实异常时显示“需要临近复核”，不增加常驻来源 badge。
 

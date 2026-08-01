@@ -3,7 +3,7 @@
 ## 当前已实现（0.1.0）
 
 - 阶段一可根据目的地、玩法、节奏、同行人与兴趣推荐最多 3 个生活品味模板；用户可单选、不选或选择一主一辅。
-- 阶段一记录 visitor mode：`first-visit`、`return-visit`、`landmark-light`、`local-only` 或 `balanced-visitor`；到访历史未知时只暂定 `balanced-visitor`。两天以上城市的首次或平衡型计划会评估代表性景点，并把保留主锚点与同方向当地生活连接，除非有记录的 mode、预约或绕路例外。
+- 阶段一记录 visitor mode：`first-visit`、`return-visit`、`landmark-light`、`local-only` 或 `balanced-visitor`；第一次使用 Skill、第一次咨询或第一次规划不等于到访史，未知时记录“到访史未知”并只暂定 `balanced-visitor`。每座两天以上城市会至少评估 3 个代表性景点并写明采用或舍弃理由；该城市停留段内的保留主锚点与同方向当地生活角色（市场、居民广场、社区空间、街区咖啡、社区饭馆、传统商业或短半径夜间体验）连接，除非有记录的 mode、预约或绕路例外。
 - 一主一辅时，主模板拥有选点与节奏；辅模板只能补一个领域或视觉倾向。
 - 0.1.0 必须保留“城市手艺与缓慢街区”和“地方风味与夜间半径”两个官方模板，但 registry 可追加 `curator-owned` community 模板；贡献者使用独立 owner、license 与 semantic version，不需要修改 Core validator。
 - 城市手艺模板关联 Tokyo golden sample；地方风味模板关联 Barcelona golden sample。Barcelona 的 2 个 market、1 个 food、2 个 bar 与 local-food/market/nightlife 行程角色只构成最低代表证据，不声明完整 food-first 覆盖。

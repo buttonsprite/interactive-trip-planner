@@ -126,6 +126,11 @@ assert.match(planning, /重型景点[^\n]*每天最多 1 个/);
 assert.match(planning, /同方向[^\n]*(市场|居民广场|社区)/);
 assert.match(sources, /著名景点[^\n]*不能[^\n]*游客多/);
 assert.match(tasteSourceOnlineLogic, /visitor mode/);
+assert.match(planning, /第一次使用[^\n]*Skill[^\n]*不等于[^\n]*到访/);
+assert.match(planning, /到访史未知[^\n]*balanced-visitor/);
+assert.match(planning, /该城市停留段内[^\n]*2[–-]4 个代表性主锚点/);
+assert.match(planning, /每座[^\n]*至少评估 3 个代表性景点[^\n]*(采用|舍弃)/);
+assert.match(planning, /同方向当地生活角色[^\n]*(街区咖啡|社区饭馆|传统商业|夜间)/);
 
 for (const testFile of ["test-core-map-state.js", "test-core-map-template.js", "test-europe-public-template.js"]) {
   const result = spawnSync(process.execPath, [path.join(scriptDir, testFile)], { encoding: "utf8" });

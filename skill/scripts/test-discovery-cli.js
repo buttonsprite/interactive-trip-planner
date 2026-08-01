@@ -159,6 +159,82 @@ try {
     assertFailure(run("build-source-query-matrix.js", ["--context", invalidContextPath]));
   }
 
+  const unsafeQueryContexts = [
+    {
+      countryCode: "ES",
+      destination: "Madrid",
+      yearMonth: "2026-11",
+      localLanguageTags: [7],
+    },
+    {
+      countryCode: "ES",
+      destination: "Madrid",
+      yearMonth: "2026-11",
+      tasteTerms: { value: "custom-secret-fragment" },
+    },
+    {
+      countryCode: "ES",
+      destination: "Madrid",
+      yearMonth: "2026-11",
+      localLanguageTerms: [],
+    },
+    {
+      countryCode: "ES",
+      destination: "Madrid",
+      yearMonth: "2026-11",
+      localLanguageTerms: null,
+    },
+    {
+      countryCode: "ES",
+      destination: "Madrid",
+      yearMonth: "2026-11",
+      localLanguageTerms: { es: [] },
+    },
+    {
+      countryCode: "ES",
+      destination: "Madrid",
+      yearMonth: "2026-11",
+      localLanguageTerms: { es: null },
+    },
+    {
+      countryCode: "ES",
+      destination: "Madrid",
+      yearMonth: "2026-11",
+      localLanguageTerms: { "bad tag": { "events-calendar": "agenda" } },
+    },
+    {
+      countryCode: "ES",
+      destination: "Madrid",
+      yearMonth: "2026-11",
+      localLanguageTerms: { es: { "bad token": "agenda" } },
+    },
+    {
+      countryCode: "ES",
+      destination: "Madrid",
+      yearMonth: "2026-11",
+      localLanguageTerms: { es: { "events-calendar": "" } },
+    },
+    {
+      countryCode: "ES",
+      destination: "Madrid",
+      yearMonth: "2026-11",
+      localLanguageTerms: { es: { "events-calendar": 7 } },
+    },
+    ...["{destination}", "[目的地]", "[旅行月份 年份]", "[本次偏好词]"].map((placeholder) => ({
+      countryCode: "ES",
+      destination: "Madrid",
+      yearMonth: "2026-11",
+      localLanguageTerms: {
+        es: { "events-calendar": placeholder + " custom-secret-fragment" },
+      },
+    })),
+  ];
+  for (const unsafeContext of unsafeQueryContexts) {
+    const rejected = run("build-source-query-matrix.js", ["--stdin"], JSON.stringify(unsafeContext));
+    assertFailure(rejected);
+    assert.doesNotMatch(rejected.stderr, /custom-secret-fragment|\{destination\}|\[目的地\]/);
+  }
+
   const unknownTaste = run("recommend-taste-models.js", ["--stdin"], JSON.stringify({ interests: ["street-life"] }));
   assert.equal(unknownTaste.status, 0, unknownTaste.stderr);
   assert.equal(JSON.parse(unknownTaste.stdout).mode, "needs-clarification");

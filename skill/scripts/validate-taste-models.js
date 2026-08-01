@@ -4,7 +4,6 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadTasteRegistry } from "./taste-model-runtime.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "..");
@@ -67,14 +66,29 @@ function resolveInside(root, requestedPath, label) {
   return resolved;
 }
 
+function resolveVerifiedDirectory(root, requestedPath, label) {
+  const resolved = resolveInside(root, requestedPath, label);
+  const stats = fs.lstatSync(resolved);
+  assert.ok(!stats.isSymbolicLink(), label + " must not be a symbolic link");
+  assert.ok(stats.isDirectory(), label + " must be a directory");
+  const realRoot = fs.realpathSync(root);
+  const realDirectory = fs.realpathSync(resolved);
+  assert.ok(
+    realDirectory.startsWith(realRoot + path.sep),
+    label + " realpath must stay inside " + realRoot,
+  );
+  return realDirectory;
+}
+
 function scanPrivacy(files, label) {
   const publicText = files.map((file) => fs.readFileSync(file, "utf8")).join("\n");
   for (const pattern of sensitivePatterns) assert.doesNotMatch(publicText, pattern, label + " privacy scan found " + pattern);
 }
 
 export function validateTasteModels({ skillRoot = defaultSkillRoot } = {}) {
-  const registry = loadTasteRegistry({ skillRoot });
   const modelRoot = path.join(skillRoot, "assets", "taste-models");
+  const registry = JSON.parse(fs.readFileSync(path.join(modelRoot, "index.json"), "utf8"));
+  const validatedModels = [];
   assert.equal(registry.schemaVersion, "0.1.0");
   assert.ok(Array.isArray(registry.models) && registry.models.length >= 1, "taste registry needs at least one model");
   assert.equal(new Set(registry.models.map((entry) => entry.id)).size, registry.models.length, "taste model ids must be unique");
@@ -83,8 +97,7 @@ export function validateTasteModels({ skillRoot = defaultSkillRoot } = {}) {
     assertNonEmptyString(entry.id, "registry model id");
     assertSemanticVersion(entry.version, entry.id + " registry version");
     assert.ok(allowedStatuses.has(entry.status), entry.id + " has unsupported status " + entry.status);
-    const directory = resolveInside(modelRoot, entry.path, entry.id + " registry path");
-    assert.ok(fs.statSync(directory).isDirectory(), entry.id + " path must be a directory");
+    const directory = resolveVerifiedDirectory(modelRoot, entry.path, entry.id + " model registry path");
     for (const file of requiredFiles) assert.ok(fs.existsSync(path.join(directory, file)), entry.id + " missing " + file);
 
     const modelFiles = listFilesRecursively(directory);
@@ -93,7 +106,8 @@ export function validateTasteModels({ skillRoot = defaultSkillRoot } = {}) {
       assert.ok(allowedModelExtension.test(file.relative), entry.id + " contains unsupported model file " + file.relative);
     }
 
-    const model = entry.model;
+    const model = JSON.parse(fs.readFileSync(path.join(directory, "model.json"), "utf8"));
+    validatedModels.push({ ...entry, model });
     assert.equal(model.schemaVersion, "0.1.0", entry.id + " model schemaVersion must be 0.1.0");
     assert.equal(model.id, entry.id);
     assertNonEmptyString(model.name, entry.id + " name");
@@ -145,11 +159,12 @@ export function validateTasteModels({ skillRoot = defaultSkillRoot } = {}) {
         );
         sampleRoot = resolvedSampleRoot;
       } else {
-        sampleRoot = resolveInside(
-          skillRoot,
-          path.relative(skillRoot, resolvedSampleRoot),
-          entry.id + " representative path",
+        const realSkillRoot = fs.realpathSync(skillRoot);
+        assert.ok(
+          resolvedSampleRoot.startsWith(realSkillRoot + path.sep),
+          entry.id + " representative path must stay inside " + realSkillRoot,
         );
+        sampleRoot = resolvedSampleRoot;
       }
       for (const required of requiredSampleFiles) {
         const file = path.join(sampleRoot, required);
@@ -179,7 +194,7 @@ export function validateTasteModels({ skillRoot = defaultSkillRoot } = {}) {
     scanPrivacy([...modelFiles.map((file) => file.absolute), ...representativeFiles], entry.id);
   }
 
-  return { modelCount: registry.models.length, registry };
+  return { modelCount: registry.models.length, registry: { ...registry, models: validatedModels } };
 }
 
 const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

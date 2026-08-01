@@ -168,7 +168,7 @@ const brazilCallerTerms = runtime.buildQueryMatrix({
   localLanguageTags: ["es"],
   localLanguageTerms: {
     es: {
-      "events-calendar": "agenda brasileira en espanol",
+      "events-calendar": "  agenda    brasileira en espanol  ",
       "local-dishes": "comida brasilena",
       "seasonal-produce": "productos brasilenos de temporada",
       "municipal-market": "mercado municipal brasileno",
@@ -186,6 +186,14 @@ assert.equal(
   brazilCallerTerms.intents[0].queries.local[0].query,
   "Recife 2026-11 agenda brasileira en espanol official",
 );
+const nullPrototypeTerms = Object.create(null);
+nullPrototypeTerms.es = { "events-calendar": "agenda" };
+assert.throws(() => runtime.buildQueryMatrix({
+  countryCode: "BR",
+  destination: "Recife",
+  yearMonth: "2026-11",
+  localLanguageTerms: nullPrototypeTerms,
+}, { skillRoot }), /localLanguageTerms.*plain object/i);
 
 const validator = spawnSync(process.execPath, [path.join(scriptDir, "validate-source-packs.js")], { encoding: "utf8" });
 assert.equal(validator.status, 0, validator.stdout + validator.stderr);

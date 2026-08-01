@@ -161,6 +161,14 @@ try {
     (pack) => { pack.sources[1].id = pack.sources[0].id; },
     /source ids.*unique/i,
   );
+  for (const unsafeSourceId of ["bad id", "with/slash"]) {
+    assertRejectedMutation(
+      sourcePackPath,
+      () => validateSourcePacks({ skillRoot: fixtureSkillRoot }),
+      (pack) => { pack.sources[0].id = unsafeSourceId; },
+      /source id.*letters|source id.*invalid|source id.*safe/i,
+    );
+  }
   for (const unsafeUrl of ["", "ftp://example.com/source", "https://user:password@example.com/source"]) {
     assertRejectedMutation(
       sourcePackPath,
@@ -198,6 +206,38 @@ try {
     () => validateSourcePacks({ skillRoot: fixtureSkillRoot }),
     (lexicon) => { lexicon.defaultCountryCodes = ["ES"]; },
     /default.*unique|one default/i,
+  );
+
+  const linkedPackPath = path.join(sourceRoot, "linked-pack.json");
+  fs.symlinkSync(sourcePackPath, linkedPackPath);
+  assertRejectedMutation(
+    sourceRegistryPath,
+    () => validateSourcePacks({ skillRoot: fixtureSkillRoot }),
+    (registryDocument) => {
+      registryDocument.packs.find((entry) => entry.id === sourcePackId).path = "linked-pack.json";
+    },
+    /pack.*symbolic link|registry path.*symbolic link/i,
+  );
+  fs.rmSync(linkedPackPath);
+
+  const linkedModelDirectory = path.join(tasteRoot, "linked-curator-model");
+  fs.symlinkSync(curatorDirectory, linkedModelDirectory);
+  assertRejectedMutation(
+    tasteRegistryPath,
+    () => validateTasteModels({ skillRoot: fixtureSkillRoot }),
+    (registryDocument) => {
+      registryDocument.models.find((entry) => entry.id === curatorId).path = "linked-curator-model";
+    },
+    /model.*symbolic link|registry path.*symbolic link/i,
+  );
+  fs.rmSync(linkedModelDirectory);
+
+  const realLexiconRoot = path.join(sourceRoot, "local-language-lexicons-real");
+  fs.renameSync(lexiconRoot, realLexiconRoot);
+  fs.symlinkSync(realLexiconRoot, lexiconRoot);
+  assert.throws(
+    () => validateSourcePacks({ skillRoot: fixtureSkillRoot }),
+    /lexicon.*symbolic link/i,
   );
 
   curatorModel.representativeTrips[0].path = "../../samples/golden/tokyo-rail-neon-craft";

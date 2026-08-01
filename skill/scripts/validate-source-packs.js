@@ -4,7 +4,6 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadSourceRegistry } from "./source-pack-runtime.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "..");
@@ -34,6 +33,7 @@ const requiredGlobalLocalTokens = new Set([
   "independent-neighborhood",
 ]);
 const prohibitedKeys = new Set(["coverage", "confidence", "maturity"]);
+const safeSourceIdPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 const sensitivePatterns = [
   /\/Users\/[^/\s]+/i,
   /\b(?:AMAP_KEY|AMAP_SECURITY_KEY)\s*[:=]\s*\S+/i,
@@ -83,9 +83,25 @@ function resolveInside(root, requestedPath, label) {
   return resolved;
 }
 
+function resolveVerifiedTarget(root, requestedPath, label, expectedType) {
+  const resolved = resolveInside(root, requestedPath, label);
+  const stats = fs.lstatSync(resolved);
+  assert.ok(!stats.isSymbolicLink(), label + " must not be a symbolic link");
+  const realRoot = fs.realpathSync(root);
+  const realTarget = fs.realpathSync(resolved);
+  assert.ok(realTarget.startsWith(realRoot + path.sep), label + " realpath must stay inside " + realRoot);
+  if (expectedType === "file") assert.ok(stats.isFile(), label + " must be a file");
+  if (expectedType === "directory") assert.ok(stats.isDirectory(), label + " must be a directory");
+  return realTarget;
+}
+
 function validateLocalLexicons(sourceRoot) {
-  const lexiconRoot = path.join(sourceRoot, "local-language-lexicons");
-  assert.ok(fs.statSync(lexiconRoot).isDirectory(), "local language lexicon directory must exist");
+  const lexiconRoot = resolveVerifiedTarget(
+    sourceRoot,
+    "local-language-lexicons",
+    "local language lexicon root",
+    "directory",
+  );
   const entries = fs.readdirSync(lexiconRoot, { withFileTypes: true });
   const languageTags = new Set();
   const defaultCountries = new Set();
@@ -116,8 +132,9 @@ function validateLocalLexicons(sourceRoot) {
 }
 
 export function validateSourcePacks({ skillRoot = defaultSkillRoot } = {}) {
-  const registry = loadSourceRegistry({ skillRoot });
   const sourceRoot = path.join(skillRoot, "assets", "source-packs");
+  const registry = JSON.parse(fs.readFileSync(path.join(sourceRoot, "index.json"), "utf8"));
+  const validatedPacks = [];
   validateLocalLexicons(sourceRoot);
   assert.equal(registry.schemaVersion, "0.1.0");
   assert.deepEqual(new Set(registry.accessClasses), new Set(["A", "B", "C"]));
@@ -138,10 +155,10 @@ export function validateSourcePacks({ skillRoot = defaultSkillRoot } = {}) {
     assert.ok(Array.isArray(entry.countryCodes) && entry.countryCodes.length >= 1, entry.id + " needs countryCodes");
     assert.equal(new Set(entry.countryCodes).size, entry.countryCodes.length, entry.id + " countryCodes must be unique");
     for (const countryCode of entry.countryCodes) assert.match(countryCode, /^(?:\*|[A-Z]{2})$/, entry.id + " invalid countryCode " + countryCode);
-    const packPath = resolveInside(sourceRoot, entry.path, entry.id + " registry path");
-    assert.ok(fs.statSync(packPath).isFile(), entry.id + " path must be a file");
+    const packPath = resolveVerifiedTarget(sourceRoot, entry.path, entry.id + " pack registry path", "file");
     assert.equal(path.extname(packPath), ".json", entry.id + " pack must be JSON");
-    const pack = entry.pack;
+    const pack = JSON.parse(fs.readFileSync(packPath, "utf8"));
+    validatedPacks.push({ ...entry, pack });
     assert.equal(pack.schemaVersion, "0.1.0", entry.id + " pack schemaVersion must be 0.1.0");
     assert.equal(pack.id, entry.id);
     assert.equal(pack.version, entry.version, entry.id + " registry/pack version mismatch");
@@ -164,6 +181,7 @@ export function validateSourcePacks({ skillRoot = defaultSkillRoot } = {}) {
     assert.ok(pack.sources.some((source) => source.kind === "local-editorial"), pack.id + " needs named editorial");
     for (const source of pack.sources) {
       assertNonEmptyString(source.id, pack.id + " source id");
+      assert.match(source.id, safeSourceIdPattern, pack.id + " source id must use letters, numbers, dots, underscores, or hyphens");
       assertNonEmptyString(source.name, pack.id + "/" + source.id + " source name");
       assertSafeHttpUrl(source.url, pack.id + "/" + source.id + " source url");
       assert.ok(!/^(当地媒体|local media)$/i.test(source.name), pack.id + "/" + source.id + " must use a named source");
@@ -190,7 +208,7 @@ export function validateSourcePacks({ skillRoot = defaultSkillRoot } = {}) {
     for (const pattern of sensitivePatterns) assert.doesNotMatch(publicText, pattern, pack.id + " privacy scan found " + pattern);
   }
 
-  return { packCount: registry.packs.length, registry };
+  return { packCount: registry.packs.length, registry: { ...registry, packs: validatedPacks } };
 }
 
 const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

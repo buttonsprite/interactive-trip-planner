@@ -8,7 +8,9 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "..");
 const readJson = (file) => JSON.parse(fs.readFileSync(file, "utf8"));
 const localTokenPattern = /\{local:([a-z0-9-]+)\}/g;
+const localTokenNamePattern = /^[a-z0-9-]+$/;
 const localLanguageTagPattern = /^[a-z]{2}(?:-[A-Z]{2})?$/;
+const unsafeQueryPlaceholderPattern = /\{[^{}]+\}|\[目的地\]|\[旅行月份 年份\]|\[本次偏好词\]/;
 
 export function loadSourceRegistry({ skillRoot = defaultSkillRoot } = {}) {
   const root = path.join(skillRoot, "assets", "source-packs");
@@ -46,6 +48,42 @@ function renderQuery(template, context) {
     .trim();
 }
 
+function isPlainObject(value) {
+  return Boolean(value) && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype;
+}
+
+function normalizeQueryFragment(value, { allowEmpty = false } = {}) {
+  if (typeof value !== "string") throw new Error("query fragments must be strings");
+  const normalized = value.trim().replace(/\s+/g, " ");
+  if (!allowEmpty && !normalized) throw new Error("query fragments must be non-empty strings");
+  if (unsafeQueryPlaceholderPattern.test(normalized)) throw new Error("query fragments must not contain placeholders");
+  return normalized;
+}
+
+function normalizeLocalLanguageTerms(value) {
+  if (value === undefined) return undefined;
+  if (!isPlainObject(value)) throw new Error("localLanguageTerms must be a plain object");
+  const normalized = {};
+  for (const [languageTag, terms] of Object.entries(value)) {
+    if (!localLanguageTagPattern.test(languageTag)) throw new Error("localLanguageTerms language tags must be valid");
+    if (!isPlainObject(terms)) throw new Error("each localLanguageTerms language value must be a plain object");
+    normalized[languageTag] = {};
+    for (const [token, term] of Object.entries(terms)) {
+      if (!localTokenNamePattern.test(token)) throw new Error("localLanguageTerms tokens must be valid");
+      normalized[languageTag][token] = normalizeQueryFragment(term);
+    }
+  }
+  return normalized;
+}
+
+function finalizeQuery(query) {
+  const normalized = query.replace(/\s+/g, " ").trim();
+  if (unsafeQueryPlaceholderPattern.test(normalized)) {
+    throw new Error("query output contains an unresolved or unsafe placeholder");
+  }
+  return normalized;
+}
+
 function normalizeRequiredContext(context) {
   const requiredFields = ["countryCode", "destination", "yearMonth"];
   const missingContextFields = requiredFields.filter((field) => (
@@ -66,6 +104,17 @@ function normalizeRequiredContext(context) {
   if (context.tasteTerms !== undefined && !Array.isArray(context.tasteTerms)) {
     throw new Error("tasteTerms must be an array");
   }
+  const localLanguageTags = (context.localLanguageTags || []).map((languageTag) => {
+    if (typeof languageTag !== "string" || !localLanguageTagPattern.test(languageTag.trim())) {
+      throw new Error("localLanguageTags must contain valid language tags");
+    }
+    return languageTag.trim();
+  });
+  const tasteTerms = [];
+  for (const term of context.tasteTerms || []) {
+    const normalizedTerm = normalizeQueryFragment(term, { allowEmpty: true });
+    if (normalizedTerm) tasteTerms.push(normalizedTerm);
+  }
   return {
     missingContextFields: [],
     context: {
@@ -73,9 +122,9 @@ function normalizeRequiredContext(context) {
       countryCode: context.countryCode.trim().toUpperCase(),
       destination: context.destination.trim().replace(/\s+/g, " "),
       yearMonth: context.yearMonth.trim().replace(/\s+/g, " "),
-      tasteTerms: (context.tasteTerms || [])
-        .map((term) => String(term || "").trim().replace(/\s+/g, " "))
-        .filter(Boolean),
+      localLanguageTags,
+      localLanguageTerms: normalizeLocalLanguageTerms(context.localLanguageTerms),
+      tasteTerms,
     },
   };
 }
@@ -123,8 +172,8 @@ function buildGlobalLocalQueries(intent, context, skillRoot, missingLocalTerms) 
     }
     queries.push({
       languageTag,
-      query: renderQuery(intent.queryTemplates.local, context)
-        .replace(localTokenPattern, (_, token) => terms[token]),
+      query: finalizeQuery(renderQuery(intent.queryTemplates.local, context)
+        .replace(localTokenPattern, (_, token) => terms[token])),
     });
   }
   return queries;
@@ -152,13 +201,13 @@ export function buildQueryMatrix(context = {}, { skillRoot = defaultSkillRoot } 
       id: intent.id,
       sourceRoles: intent.sourceRoles,
       queries: {
-        zh: renderQuery(intent.queryTemplates.zh, context),
-        en: renderQuery(intent.queryTemplates.en, context),
+        zh: finalizeQuery(renderQuery(intent.queryTemplates.zh, context)),
+        en: finalizeQuery(renderQuery(intent.queryTemplates.en, context)),
         local: activeId === "global-base"
           ? buildGlobalLocalQueries(intent, context, skillRoot, missingLocalTerms)
           : [{
               languageTag: active.languageStrategy.localLanguageTags[0],
-              query: renderQuery(intent.queryTemplates.local, context),
+              query: finalizeQuery(renderQuery(intent.queryTemplates.local, context)),
             }],
       },
     })),

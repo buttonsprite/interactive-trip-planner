@@ -18,6 +18,9 @@ const userLanguage = read("references/user-facing-language.md");
 const workspaceTemplate = read("assets/workspace-AGENTS-template.md");
 const workspaceBootstrap = read("references/workspace-bootstrap.md");
 const coreContractPath = path.join(skillRoot, "references", "core-interaction-contract.md");
+const tasteReference = read("references/hybrid-taste-models.md");
+const sourcePackReference = read("references/regional-source-packs.md");
+const tasteSourceOnlineLogic = read("references/taste-and-source-online-logic.md");
 const template = read("assets/guide-template/maps/itinerary-map.html");
 const goldenDataRoot = path.join(skillRoot, "assets", "samples", "golden");
 
@@ -38,6 +41,18 @@ assert.match(skill, /--strict-routes/);
 assert.match(skill, /build-redskill-release\.js/);
 assert.match(skill, /test-redskill-release\.js/);
 assert.match(skill, /每两个相邻地点/);
+assert.match(skill, /生活品味模板/);
+assert.match(skill, /推荐 1[–-]3 个/);
+assert.match(skill, /不使用现成模板/);
+assert.match(skill, /一主一辅/);
+assert.match(skill, /主模板[^\n]*选点[^\n]*节奏/);
+assert.match(skill, /辅模板[^\n]*(一个明确领域|视觉倾向)/);
+assert.match(skill, /Regional Source Pack/);
+assert.match(skill, /Global[^\n]*中国大陆[^\n]*日本[^\n]*法语区/);
+assert.match(skill, /为什么符合这个模板/);
+assert.match(skill, /为什么安排在这里/);
+assert.match(skill, /需要临近复核/);
+assert.doesNotMatch(skill, /coverage|confidence|maturity/i);
 for (const stage of [
   "阶段一：理解并确认旅行方向",
   "阶段二：寻找适合用户的地点",
@@ -87,6 +102,19 @@ assert.match(sources, /正餐候选[^\n]*4-6 家/);
 assert.match(sources, /小吃、咖啡、甜品或休息[^\n]*3-5 家/);
 assert.match(sources, /分类数字不能简单相加/);
 assert.match(sources, /数量是质量下限，不是凑数任务/);
+assert.match(tasteReference, /用户硬约束[^\n]*当前事实[^\n]*高于模板/);
+assert.match(tasteReference, /不得直接复制[^\n]*样本[^\n]*店名/);
+assert.match(tasteReference, /主模板[^\n]*选点[^\n]*节奏/);
+assert.match(sourcePackReference, /A[：:][^\n]*可重复检索/);
+assert.match(sourcePackReference, /B[：:][^\n]*条件可检索/);
+assert.match(sourcePackReference, /C[：:][^\n]*仅人工/);
+assert.match(sourcePackReference, /city-life-culture/);
+assert.match(sourcePackReference, /industry-specialist/);
+assert.match(sourcePackReference, /不得使用[^\n]*(当地媒体|local media)/i);
+assert.match(tasteSourceOnlineLogic, /当前已实现/);
+assert.match(tasteSourceOnlineLogic, /0\.1\.0/);
+assert.match(tasteSourceOnlineLogic, /后续/);
+assert.doesNotMatch(tasteSourceOnlineLogic, /8\+[^\n]*已实现|跨 3 城[^\n]*已完成/);
 
 for (const testFile of ["test-core-map-state.js", "test-core-map-template.js", "test-europe-public-template.js"]) {
   const result = spawnSync(process.execPath, [path.join(scriptDir, testFile)], { encoding: "utf8" });

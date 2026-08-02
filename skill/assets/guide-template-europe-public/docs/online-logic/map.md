@@ -36,7 +36,7 @@
 - `hosted` 活动跟随 `hostPoiId`，在该地点原有类型化详情段之后显示日期、自然语言状态、安排建议、注意事项和官网入口；不显示 schema enum 或 `sourceIds`。
 - `citywide` 活动按旅行年份、当天 `MM/DD`、起止日期和城市（含可选 `affectedCities`）匹配，并显示在当天路线滚动列表顶部。它用于解释人流、交通、纪念或节庆语境，不进入地点详情，也不成为默认安排。
 - 普通 POI 始终可以加入日期；event synthetic POI 只有 `eventStatus === "confirmed"` 可以加入。其他状态在详情日期选择、速查加入按钮和当天候选加入按钮中统一 disabled，并显示“等待具体节目”或“等待场次确认”；最终 `assignPoiToDay` mutation boundary 会再次拒绝写入，旧 storage 中残留的非确认 event assignment 也不会恢复为有效安排。
-- 默认 assignment 与浏览器恢复 assignment 都先经过同一 `sanitizeEventAssignments`，因此 status 从 confirmed 变为 pending 后不会靠旧 storage 继续出现在当天路线。
+- 默认 assignment 与浏览器恢复 assignment 都先经过同一 `sanitizeEventAssignments`：status 从 confirmed 变为 pending 的 event、以及已经从当前 event 数据中删除的 `event:*` 都不会靠旧 storage 继续出现在当天路线；未知的普通非 event POI id 仍保留，兼容旧地图状态。
 - 当前公开 fixture 以 Art Basel Paris 官方公众开放日作为 confirmed venue 示例；Castanyada 和诸圣节只有官方传统日期、没有足够具体的 2026 街区节目，因此保持 `program-pending`，分别进入 host detail 与 Barcelona 当天城市提示。
 
 ## 状态恢复

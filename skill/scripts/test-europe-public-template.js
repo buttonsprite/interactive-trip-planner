@@ -146,12 +146,15 @@ for (const label of ["default", "restored"]) {
     normal: { dayId: "d1", order: 1 },
     "event:confirmed.event-1": { dayId: "d1", order: 2 },
     "event:pending-event": { dayId: "d1", order: 3 },
+    "event:removed-event": { dayId: "d1", order: 4 },
+    "legacy-missing-poi": { dayId: "d1", order: 5 },
   };
   const sanitized = JSON.parse(JSON.stringify(eventRuntime.sanitizeEventAssignments(input, assignmentItems)));
   assert.deepEqual(sanitized, {
     normal: { dayId: "d1", order: 1 },
     "event:confirmed.event-1": { dayId: "d1", order: 2 },
-  }, `${label} assignments must exclude pending venue events`);
+    "legacy-missing-poi": { dayId: "d1", order: 5 },
+  }, `${label} assignments must exclude pending and removed events`);
   assert.ok(input["event:pending-event"], `${label} sanitization must not mutate its input`);
 }
 assert.ok(

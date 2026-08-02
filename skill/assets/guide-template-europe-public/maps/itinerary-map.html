@@ -9941,7 +9941,8 @@
       const itemById = new Map((Array.isArray(items) ? items : []).map((item) => [item.id, item]));
       return Object.fromEntries(Object.entries(assignments || {}).filter(([poiId]) => {
         const item = itemById.get(poiId);
-        return !item || isEventAssignable(item);
+        if (!item) return !poiId.startsWith("event:");
+        return isEventAssignable(item);
       }));
     }
 

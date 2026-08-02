@@ -22,6 +22,7 @@
 ## 修改行程
 
 - 优先级、加入/移出日期与同日顺序沿用欧洲地图原交互并立即保存。优先级变化统一刷新动态候选排序、地点列表和地图可见 marker，保证移动端 top-8 候选口径一致；桌面与手机都从卡片左侧 44px 专用手柄启动排序，卡片正文仍打开详情，右侧按钮仍负责移出或精确上移/下移；移出的地点重新参与同城动态候选排序。
+- 恢复浏览器中已保存的行程后，先移除已经不再合格的 event assignment，再按用户当前有效的日期归类与移除状态，把每一天的正数路线序号归一化为连续的 `1..N`。迁移只写入序号确实变化的 assignment override，不改动 `removed`、默认行程、零或负数的住宿基底语义，也不制造修改记录；没有变化时不重复写入浏览器存储。
 - 排序手柄按住 160ms 后才进入拖动状态。拖动卡片浮起，目标位置出现插入线；手指进入列表顶部或底部 48px 时只自动滚动当天路线列表，速度随靠近边缘而增加并限制在每帧 14px。`pointercancel`、页面级 `Escape` 或未改变位置都会取消本次排序，不写入修改。
 - 松手改变顺序后调用原有 `reorderDayPois`，因此沿用已有的修改记录、撤销快照、浏览器保存、重新编号、路线弱化和“请 Codex 重新安排”闭环。受影响日期不再把旧相邻交通或规划估算描述成新顺序的有效交通，统一显示“顺序或安排已调整，交通待复核”。
 - 每次上述修改会在同一份公开 itinerary plan 状态中保存包含 `type / before / after / affectedDays` 的结构化修改记录和最多 20 步撤销快照；移动端底部工具栏可撤销上一步、查看原值、新值与受影响日期。撤销后若没有剩余修改，汇总自动关闭。
@@ -35,6 +36,7 @@
 - 浏览器以同一个 traveler visibility gate 消费活动：id 必须符合 `/^[A-Za-z0-9][A-Za-z0-9._-]*$/`，且 status 不能是 `historical-lead`。不符合 gate 的 venue 不生成 synthetic POI，hosted/citywide 也不进入任何 HTML renderer，避免历史线索伪装成当前活动或把未经约束的 id 带入 marker 的 data attribute。转换、状态清理、日期匹配和 event HTML 由同一个 bounded pure runtime block 提供，Node VM contract tests 直接执行这份 shipped logic。
 - `hosted` 活动跟随 `hostPoiId`，在该地点原有类型化详情段之后显示日期、自然语言状态、安排建议、注意事项和官网入口；不显示 schema enum 或 `sourceIds`。
 - `citywide` 活动先取合法 ISO `day.date`；没有 ISO 时才按旅行年份解析当天 `MM/DD` 或 `MM-DD`，再与起止日期及城市（含可选 `affectedCities`）匹配，并显示在当天路线滚动列表顶部。它用于解释人流、交通、纪念或节庆语境，不进入地点详情，也不成为默认安排。
+- 桌面日期说明、手机 app bar 与当天详情摘要统一把正式安排拆成“路线站点 / 住宿基底 / 体验与吃喝”三个计数。匹配当天与城市的 `citywide` 记录另显示“同期活动提示 N 条，不计入路线编号”；没有可见提示时不显示这句话，活动提示不会增加路线总数、体验数或站点序号。
 - 普通 POI 始终可以加入日期；event synthetic POI 必须同时满足 `confirmed + venue + 当天落在活动窗口内 + day.city 命中 event.city/affectedCities`。详情日期下拉只列合格日期，速查加入按钮、当天候选、最终 `assignPoiToDay` mutation boundary 都调用同一 day-specific helper；其他状态显示“等待具体节目”或“等待场次确认”，已确认但日期/城市不符时显示“不在活动日期或城市”。
 - 默认 assignment 与浏览器恢复 assignment 都先经过同一 `sanitizeEventAssignments`：活动被删除、status/scope 退回、活动日期或城市变化、目标日期消失或不再落在窗口内时，旧 `event:*` assignment 都会移除；未知的普通非 event POI id 仍保留，兼容旧地图状态。
 - 当前公开 fixture 以 Art Basel Paris 官方公众开放日作为 confirmed venue 示例；Castanyada 和诸圣节只有官方传统日期、没有足够具体的 2026 街区节目，因此保持 `program-pending`，分别进入 host detail 与 Barcelona 当天城市提示。

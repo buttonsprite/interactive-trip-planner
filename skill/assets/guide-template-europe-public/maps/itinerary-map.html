@@ -10401,6 +10401,73 @@
     }
     /* POI_EVIDENCE_RUNTIME_END */
 
+    function buildSavedOrderOverrides(defaultAssignments, savedAssignments, removed, dayIds) {
+      const validDayIds = new Set(Array.isArray(dayIds) ? dayIds : []);
+      const defaults = defaultAssignments && typeof defaultAssignments === "object"
+        ? defaultAssignments
+        : {};
+      const saved = savedAssignments && typeof savedAssignments === "object"
+        ? savedAssignments
+        : {};
+      const removedFlags = removed && typeof removed === "object" ? removed : {};
+      const poiIds = [...new Set([...Object.keys(defaults), ...Object.keys(saved)])];
+      const positiveStopsByDay = new Map();
+
+      poiIds.forEach((poiId, sourceIndex) => {
+        if (removedFlags[poiId]) return;
+        const savedAssignment = saved[poiId];
+        const defaultAssignment = defaults[poiId];
+        const assignment = savedAssignment && typeof savedAssignment === "object"
+          ? savedAssignment
+          : defaultAssignment;
+        if (!assignment || !validDayIds.has(assignment.dayId) || Number(assignment.order) <= 0) return;
+        if (!positiveStopsByDay.has(assignment.dayId)) {
+          positiveStopsByDay.set(assignment.dayId, []);
+        }
+        positiveStopsByDay.get(assignment.dayId).push({
+          poiId,
+          dayId: assignment.dayId,
+          order: Number(assignment.order),
+          sourceIndex
+        });
+      });
+
+      const overrides = {};
+      for (const stops of positiveStopsByDay.values()) {
+        stops
+          .sort((left, right) => left.order - right.order || left.sourceIndex - right.sourceIndex)
+          .forEach((stop, index) => {
+            const normalizedOrder = index + 1;
+            if (stop.order !== normalizedOrder) {
+              overrides[stop.poiId] = { dayId: stop.dayId, order: normalizedOrder };
+            }
+          });
+      }
+      return overrides;
+    }
+
+    function summarizeScheduledPlaces(dayPois) {
+      const scheduled = Array.isArray(dayPois) ? dayPois : [];
+      const lodgingBases = scheduled.filter(({ item }) => item?.category === "hotel").length;
+      return {
+        total: scheduled.length,
+        lodgingBases,
+        experiences: scheduled.length - lodgingBases
+      };
+    }
+
+    function formatScheduledPlacesSummary(dayPois) {
+      const summary = summarizeScheduledPlaces(dayPois);
+      return `${summary.total} 个路线站点：住宿基底 ${summary.lodgingBases}，体验与吃喝 ${summary.experiences}`;
+    }
+
+    function formatCityEventNoticeSummary(eventCount) {
+      const count = Number(eventCount);
+      return Number.isInteger(count) && count > 0
+        ? `同期活动提示 ${count} 条，不计入路线编号`
+        : "";
+    }
+
     /* EVENT_RUNTIME_PURE_START */
     function isSlugSafeEventId(value) {
       return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value);
@@ -10818,6 +10885,16 @@
     const defaultItineraryAssignments = sanitizeEventAssignments(rawDefaultItineraryAssignments, pois, itineraryDays, PUBLIC_TRIP_DATA.trip.startDate);
     const itineraryPlan = loadItineraryPlan();
     itineraryPlan.assignments = sanitizeEventAssignments(itineraryPlan.assignments, pois, itineraryDays, PUBLIC_TRIP_DATA.trip.startDate);
+    const savedOrderOverrides = buildSavedOrderOverrides(
+      defaultItineraryAssignments,
+      itineraryPlan.assignments,
+      itineraryPlan.removed,
+      itineraryDays.map((day) => day.id)
+    );
+    if (Object.keys(savedOrderOverrides).length) {
+      Object.assign(itineraryPlan.assignments, savedOrderOverrides);
+      saveItineraryPlan(itineraryPlan);
+    }
     const clonePlainData = (value) => JSON.parse(JSON.stringify(value));
     const createItinerarySnapshot = () => ({
       assignments: clonePlainData(itineraryPlan.assignments),
@@ -11484,12 +11561,17 @@
         dayModeNote.textContent = `${selectedDay.short} 是交通日，地图只显示机场/转机/移动节点；速查清单自动显示全部地点。`;
         return;
       }
-      const dayPois = getDayPois(selectedDay.id).length;
-      const candidatePois = getDayCandidatePois(selectedDay.id, getDayPois(selectedDay.id)).items.length;
+      const dayPois = getDayPois(selectedDay.id);
+      const candidatePois = getDayCandidatePois(selectedDay.id, dayPois).items.length;
+      const cityEventNoticeCount = getCityEventsForDay(
+        tripEvents,
+        selectedDay,
+        PUBLIC_TRIP_DATA.trip.startDate
+      ).length;
       const sequenceNote = hasNumberedPoisForDay(selectedDay.id)
         ? "地图用小圆数字和顺序引导线表示当天先后；引导线不代表实际道路，完整交通见下方时间线。"
         : "地图用大圆数字表示当天行程节点。";
-      dayModeNote.textContent = `${selectedDay.short} 当前已安排 ${dayPois} 个地点；${appState.dayView.showCandidates ? `同时显示 ${candidatePois} 个同城候选。` : "候选地点已隐藏。"}再次点击该日期可取消选择。${sequenceNote}`
+      dayModeNote.textContent = `${selectedDay.short} 当前安排：${formatScheduledPlacesSummary(dayPois)}；${formatCityEventNoticeSummary(cityEventNoticeCount) ? `${formatCityEventNoticeSummary(cityEventNoticeCount)}；` : ""}${appState.dayView.showCandidates ? `同时显示 ${candidatePois} 个同城候选。` : "候选地点已隐藏。"}再次点击该日期可取消选择。${sequenceNote}`
     };
 
     const setItineraryVisibility = () => {
@@ -12193,7 +12275,14 @@
 
       if (mode === "day" && selectedDay) {
         mobileAppTitle.textContent = `${selectedDay.short} · ${cityLabels[selectedDay.city] || selectedDay.city}`;
-        mobileAppMeta.textContent = `${getDayPois(selectedDay.id).length} 个地点`;
+        mobileAppMeta.textContent = [
+          formatScheduledPlacesSummary(getDayPois(selectedDay.id)),
+          formatCityEventNoticeSummary(getCityEventsForDay(
+            tripEvents,
+            selectedDay,
+            PUBLIC_TRIP_DATA.trip.startDate
+          ).length)
+        ].filter(Boolean).join("；");
       } else if (mode === "detail" && selectedEntry) {
         mobileAppTitle.textContent = getZhName(selectedEntry.item);
         mobileAppMeta.textContent = `${cityLabels[selectedEntry.item.city] || selectedEntry.item.city} · ${poiCategories[selectedEntry.item.category].label}`;
@@ -12574,8 +12663,13 @@
       const movableDayPois = dayPois.filter(({ assignment }) => Number(assignment.order) > 0);
       const needsReroute = Boolean(itineraryPlan.dirtyDays[dayId]);
       const cityEventNoticesHtml = renderCityEventNotices(day);
+      const cityEventNoticeSummary = formatCityEventNoticeSummary(getCityEventsForDay(
+        tripEvents,
+        day,
+        PUBLIC_TRIP_DATA.trip.startDate
+      ).length);
       poiDetailDayHeading.innerHTML = `<span class="desktop-only-label">${escapeHtml(day.short)}</span><span class="mobile-only-label">当天安排</span>`;
-      poiDetailDaySummary.textContent = `${cityLabels[day.city] || day.city} · ${dayPois.length} 个地点${needsReroute ? " · 路线需要重新安排" : ""}`;
+      poiDetailDaySummary.textContent = `${cityLabels[day.city] || day.city} · ${formatScheduledPlacesSummary(dayPois)}${cityEventNoticeSummary ? ` · ${cityEventNoticeSummary}` : ""}${needsReroute ? " · 路线需要重新安排" : ""}`;
       poiDetailDaySummary.classList.toggle("needs-reroute", needsReroute);
       if (day.city === "Transit") {
         poiDetailDayList.innerHTML = composeDayListEventSections(

@@ -4936,7 +4936,11 @@
     "note": "2026 年 10 月 23-25 日在 Grand Palais 举行的国际当代艺术展，是巴黎段最强的同期艺术事件。",
     "plan": "10/24 傍晚先看重点，10/25 留完整时段深入；首日抵达延误时把主要参观放到 10/25。",
     "tip": "需购票并按票种入场；公众开放时间和单次入场规则出发前复核。",
-    "source": "Art Basel Paris official event and ticket pages, checked 2026-07-19"
+    "source": "Art Basel Paris official event and ticket pages, checked 2026-07-19",
+    "sourceIds": [
+      "art-basel-paris-2026",
+      "art-basel-paris-tickets-2026"
+    ]
   },
   {
     "city": "Paris",

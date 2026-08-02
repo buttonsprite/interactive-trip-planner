@@ -57,6 +57,7 @@ window.TRIP_DATA = {
       "plan": "只有住宿计划变化、且更重视玛黑夜生活时再比较；当前圣日耳曼住宿片区 对 10/26 左岸艺术日和 10/27 卢浮宫日更顺。",
       "tip": "越靠近酒吧街和大路越吵；订房前看电梯、空调、隔音、地铁站距离和夜间回程路线。",
       "source": "Paris neighborhood guide 2026 / first-time area comparison + 本行程酒吧动线",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Paris%20hotel%20base%20-%20Marais%20%2F%20Bastille%20edge%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E9%BB%8E%E4%BD%8F%E5%AE%BF%E7%89%87%E5%8C%BA%20-%20%E7%8E%9B%E9%BB%91%20%2F%20%E5%B7%B4%E5%A3%AB%E5%BA%95%E8%BE%B9%E7%BC%98%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Paris hotel base - Marais / Bastille edge Paris"
@@ -78,6 +79,7 @@ window.TRIP_DATA = {
       "plan": "服务 10/24-10/28 巴黎段：首日恢复体力，左岸艺术日步行顺，去大皇宫和右岸也容易衔接。",
       "tip": "先比较电梯、隔音、寄存、取消政策和夜间回程；具体酒店由使用者按预算再选。",
       "source": "Paris official tourism neighborhood information + current route clustering",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Paris%20hotel%20base%20-%20Saint-Germain-des-Pr%C3%A9s%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E9%BB%8E%E4%BD%8F%E5%AE%BF%E7%89%87%E5%8C%BA%20-%20%E5%9C%A3%E6%97%A5%E8%80%B3%E6%9B%BC%E5%BE%B7%E4%BD%A9%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Paris hotel base - Saint-Germain-des-Prés Paris"
@@ -99,6 +101,7 @@ window.TRIP_DATA = {
       "plan": "适合 10/27 巴黎秋季城市日和右岸酒吧线；如果想减少跨区交通，Sentier / Bourse 是实用折中。",
       "tip": "不同街道氛围差异大；避免太靠近大站或纯商务街的无聊位置。",
       "source": "Paris neighborhood guide 2026 / current route clustering",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Paris%20hotel%20base%20-%20Sentier%20%2F%20Bourse%20%2F%20Op%C3%A9ra%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E9%BB%8E%E4%BD%8F%E5%AE%BF%E7%89%87%E5%8C%BA%20-%20%E6%A1%91%E6%8D%B7%20%2F%20%E4%BA%A4%E6%98%93%E6%89%80%20%2F%20%E6%AD%8C%E5%89%A7%E9%99%A2%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Paris hotel base - Sentier / Bourse / Opéra Paris"
@@ -120,6 +123,7 @@ window.TRIP_DATA = {
       "plan": "适合 10/29-10/31 尼斯段；比只住老城更利于交通和 day trip，晚上回程也更清楚。",
       "tip": "看清楚离海边、tram、火车站各自距离；不要为了海景牺牲去车站和机场的便利。",
       "source": "Nice local neighborhood guide 2026 / Riviera day trip logistics",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Nice%20hotel%20base%20-%20Carr%C3%A9%20d'Or%20%2F%20Jean%20M%C3%A9decin%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%BC%E6%96%AF%E4%BD%8F%E5%AE%BF%E7%89%87%E5%8C%BA%20-%20%E9%BB%84%E9%87%91%E6%96%B9%E5%9D%97%20%2F%20%E8%AE%A9%C2%B7%E6%A2%85%E5%BE%B7%E6%A1%91%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Nice hotel base - Carré d'Or / Jean Médecin Nice"
@@ -141,6 +145,7 @@ window.TRIP_DATA = {
       "plan": "适合你想把尼斯当作海边老城体验来住；抵达日和老城晚餐最顺。",
       "tip": "老楼、电梯、噪音、车行进入和拖箱路面要重点看；早市和夜间餐饮会增加声响。",
       "source": "Nice local neighborhood guide 2026 / old town pros and cons",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Nice%20hotel%20base%20-%20Vieux%20Nice%20%2F%20Cours%20Saleya%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%BC%E6%96%AF%E4%BD%8F%E5%AE%BF%E7%89%87%E5%8C%BA%20-%20%E8%80%81%E5%9F%8E%20%2F%20%E8%90%A8%E9%9B%B7%E4%BA%9A%E5%B9%BF%E5%9C%BA%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Nice hotel base - Vieux Nice / Cours Saleya Nice"
@@ -162,6 +167,7 @@ window.TRIP_DATA = {
       "plan": "适合你想把 Port、Garibaldi、wine bar 和老城晚餐串起来；去 Villefranche 也顺。",
       "tip": "离主火车站稍远；如果主要靠火车 day trip，需要确认 tram/步行换乘。",
       "source": "Nice local neighborhood guide 2026 / Port neighborhood notes",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Nice%20hotel%20base%20-%20Port%20%2F%20Garibaldi%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%BC%E6%96%AF%E4%BD%8F%E5%AE%BF%E7%89%87%E5%8C%BA%20-%20%E6%B8%AF%E5%8F%A3%20%2F%20%E5%8A%A0%E9%87%8C%E6%B3%A2%E7%AC%AC%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Nice hotel base - Port / Garibaldi Nice"
@@ -183,6 +189,7 @@ window.TRIP_DATA = {
       "plan": "适合 10/31-11/5 巴塞罗那城市段；尤其适合你晚上喝酒后不想从老城深处走很远。",
       "tip": "街区很大，优先靠 Passeig de Gràcia / Diagonal / Universitat 交通轴；避开过于临大车道的低隔音房。",
       "source": "Barcelona local neighborhood guide 2026 / Eixample practical stay recommendation",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Barcelona%20hotel%20base%20-%20Eixample%20%2F%20Passeig%20de%20Gr%C3%A0cia%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E4%BD%8F%E5%AE%BF%E7%89%87%E5%8C%BA%20-%20%E6%89%A9%E5%B1%95%E5%8C%BA%20%2F%20%E6%A0%BC%E6%8B%89%E8%A5%BF%E4%BA%9A%E5%A4%A7%E9%81%93%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Barcelona hotel base - Eixample / Passeig de Gràcia Barcelona"
@@ -204,6 +211,7 @@ window.TRIP_DATA = {
       "plan": "适合你更重视 Born tapas crawl 和节庆氛围时选择；11/1 和 11/3 很顺。",
       "tip": "街巷夜间噪音、游客流和拖箱路面明显；住宿要看是否可车达、隔音和夜间安全感。",
       "source": "Barcelona local neighborhood guide 2026 / El Born atmosphere vs convenience",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Barcelona%20hotel%20base%20-%20El%20Born%20%2F%20Santa%20Caterina%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E4%BD%8F%E5%AE%BF%E7%89%87%E5%8C%BA%20-%20%E5%8D%9A%E6%81%A9%20%2F%20%E5%9C%A3%E5%8D%A1%E7%89%B9%E7%90%B3%E5%A8%9C%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Barcelona hotel base - El Born / Santa Caterina Barcelona"
@@ -225,6 +233,7 @@ window.TRIP_DATA = {
       "plan": "适合你想降低游客感、晚上在 Gràcia 喝酒吃饭；但去 Born、机场和节庆核心会多一点交通。",
       "tip": "不要住得太靠山上，否则每天回程累；看地铁和夜间打车便利。",
       "source": "Barcelona local neighborhood guide 2026 / Gràcia local community notes",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Barcelona%20hotel%20base%20-%20Gr%C3%A0cia%20%2F%20Diagonal%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E4%BD%8F%E5%AE%BF%E7%89%87%E5%8C%BA%20-%20%E6%A0%BC%E6%8B%89%E8%A5%BF%E4%BA%9A%20%2F%20%E5%AF%B9%E8%A7%92%E7%BA%BF%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Barcelona hotel base - Gràcia / Diagonal Barcelona"
@@ -246,6 +255,7 @@ window.TRIP_DATA = {
       "plan": "适合 11/5-11/9 塞维利亚段；比 Santa Cruz 更方便吃喝，比 Alameda 更靠近核心景点。",
       "tip": "看街道是否安静、是否靠近酒吧街；11 月初白天仍可能偏暖，早晚温差明显，空调和遮阳很重要。",
       "source": "Seville neighborhood guide 2026 / Arenal and Centro food access",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sevilla%20hotel%20base%20-%20Arenal%20%2F%20Centro%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A%E4%BD%8F%E5%AE%BF%E7%89%87%E5%8C%BA%20-%20%E9%98%BF%E9%9B%B7%E7%BA%B3%E5%B0%94%20%2F%20%E4%B8%AD%E5%BF%83%E5%8C%BA%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Sevilla hotel base - Arenal / Centro Sevilla"
@@ -267,6 +277,7 @@ window.TRIP_DATA = {
       "plan": "适合你想减少白天通勤、把王宫和大教堂放在门口；到达日最顺。",
       "tip": "游客和团队多，部分小巷夜间安静但绕；订房要看可达性、噪音和是否容易打车。",
       "source": "Seville neighborhood guide 2026 / Santa Cruz first-time stay notes",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sevilla%20hotel%20base%20-%20Santa%20Cruz%20%2F%20Catedral%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A%E4%BD%8F%E5%AE%BF%E7%89%87%E5%8C%BA%20-%20%E5%9C%A3%E5%85%8B%E9%B2%81%E6%96%AF%20%2F%20%E5%A4%A7%E6%95%99%E5%A0%82%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Sevilla hotel base - Santa Cruz / Catedral Sevilla"
@@ -288,6 +299,7 @@ window.TRIP_DATA = {
       "plan": "适合你想多看本地夜生活和 tapas，而不是只住景点脚下；11/8 慢日会很顺。",
       "tip": "离王宫大教堂更远；深夜回程和步行路径要看酒店具体位置。",
       "source": "Seville neighborhood guide 2026 / Alameda local nightlife notes",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sevilla%20hotel%20base%20-%20Alameda%20%2F%20San%20Lorenzo%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A%E4%BD%8F%E5%AE%BF%E7%89%87%E5%8C%BA%20-%20%E9%98%BF%E6%8B%89%E6%A2%85%E8%BE%BE%20%2F%20%E5%9C%A3%E6%B4%9B%E4%BC%A6%E7%B4%A2%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Sevilla hotel base - Alameda / San Lorenzo Sevilla"
@@ -307,6 +319,7 @@ window.TRIP_DATA = {
       ],
       "note": "2026 Europe Top50 #5；2025 World Top50 #17，Art Nouveau 氛围，适合正式 cocktail night。",
       "source": "Europe's 50 Best Bars 2026 + World's 50 Best Bars 2025",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bar%20Nouveau%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%96%B0%E8%89%BA%E6%9C%AF%E9%85%92%E5%90%A7%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Bar Nouveau Paris"
@@ -326,6 +339,7 @@ window.TRIP_DATA = {
       ],
       "note": "2026 Europe Top50 #7；2025 World Top50 #20，cocktail pub 气质，轻松也有酒单。",
       "source": "Europe's 50 Best Bars 2026 + World's 50 Best Bars 2025",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=The%20Cambridge%20Public%20House%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%89%91%E6%A1%A5%E5%85%AC%E5%85%B1%E9%85%92%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "The Cambridge Public House Paris"
@@ -345,6 +359,7 @@ window.TRIP_DATA = {
       ],
       "note": "2026 Europe Top50 #19；2025 World Top50 #30，靠近 Palais Royal，适合和右岸散步合并。",
       "source": "Europe's 50 Best Bars 2026 + World's 50 Best Bars 2025",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Danico%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%BE%BE%E5%B0%BC%E7%A7%91%E9%85%92%E5%90%A7%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Danico Paris"
@@ -364,6 +379,7 @@ window.TRIP_DATA = {
       ],
       "note": "2026 Europe Top50 #27，1911 年老派鸡尾酒机构，Bloody Mary / French 75 等经典酒谱语境很强。",
       "source": "Europe's 50 Best Bars 2026 官方榜单",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Harry's%20Bar%20Paris%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E9%BB%8E%E5%93%88%E5%88%A9%E9%85%92%E5%90%A7%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Harry's Bar Paris Paris"
@@ -383,6 +399,7 @@ window.TRIP_DATA = {
       ],
       "note": "2026 Europe Top50 #34，季节性 cocktail + plate，适合和 Montorgueil、Sentier 晚间线合并。",
       "source": "Europe's 50 Best Bars 2026 官方榜单 + 官方地址",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=De%20Vie%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=De%20Vie%20%E9%85%92%E5%90%A7%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "De Vie Paris"
@@ -401,6 +418,7 @@ window.TRIP_DATA = {
         2.3808
       ],
       "note": "自然酒小店，适合餐前一杯或买瓶酒。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Septime%20La%20Cave%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Septime%20La%20Cave%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Septime La Cave Paris"
@@ -419,6 +437,7 @@ window.TRIP_DATA = {
         2.3657
       ],
       "note": "自然酒 + 小盘，和运河散步同线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Verre%20Vol%C3%A9%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Le%20Verre%20Vol%C3%A9%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Le Verre Volé Paris"
@@ -437,6 +456,7 @@ window.TRIP_DATA = {
         2.3763
       ],
       "note": "11 区热闹酒馆，适合感受本地晚上。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Aux%20Deux%20Amis%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Aux%20Deux%20Amis%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Aux Deux Amis Paris"
@@ -455,6 +475,7 @@ window.TRIP_DATA = {
         2.3836
       ],
       "note": "自然酒 + 冰淇淋，酒和甜品交集点。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Folderol%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Folderol%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Folderol Paris"
@@ -473,6 +494,7 @@ window.TRIP_DATA = {
         2.3783
       ],
       "note": "老派 wine bar，搭配 Aligre 市场最有生活感。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Baron%20Rouge%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Le%20Baron%20Rouge%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Le Baron Rouge Paris"
@@ -491,6 +513,7 @@ window.TRIP_DATA = {
         2.3383
       ],
       "note": "经典 wine bar，英文友好，适合系统喝法国酒。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Willi's%20Wine%20Bar%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Willi's%20Wine%20Bar%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Willi's Wine Bar Paris"
@@ -509,6 +532,7 @@ window.TRIP_DATA = {
         2.3715
       ],
       "note": "小而轻松的自然酒点，适合晚餐前后。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Buvette%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=La%20Buvette%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "La Buvette Paris"
@@ -527,6 +551,7 @@ window.TRIP_DATA = {
         4.0317
       ],
       "note": "巴黎出发 Champagne 一日游主城之一。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Reims%20%2F%20Champagne%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Reims%20%2F%20Champagne%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Reims / Champagne Paris"
@@ -545,6 +570,7 @@ window.TRIP_DATA = {
         3.956
       ],
       "note": "Avenue de Champagne，适合做起泡酒主题一日线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=%C3%89pernay%20%2F%20Champagne%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%C3%89pernay%20%2F%20Champagne%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Épernay / Champagne Paris"
@@ -563,6 +589,7 @@ window.TRIP_DATA = {
         2.3339
       ],
       "note": "macaron / Ispahan 方向，甜品优先级高。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Pierre%20Herm%C3%A9%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Pierre%20Herm%C3%A9%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Pierre Hermé Paris"
@@ -581,6 +608,7 @@ window.TRIP_DATA = {
         2.3317
       ],
       "note": "视觉系水果甜点，需预留排队/预约成本。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=C%C3%A9dric%20Grolet%20Op%C3%A9ra%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=C%C3%A9dric%20Grolet%20Op%C3%A9ra%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Cédric Grolet Opéra Paris"
@@ -599,6 +627,7 @@ window.TRIP_DATA = {
         2.3475
       ],
       "note": "巴黎老牌甜品店，适合和 Montorgueil 街区合并。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Stohrer%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Stohrer%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Stohrer Paris"
@@ -617,6 +646,7 @@ window.TRIP_DATA = {
         2.3686
       ],
       "note": "年轻面包甜点店，靠近右岸生活区。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Boulangerie%20Utopie%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Boulangerie%20Utopie%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Boulangerie Utopie Paris"
@@ -635,6 +665,7 @@ window.TRIP_DATA = {
         2.3638
       ],
       "note": "escargot pistache / chocolat，适合早晨或下午。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Du%20Pain%20et%20des%20Id%C3%A9es%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Du%20Pain%20et%20des%20Id%C3%A9es%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Du Pain et des Idées Paris"
@@ -653,6 +684,7 @@ window.TRIP_DATA = {
         2.3304
       ],
       "note": "苹果挞、乡村面包，老派巴黎。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Poil%C3%A2ne%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Poil%C3%A2ne%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Poilâne Paris"
@@ -671,6 +703,7 @@ window.TRIP_DATA = {
         2.3589
       ],
       "note": "Paris-Brest / millefeuille，和 Marais 同线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Yann%20Couvreur%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Yann%20Couvreur%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Yann Couvreur Paris"
@@ -689,6 +722,7 @@ window.TRIP_DATA = {
         2.3322
       ],
       "note": "巧克力，兼具雕塑感和伴手礼属性。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Patrick%20Roger%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Patrick%20Roger%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Patrick Roger Paris"
@@ -707,6 +741,7 @@ window.TRIP_DATA = {
         2.3266
       ],
       "note": "印象派主线，巴黎艺术优先级最高之一。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20d'Orsay%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A5%A5%E8%B5%9B%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Musée d'Orsay Paris"
@@ -725,6 +760,7 @@ window.TRIP_DATA = {
         2.3226
       ],
       "note": "Monet 睡莲，体量适中，适合和河岸散步合并。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20de%20l'Orangerie%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%A9%98%E5%9B%AD%E7%BE%8E%E6%9C%AF%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Musée de l'Orangerie Paris"
@@ -743,6 +779,7 @@ window.TRIP_DATA = {
         2.3158
       ],
       "note": "雕塑 + 花园，节奏比大馆更舒服。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20Rodin%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%BD%97%E4%B8%B9%E7%BE%8E%E6%9C%AF%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Musée Rodin Paris"
@@ -761,6 +798,7 @@ window.TRIP_DATA = {
         2.3626
       ],
       "note": "Marais 中心，适合街区+美术馆半日。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20Picasso%20Paris%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E9%BB%8E%E6%AF%95%E5%8A%A0%E7%B4%A2%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Musée Picasso Paris Paris"
@@ -779,6 +817,7 @@ window.TRIP_DATA = {
         2.263
       ],
       "note": "建筑和展览都值得看，离市中心稍远。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Fondation%20Louis%20Vuitton%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%B7%AF%E6%98%93%E5%A8%81%E7%99%BB%E5%9F%BA%E9%87%91%E4%BC%9A%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Fondation Louis Vuitton Paris"
@@ -797,6 +836,7 @@ window.TRIP_DATA = {
         2.3789
       ],
       "note": "巴黎生活感最强市场之一，和 Le Baron Rouge 同线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=March%C3%A9%20d'Aligre%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%98%BF%E5%88%A9%E6%A0%BC%E5%B8%82%E5%9C%BA%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Marché d'Aligre Paris"
@@ -815,6 +855,7 @@ window.TRIP_DATA = {
         2.365
       ],
       "note": "散步、咖啡、自然酒，适合轻松半日。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Canal%20Saint-Martin%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E9%A9%AC%E4%B8%81%E8%BF%90%E6%B2%B3%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Canal Saint-Martin Paris"
@@ -833,6 +874,7 @@ window.TRIP_DATA = {
         2.361
       ],
       "note": "Marais 市场，吃喝选择密集。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=March%C3%A9%20des%20Enfants%20Rouges%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%BA%A2%E5%AD%A9%E5%84%BF%E5%B8%82%E5%9C%BA%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Marché des Enfants Rouges Paris"
@@ -851,6 +893,7 @@ window.TRIP_DATA = {
         2.385
       ],
       "note": "更本地、更年轻，适合晚上小酒馆。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Belleville%20%2F%20M%C3%A9nilmontant%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%B4%9D%E5%B0%94%E7%BB%B4%E5%B0%94%20%2F%20%E6%A2%85%E5%B0%BC%E8%92%99%E5%BD%93%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Belleville / Ménilmontant Paris"
@@ -869,6 +912,7 @@ window.TRIP_DATA = {
         2.3768
       ],
       "note": "餐酒馆密度高，适合 tapas 式换店。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Oberkampf%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A5%A5%E8%B4%9D%E5%BA%B7%E5%A4%AB%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Oberkampf Paris"
@@ -887,6 +931,7 @@ window.TRIP_DATA = {
         2.3423
       ],
       "note": "Tadao Ando 改造的当代艺术馆，建筑和展览都强。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bourse%20de%20Commerce%20-%20Pinault%20Collection%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E9%BB%8E%E5%95%86%E5%93%81%E4%BA%A4%E6%98%93%E6%89%80%20-%20%E7%9A%AE%E8%AF%BA%E6%94%B6%E8%97%8F%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Bourse de Commerce - Pinault Collection Paris"
@@ -905,6 +950,7 @@ window.TRIP_DATA = {
         2.2975
       ],
       "note": "偏实验和当代艺术，适合晚上或展览型行程。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Palais%20de%20Tokyo%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E4%B8%9C%E4%BA%AC%E5%AE%AB%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Palais de Tokyo Paris"
@@ -923,6 +969,7 @@ window.TRIP_DATA = {
         2.3589
       ],
       "note": "摄影馆，和 Marais 街区动线很好合并。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Maison%20Europ%C3%A9enne%20de%20la%20Photographie%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%AC%A7%E6%B4%B2%E6%91%84%E5%BD%B1%E4%B9%8B%E5%AE%B6%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Maison Européenne de la Photographie Paris"
@@ -941,6 +988,7 @@ window.TRIP_DATA = {
         2.3625
       ],
       "note": "巴黎城市史博物馆，理解本地生活和城市变迁。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20Carnavalet%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8D%A1%E7%BA%B3%E7%93%A6%E8%8E%B1%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Musée Carnavalet Paris"
@@ -959,6 +1007,7 @@ window.TRIP_DATA = {
         2.3337
       ],
       "note": "装饰艺术、设计、时尚相关，适合你喜欢艺术和审美细节。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20des%20Arts%20D%C3%A9coratifs%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%A3%85%E9%A5%B0%E8%89%BA%E6%9C%AF%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Musée des Arts Décoratifs Paris"
@@ -977,6 +1026,7 @@ window.TRIP_DATA = {
         2.3105
       ],
       "note": "私宅美术馆，空间比大馆更有生活质感。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20Jacquemart-Andr%C3%A9%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%9B%85%E5%85%8B%E9%A9%AC%E5%B0%94-%E5%AE%89%E5%BE%B7%E7%83%88%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Musée Jacquemart-André Paris"
@@ -995,6 +1045,7 @@ window.TRIP_DATA = {
         2.3587
       ],
       "note": "小而独特的博物馆，适合避开大馆拥挤。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20de%20la%20Chasse%20et%20de%20la%20Nature%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%8B%A9%E7%8C%8E%E4%B8%8E%E8%87%AA%E7%84%B6%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Musée de la Chasse et de la Nature Paris"
@@ -1013,6 +1064,7 @@ window.TRIP_DATA = {
         2.3564
       ],
       "note": "建筑、展览和屋顶视角都值得，补巴黎多元文化面。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Institut%20du%20Monde%20Arabe%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%98%BF%E6%8B%89%E4%BC%AF%E4%B8%96%E7%95%8C%E5%AD%A6%E9%99%A2%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Institut du Monde Arabe Paris"
@@ -1031,6 +1083,7 @@ window.TRIP_DATA = {
         2.342
       ],
       "note": "周末跳蚤/古董市场，本地淘旧物和设计家具的人也会来。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Les%20Puces%20de%20Saint-Ouen%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E6%97%BA%E8%B7%B3%E8%9A%A4%E5%B8%82%E5%9C%BA%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Les Puces de Saint-Ouen Paris"
@@ -1049,6 +1102,7 @@ window.TRIP_DATA = {
         2.3054
       ],
       "note": "比 Saint-Ouen 更小更轻松的周末跳蚤市场。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=March%C3%A9%20aux%20Puces%20de%20Vanves%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%97%BA%E5%A4%AB%E8%B7%B3%E8%9A%A4%E5%B8%82%E5%9C%BA%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Marché aux Puces de Vanves Paris"
@@ -1067,6 +1121,7 @@ window.TRIP_DATA = {
         2.3412
       ],
       "note": "河岸旧书摊，适合把巴黎的阅读/闲逛文化串起来。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bouquinistes%20de%20la%20Seine%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A1%9E%E7%BA%B3%E6%B2%B3%E6%97%A7%E4%B9%A6%E6%91%8A%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Bouquinistes de la Seine Paris"
@@ -1085,6 +1140,7 @@ window.TRIP_DATA = {
         2.3372
       ],
       "note": "本地人午休、读书、带小孩和晒太阳的日常公园。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Jardin%20du%20Luxembourg%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8D%A2%E6%A3%AE%E5%A0%A1%E5%85%AC%E5%9B%AD%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Jardin du Luxembourg Paris"
@@ -1103,6 +1159,7 @@ window.TRIP_DATA = {
         2.3823
       ],
       "note": "东巴黎本地公园，适合看非明信片式巴黎。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Parc%20des%20Buttes-Chaumont%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%82%96%E8%92%99%E5%B1%B1%E4%B8%98%E5%85%AC%E5%9B%AD%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Parc des Buttes-Chaumont Paris"
@@ -1121,6 +1178,7 @@ window.TRIP_DATA = {
         2.34
       ],
       "note": "面包店、奶酪、咖啡和日常采购街，比纯景点更生活。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Rue%20des%20Martyrs%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%AE%89%E9%81%93%E8%80%85%E8%A1%97%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Rue des Martyrs Paris"
@@ -1139,6 +1197,7 @@ window.TRIP_DATA = {
         2.3714
       ],
       "note": "本地电影院和运河生活，晚上很适合看人群。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=MK2%20Quai%20de%20Seine%20%2F%20Bassin%20de%20la%20Villette%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=MK2%20%E5%A1%9E%E7%BA%B3%E6%B2%B3%E7%A0%81%E5%A4%B4%E5%BD%B1%E9%99%A2%20%2F%20%E7%BB%B4%E8%8E%B1%E7%89%B9%E6%B0%B4%E6%B1%A0%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "MK2 Quai de Seine / Bassin de la Villette Paris"
@@ -1157,6 +1216,7 @@ window.TRIP_DATA = {
         2.3743
       ],
       "note": "旧铁路空间改造的吃喝文化场，偏年轻和社区活动。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Ground%20Control%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Ground%20Control%20%E6%96%87%E5%8C%96%E7%A9%BA%E9%97%B4%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Ground Control Paris"
@@ -1175,6 +1235,7 @@ window.TRIP_DATA = {
         7.203
       ],
       "note": "尼斯近郊城市酒庄，南法段酒庄首选。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%A2teau%20de%20Bellet%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%B4%9D%E8%8E%B1%E9%85%92%E5%BA%84%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Château de Bellet Nice"
@@ -1193,6 +1254,7 @@ window.TRIP_DATA = {
         7.2136
       ],
       "note": "Bellet 另一家可选酒庄，适合半日线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Domaine%20de%20la%20Source%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%BA%90%E6%B3%89%E9%85%92%E5%BA%84%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Domaine de la Source Nice"
@@ -1211,6 +1273,7 @@ window.TRIP_DATA = {
         7.2618
       ],
       "note": "市区买酒/喝酒点，方便。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cave%20Rivoli%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Cave%20Rivoli%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Cave Rivoli Nice"
@@ -1229,6 +1292,7 @@ window.TRIP_DATA = {
         7.27
       ],
       "note": "自然酒方向，适合晚餐前一杯。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20P%C3%AAche%20%C3%A0%20la%20Vigne%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=La%20P%C3%AAche%20%C3%A0%20la%20Vigne%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "La Pêche à la Vigne Nice"
@@ -1247,6 +1311,7 @@ window.TRIP_DATA = {
         7.2765
       ],
       "note": "轻松 wine bar，和老城动线合并。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Comptoir%20des%20Fr%C3%A8res%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Le%20Comptoir%20des%20Fr%C3%A8res%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Le Comptoir des Frères Nice"
@@ -1265,6 +1330,7 @@ window.TRIP_DATA = {
         7.2541
       ],
       "note": "海边 aperitif 氛围，适合傍晚。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=H%C3%B4tel%20Amour%20Nice%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=H%C3%B4tel%20Amour%20Nice%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Hôtel Amour Nice Nice"
@@ -1283,6 +1349,7 @@ window.TRIP_DATA = {
         7.2582
       ],
       "note": "老派 Riviera 空间感，适合看酒店和喝一杯。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Negresco%20Bar%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Le%20Negresco%20Bar%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Le Negresco Bar Nice"
@@ -1301,6 +1368,7 @@ window.TRIP_DATA = {
         7.2764
       ],
       "note": "老城经典 gelato，游客多但方便。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Fenocchio%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Fenocchio%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Fenocchio Nice"
@@ -1319,6 +1387,7 @@ window.TRIP_DATA = {
         7.2702
       ],
       "note": "冰淇淋/甜点选择。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=N%C3%A9ron%20Glacier%20P%C3%A2tissier%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=N%C3%A9ron%20Glacier%20P%C3%A2tissier%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Néron Glacier Pâtissier Nice"
@@ -1337,6 +1406,7 @@ window.TRIP_DATA = {
         7.2754
       ],
       "note": "老派糖果、巧克力、水果蜜饯。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Maison%20Auer%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Maison%20Auer%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Maison Auer Nice"
@@ -1355,6 +1425,7 @@ window.TRIP_DATA = {
         7.2804
       ],
       "note": "socca 经典店，属于当地小吃，不是甜品但必吃。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Chez%20Pipo%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Chez%20Pipo%20%E5%B0%BC%E6%96%AF%E5%B0%8F%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Chez Pipo Nice"
@@ -1373,6 +1444,7 @@ window.TRIP_DATA = {
         7.275
       ],
       "note": "找老城面包店尝当地甜咸点心。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Tourte%20de%20blettes%20%2F%20Pissaladi%C3%A8re%20zone%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Tourte%20de%20blettes%20%2F%20Pissaladi%C3%A8re%20zone%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Tourte de blettes / Pissaladière zone Nice"
@@ -1391,6 +1463,7 @@ window.TRIP_DATA = {
         7.2762
       ],
       "note": "Nice 艺术主线之一。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20Matisse%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%A9%AC%E8%92%82%E6%96%AF%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Musée Matisse Nice"
@@ -1409,6 +1482,7 @@ window.TRIP_DATA = {
         7.2698
       ],
       "note": "Chagall 圣经主题作品，体量适中。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20Marc%20Chagall%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A4%8F%E5%8A%A0%E5%B0%94%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Musée Marc Chagall Nice"
@@ -1427,6 +1501,7 @@ window.TRIP_DATA = {
         7.3287
       ],
       "note": "花园和 Riviera 空间，适合海岸半日。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Villa%20Ephrussi%20de%20Rothschild%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%BD%97%E6%96%AF%E6%9F%B4%E5%B0%94%E5%BE%B7%E8%8A%B1%E5%9B%AD%E5%88%AB%E5%A2%85%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Villa Ephrussi de Rothschild Nice"
@@ -1445,6 +1520,7 @@ window.TRIP_DATA = {
         7.1157
       ],
       "note": "如果愿意离开海岸，艺术强度很高。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Fondation%20Maeght%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%A2%85%E6%A0%BC%E5%9F%BA%E9%87%91%E4%BC%9A%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Fondation Maeght Nice"
@@ -1463,6 +1539,7 @@ window.TRIP_DATA = {
         7.2763
       ],
       "note": "早市和老城生活核心。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cours%20Saleya%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%90%A8%E9%9B%B7%E4%BA%9A%E9%9B%86%E5%B8%82%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Cours Saleya Nice"
@@ -1481,6 +1558,7 @@ window.TRIP_DATA = {
         7.2622
       ],
       "note": "比老城更本地的市场动线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Lib%C3%A9ration%20Market%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%A7%A3%E6%94%BE%E5%B8%82%E5%9C%BA%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Libération Market Nice"
@@ -1499,6 +1577,7 @@ window.TRIP_DATA = {
         7.2843
       ],
       "note": "傍晚喝一杯、散步很好。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Port%20Lympia%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%9E%97%E7%9A%AE%E4%BA%9A%E6%B8%AF%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Port Lympia Nice"
@@ -1517,6 +1596,7 @@ window.TRIP_DATA = {
         7.3124
       ],
       "note": "海湾和晚餐点，尼斯短途首选之一。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Villefranche-sur-Mer%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%BB%A8%E6%B5%B7%E8%87%AA%E7%94%B1%E5%9F%8E%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Villefranche-sur-Mer Nice"
@@ -1535,6 +1615,7 @@ window.TRIP_DATA = {
         7.1253
       ],
       "note": "戛纳同线，更有老城生活感。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Antibes%20March%C3%A9%20Proven%C3%A7al%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%AE%89%E6%8F%90%E5%B8%83%E6%99%AE%E7%BD%97%E6%97%BA%E6%96%AF%E5%B8%82%E5%9C%BA%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Antibes Marché Provençal Nice"
@@ -1553,6 +1634,7 @@ window.TRIP_DATA = {
         7.0106
       ],
       "note": "戛纳主线，海边 + 老城一起看。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cannes%20Croisette%20%2F%20Le%20Suquet%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%88%9B%E7%BA%B3%E6%B5%B7%E6%BB%A8%E5%A4%A7%E9%81%93%20%2F%20%E8%8B%8F%E5%87%AF%E8%80%81%E5%9F%8E%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Cannes Croisette / Le Suquet Nice"
@@ -1571,6 +1653,7 @@ window.TRIP_DATA = {
         7.258
       ],
       "note": "Belle Époque 别墅里的城市与 Riviera 历史。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20Mass%C3%A9na%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%A9%AC%E5%A1%9E%E7%BA%B3%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Musée Masséna Nice"
@@ -1589,6 +1672,7 @@ window.TRIP_DATA = {
         7.2458
       ],
       "note": "尼斯美术馆，适合补一段 Riviera 艺术史。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20des%20Beaux-Arts%20Jules%20Ch%C3%A9ret%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%9C%B1%E5%B0%94%C2%B7%E8%B0%A2%E9%9B%B7%E7%BE%8E%E6%9C%AF%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Musée des Beaux-Arts Jules Chéret Nice"
@@ -1607,6 +1691,7 @@ window.TRIP_DATA = {
         7.2775
       ],
       "note": "老城巴洛克宫殿，小而有地方质感。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Palais%20Lascaris%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%8B%89%E6%96%AF%E5%8D%A1%E9%87%8C%E5%AE%AB%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Palais Lascaris Nice"
@@ -1625,6 +1710,7 @@ window.TRIP_DATA = {
         7.2758
       ],
       "note": "摄影馆，和 Cours Saleya/老城很顺路。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20de%20la%20Photographie%20Charles%20N%C3%A8gre%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A4%8F%E5%B0%94%C2%B7%E5%86%85%E6%A0%BC%E5%B0%94%E6%91%84%E5%BD%B1%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Musée de la Photographie Charles Nègre Nice"
@@ -1643,6 +1729,7 @@ window.TRIP_DATA = {
         7.2792
       ],
       "note": "Cimiez 罗马遗址和博物馆，和 Matisse 同线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20d'Arch%C3%A9ologie%20de%20Nice-Cimiez%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%BC%E6%96%AF-%E8%A5%BF%E7%B1%B3%E8%80%B6%E8%80%83%E5%8F%A4%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Musée d'Archéologie de Nice-Cimiez Nice"
@@ -1661,6 +1748,7 @@ window.TRIP_DATA = {
         7.2787
       ],
       "note": "MAMAC 本馆闭馆翻新，关注馆外项目，不按常规馆排。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=MAMAC%20%23MAMACnextdoor%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%BC%E6%96%AF%E7%8E%B0%E4%BB%A3%E4%B8%8E%E5%BD%93%E4%BB%A3%E8%89%BA%E6%9C%AF%E5%8D%9A%E7%89%A9%E9%A6%86%EF%BC%88MAMAC%EF%BC%89%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "MAMAC #MAMACnextdoor Nice"
@@ -1679,6 +1767,7 @@ window.TRIP_DATA = {
         7.2807
       ],
       "note": "本地人约见面、喝咖啡、去港口前后的广场。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Place%20Garibaldi%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8A%A0%E9%87%8C%E6%B3%A2%E7%AC%AC%E5%B9%BF%E5%9C%BA%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Place Garibaldi Nice"
@@ -1697,6 +1786,7 @@ window.TRIP_DATA = {
         7.2729
       ],
       "note": "家庭、孩子和下班散步的城市绿轴。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Coul%C3%A9e%20Verte%20%2F%20Promenade%20du%20Paillon%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%BB%BF%E5%BB%8A%20%2F%20%E5%B8%95%E6%B0%B8%E9%95%BF%E5%BB%8A%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Coulée Verte / Promenade du Paillon Nice"
@@ -1715,6 +1805,7 @@ window.TRIP_DATA = {
         7.2838
       ],
       "note": "咖啡、酒吧和本地夜间社交，比海边游客区更日常。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Place%20du%20Pin%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%9D%BE%E6%A0%91%E5%B9%BF%E5%9C%BA%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Place du Pin Nice"
@@ -1733,6 +1824,7 @@ window.TRIP_DATA = {
         7.2769
       ],
       "note": "本地家庭周末、公园和博物馆一起安排。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cimiez%20Gardens%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%A5%BF%E7%B1%B3%E8%80%B6%E8%8A%B1%E5%9B%AD%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Cimiez Gardens Nice"
@@ -1751,6 +1843,7 @@ window.TRIP_DATA = {
         7.2805
       ],
       "note": "电影资料馆/放映空间，属于城市文化日常。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cin%C3%A9math%C3%A8que%20de%20Nice%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%BC%E6%96%AF%E7%94%B5%E5%BD%B1%E8%B5%84%E6%96%99%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Cinémathèque de Nice Nice"
@@ -1770,6 +1863,7 @@ window.TRIP_DATA = {
       ],
       "note": "2026 Europe Top50 #3；2025 World Top50 #3，技术型 cocktail，需提前规划。",
       "source": "Europe's 50 Best Bars 2026 + World's 50 Best Bars 2025",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sips%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Sips%20%E9%B8%A1%E5%B0%BE%E9%85%92%E5%90%A7%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Sips Barcelona"
@@ -1789,6 +1883,7 @@ window.TRIP_DATA = {
       ],
       "note": "2026 Europe Top50 #9；2025 World Top50 #4，戏剧化 speakeasy。",
       "source": "Europe's 50 Best Bars 2026 + World's 50 Best Bars 2025",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Paradiso%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A4%A9%E5%A0%82%E9%85%92%E5%90%A7%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Paradiso Barcelona"
@@ -1808,6 +1903,7 @@ window.TRIP_DATA = {
       ],
       "note": "2026 Europe Top50 #26，farm-to-glass 概念，El Born 小街里的设计感 cocktail bar。",
       "source": "Europe's 50 Best Bars 2026 官方榜单 + 官方地址",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Aldea%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Aldea%20%E9%85%92%E5%90%A7%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Aldea Barcelona"
@@ -1827,6 +1923,7 @@ window.TRIP_DATA = {
       ],
       "note": "2026 Europe Top50 #35，Gràcia 社区型经典鸡尾酒吧，适合和广场生活、晚餐串起来。",
       "source": "Europe's 50 Best Bars 2026 官方榜单 + 官方地址",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=14%20De%20La%20Rosa%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=14%20De%20La%20Rosa%20%E9%85%92%E5%90%A7%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "14 De La Rosa Barcelona"
@@ -1846,6 +1943,7 @@ window.TRIP_DATA = {
       ],
       "note": "2026 Europe Top50 #36，Barcelona 老派 classic cocktail 代表，适合看本地酒吧传统。",
       "source": "Europe's 50 Best Bars 2026 官方榜单",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Boadas%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Boadas%20%E9%B8%A1%E5%B0%BE%E9%85%92%E5%90%A7%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Boadas Barcelona"
@@ -1865,6 +1963,7 @@ window.TRIP_DATA = {
       ],
       "note": "2026 Europe Top50 #48，Gràcia 现代邻里 cocktail bar，适合想喝好但不想太戏剧化的一晚。",
       "source": "Europe's 50 Best Bars 2026 官方榜单 + 官方地址",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Foco%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Foco%20%E9%85%92%E5%90%A7%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Foco Barcelona"
@@ -1883,6 +1982,7 @@ window.TRIP_DATA = {
         2.1819
       ],
       "note": "实验感 cocktail，和 Paradiso 同区。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Dr.%20Stravinsky%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Dr.%20Stravinsky%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Dr. Stravinsky Barcelona"
@@ -1901,6 +2001,7 @@ window.TRIP_DATA = {
         2.1509
       ],
       "note": "martini 圣地，偏 classic。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Dry%20Martini%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Dry%20Martini%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Dry Martini Barcelona"
@@ -1919,6 +2020,7 @@ window.TRIP_DATA = {
         2.1814
       ],
       "note": "自然酒 + 食物，和 Can Cisa 同体系。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bar%20Brutal%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Bar%20Brutal%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Bar Brutal Barcelona"
@@ -1937,6 +2039,7 @@ window.TRIP_DATA = {
         2.1813
       ],
       "note": "自然酒店/餐酒馆，适合一餐。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Can%20Cisa%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Can%20Cisa%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Can Cisa Barcelona"
@@ -1955,6 +2058,7 @@ window.TRIP_DATA = {
         2.1625
       ],
       "note": "认真喝葡萄酒的城市点。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Monv%C3%ADnic%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Monv%C3%ADnic%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Monvínic Barcelona"
@@ -1973,6 +2077,7 @@ window.TRIP_DATA = {
         2.1825
       ],
       "note": "教堂前 wine bar，景观好。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Vinya%20del%20Senyor%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=La%20Vinya%20del%20Senyor%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "La Vinya del Senyor Barcelona"
@@ -1991,6 +2096,7 @@ window.TRIP_DATA = {
         2.162
       ],
       "note": "vermut 文化，轻松本地 aperitif。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Morro%20Fi%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Morro%20Fi%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Morro Fi Barcelona"
@@ -2009,6 +2115,7 @@ window.TRIP_DATA = {
         2.1904
       ],
       "note": "老式 vermut / 海边街区生活感。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bar%20Electricitat%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Bar%20Electricitat%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Bar Electricitat Barcelona"
@@ -2027,6 +2134,7 @@ window.TRIP_DATA = {
         2.1645
       ],
       "note": "站着吃 montaditos + 喝一杯，非常 local。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Quimet%20%26%20Quimet%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Quimet%20%26%20Quimet%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Quimet & Quimet Barcelona"
@@ -2045,6 +2153,7 @@ window.TRIP_DATA = {
         1.7856
       ],
       "note": "Barcelona 最近的酒庄线核心，11/9 可接起泡酒活动。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sant%20Sadurn%C3%AD%20d'Anoia%20%2F%20Pened%C3%A8s%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Sant%20Sadurn%C3%AD%20d'Anoia%20%2F%20Pened%C3%A8s%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Sant Sadurní d'Anoia / Penedès Barcelona"
@@ -2063,6 +2172,7 @@ window.TRIP_DATA = {
         1.793
       ],
       "note": "Cava 大厂，建筑和参观成熟。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Codorn%C3%ADu%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Codorn%C3%ADu%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Codorníu Barcelona"
@@ -2081,6 +2191,7 @@ window.TRIP_DATA = {
         1.7864
       ],
       "note": "更认真、精品的 Cava 选择。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Recaredo%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Recaredo%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Recaredo Barcelona"
@@ -2099,6 +2210,7 @@ window.TRIP_DATA = {
         1.7884
       ],
       "note": "Cava 酒庄可选项。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Juv%C3%A9%20%26%20Camps%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Juv%C3%A9%20%26%20Camps%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Juvé & Camps Barcelona"
@@ -2117,6 +2229,7 @@ window.TRIP_DATA = {
         1.7875
       ],
       "note": "起泡酒质量口碑强，建议提前预约。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Gramona%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Gramona%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Gramona Barcelona"
@@ -2135,6 +2248,7 @@ window.TRIP_DATA = {
         1.7899
       ],
       "note": "交通方便的大厂参观选择。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Freixenet%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Freixenet%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Freixenet Barcelona"
@@ -2153,6 +2267,7 @@ window.TRIP_DATA = {
         1.6736
       ],
       "note": "Penedès 葡萄酒大厂，适合系统 tasting。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Familia%20Torres%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Familia%20Torres%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Familia Torres Barcelona"
@@ -2171,6 +2286,7 @@ window.TRIP_DATA = {
         0.8197
       ],
       "note": "严肃红酒产区，但当天往返更累。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Priorat%20%2F%20Falset%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Priorat%20%2F%20Falset%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Priorat / Falset Barcelona"
@@ -2189,6 +2305,7 @@ window.TRIP_DATA = {
         2.1802
       ],
       "note": "croissant / pastry，甜品优先级高。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Hofmann%20Pastisseria%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Hofmann%20Pastisseria%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Hofmann Pastisseria Barcelona"
@@ -2207,6 +2324,7 @@ window.TRIP_DATA = {
         2.1832
       ],
       "note": "cheesecake 专门店。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Jon%20Cake%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Jon%20Cake%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Jon Cake Barcelona"
@@ -2225,6 +2343,7 @@ window.TRIP_DATA = {
         2.182
       ],
       "note": "巧克力和精致甜点。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bub%C3%B3%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Bub%C3%B3%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Bubó Barcelona"
@@ -2243,6 +2362,7 @@ window.TRIP_DATA = {
         2.1735
       ],
       "note": "老牌甜品店，顺路但游客也多。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Escrib%C3%A0%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Escrib%C3%A0%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Escribà Barcelona"
@@ -2261,6 +2381,7 @@ window.TRIP_DATA = {
         2.177
       ],
       "note": "传统甜品，靠近老城动线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Colmena%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=La%20Colmena%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "La Colmena Barcelona"
@@ -2279,6 +2400,7 @@ window.TRIP_DATA = {
         2.1689
       ],
       "note": "热巧克力、奶制品，老 Barcelona 氛围。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Granja%20M.%20Viader%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Granja%20M.%20Viader%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Granja M. Viader Barcelona"
@@ -2297,6 +2419,7 @@ window.TRIP_DATA = {
         2.159
       ],
       "note": "Barcelona 艺术首选，和 Montjuïc 同线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Fundaci%C3%B3%20Joan%20Mir%C3%B3%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%B1%B3%E7%BD%97%E5%9F%BA%E9%87%91%E4%BC%9A%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Fundació Joan Miró Barcelona"
@@ -2315,6 +2438,7 @@ window.TRIP_DATA = {
         2.1815
       ],
       "note": "Picasso 早期作品，建议预约。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Museu%20Picasso%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E6%AF%95%E5%8A%A0%E7%B4%A2%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Museu Picasso Barcelona"
@@ -2333,6 +2457,7 @@ window.TRIP_DATA = {
         2.166
       ],
       "note": "当代艺术 + Raval 街区观察。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=MACBA%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E5%BD%93%E4%BB%A3%E8%89%BA%E6%9C%AF%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "MACBA Barcelona"
@@ -2351,6 +2476,7 @@ window.TRIP_DATA = {
         2.1536
       ],
       "note": "Catalan art + 城市视野。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=MNAC%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8A%A0%E6%B3%B0%E7%BD%97%E5%B0%BC%E4%BA%9A%E5%9B%BD%E5%AE%B6%E8%89%BA%E6%9C%AF%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "MNAC Barcelona"
@@ -2369,6 +2495,7 @@ window.TRIP_DATA = {
         2.1666
       ],
       "note": "展览型机构，城市文化方向。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=CCCB%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E5%BD%93%E4%BB%A3%E6%96%87%E5%8C%96%E4%B8%AD%E5%BF%83%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "CCCB Barcelona"
@@ -2409,6 +2536,7 @@ window.TRIP_DATA = {
           "body": "它是巴塞罗那城墙外早期的重要市场建筑，后来又容纳生鲜、Encants 旧货和周日书刊收藏市集；理解这三种节奏，比只拍建筑外观更有意思。"
         }
       ],
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mercat%20de%20Sant%20Antoni%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E5%AE%89%E4%B8%9C%E5%B0%BC%E5%B8%82%E5%9C%BA%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Mercat de Sant Antoni Barcelona"
@@ -2427,6 +2555,7 @@ window.TRIP_DATA = {
         2.1572
       ],
       "note": "广场生活，晚上坐着喝一杯。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Gr%C3%A0cia%20%2F%20Pla%C3%A7a%20del%20Sol%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%A0%BC%E6%8B%89%E8%A5%BF%E4%BA%9A%20%2F%20%E5%A4%AA%E9%98%B3%E5%B9%BF%E5%9C%BA%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Gràcia / Plaça del Sol Barcelona"
@@ -2445,6 +2574,7 @@ window.TRIP_DATA = {
         2.204
       ],
       "note": "年轻、设计、靠海，节奏比老城松。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Poblenou%20%2F%20Rambla%20del%20Poblenou%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%B3%A2%E5%B8%83%E9%9B%B7%E8%AF%BA%20%2F%20%E6%B3%A2%E5%B8%83%E9%9B%B7%E8%AF%BA%E5%A4%A7%E9%81%93%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Poblenou / Rambla del Poblenou Barcelona"
@@ -2463,6 +2593,7 @@ window.TRIP_DATA = {
         2.1897
       ],
       "note": "老酒吧、市场、海边散步。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Barceloneta%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E6%B5%B7%E6%BB%A9%E5%8C%BA%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Barceloneta Barcelona"
@@ -2481,6 +2612,7 @@ window.TRIP_DATA = {
         2.1678
       ],
       "note": "比 Boqueria 更适合日常市场体验。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mercat%20de%20la%20Concepci%C3%B3%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%BA%B7%E5%A1%9E%E6%99%AE%E8%A5%BF%E7%BF%81%E5%B8%82%E5%9C%BA%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Mercat de la Concepció Barcelona"
@@ -2502,6 +2634,7 @@ window.TRIP_DATA = {
       "plan": "安排在 10/31 抵达巴塞罗那后的老城轻量夜线；具体摊位和街区节目临近出发复核。",
       "tip": "节庆体验以吃和街区氛围为主，不把未公布的 2026 活动写成已确认节目。",
       "source": "Barcelona Turisme autumn traditions, checked 2026-07-19",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Castanyada%20activity%20core%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8A%A0%E6%B3%B0%E7%BD%97%E5%B0%BC%E4%BA%9A%E6%A0%97%E5%AD%90%E8%8A%82%E6%A0%B8%E5%BF%83%E6%B4%BB%E5%8A%A8%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "La Castanyada activity core Barcelona"
@@ -2520,6 +2653,7 @@ window.TRIP_DATA = {
         2.184
       ],
       "note": "市场建筑 + 1714 遗址，理解城市记忆很有效。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=El%20Born%20Centre%20de%20Cultura%20i%20Mem%C3%B2ria%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8D%9A%E6%81%A9%E6%96%87%E5%8C%96%E4%B8%8E%E8%AE%B0%E5%BF%86%E4%B8%AD%E5%BF%83%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "El Born Centre de Cultura i Memòria Barcelona"
@@ -2538,6 +2672,7 @@ window.TRIP_DATA = {
         2.1875
       ],
       "note": "设计博物馆/设计中心，适合你喜欢审美和城市设计。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Disseny%20Hub%20Barcelona%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E8%AE%BE%E8%AE%A1%E4%B8%AD%E5%BF%83%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Disseny Hub Barcelona Barcelona"
@@ -2556,6 +2691,7 @@ window.TRIP_DATA = {
         2.1761
       ],
       "note": "皇家船坞里的海事博物馆，建筑空间很强。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Museu%20Mar%C3%ADtim%20de%20Barcelona%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E6%B5%B7%E4%BA%8B%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Museu Marítim de Barcelona Barcelona"
@@ -2574,6 +2710,7 @@ window.TRIP_DATA = {
         2.1765
       ],
       "note": "Barcelona 城市历史主馆，适合补 Roman/medieval 层。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=MUHBA%20Pla%C3%A7a%20del%20Rei%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E5%9F%8E%E5%B8%82%E5%8E%86%E5%8F%B2%E5%8D%9A%E7%89%A9%E9%A6%86%E5%9B%BD%E7%8E%8B%E5%B9%BF%E5%9C%BA%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "MUHBA Plaça del Rei Barcelona"
@@ -2592,6 +2729,7 @@ window.TRIP_DATA = {
         2.1764
       ],
       "note": "收藏型小馆，适合避开热门景点。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Museu%20Frederic%20Mar%C3%A8s%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%BC%97%E9%9B%B7%E5%BE%B7%E9%87%8C%E5%85%8B%C2%B7%E9%A9%AC%E9%9B%B7%E6%96%AF%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Museu Frederic Marès Barcelona"
@@ -2610,6 +2748,7 @@ window.TRIP_DATA = {
         2.1806
       ],
       "note": "欧洲现代艺术馆，和 Picasso/El Born 同线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=MEAM%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%AC%A7%E6%B4%B2%E7%8E%B0%E4%BB%A3%E8%89%BA%E6%9C%AF%E5%8D%9A%E7%89%A9%E9%A6%86%EF%BC%88MEAM%EF%BC%89%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "MEAM Barcelona"
@@ -2628,6 +2767,7 @@ window.TRIP_DATA = {
         2.1649
       ],
       "note": "2026 Gaudí 百年和建筑之都语境下的新当代艺术空间。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Batll%C3%B3%20Contemporary%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E7%89%B9%E7%BD%97%E4%B9%8B%E5%AE%B6%E5%BD%93%E4%BB%A3%E8%89%BA%E6%9C%AF%E9%A1%B9%E7%9B%AE%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Casa Batlló Contemporary Barcelona"
@@ -2646,6 +2786,7 @@ window.TRIP_DATA = {
         2.1499
       ],
       "note": "展览型文化中心，和 MNAC / Montjuïc 同线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=CaixaForum%20Barcelona%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%20CaixaForum%20%E8%89%BA%E6%9C%AF%E4%B8%AD%E5%BF%83%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "CaixaForum Barcelona Barcelona"
@@ -2664,6 +2805,7 @@ window.TRIP_DATA = {
         2.1717
       ],
       "note": "本地文化社交机构，适合理解 Barcelona 的市民文化。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Ateneu%20Barcelon%C3%A8s%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E9%9B%85%E5%85%B8%E5%A8%9C%E5%8D%8F%E4%BC%9A%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Ateneu Barcelonès Barcelona"
@@ -2682,6 +2824,7 @@ window.TRIP_DATA = {
         2.1692
       ],
       "note": "电影资料馆，Raval 本地文化夜晚很适合。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Filmoteca%20de%20Catalunya%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8A%A0%E6%B3%B0%E7%BD%97%E5%B0%BC%E4%BA%9A%E7%94%B5%E5%BD%B1%E8%B5%84%E6%96%99%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Filmoteca de Catalunya Barcelona"
@@ -2700,6 +2843,7 @@ window.TRIP_DATA = {
         2.1593
       ],
       "note": "书店 + 咖啡/文化活动，本地阅读生活。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Llibreria%20Finestres%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Finestres%20%E4%B9%A6%E5%BA%97%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Llibreria Finestres Barcelona"
@@ -2718,6 +2862,7 @@ window.TRIP_DATA = {
         2.1874
       ],
       "note": "本地人野餐、运动、带娃和 Castanyada 活动常用空间。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Parc%20de%20la%20Ciutadella%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9F%8E%E5%A0%A1%E5%85%AC%E5%9B%AD%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Parc de la Ciutadella Barcelona"
@@ -2736,6 +2881,7 @@ window.TRIP_DATA = {
         2.1568
       ],
       "note": "Gràcia 居民广场生活，比只看景点更贴近日常。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Pla%C3%A7a%20de%20la%20Virreina%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%BB%B4%E9%9B%B7%E7%BA%B3%E5%B9%BF%E5%9C%BA%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Plaça de la Virreina Barcelona"
@@ -2754,6 +2900,7 @@ window.TRIP_DATA = {
         2.1936
       ],
       "note": "获奖社区图书馆，理解当代 Barcelona 公共生活。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Biblioteca%20Gabriel%20Garc%C3%ADa%20M%C3%A1rquez%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8A%A0%E5%A4%AB%E5%88%97%E5%B0%94%C2%B7%E5%8A%A0%E8%A5%BF%E4%BA%9A%C2%B7%E9%A9%AC%E5%B0%94%E5%85%8B%E6%96%AF%E5%9B%BE%E4%B9%A6%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Biblioteca Gabriel García Márquez Barcelona"
@@ -2772,6 +2919,7 @@ window.TRIP_DATA = {
         2.2049
       ],
       "note": "创意园区/市集/活动空间，偏本地年轻人周末。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Palo%20Alto%20Barcelona%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Palo%20Alto%20Barcelona%20%E5%88%9B%E6%84%8F%E5%9B%AD%E5%8C%BA%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Palo Alto Barcelona Barcelona"
@@ -2790,6 +2938,7 @@ window.TRIP_DATA = {
         -5.9931
       ],
       "note": "sherry + tapas，Sevilla 酒类优先。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Palo%20Cortao%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Palo%20Cortao%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Palo Cortao Sevilla"
@@ -2808,6 +2957,7 @@ window.TRIP_DATA = {
         -5.9934
       ],
       "note": "sherry cocktail，适合系统试 Andalusia 酒。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Premier%20Sherry%20Cocktail%20Bar%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Premier%20Sherry%20Cocktail%20Bar%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Premier Sherry Cocktail Bar Sevilla"
@@ -2826,6 +2976,7 @@ window.TRIP_DATA = {
         -5.9951
       ],
       "note": "西班牙 wine bar，适合让店员按口味推荐。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Lama%20La%20Uva%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Lama%20La%20Uva%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Lama La Uva Sevilla"
@@ -2844,6 +2995,7 @@ window.TRIP_DATA = {
         -5.9911
       ],
       "note": "wine tasting + 小食/cheese/chocolate pairing。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Flor%20de%20Sal%20Wine%20Bar%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Flor%20de%20Sal%20Wine%20Bar%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Flor de Sal Wine Bar Sevilla"
@@ -2862,6 +3014,7 @@ window.TRIP_DATA = {
         -5.9956
       ],
       "note": "老酒馆氛围强，适合站着喝一轮。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Morales%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Casa%20Morales%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Casa Morales Sevilla"
@@ -2880,6 +3033,7 @@ window.TRIP_DATA = {
         -5.9897
       ],
       "note": "1670 老店，游客多但空间值得看。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=El%20Rinconcillo%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=El%20Rinconcillo%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "El Rinconcillo Sevilla"
@@ -2898,6 +3052,7 @@ window.TRIP_DATA = {
         -6
       ],
       "note": "本地 tapas 生活感强。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bodega%20Dos%20de%20Mayo%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Bodega%20Dos%20de%20Mayo%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Bodega Dos de Mayo Sevilla"
@@ -2916,6 +3071,7 @@ window.TRIP_DATA = {
         -6.0037
       ],
       "note": "Triana 热闹、接地气。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Las%20Golondrinas%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Las%20Golondrinas%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Las Golondrinas Sevilla"
@@ -2934,6 +3090,7 @@ window.TRIP_DATA = {
         -5.9959
       ],
       "note": "杂货铺式吃喝，适合本地生活感。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Antigua%20Abacer%C3%ADa%20de%20San%20Lorenzo%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Antigua%20Abacer%C3%ADa%20de%20San%20Lorenzo%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Antigua Abacería de San Lorenzo Sevilla"
@@ -2952,6 +3109,7 @@ window.TRIP_DATA = {
         -5.9971
       ],
       "note": "更精致一点，建议预约或错峰。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Eslava%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Eslava%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Eslava Sevilla"
@@ -2970,6 +3128,7 @@ window.TRIP_DATA = {
         -6.1261
       ],
       "note": "Sevilla 出发最值得的酒庄一日线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Jerez%20de%20la%20Frontera%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Jerez%20de%20la%20Frontera%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Jerez de la Frontera Sevilla"
@@ -2988,6 +3147,7 @@ window.TRIP_DATA = {
         -6.1357
       ],
       "note": "sherry 酒庄可选，建议提前订 tour。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Lustau%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Lustau%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Lustau Sevilla"
@@ -3006,6 +3166,7 @@ window.TRIP_DATA = {
         -6.1435
       ],
       "note": "小而精品，艺术收藏也值得看。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bodegas%20Tradici%C3%B3n%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Bodegas%20Tradici%C3%B3n%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Bodegas Tradición Sevilla"
@@ -3024,6 +3185,7 @@ window.TRIP_DATA = {
         -6.1407
       ],
       "note": "经典大厂，参观成熟。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=T%C3%ADo%20Pepe%20%2F%20Gonz%C3%A1lez%20Byass%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=T%C3%ADo%20Pepe%20%2F%20Gonz%C3%A1lez%20Byass%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Tío Pepe / González Byass Sevilla"
@@ -3042,6 +3204,7 @@ window.TRIP_DATA = {
         -6.145
       ],
       "note": "Jerez 大厂选择之一。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Fundador%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Fundador%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Fundador Sevilla"
@@ -3060,6 +3223,7 @@ window.TRIP_DATA = {
         -6.1329
       ],
       "note": "可结合 Jerez 城区和 tabanco。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=%C3%81lvaro%20Domecq%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%C3%81lvaro%20Domecq%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Álvaro Domecq Sevilla"
@@ -3078,6 +3242,7 @@ window.TRIP_DATA = {
         -5.9946
       ],
       "note": "Sevilla 老牌甜品店，位置方便。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Campana%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=La%20Campana%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "La Campana Sevilla"
@@ -3096,6 +3261,7 @@ window.TRIP_DATA = {
         -6.004
       ],
       "note": "Triana 甜品，法式技术 + 西班牙口味。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Manu%20Jara%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Manu%20Jara%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Manu Jara Sevilla"
@@ -3114,6 +3280,7 @@ window.TRIP_DATA = {
         -5.994
       ],
       "note": "传统点心选择。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Confiter%C3%ADa%20Filella%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Confiter%C3%ADa%20Filella%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Confitería Filella Sevilla"
@@ -3132,6 +3299,7 @@ window.TRIP_DATA = {
         -5.9927
       ],
       "note": "修道院甜点集合购买点，适合伴手礼。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=El%20Torno%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=El%20Torno%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "El Torno Sevilla"
@@ -3150,6 +3318,7 @@ window.TRIP_DATA = {
         -5.9871
       ],
       "note": "修道院甜点方向，营业时间需核对。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Convento%20de%20San%20Leandro%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Convento%20de%20San%20Leandro%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Convento de San Leandro Sevilla"
@@ -3168,6 +3337,7 @@ window.TRIP_DATA = {
         -6.0009
       ],
       "note": "Sevilla 最重要美术馆，Murillo / Zurbarán 主线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Museo%20de%20Bellas%20Artes%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A%E7%BE%8E%E6%9C%AF%E9%A6%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Museo de Bellas Artes Sevilla"
@@ -3186,6 +3356,7 @@ window.TRIP_DATA = {
         -5.99
       ],
       "note": "巴洛克空间，和 Santa Cruz 同线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Hospital%20de%20los%20Venerables%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%8A%E8%80%85%E5%8C%BB%E9%99%A2%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Hospital de los Venerables Sevilla"
@@ -3204,6 +3375,7 @@ window.TRIP_DATA = {
         -5.9871
       ],
       "note": "建筑、瓷砖、庭院都值得看。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20de%20Pilatos%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%BD%BC%E6%8B%89%E5%A4%9A%E4%B9%8B%E5%AE%B6%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Casa de Pilatos Sevilla"
@@ -3222,6 +3394,7 @@ window.TRIP_DATA = {
         -6.0075
       ],
       "note": "当代艺术，旧修道院空间。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=CAAC%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%AE%89%E8%BE%BE%E5%8D%A2%E8%A5%BF%E4%BA%9A%E5%BD%93%E4%BB%A3%E8%89%BA%E6%9C%AF%E4%B8%AD%E5%BF%83%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "CAAC Sevilla"
@@ -3240,6 +3413,7 @@ window.TRIP_DATA = {
         -5.9891
       ],
       "note": "贵族宅邸 + 花园。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Palacio%20de%20las%20Due%C3%B1as%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%9D%9C%E5%9F%83%E5%B0%BC%E4%BA%9A%E6%96%AF%E5%AE%AB%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Palacio de las Dueñas Sevilla"
@@ -3261,6 +3435,7 @@ window.TRIP_DATA = {
       "plan": "只在节目、时间和当天路线匹配时预约，不用旧季节的活动信息硬套。",
       "tip": "演出日期、开场时间、座位和退改政策需要临近预订时核实。",
       "source": "Teatro de la Maestranza official programme",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Teatro%20de%20la%20Maestranza%20%2F%20performance%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%A9%AC%E5%9F%83%E6%96%AF%E7%89%B9%E5%85%B0%E8%90%A8%E5%89%A7%E9%99%A2%20%2F%20%E6%BC%94%E5%87%BA%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Teatro de la Maestranza / performance Sevilla"
@@ -3279,6 +3454,7 @@ window.TRIP_DATA = {
         -6.0041
       ],
       "note": "陶瓷、市场、河边酒吧，生活感强。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Triana%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%89%B9%E9%87%8C%E4%BA%9A%E7%BA%B3%E5%8C%BA%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Triana Sevilla"
@@ -3297,6 +3473,7 @@ window.TRIP_DATA = {
         -5.9912
       ],
       "note": "年轻、本地、晚上喝酒。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Alameda%20de%20H%C3%A9rcules%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%B5%AB%E6%8B%89%E5%85%8B%E5%8B%92%E6%96%AF%E6%9E%97%E8%8D%AB%E5%B9%BF%E5%9C%BA%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Alameda de Hércules Sevilla"
@@ -3315,6 +3492,7 @@ window.TRIP_DATA = {
         -5.989
       ],
       "note": "市场吃喝，适合白天或早晚。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mercado%20de%20Feria%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%B4%B9%E9%87%8C%E4%BA%9A%E5%B8%82%E5%9C%BA%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Mercado de Feria Sevilla"
@@ -3333,6 +3511,7 @@ window.TRIP_DATA = {
         -5.996
       ],
       "note": "安静本地街区，搭配 Eslava / Abacería。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=San%20Lorenzo%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E6%B4%9B%E4%BC%A6%E7%B4%A2%E8%A1%97%E5%8C%BA%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "San Lorenzo Sevilla"
@@ -3351,6 +3530,7 @@ window.TRIP_DATA = {
         -6.0054
       ],
       "note": "Triana 陶瓷传统，最贴近本地工艺和街区身份的小馆。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Centro%20Cer%C3%A1mica%20Triana%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%89%B9%E9%87%8C%E4%BA%9A%E7%BA%B3%E9%99%B6%E7%93%B7%E4%B8%AD%E5%BF%83%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Centro Cerámica Triana Sevilla"
@@ -3369,6 +3549,7 @@ window.TRIP_DATA = {
         -5.9896
       ],
       "note": "flamenco 文化馆，和 正式 flamenco 演出 形成背景补充。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Museo%20del%20Baile%20Flamenco%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%BC%97%E6%8B%89%E9%97%A8%E6%88%88%E8%88%9E%E8%B9%88%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Museo del Baile Flamenco Sevilla"
@@ -3387,6 +3568,7 @@ window.TRIP_DATA = {
         -5.9922
       ],
       "note": "城市与殖民航海史核心文献空间，建筑也重要。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Archivo%20General%20de%20Indias%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8D%B0%E5%BA%A6%E7%BE%A4%E5%B2%9B%E7%BB%BC%E5%90%88%E6%A1%A3%E6%A1%88%E9%A6%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Archivo General de Indias Sevilla"
@@ -3405,6 +3587,7 @@ window.TRIP_DATA = {
         -5.9918
       ],
       "note": "Las Setas 下的罗马遗址，短时间理解城市地层。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Antiquarium%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8F%A4%E7%BD%97%E9%A9%AC%E9%81%97%E5%9D%80%E5%8D%9A%E7%89%A9%E9%A6%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Antiquarium Sevilla"
@@ -3423,6 +3606,7 @@ window.TRIP_DATA = {
         -5.9884
       ],
       "note": "CSIC 科学馆，适合看本地家庭/教育文化空间。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20de%20la%20Ciencia%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%A7%91%E5%AD%A6%E4%B9%8B%E5%AE%B6%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Casa de la Ciencia Sevilla"
@@ -3441,6 +3625,7 @@ window.TRIP_DATA = {
         -6.0087
       ],
       "note": "航海与世博记忆，和 CAAC/Cartuja 同线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Pabell%C3%B3n%20de%20la%20Navegaci%C3%B3n%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%88%AA%E6%B5%B7%E9%A6%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Pabellón de la Navegación Sevilla"
@@ -3459,6 +3644,7 @@ window.TRIP_DATA = {
         -5.9937
       ],
       "note": "修道院改造文化空间，常有展览/演出。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Espacio%20Santa%20Clara%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E5%85%8B%E6%8B%89%E6%8B%89%E6%96%87%E5%8C%96%E7%A9%BA%E9%97%B4%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Espacio Santa Clara Sevilla"
@@ -3477,6 +3663,7 @@ window.TRIP_DATA = {
         -6.0038
       ],
       "note": "居民市场 + 小吃，和陶瓷/河边同线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mercado%20de%20Triana%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%89%B9%E9%87%8C%E4%BA%9A%E7%BA%B3%E5%B8%82%E5%9C%BA%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Mercado de Triana Sevilla"
@@ -3495,6 +3682,7 @@ window.TRIP_DATA = {
         -5.9891
       ],
       "note": "周四古董/旧物市场，本地生活比景点更强。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Calle%20Feria%20Thursday%20Market%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%B4%B9%E9%87%8C%E4%BA%9A%E8%A1%97%E5%91%A8%E5%9B%9B%E5%B8%82%E9%9B%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Calle Feria Thursday Market Sevilla"
@@ -3513,6 +3701,7 @@ window.TRIP_DATA = {
         -5.989
       ],
       "note": "住宅区、教堂、bar 和市场，适合看 Sevilla 日常。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Macarena%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%A9%AC%E5%8D%A1%E9%9B%B7%E7%BA%B3%E5%8C%BA%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Macarena Sevilla"
@@ -3531,6 +3720,7 @@ window.TRIP_DATA = {
         -5.9917
       ],
       "note": "书店咖啡馆，适合把 Alameda 的白天生活补上。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=El%20Viajero%20Sedentario%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=El%20Viajero%20Sedentario%20%E4%B9%A6%E5%BA%97%E5%92%96%E5%95%A1%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "El Viajero Sedentario Sevilla"
@@ -3549,6 +3739,7 @@ window.TRIP_DATA = {
         -5.9926
       ],
       "note": "社区剧场/演出空间，晚上不只 tapas 和酒。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Teatro%20Alameda%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%98%BF%E6%8B%89%E6%A2%85%E8%BE%BE%E5%89%A7%E9%99%A2%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Teatro Alameda Sevilla"
@@ -3567,6 +3758,7 @@ window.TRIP_DATA = {
         -6.0024
       ],
       "note": "河边日落、滑板、散步和等朋友的日常空间。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Muelle%20de%20la%20Sal%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%9B%90%E7%A0%81%E5%A4%B4%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Muelle de la Sal Sevilla"
@@ -3588,6 +3780,7 @@ window.TRIP_DATA = {
       "plan": "适合安排在 11 区自然酒线或 Père-Lachaise / Bastille 之后；热门，优先预约或早到。",
       "tip": "订位和排队规则会变，出发前复核；同街区可备选 Septime La Cave、Clamato。",
       "source": "Paris by Mouth / Star Wine List / 公开餐饮指南 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Bistrot%20Paul%20Bert%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E4%BF%9D%E7%BD%97%E8%B4%9D%E5%B0%94%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Le Bistrot Paul Bert Paris"
@@ -3609,6 +3802,7 @@ window.TRIP_DATA = {
       "plan": "可和 Rue des Martyrs、Pigalle、Montmartre 方向合并，放午餐或晚餐都顺。",
       "tip": "酒单和当日菜变化快，提前看官网/地图订位。",
       "source": "近期巴黎 bistro 指南 + 官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Bon%20Georges%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A5%BD%E4%B9%94%E6%B2%BB%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Le Bon Georges Paris"
@@ -3630,6 +3824,7 @@ window.TRIP_DATA = {
       "plan": "适合 Marais / Place des Vosges 一天的轻松晚餐，不建议排在已经很满的大馆日。",
       "tip": "热门且桌距紧，想安静吃饭可作为 B 级候选。",
       "source": "公开餐饮指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Chez%20Janou%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Janou%20%E5%B0%8F%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Chez Janou Paris"
@@ -3651,6 +3846,7 @@ window.TRIP_DATA = {
       "plan": "适合预算保底或高强度景点日后的简单晚餐；和 Canal / Marais / République 同线。",
       "tip": "排队常见，别把它当安静约会餐。",
       "source": "官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bouillon%20R%C3%A9publique%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%85%B1%E5%92%8C%E5%9B%BD%E5%A4%A7%E4%BC%97%E9%A4%90%E5%8E%85%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Bouillon République Paris"
@@ -3672,6 +3868,7 @@ window.TRIP_DATA = {
       "plan": "适合和 Belleville、Buttes-Chaumont 或晚间 wine bar 合并，放轻松晚餐。",
       "tip": "位置不在核心景点区，只有当天去东巴黎时才顺。",
       "source": "公开餐饮指南 + wine/bistro 关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Baratin%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Baratin%20%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Le Baratin Paris"
@@ -3693,6 +3890,7 @@ window.TRIP_DATA = {
       "plan": "适合 Marais 白天或午后，和 Picasso / Carnavalet / Enfants Rouges 同线。",
       "tip": "座位少、价格不低，错峰更舒服。",
       "source": "公开餐饮指南 + 市场/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Les%20Enfants%20du%20March%C3%A9%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B8%82%E5%9C%BA%E4%B9%8B%E5%AD%90%E9%A4%90%E5%8E%85%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Les Enfants du Marché Paris"
@@ -3714,6 +3912,7 @@ window.TRIP_DATA = {
       "plan": "适合 Bastille / 11 区晚上；如果订不到 Septime，可以用它做同街区替代。",
       "tip": "热门，需复核预约和 walk-in 规则。",
       "source": "官方/公开餐饮指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Clamato%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Clamato%20%E6%B5%B7%E9%B2%9C%E9%A4%90%E5%8E%85%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Clamato Paris"
@@ -3735,6 +3934,7 @@ window.TRIP_DATA = {
       "plan": "更适合午餐或下午，和 11 区自然酒线、Aligre 市场合并。",
       "tip": "营业窗口有限，必须提前查当天开放。",
       "source": "公开餐饮指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mokonuts%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Mokonuts%20%E5%B0%8F%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Mokonuts Paris"
@@ -3756,6 +3956,7 @@ window.TRIP_DATA = {
       "plan": "可放在 Danico、De Vie、Stohrer 或 Bourse de Commerce 同区之后。",
       "tip": "热门区位，注意排队和营业时段。",
       "source": "官方/公开餐饮指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Frenchie%20Bar%20%C3%A0%20Vins%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Frenchie%20%E9%85%92%E5%90%A7%E5%B0%8F%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Frenchie Bar à Vins Paris"
@@ -3777,6 +3978,7 @@ window.TRIP_DATA = {
       "plan": "适合 Marais 半日里的低压力午餐，不占用正式晚餐名额。",
       "tip": "连锁但稳定，优先看当天附近分店。",
       "source": "官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Breizh%20Caf%C3%A9%20Le%20Marais%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Breizh%20%E5%8F%AF%E4%B8%BD%E9%A5%BC%E7%8E%9B%E9%BB%91%E5%BA%97%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Breizh Café Le Marais Paris"
@@ -3798,6 +4000,7 @@ window.TRIP_DATA = {
       "plan": "可和 Saint-Germain、Luxembourg、Orsay 左岸日合并。",
       "tip": "站食空间拥挤，适合短暂停留。",
       "source": "公开餐饮指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=L'Avant%20Comptoir%20de%20la%20Mer%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%B5%B7%E9%B2%9C%E5%89%8D%E5%90%A7%E5%8F%B0%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "L'Avant Comptoir de la Mer Paris"
@@ -3819,6 +4022,7 @@ window.TRIP_DATA = {
       "plan": "适合左岸晚上不想研究菜单时保底；不要为它横穿城市。",
       "tip": "常排队，且风格很单一。",
       "source": "官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Relais%20de%20l'Entrec%C3%B4te%20Saint-Germain%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E6%97%A5%E8%80%B3%E6%9B%BC%E7%89%9B%E6%8E%92%E8%96%AF%E6%9D%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Le Relais de l'Entrecôte Saint-Germain Paris"
@@ -3840,6 +4044,7 @@ window.TRIP_DATA = {
       "plan": "只在订到位且当天不赶路时安排；可和 Clamato、Septime La Cave 形成同街区备选组。",
       "tip": "订位难度高，不要把它作为唯一晚餐方案。",
       "source": "公开餐饮指南 + World of Mouth / 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Septime%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Septime%20%E9%A4%90%E5%8E%85%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Septime Paris"
@@ -3861,6 +4066,7 @@ window.TRIP_DATA = {
       "plan": "适合 Oberkampf / Belleville / 11 区晚间线；比只去老派 bistro 更有当代巴黎感。",
       "tip": "热门，需复核订位。",
       "source": "Jon Bonné Paris guide + 公开餐饮指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Servan%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Servan%20%E5%B0%8F%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Le Servan Paris"
@@ -3882,6 +4088,7 @@ window.TRIP_DATA = {
       "plan": "保留为玛黑晚间候选；当前 10/25 在 16:00 回左岸入住后不再折返，因此不进入默认路线。",
       "tip": "订位优先；如果想轻松热闹，Chez Janou 更随意。",
       "source": "House & Garden 2026 Paris restaurant guide + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Parcelles%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Parcelles%20%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Parcelles Paris"
@@ -3903,6 +4110,7 @@ window.TRIP_DATA = {
       "plan": "可和 The Cambridge、La Buvette、Aux Deux Amis 形成东巴黎短线。",
       "tip": "氛围比正式餐更重要，适合共享小盘。",
       "source": "自然酒餐厅指南 + Reddit natural wine 线索 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Au%20Passage%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Au%20Passage%20%E5%B0%8F%E7%9B%98%E9%A4%90%E9%85%92%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Au Passage Paris"
@@ -3924,6 +4132,7 @@ window.TRIP_DATA = {
       "plan": "适合 Marais / Oberkampf / République 一线；可作为比普通 bistro 更有记忆点的一餐。",
       "tip": "菜风格更有个性，先看菜单是否合口味。",
       "source": "World's 50 Best Discovery / 公开餐饮指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Clown%20Bar%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%8F%E4%B8%91%E9%85%92%E5%90%A7%E9%A4%90%E5%8E%85%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Clown Bar Paris"
@@ -3945,6 +4154,7 @@ window.TRIP_DATA = {
       "plan": "保留为另一天玛黑晚间候选；10/25 入住后不再返回玛黑，因此不进入当前默认路线。",
       "tip": "更像小盘 bar，不适合安静正式晚餐。",
       "source": "公开餐饮指南 + À Boire À Manger 线索 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Mary%20Celeste%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Mary%20Celeste%20%E6%B5%B7%E9%B2%9C%E9%85%92%E5%90%A7%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Le Mary Celeste Paris"
@@ -3966,6 +4176,7 @@ window.TRIP_DATA = {
       "plan": "适合到达日或 Marais 半日，不需要跨区。",
       "tip": "空间小，订位优先。",
       "source": "近期 ParisTravelGuide 讨论 + bistro 指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bistrot%20des%20Tournelles%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Tournelles%20%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Bistrot des Tournelles Paris"
@@ -3987,6 +4198,7 @@ window.TRIP_DATA = {
       "plan": "如果 10/26 想把左岸延伸到 Luxembourg/Panthéon，可作为晚餐或 aperitif。",
       "tip": "不在铁塔/游船线附近，当天是否加入要看你是否改左岸深度线。",
       "source": "自然酒餐厅推荐 + Paris by Mouth bistro list + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20de%20la%20Nouvelle%20Mairie%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%96%B0%E5%B8%82%E6%94%BF%E5%8E%85%E5%92%96%E5%95%A1%E9%A4%90%E9%85%92%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Café de la Nouvelle Mairie Paris"
@@ -4008,6 +4220,7 @@ window.TRIP_DATA = {
       "plan": "10/27 右岸建筑日可替换 Frenchie Bar à Vins。",
       "tip": "更偏酒和 bistro 氛围，适合轻松晚餐。",
       "source": "Paris by Mouth bistro list + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Juveniles%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Juveniles%20%E9%85%92%E9%A3%9F%E5%B0%8F%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Juveniles Paris"
@@ -4029,6 +4242,7 @@ window.TRIP_DATA = {
       "plan": "适合 Gare du Nord / 9-10 区晚上，不建议从左岸专程绕。",
       "tip": "只在当天住处或动线靠北时加入。",
       "source": "bistro 推荐 / Emily in France 线索 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Les%20Arlots%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Arlots%20%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Les Arlots Paris"
@@ -4050,6 +4264,7 @@ window.TRIP_DATA = {
       "plan": "适合 Canal / Oberkampf / Belleville 方向，尤其你想系统喝酒时。",
       "tip": "提前看预算和订位。",
       "source": "Objective Foodie bistro guide + 自然酒关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Vantre%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Vantre%20%E9%A4%90%E9%85%92%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Vantre Paris"
@@ -4071,6 +4286,7 @@ window.TRIP_DATA = {
       "plan": "适合 Buttes-Chaumont、Belleville、Ménilmontant 一线；不要从西巴黎专程绕。",
       "tip": "位置偏东，夜里回酒店优先叫车。",
       "source": "Paris by Mouth bistro list + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Cadoret%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Cadoret%20%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Le Cadoret Paris"
@@ -4092,6 +4308,7 @@ window.TRIP_DATA = {
       "plan": "适合 10/26 左岸艺术日午餐或早晚餐。",
       "tip": "更稳妥但也更游客友好，适合作为保底。",
       "source": "Paris by Mouth bistro list + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Brasserie%20des%20Pr%C3%A9s%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%8D%89%E5%9C%B0%E5%95%A4%E9%85%92%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Brasserie des Prés Paris"
@@ -4113,6 +4330,7 @@ window.TRIP_DATA = {
       "plan": "可替换 L'Avant Comptoir de la Mer，坐下吃更舒服。",
       "tip": "热门区域，提前确认订位。",
       "source": "Forbes Saint-Germain local guide + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Huguette%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Huguette%20%E6%B5%B7%E9%B2%9C%E5%B0%8F%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Huguette Paris"
@@ -4134,6 +4352,7 @@ window.TRIP_DATA = {
       "plan": "适合 10/26 午餐或晚餐保底，但不要和 L'Avant Comptoir 同时安排。",
       "tip": "排队/订位规则要复核。",
       "source": "公开 bistro 指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Comptoir%20du%20Relais%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Relais%20%E5%90%A7%E5%8F%B0%E5%B0%8F%E9%A6%86%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Le Comptoir du Relais Paris"
@@ -4155,6 +4374,7 @@ window.TRIP_DATA = {
       "plan": "适合老城、Garibaldi、Port Lympia 一线的午餐或晚餐。",
       "tip": "游客也多，重点吃海鲜而不是期待精致服务。",
       "source": "AzurSelect / 公开餐饮指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20de%20Turin%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%83%BD%E7%81%B5%E5%92%96%E5%95%A1%E6%B5%B7%E9%B2%9C%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Café de Turin Nice"
@@ -4176,6 +4396,7 @@ window.TRIP_DATA = {
       "plan": "适合尼斯老城日的正式一餐，提前确认订位方式。",
       "tip": "座位少，营业和订位规则要临近确认。",
       "source": "公开餐饮指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Merenda%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=La%20Merenda%20%E5%B0%BC%E6%96%AF%E5%B0%8F%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "La Merenda Nice"
@@ -4197,6 +4418,7 @@ window.TRIP_DATA = {
       "plan": "适合 Cours Saleya、老城、Fenocchio 同线，作为轻午餐或补给。",
       "tip": "不适合作为正式晚餐，排队和拥挤正常。",
       "source": "地方小吃指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Lou%20Pilha%20Leva%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Lou%20Pilha%20Leva%20%E5%B0%8F%E5%90%83%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Lou Pilha Leva Nice"
@@ -4218,6 +4440,7 @@ window.TRIP_DATA = {
       "plan": "适合海边/市中心傍晚后，和 Promenade des Anglais 同线。",
       "tip": "热门时段要订位。",
       "source": "公开餐饮指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Peixes%20Nice%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Peixes%20%E5%B0%BC%E6%96%AF%E6%B5%B7%E9%B2%9C%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Peixes Nice Nice"
@@ -4239,6 +4462,7 @@ window.TRIP_DATA = {
       "plan": "适合尼斯老城或城堡山后安排一餐。",
       "tip": "传统小馆节奏，营业日需复核。",
       "source": "官方/公开餐饮指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Chez%20Acchiardo%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Acchiardo%20%E5%B0%BC%E6%96%AF%E8%8F%9C%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Chez Acchiardo Nice"
@@ -4260,6 +4484,7 @@ window.TRIP_DATA = {
       "plan": "适合尼斯傍晚或庆祝型晚餐，和 Port / Mont Boron 同线。",
       "tip": "需要预约，价格和天气影响体验。",
       "source": "官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Plongeoir%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%B7%B3%E6%B0%B4%E5%8F%B0%E6%B5%B7%E6%99%AF%E9%A4%90%E5%8E%85%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Le Plongeoir Nice"
@@ -4281,6 +4506,7 @@ window.TRIP_DATA = {
       "plan": "适合 Nice 抵达日或老城日晚上。",
       "tip": "热门，订位优先。",
       "source": "公开餐饮指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bistrot%20d'Antoine%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Antoine%20%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Bistrot d'Antoine Nice"
@@ -4302,6 +4528,7 @@ window.TRIP_DATA = {
       "plan": "适合 Cannes / Le Suquet 当天午餐或晚餐。",
       "tip": "游客区价格和排队需有预期。",
       "source": "Indagare / 公开餐饮指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Astoux%20et%20Brun%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Astoux%20et%20Brun%20%E6%B5%B7%E9%B2%9C%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Astoux et Brun Nice"
@@ -4323,6 +4550,7 @@ window.TRIP_DATA = {
       "plan": "适合 Croisette / Rue d'Antibes 逛完后吃喝。",
       "tip": "出发前复核营业和订位。",
       "source": "Indagare / 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Cave%20Croisette%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8D%81%E5%AD%97%E5%A4%A7%E9%81%93%E9%85%92%E7%AA%96%E9%A4%90%E5%90%A7%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "La Cave Croisette Nice"
@@ -4344,6 +4572,7 @@ window.TRIP_DATA = {
       "plan": "适合 Antibes 市场、城墙和 Picasso Museum 之后。",
       "tip": "座位有限，晚餐需确认订位。",
       "source": "公开餐饮指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Comptoir%20de%20la%20Tourraque%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Tourraque%20%E5%B0%8F%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Le Comptoir de la Tourraque Nice"
@@ -4365,6 +4594,7 @@ window.TRIP_DATA = {
       "plan": "适合老城/市场日中午，不占正式晚餐名额。",
       "tip": "更像小吃和排队体验，不是坐下慢餐。",
       "source": "Nice city guide / Ammihotels restaurant guide + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Ren%C3%A9%20Socca%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Ren%C3%A9%20Socca%20%E5%B0%BC%E6%96%AF%E5%B0%8F%E5%90%83%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "René Socca Nice"
@@ -4386,6 +4616,7 @@ window.TRIP_DATA = {
       "plan": "适合尼斯老城晚餐，可替换 La Merenda 或 Bistrot d'Antoine。",
       "tip": "热门小店，订位优先。",
       "source": "Time Out Nice 2025 / Ammihotels guide + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Lavomatique%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%B4%97%E8%A1%A3%E6%88%BF%E5%B0%8F%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Lavomatique Nice"
@@ -4407,6 +4638,7 @@ window.TRIP_DATA = {
       "plan": "适合 10/29 抵达日或 10/30 回尼斯后的晚餐备选。",
       "tip": "出发前确认营业和订位。",
       "source": "Ammihotels Nice restaurant guide + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Olive%20%26%20Artichaut%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%A9%84%E6%A6%84%E4%B8%8E%E6%B4%8B%E8%93%9F%E9%A4%90%E5%8E%85%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Olive & Artichaut Nice"
@@ -4428,6 +4660,7 @@ window.TRIP_DATA = {
       "plan": "适合替换 Bistrot d'Antoine，留在老城不绕路。",
       "tip": "小馆，先复核营业日。",
       "source": "Time Out Nice 2025 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Bistrot%20de%20Serruriers%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%94%81%E5%8C%A0%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Le Bistrot de Serruriers Nice"
@@ -4449,6 +4682,7 @@ window.TRIP_DATA = {
       "plan": "适合 Promenade des Anglais 傍晚后，不想吃传统尼斯菜时使用。",
       "tip": "更偏氛围和饮食混合，不是老派地方菜。",
       "source": "Time Out Nice 2025 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Babel%20Babel%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Babel%20Babel%20%E6%B5%B7%E8%BE%B9%E9%A4%90%E5%90%A7%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Babel Babel Nice"
@@ -4470,6 +4704,7 @@ window.TRIP_DATA = {
       "plan": "当 Bistrot d'Antoine 或 La Merenda 订不到时使用。",
       "tip": "位置和风格接近，避免同一天重复安排。",
       "source": "Rugby Journal Nice dining guide + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Comptoir%20du%20March%C3%A9%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B8%82%E5%9C%BA%E5%90%A7%E5%8F%B0%E5%B0%8F%E9%A6%86%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Comptoir du Marché Nice"
@@ -4491,6 +4726,7 @@ window.TRIP_DATA = {
       "plan": "适合 Picasso、Santa Maria del Mar、Paradiso / Aldea 同区的一晚。",
       "tip": "热门，建议预约或错峰。",
       "source": "Condé Nast Traveler tapas guide + 官方/小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bar%20del%20Pla%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Pla%20%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Bar del Pla Barcelona"
@@ -4512,6 +4748,7 @@ window.TRIP_DATA = {
       "plan": "适合 El Born 白天到夜晚的主餐，和酒吧线很顺。",
       "tip": "吧台体验强但排队/订位要确认。",
       "source": "公开餐饮指南 + 官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cal%20Pep%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Cal%20Pep%20%E6%B5%B7%E9%B2%9C%E5%B0%8F%E7%9B%98%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Cal Pep Barcelona"
@@ -4533,6 +4770,7 @@ window.TRIP_DATA = {
       "plan": "适合 Born 走累后站着吃喝一轮，不必当完整晚餐。",
       "tip": "空间拥挤，排队正常。",
       "source": "公开餐饮指南 + 官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=El%20Xampanyet%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%8F%E9%A6%99%E6%A7%9F%E9%85%92%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "El Xampanyet Barcelona"
@@ -4554,6 +4792,7 @@ window.TRIP_DATA = {
       "plan": "适合老城/Raval/La Rambla 之后的正式晚餐。",
       "tip": "提前预约，注意区分 bar 区和 restaurant 区。",
       "source": "公开餐饮指南 + 官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bar%20Ca%C3%B1ete%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Ca%C3%B1ete%20%E9%85%92%E5%90%A7%E9%A4%90%E5%8E%85%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Bar Cañete Barcelona"
@@ -4575,6 +4814,7 @@ window.TRIP_DATA = {
       "plan": "适合 Barceloneta / 海边午餐，不建议晚到。",
       "tip": "营业窗口短，现金/排队规则要确认。",
       "source": "公开餐饮指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Cova%20Fumada%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%83%9F%E6%B4%9E%E8%80%81%E5%BA%97%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "La Cova Fumada Barcelona"
@@ -4596,6 +4836,7 @@ window.TRIP_DATA = {
       "plan": "适合 Barceloneta 或 Born 之间快速吃喝。",
       "tip": "很挤，体验重于舒适。",
       "source": "公开餐饮指南 + 官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Can%20Paixano%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Can%20Paixano%20%E9%A6%99%E6%A7%9F%E9%85%92%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Can Paixano Barcelona"
@@ -4617,6 +4858,7 @@ window.TRIP_DATA = {
       "plan": "适合现代主义建筑日的午餐或晚餐。",
       "tip": "稳定型，不是最惊艳但方便。",
       "source": "公开餐饮指南 + 官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Paco%20Meralgo%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Paco%20Meralgo%20%E5%B0%8F%E7%9B%98%E9%A4%90%E5%8E%85%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Paco Meralgo Barcelona"
@@ -4638,6 +4880,7 @@ window.TRIP_DATA = {
       "plan": "适合 Sips、Eixample 建筑线同区，作为较正式晚餐。",
       "tip": "预约优先，确认 bar/restaurant 体验差异。",
       "source": "公开餐饮指南 + 官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Gresca%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Gresca%20%E9%A4%90%E5%8E%85%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Gresca Barcelona"
@@ -4659,6 +4902,7 @@ window.TRIP_DATA = {
       "plan": "适合 Raval / MACBA / Filmoteca 后安排。",
       "tip": "口味和概念更特别，作为 A/B 级候选。",
       "source": "官方/公开餐饮指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Dos%20Pebrots%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8F%8C%E8%BE%A3%E6%A4%92%E9%A4%90%E5%8E%85%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Dos Pebrots Barcelona"
@@ -4680,6 +4924,7 @@ window.TRIP_DATA = {
       "plan": "适合 Gothic Quarter / Port Vell 步行线上的轻食。",
       "tip": "不适合大餐，重在老店节奏。",
       "source": "公开餐饮指南 + 官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bar%20La%20Plata%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%93%B6%E9%85%92%E5%90%A7%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Bar La Plata Barcelona"
@@ -4701,6 +4946,7 @@ window.TRIP_DATA = {
       "plan": "适合 Park Güell / Gràcia 傍晚线。",
       "tip": "热门小店，确认订位。",
       "source": "公开餐饮指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Lluritu%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Lluritu%20%E6%B5%B7%E9%B2%9C%E5%B0%8F%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Lluritu Barcelona"
@@ -4722,6 +4968,7 @@ window.TRIP_DATA = {
       "plan": "适合 Eixample 中段，不想研究复杂餐厅时使用。",
       "tip": "更偏实用，不是专程目的地。",
       "source": "公开餐饮指南 + 官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bodega%20Joan%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Joan%20%E9%85%92%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Bodega Joan Barcelona"
@@ -4743,6 +4990,7 @@ window.TRIP_DATA = {
       "plan": "适合 Paradiso / Aldea / Bar Brutal 同区，作为 Bar del Pla 的替代。",
       "tip": "热门区域，订位或错峰。",
       "source": "Barcelona Food Experience 2026 tapas guide + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Pepa%20Pla%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Pepa%20Pla%20%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Pepa Pla Barcelona"
@@ -4764,6 +5012,7 @@ window.TRIP_DATA = {
       "plan": "适合 Park Güell / Gràcia 日晚餐，不回老城绕路。",
       "tip": "订位优先。",
       "source": "Barcelona tapas/restaurant guides 2026 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Berbena%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Berbena%20%E9%A4%90%E5%8E%85%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Berbena Barcelona"
@@ -4785,6 +5034,7 @@ window.TRIP_DATA = {
       "plan": "适合 MACBA / Raval / Filmoteca 动线。",
       "tip": "风格更餐厅化，提前看菜单和订位。",
       "source": "Barcelona food guides + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Suculent%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Suculent%20%E9%A4%90%E5%8E%85%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Suculent Barcelona"
@@ -4806,6 +5056,7 @@ window.TRIP_DATA = {
       "plan": "适合 Eixample / Sant Antoni 晚餐，想比 tapas 更完整时选。",
       "tip": "预算和订位需提前确认。",
       "source": "Barcelona foodies recommendations + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Besta%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Besta%20%E6%B5%B7%E9%B2%9C%E9%A4%90%E5%8E%85%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Besta Barcelona"
@@ -4827,6 +5078,7 @@ window.TRIP_DATA = {
       "plan": "适合 Passeig de Gràcia / Eixample 建筑日。",
       "tip": "出发前复核订位和菜单。",
       "source": "Barcelona foodies recommendations + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Batea%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Batea%20%E6%B5%B7%E9%B2%9C%E9%A4%90%E5%8E%85%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Batea Barcelona"
@@ -4848,6 +5100,7 @@ window.TRIP_DATA = {
       "plan": "适合 11/3 Born / Top50 酒吧日，但不要和 Cal Pep 同天重复。",
       "tip": "价格高、订位难，作为 S/A 级候选。",
       "source": "Barcelona foodies recommendations + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Estimar%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Estimar%20%E6%B5%B7%E9%B2%9C%E9%A4%90%E5%8E%85%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Estimar Barcelona"
@@ -4869,6 +5122,7 @@ window.TRIP_DATA = {
       "plan": "适合 Gràcia / Eixample 之间，Park Güell 日可用。",
       "tip": "更偏热闹和游客友好，注意订位。",
       "source": "Barcelona social/tapas recommendations 2026 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Pepita%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Pepita%20%E5%B0%8F%E7%9B%98%E9%85%92%E5%90%A7%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "La Pepita Barcelona"
@@ -4890,6 +5144,7 @@ window.TRIP_DATA = {
       "plan": "适合 Gràcia 白天，不建议专门晚间跨区。",
       "tip": "营业时段需复核。",
       "source": "Barcelona local restaurant guides + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Pubilla%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Pubilla%20%E5%B8%82%E5%9C%BA%E9%A4%90%E5%8E%85%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "La Pubilla Barcelona"
@@ -4911,6 +5166,7 @@ window.TRIP_DATA = {
       "plan": "适合 Bar del Pla 或 Cal Pep 订不到时作为替代。",
       "tip": "核心区热门，提前确认。",
       "source": "Barcelona tapas guides + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Tapeo%20Born%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Born%20%E5%B0%8F%E7%9B%98%E9%A4%90%E5%8E%85%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Tapeo Born Barcelona"
@@ -4932,6 +5188,7 @@ window.TRIP_DATA = {
       "plan": "适合 Casa Batlló / La Pedrera / Sips 之间。",
       "tip": "价格和游客热度偏高，作为便利候选。",
       "source": "Barcelona restaurant guides + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bar%20Mut%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Mut%20%E9%85%92%E5%90%A7%E9%A4%90%E5%8E%85%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Bar Mut Barcelona"
@@ -4953,6 +5210,7 @@ window.TRIP_DATA = {
       "plan": "适合大教堂、斗牛场、河边同线，作为午餐或晚餐前半段。",
       "tip": "热门且翻台快，适合点几样就走。",
       "source": "官方/Sevilla tapas 指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bodeguita%20Romero%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Romero%20%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Bodeguita Romero Sevilla"
@@ -4974,6 +5232,7 @@ window.TRIP_DATA = {
       "plan": "适合城市核心晚餐，不要和太满的 tapas crawl 同晚硬拼。",
       "tip": "必须提前看订位和预算。",
       "source": "官方/餐饮指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Ca%C3%B1abota%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Ca%C3%B1abota%20%E6%B5%B7%E9%B2%9C%E9%A4%90%E5%8E%85%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Cañabota Sevilla"
@@ -4995,6 +5254,7 @@ window.TRIP_DATA = {
       "plan": "适合 Arenal / 河边 / 大教堂周边晚餐。",
       "tip": "热门，预约或早到。",
       "source": "官方/公开餐饮指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Brunilda%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Brunilda%20%E5%B0%8F%E7%9B%98%E9%A4%90%E5%8E%85%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "La Brunilda Sevilla"
@@ -5016,6 +5276,7 @@ window.TRIP_DATA = {
       "plan": "适合 Eslava、Alameda、San Lorenzo 同线换店吃。",
       "tip": "环境传统，服务和节奏按老酒馆预期。",
       "source": "Sevilla tapas 指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Ricardo%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Ricardo%20%E8%80%81%E9%85%92%E9%A6%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Casa Ricardo Sevilla"
@@ -5037,6 +5298,7 @@ window.TRIP_DATA = {
       "plan": "适合美术馆、San Lorenzo 或 Alameda 前后。",
       "tip": "有多家点位，地图上以中心区候选定位，出发前选具体分店。",
       "source": "官方/公开餐饮指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Azotea%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B1%8B%E9%A1%B6%E5%B0%8F%E9%A6%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "La Azotea Sevilla"
@@ -5058,6 +5320,7 @@ window.TRIP_DATA = {
       "plan": "适合河边、斗牛场或大教堂之后。",
       "tip": "适合保底，不是最 local 的 bar 体验。",
       "source": "官方/地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Petit%20Comit%C3%A9%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%8F%E5%A7%94%E5%91%98%E4%BC%9A%E9%A4%90%E5%8E%85%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Petit Comité Sevilla"
@@ -5079,6 +5342,7 @@ window.TRIP_DATA = {
       "plan": "适合大教堂/Alcázar 周边，不想走远时用。",
       "tip": "核心区热门，注意排队。",
       "source": "官方/Sevilla tapas 指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Ovejas%20Negras%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%BB%91%E7%BE%8A%E5%B0%8F%E9%A6%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Ovejas Negras Sevilla"
@@ -5100,6 +5364,7 @@ window.TRIP_DATA = {
       "plan": "适合 Santa Cruz / Casa de Pilatos / Alfalfa 晚间换店。",
       "tip": "空间很小，适合短暂停留。",
       "source": "公开餐饮指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bar%20Alfalfa%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Alfalfa%20%E9%85%92%E5%90%A7%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Bar Alfalfa Sevilla"
@@ -5121,6 +5386,7 @@ window.TRIP_DATA = {
       "plan": "适合大教堂周边作为午间补给或 tapas crawl 一站。",
       "tip": "不要当正式餐，油炸为主。",
       "source": "公开餐饮指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Freidur%C3%ADa%20La%20Isla%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%8F%E5%B2%9B%E7%82%B8%E9%B1%BC%E5%BA%97%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Freiduría La Isla Sevilla"
@@ -5142,6 +5408,7 @@ window.TRIP_DATA = {
       "plan": "适合 Alcázar / Santa Cruz 后的第一轮。",
       "tip": "很挤，注意随身物品和点单节奏。",
       "source": "Sevilla tapas 指南 + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bodega%20Santa%20Cruz%20Las%20Columnas%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E5%85%8B%E9%B2%81%E6%96%AF%E9%85%92%E9%A6%86%E6%9F%B1%E5%AD%90%E5%BA%97%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Bodega Santa Cruz Las Columnas Sevilla"
@@ -5163,6 +5430,7 @@ window.TRIP_DATA = {
       "plan": "适合 11/6 大教堂、Arenal、河边当天作为第一轮或第二轮 tapas，不需要坐很久。",
       "tip": "站着吃更有味道；热门时段拥挤，贵重物品收好。",
       "source": "Seville tapas guide / The Travellist 地址信息 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bodeguita%20Antonio%20Romero%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Antonio%20Romero%20%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Bodeguita Antonio Romero Sevilla"
@@ -5184,6 +5452,7 @@ window.TRIP_DATA = {
       "plan": "适合大教堂/Alcázar 日的午晚餐保底，也可作为 La Brunilda 订不到时的替代。",
       "tip": "游客核心区，建议提前看菜单和订位，不要当最 local 的站食 bar。",
       "source": "TheFork 2026 Sevilla city-centre listing + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Torres%20y%20Garc%C3%ADa%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Torres%20y%20Garc%C3%ADa%20%E9%A4%90%E5%8E%85%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Torres y García Sevilla"
@@ -5205,6 +5474,7 @@ window.TRIP_DATA = {
       "plan": "适合 Las Setas、Alfalfa、Casa de Pilatos 一线；可与 Bar Alfalfa 做一站传统、一站现代的对照。",
       "tip": "有多个点位时以当天地图最近分店为准。",
       "source": "Sevilla food guides + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sal%20Gorda%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Sal%20Gorda%20%E5%B0%8F%E7%9B%98%E9%A4%90%E5%8E%85%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Sal Gorda Sevilla"
@@ -5226,6 +5496,7 @@ window.TRIP_DATA = {
       "plan": "适合 Casa de Pilatos / Santa Catalina 方向，不想继续站着 tapas 时使用。",
       "tip": "离核心游客动线稍东，晚间回酒店看距离。",
       "source": "Sevilla restaurant guides + Eater / 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Becerrita%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Becerrita%20%E4%BC%A0%E7%BB%9F%E9%A4%90%E5%8E%85%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Becerrita Sevilla"
@@ -5247,6 +5518,7 @@ window.TRIP_DATA = {
       "plan": "适合 Las Setas、Palacio de las Dueñas、Macarena 南侧动线，作为午餐或轻晚餐。",
       "tip": "Azahar 记录营业日/时段变化，出发前复核当天开放。",
       "source": "Azahar Sevilla Tapas 2023 update + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Catalina%20Casa%20de%20Comidas%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Catalina%20%E5%AE%B6%E5%B8%B8%E9%A4%90%E5%8E%85%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Catalina Casa de Comidas Sevilla"
@@ -5268,6 +5540,7 @@ window.TRIP_DATA = {
       "plan": "适合把 Cañabota 从正式晚餐降级为轻量海鲜酒吧，和 Centro 酒吧线同区。",
       "tip": "仍然热门，需提前看预约和当日位置。",
       "source": "Cañabota 官方体系 + MICHELIN/餐饮指南 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Barra%20de%20Ca%C3%B1abota%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Ca%C3%B1abota%20%E5%90%A7%E5%8F%B0%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "La Barra de Cañabota Sevilla"
@@ -5289,6 +5562,7 @@ window.TRIP_DATA = {
       "plan": "适合大教堂、Archivo de Indias、Arenal 日；可作为 Ovejas Negras 或 La Brunilda 的替代。",
       "tip": "核心区热门，订位或错峰更稳。",
       "source": "Sevilla food guides + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Tradevo%20Centro%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Tradevo%20%E4%B8%AD%E5%BF%83%E5%BA%97%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Tradevo Centro Sevilla"
@@ -5310,6 +5584,7 @@ window.TRIP_DATA = {
       "plan": "如果想在 Sevilla 安排一顿仪式感餐，可单独留晚餐；不要和 flamenco 或多家酒吧硬叠。",
       "tip": "预算、着装、订位和取消政策要提前确认。",
       "source": "Abantal 官方 + MICHELIN Guide 2026",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Abantal%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Abantal%20%E7%B1%B3%E5%85%B6%E6%9E%97%E9%A4%90%E5%8E%85%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Abantal Sevilla"
@@ -5331,6 +5606,7 @@ window.TRIP_DATA = {
       "plan": "适合 Las Setas / Santa Catalina 附近午餐，不建议作为特别晚餐。",
       "tip": "排队常见，重点是实用和热闹。",
       "source": "Sevilla tapas guides + 地图关键词 + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Taberna%20Coloniales%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Coloniales%20%E5%B0%8F%E9%85%92%E9%A6%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Taberna Coloniales Sevilla"
@@ -5352,6 +5628,7 @@ window.TRIP_DATA = {
       "plan": "适合 Triana / Mercado de Triana / Centro Cerámica 同线；晚上回程优先看桥边人流和打车。",
       "tip": "比大教堂周边更有居民区气氛，但也很热门。",
       "source": "Eater Seville map / Sevilla tapas guides + 小红书入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Blanca%20Paloma%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%99%BD%E9%B8%BD%E9%85%92%E9%A6%86%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Blanca Paloma Sevilla"
@@ -5371,6 +5648,7 @@ window.TRIP_DATA = {
       ],
       "note": "巴黎精品咖啡高频推荐，小空间快节奏，适合右岸景点日早上提神。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Motors%20Coffee%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Motors%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Motors Coffee Paris"
@@ -5390,6 +5668,7 @@ window.TRIP_DATA = {
       ],
       "note": "运河边经典咖啡点，适合和 Canal Saint-Martin、Du Pain et des Idées 同线。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Ten%20Belles%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Ten%20Belles%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Ten Belles Paris"
@@ -5409,6 +5688,7 @@ window.TRIP_DATA = {
       ],
       "note": "小而安静的咖啡点，适合 Marais 或 Oberkampf 动线中间休息。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Dreamin%20Man%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Dreamin%20Man%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Dreamin Man Paris"
@@ -5428,6 +5708,7 @@ window.TRIP_DATA = {
       ],
       "note": "Pigalle / Montmartre 一带常被推荐的 roaster，适合蒙马特日前置。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=KB%20Coffee%20Roasters%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=KB%20%E5%92%96%E5%95%A1%E7%83%98%E7%84%99%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "KB Coffee Roasters Paris"
@@ -5447,6 +5728,7 @@ window.TRIP_DATA = {
       ],
       "note": "左岸精品咖啡老牌，适合 Orsay、Rodin 或 Invalides 同线。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Coutume%20Caf%C3%A9%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Coutume%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Coutume Café Paris"
@@ -5466,6 +5748,7 @@ window.TRIP_DATA = {
       ],
       "note": "NOIR 左岸 Saint-Germain 分店，离 Orsay、Rodin 和 Rue du Bac 很近，适合 10/26 不绕路补一杯。",
       "source": "NOIR 官方店铺页列出 Saint-Germain - 9 rue de Luynes + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=NOIR%20Saint-Germain%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=NOIR%20%E5%92%96%E5%95%A1%E5%9C%A3%E6%97%A5%E8%80%B3%E6%9B%BC%E5%BA%97%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "NOIR Saint-Germain Paris"
@@ -5485,6 +5768,7 @@ window.TRIP_DATA = {
       ],
       "note": "NOIR Invalides 分店，适合作为罗丹、荣军院、铁塔方向之间的保底咖啡。",
       "source": "NOIR 官方店铺页列出 Invalides - 184 rue de Grenelle + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=NOIR%20Invalides%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=NOIR%20%E5%92%96%E5%95%A1%E8%8D%A3%E5%86%9B%E9%99%A2%E5%BA%97%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "NOIR Invalides Paris"
@@ -5504,6 +5788,7 @@ window.TRIP_DATA = {
       ],
       "note": "Terres de Café 左岸 Saint-Germain 小店，偏认真喝豆子/买豆，空间小更适合 takeaway。",
       "source": "European Coffee Trip / Terres de Café Saint-Germain 信息 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Terres%20de%20Caf%C3%A9%20Saint-Germain%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Terres%20de%20Caf%C3%A9%20%E5%9C%A3%E6%97%A5%E8%80%B3%E6%9B%BC%E5%BA%97%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Terres de Café Saint-Germain Paris"
@@ -5523,6 +5808,7 @@ window.TRIP_DATA = {
       ],
       "note": "咖啡、杂志、唱片和设计感结合的 Saint-Germain 分店，适合左岸艺术日前半段慢一点。",
       "source": "European Coffee Trip / Bonjour Jacob 官方社媒地址 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bonjour%20Jacob%20Saint-Germain%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Bonjour%20Jacob%20%E5%9C%A3%E6%97%A5%E8%80%B3%E6%9B%BC%E5%BA%97%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Bonjour Jacob Saint-Germain Paris"
@@ -5542,6 +5828,7 @@ window.TRIP_DATA = {
       ],
       "note": "卢森堡公园旁的书店旧址咖啡馆，空间和历史感更强，适合不只为咖啡本身停留。",
       "source": "Sortir à Paris 2026 update / Le Pont Traversé 地址 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Pont%20Travers%C3%A9%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%A9%BF%E6%A1%A5%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Le Pont Traversé Paris"
@@ -5561,6 +5848,7 @@ window.TRIP_DATA = {
       ],
       "note": "拉丁区 / Mouffetard 一带的社区咖啡点，适合把左岸行程往 Panthéon 或 Mouffetard 延伸时使用。",
       "source": "公开咖啡指南 + 地图关键词 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Dose%20Mouffetard%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Dose%20%E7%A9%86%E5%A4%AB%E5%A1%94%E8%A1%97%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Dose Mouffetard Paris"
@@ -5580,6 +5868,7 @@ window.TRIP_DATA = {
       ],
       "note": "Marais 区好用的咖啡休息点，适合美术馆和小店之间停留。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Partisan%20Caf%C3%A9%20Artisanal%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Partisan%20%E6%89%8B%E4%BD%9C%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Partisan Café Artisanal Paris"
@@ -5599,6 +5888,7 @@ window.TRIP_DATA = {
       ],
       "note": "巴黎 specialty coffee 早期名店之一，靠近 Palais Royal、Louvre 和 Opéra；适合右岸经典景点日开场。",
       "source": "OSM 坐标复核 + 咖啡指南 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=T%C3%A9lescope%20Caf%C3%A9%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=T%C3%A9lescope%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Télescope Café Paris"
@@ -5618,6 +5908,7 @@ window.TRIP_DATA = {
       ],
       "note": "偏咖啡发烧友的 tasting bar 气质，适合把它当作认真喝咖啡的一站，而不是普通休息点。",
       "source": "官方/咖啡指南关键词复核 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Substance%20Caf%C3%A9%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Substance%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Substance Café Paris"
@@ -5637,6 +5928,7 @@ window.TRIP_DATA = {
       ],
       "note": "玛黑区小门脸名店，空间小但很有识别度；适合和 Picasso、Place des Vosges、Merci 一线合并。",
       "source": "OSM 坐标复核 + 咖啡指南 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Boot%20Caf%C3%A9%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Boot%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Boot Café Paris"
@@ -5656,6 +5948,7 @@ window.TRIP_DATA = {
       ],
       "note": "包装和空间很有设计感的巴黎新派咖啡，靠近 Opéra、Vendôme 和百货公司，适合顺路补一杯。",
       "source": "OSM 坐标复核 + 官方店铺页 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Nuances%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Nuances%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Café Nuances Paris"
@@ -5675,6 +5968,7 @@ window.TRIP_DATA = {
       ],
       "note": "巴黎精品咖啡老牌 roaster，适合想买豆子或稳定喝一杯；和蓬皮杜、玛黑北侧同线。",
       "source": "OSM 坐标复核 + 官方店铺页 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Terres%20de%20Caf%C3%A9%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Terres%20de%20Caf%C3%A9%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Terres de Café Paris"
@@ -5694,6 +5988,7 @@ window.TRIP_DATA = {
       ],
       "note": "巴黎 roaster 代表之一，位置更偏北，适合咖啡优先或蒙马特北侧探索，不建议只为打卡硬绕。",
       "source": "OSM 坐标复核 + 官方店铺页 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Lomi%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Lomi%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Café Lomi Paris"
@@ -5713,6 +6008,7 @@ window.TRIP_DATA = {
       ],
       "note": "介于老派 café 和精品咖啡之间，社区感比纯网红店更强；适合运河、Belleville 或晚间酒馆线前后。",
       "source": "OSM 坐标复核 + 官方店铺页 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Fontaine%20de%20Belleville%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%B4%9D%E5%B0%94%E7%BB%B4%E5%B0%94%E5%96%B7%E6%B3%89%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "La Fontaine de Belleville Paris"
@@ -5732,6 +6028,7 @@ window.TRIP_DATA = {
       ],
       "note": "巴黎重要烘焙品牌，偏买豆/咖啡文化点；适合和 Belleville、Buttes-Chaumont 方向合并。",
       "source": "官方店铺页 + 咖啡指南 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Belleville%20Br%C3%BBlerie%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%B4%9D%E5%B0%94%E7%BB%B4%E5%B0%94%E7%83%98%E7%84%99%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Belleville Brûlerie Paris"
@@ -5751,6 +6048,7 @@ window.TRIP_DATA = {
       ],
       "note": "KB 团队风格的 all-day coffee / brunch 点，空间比很多小店更适合坐下，靠近 Marais、Bastille。",
       "source": "官方/咖啡指南关键词复核 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Back%20in%20Black%20Coffee%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Back%20in%20Black%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Back in Black Coffee Paris"
@@ -5770,6 +6068,7 @@ window.TRIP_DATA = {
       ],
       "note": "巴黎新派 roaster / 咖啡店，适合买豆和尝试更现代的烘焙风格；玛黑动线很方便。",
       "source": "官方店铺页 + 咖啡指南 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kawa%20Coffee%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Kawa%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Kawa Coffee Paris"
@@ -5789,6 +6088,7 @@ window.TRIP_DATA = {
       ],
       "note": "14 区社区型 specialty coffee，离核心景点远一点，但更像居民日常；适合你想看非游客巴黎时安排。",
       "source": "OSM 坐标复核 + 咖啡指南 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Hexagone%20Caf%C3%A9%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Hexagone%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Hexagone Café Paris"
@@ -5808,6 +6108,7 @@ window.TRIP_DATA = {
       ],
       "note": "咖啡、轻食和摄影气质结合的小店，适合玛黑区慢走时坐一下，不只是外带。",
       "source": "OSM 坐标复核 + 官方店铺页 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=fringe%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=fringe%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "fringe Paris"
@@ -5827,6 +6128,7 @@ window.TRIP_DATA = {
       ],
       "note": "巴黎精品咖啡老名单里的小店，靠近 Arts et Métiers 和玛黑北侧，适合街区散步中补一杯。",
       "source": "咖啡指南 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Loustic%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Loustic%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Loustic Paris"
@@ -5846,6 +6148,7 @@ window.TRIP_DATA = {
       ],
       "note": "品牌感强、游客也多，但 Palais Royal 庭院位置非常顺；适合看景顺手喝，不必为咖啡本身专程。",
       "source": "OSM 坐标复核 + 官方店铺页 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Kitsun%C3%A9%20Palais%20Royal%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Kitsun%C3%A9%20%E5%92%96%E5%95%A1%E7%9A%87%E5%AE%B6%E5%AE%AB%E6%AE%BF%E5%BA%97%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Café Kitsuné Palais Royal Paris"
@@ -5865,6 +6168,7 @@ window.TRIP_DATA = {
       ],
       "note": "设计家具品牌下的社区咖啡空间，适合圣马丁运河一带慢逛、看本地人坐店。",
       "source": "OSM 坐标复核 + 官方/地图关键词 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=R%C3%A9sidence%20Kann%20Coffee%20Shop%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Kann%20%E4%BD%8F%E5%AE%85%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Résidence Kann Coffee Shop Paris"
@@ -5884,6 +6188,7 @@ window.TRIP_DATA = {
       ],
       "note": "Sentier / Montorgueil 一带好用的社区咖啡点，适合和 Stohrer、Rue Montorgueil 同线。",
       "source": "咖啡指南 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Matamata%20Coffee%20Bar%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Matamata%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Matamata Coffee Bar Paris"
@@ -5903,6 +6208,7 @@ window.TRIP_DATA = {
       ],
       "note": "蒙马特坡上小咖啡店，适合 Sacré-Cœur 前后避开主广场游客流，坐下来喘口气。",
       "source": "地图关键词复核 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Clove%20Coffee%20Shop%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Clove%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Clove Coffee Shop Paris"
@@ -5922,6 +6228,7 @@ window.TRIP_DATA = {
       ],
       "note": "骑行社区感很强的小咖啡馆，靠近塞纳河、Saint-Paul 和玛黑南侧；比纯打卡店更日常。",
       "source": "OSM 坐标复核 + 官方店铺页 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Peloton%20Caf%C3%A9%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Peloton%20%E9%AA%91%E8%A1%8C%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Le Peloton Café Paris"
@@ -5941,6 +6248,7 @@ window.TRIP_DATA = {
       ],
       "note": "Oberkampf 社区咖啡/轻食点，亚洲风味和本地年轻街区结合，适合东巴黎晚间线之前。",
       "source": "OSM 坐标复核 + 官方/地图关键词 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=The%20Hood%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=The%20Hood%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "The Hood Paris"
@@ -5960,6 +6268,7 @@ window.TRIP_DATA = {
       ],
       "note": "Oberkampf 街区 brunch / coffee 点，适合作为东巴黎生活线的白天入口。",
       "source": "地图关键词复核 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Oberkampf%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Oberkampf%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Café Oberkampf Paris"
@@ -5979,6 +6288,7 @@ window.TRIP_DATA = {
       ],
       "note": "巴黎本地连锁型精品咖啡，稳定、分店多；这个点适合 Tuileries、Orangerie、Concorde 前后保底。",
       "source": "官方店铺页 + 地图关键词 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=NOIR%20Coffee%20Shop%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=NOIR%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "NOIR Coffee Shop Paris"
@@ -5998,6 +6308,7 @@ window.TRIP_DATA = {
       ],
       "note": "小红书和本地社媒都常见的新派咖啡/轻食点，适合玛黑区不想只喝老牌时替换。",
       "source": "OSM 坐标复核 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Berry%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Berry%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Berry Paris"
@@ -6017,6 +6328,7 @@ window.TRIP_DATA = {
       ],
       "note": "更偏 brunch 名店，但咖啡和早午餐动线好用；排队成本较高，适合早到或错峰。",
       "source": "官方店铺页 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Holybelly%205%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Holybelly%205%20%E6%97%A9%E5%8D%88%E9%A4%90%E5%92%96%E5%95%A1%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Holybelly 5 Paris"
@@ -6036,6 +6348,7 @@ window.TRIP_DATA = {
       ],
       "note": "杂志、设计和咖啡结合的社区空间，适合运河一带慢逛，不只是拿铁打卡。",
       "source": "OSM 坐标复核 + 官方店铺页 + 小红书关键词入口",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bonjour%20Jacob%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Bonjour%20Jacob%20%E5%92%96%E5%95%A1%E4%B9%A6%E5%BA%97%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Bonjour Jacob Paris"
@@ -6055,6 +6368,7 @@ window.TRIP_DATA = {
       ],
       "note": "尼斯市中心常见精品咖啡选择，适合老城/市中心散步前后。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Hobo%20Coffee%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Hobo%20%E5%92%96%E5%95%A1%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Hobo Coffee Nice"
@@ -6074,6 +6388,7 @@ window.TRIP_DATA = {
       ],
       "note": "老城附近咖啡点，适合和 Cours Saleya、Fenocchio 串起来。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Fino%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Fino%20%E5%92%96%E5%95%A1%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Café Fino Nice"
@@ -6093,6 +6408,7 @@ window.TRIP_DATA = {
       ],
       "note": "适合在市中心补一杯，不必为咖啡专门横穿城市。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Brume%20Coffee%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Brume%20%E5%92%96%E5%95%A1%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Brume Coffee Nice"
@@ -6112,6 +6428,7 @@ window.TRIP_DATA = {
       ],
       "note": "连锁但稳定，适合作为早起和临时办公的保底选择。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Copenhagen%20Coffee%20Lab%20Nice%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%93%A5%E6%9C%AC%E5%93%88%E6%A0%B9%E5%92%96%E5%95%A1%E5%AE%9E%E9%AA%8C%E5%AE%A4%E5%B0%BC%E6%96%AF%E5%BA%97%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Copenhagen Coffee Lab Nice Nice"
@@ -6131,6 +6448,7 @@ window.TRIP_DATA = {
       ],
       "note": "Barcelona 精品咖啡代表之一，适合和 Picasso、El Born 动线合并。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=N%C3%B8mad%20Coffee%20Lab%20%26%20Shop%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=N%C3%B8mad%20%E5%92%96%E5%95%A1%E5%AE%9E%E9%AA%8C%E5%AE%A4%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Nømad Coffee Lab & Shop Barcelona"
@@ -6150,6 +6468,7 @@ window.TRIP_DATA = {
       ],
       "note": "老城咖啡名店，适合 Gothic Quarter / Cathedral 半日里的补给点。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Satan's%20Coffee%20Corner%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Satan's%20%E5%92%96%E5%95%A1%E8%A7%92%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Satan's Coffee Corner Barcelona"
@@ -6169,6 +6488,7 @@ window.TRIP_DATA = {
       ],
       "note": "更偏 roaster 和认真喝咖啡的点，离核心景点略远，适合咖啡优先日。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Hidden%20Coffee%20Roasters%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Hidden%20%E5%92%96%E5%95%A1%E7%83%98%E7%84%99%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Hidden Coffee Roasters Barcelona"
@@ -6188,6 +6508,7 @@ window.TRIP_DATA = {
       ],
       "note": "Gràcia 社区感咖啡 roaster，适合和广场生活、Park Güell 方向合并。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=SlowMov%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=SlowMov%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "SlowMov Barcelona"
@@ -6207,6 +6528,7 @@ window.TRIP_DATA = {
       ],
       "note": "Eixample / Arc de Triomf 一带好用的咖啡点，动线灵活。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Three%20Marks%20Coffee%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Three%20Marks%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Three Marks Coffee Barcelona"
@@ -6226,6 +6548,7 @@ window.TRIP_DATA = {
       ],
       "note": "本地连锁密度高，适合临时找一杯，不一定要专门绕路。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Syra%20Coffee%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Syra%20%E5%92%96%E5%95%A1%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Syra Coffee Barcelona"
@@ -6245,6 +6568,7 @@ window.TRIP_DATA = {
       ],
       "note": "Sevilla 精品咖啡代表之一，适合老城早晨第一杯。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Virgin%20Coffee%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Virgin%20%E5%92%96%E5%95%A1%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Virgin Coffee Sevilla"
@@ -6264,6 +6588,7 @@ window.TRIP_DATA = {
       ],
       "note": "咖啡 + 轻食，适合美术馆、San Vicente 或河边动线。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Paradas7%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Paradas7%20%E5%92%96%E5%95%A1%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Paradas7 Sevilla"
@@ -6283,6 +6608,7 @@ window.TRIP_DATA = {
       ],
       "note": "稳定型咖啡保底点，适合在中心区临时补咖啡。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Syra%20Coffee%20Sevilla%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Syra%20%E5%92%96%E5%95%A1%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A%E5%BA%97%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Syra Coffee Sevilla Sevilla"
@@ -6302,6 +6628,7 @@ window.TRIP_DATA = {
       ],
       "note": "靠近游客核心区，适合大教堂/王宫日早午间快速补给。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Jester%20Coffee%20%26%20Juices%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Jester%20%E5%92%96%E5%95%A1%E6%9E%9C%E6%B1%81%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Jester Coffee & Juices Sevilla"
@@ -6321,6 +6648,7 @@ window.TRIP_DATA = {
       ],
       "note": "中心区咖啡和轻食选择，适合把高强度景点日降速。",
       "source": "公开咖啡指南 + 小红书关键词复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Utopia%20Caf%C3%A9%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=Utopia%20%E5%92%96%E5%95%A1%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Utopia Café Sevilla"
@@ -6341,6 +6669,7 @@ window.TRIP_DATA = {
       "note": "巴黎最明确的城市符号，第一次来仍然值得看；从 Trocadéro、Champ de Mars 和塞纳河岸看角度完全不同。",
       "plan": "适合安排在黄昏到夜晚，先从 Trocadéro 看全景，再沿河走到塔下；登塔要单独预约，纯看景可不登。",
       "tip": "塔下安检和人流都重，贵重物品要收好；登塔票和电梯时段提前确认。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Tour%20Eiffel%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9F%83%E8%8F%B2%E5%B0%94%E9%93%81%E5%A1%94%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Tour Eiffel Paris"
@@ -6362,6 +6691,7 @@ window.TRIP_DATA = {
       "plan": "10/26 黄昏看完铁塔后上船，选 sunset 或 evening slot；结束后直接叫车去 Bar Nouveau，不夜间长距离步行。",
       "tip": "船班、香槟套餐、登船口和天气要提前确认；露天甲板风大，带外套。",
       "source": "Vedettes de Paris 官方页面：Port de Suffren / Champagne or aperitif cruise",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Vedettes%20de%20Paris%20Champagne%20Cruise%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A1%9E%E7%BA%B3%E6%B2%B3%E9%A6%99%E6%A7%9F%E6%B8%B8%E8%88%B9%20%2F%20%E9%93%81%E5%A1%94%E4%B8%8A%E8%88%B9%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Vedettes de Paris Champagne Cruise Paris"
@@ -6383,6 +6713,7 @@ window.TRIP_DATA = {
       "plan": "适合替换 10/25 西岱岛/卢浮宫之后的晚间活动；如果想更中心、更少往返，就选这个。",
       "tip": "Happy Hour 常见 17:45 / 19:15 档，sunset 档随日落变化；出发前复核官方时刻。",
       "source": "Vedettes du Pont Neuf 官方 Champagne Cruise / Happy Hour 页面",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Vedettes%20du%20Pont%20Neuf%20Champagne%20Cruise%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A1%9E%E7%BA%B3%E6%B2%B3%E9%A6%99%E6%A7%9F%E6%B8%B8%E8%88%B9%20%2F%20%E6%96%B0%E6%A1%A5%E4%B8%8A%E8%88%B9%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Vedettes du Pont Neuf Champagne Cruise Paris"
@@ -6403,6 +6734,7 @@ window.TRIP_DATA = {
       "note": "不只是美术馆，也是从王宫到共和国文化权力的核心空间；就算不进馆，玻璃金字塔和庭院动线也值得看。",
       "plan": "如果进馆，挑 2-3 条主题线，不要试图看完；如果只看外部，可和 Tuileries、Palais Royal、Danico 同线。",
       "tip": "热门入口排队长，闭馆日和夜场变化要复查；馆内很大，留足体力。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20du%20Louvre%20%2F%20Cour%20Carr%C3%A9e%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8D%A2%E6%B5%AE%E5%AE%AB%20%2F%20%E6%96%B9%E5%BD%A2%E5%BA%AD%E9%99%A2%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Musée du Louvre / Cour Carrée Paris"
@@ -6424,6 +6756,7 @@ window.TRIP_DATA = {
       "plan": "10/27 从卢浮宫步行约 500 米到达，在同区午餐后散步，再向西进入杜乐丽花园。",
       "tip": "花园免费；秋季开放时间需要出发前复核，活动或安保可能临时调整。",
       "source": "Domaine national du Palais-Royal 官方实用信息，2026-07-09 复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Domaine%20national%20du%20Palais-Royal%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E9%BB%8E%E7%9A%87%E5%AE%B6%E5%AE%AB%E6%AE%BF%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Domaine national du Palais-Royal Paris"
@@ -6445,6 +6778,7 @@ window.TRIP_DATA = {
       "plan": "10/27 从 Palais Royal 向西步行约 800 米进入花园，沿中轴前往橘园与协和广场。",
       "tip": "秋季闭园时间会提前，闭园前 30 分钟开始清场；出发前再看卢浮宫官方当天公告。",
       "source": "Musée du Louvre 官方开放时间，2026-07-09 复核",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Jardin%20des%20Tuileries%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%9D%9C%E4%B9%90%E4%B8%BD%E8%8A%B1%E5%9B%AD%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Jardin des Tuileries Paris"
@@ -6466,6 +6800,7 @@ window.TRIP_DATA = {
       "plan": "10/27 作为卢浮宫城市日的落日收尾，从橘园步行约 300 米到达；之后向北走到 Madeleine 吃饭。",
       "tip": "广场车流和游客都多，过街走信号灯；具体日落视角按天气和现场施工调整。",
       "source": "Ville de Paris - La Concorde, une place aux multiples facettes",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Place%20de%20la%20Concorde%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8D%8F%E5%92%8C%E5%B9%BF%E5%9C%BA%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Place de la Concorde Paris"
@@ -6486,6 +6821,7 @@ window.TRIP_DATA = {
       "note": "巴黎历史和宗教地理中心，修复后重新成为塞纳河岛区的核心；外部立面、广场和桥上视角都重要。",
       "plan": "和 Sainte-Chapelle、Conciergerie、河岸旧书摊一起排成半日；傍晚从左岸看更舒服。",
       "tip": "入内参观政策和预约可能变化，出发前看官方信息；周边游客密集。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cath%C3%A9drale%20Notre-Dame%20de%20Paris%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E9%BB%8E%E5%9C%A3%E6%AF%8D%E9%99%A2%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Cathédrale Notre-Dame de Paris Paris"
@@ -6506,6 +6842,7 @@ window.TRIP_DATA = {
       "note": "以彩色玻璃闻名的小型哥特空间，体量不大但视觉冲击强；适合补巴黎中世纪层次。",
       "plan": "和 Notre-Dame、Conciergerie 同线，最好选有阳光的时段；参观时间短但排队可能长。",
       "tip": "安检严格，预约票更稳；阴天观感会打折。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sainte-Chapelle%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E7%A4%BC%E6%8B%9C%E5%A0%82%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Sainte-Chapelle Paris"
@@ -6526,6 +6863,7 @@ window.TRIP_DATA = {
       "note": "凯旋门是巴黎轴线和纪念性城市规划的关键节点，登顶能看香榭丽舍和放射状大道。",
       "plan": "适合傍晚登顶，看城市灯光；可和 Champs-Élysées 快速经过，不必在商业街停太久。",
       "tip": "不要横穿环岛，走地下通道；登顶有台阶。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Arc%20de%20Triomphe%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%87%AF%E6%97%8B%E9%97%A8%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Arc de Triomphe Paris"
@@ -6546,6 +6884,7 @@ window.TRIP_DATA = {
       "note": "蒙马特高地是游客经典区，也保留了村落式坡道、画室和小广场；城市视野很好。",
       "plan": "早晨或傍晚去，避开最挤的正午；和 Rue des Martyrs、Pigalle 或北侧小街串起来。",
       "tip": "大台阶附近游客陷阱多，餐厅要谨慎选。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Basilique%20du%20Sacr%C3%A9-C%C5%93ur%20%2F%20Montmartre%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E5%BF%83%E5%A4%A7%E6%95%99%E5%A0%82%20%2F%20%E8%92%99%E9%A9%AC%E7%89%B9%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Basilique du Sacré-Cœur / Montmartre Paris"
@@ -6566,6 +6905,7 @@ window.TRIP_DATA = {
       "note": "第二帝国时期最华丽的公共建筑之一，楼梯、穹顶和剧院空间比外立面更值得看。",
       "plan": "白天参观建筑，晚上若有演出可单独安排；和百货公司屋顶、Danico 同区。",
       "tip": "内部参观有演出排练限制，临近确认开放区域。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Palais%20Garnier%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E9%BB%8E%E6%AD%8C%E5%89%A7%E9%99%A2%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Palais Garnier Paris"
@@ -6586,6 +6926,7 @@ window.TRIP_DATA = {
       "note": "法国国家记忆空间，能把文学、革命、共和国和拉丁区地理串起来。",
       "plan": "和 Luxembourg、Sorbonne、Rue Mouffetard 同线，适合左岸半日。",
       "tip": "穹顶开放有季节/天气限制，想登高需单独确认。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Panth%C3%A9on%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%85%88%E8%B4%A4%E7%A5%A0%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Panthéon Paris"
@@ -6606,6 +6947,7 @@ window.TRIP_DATA = {
       "note": "巴黎最漂亮也最完整的历史广场之一，兼具游客价值和本地坐草地休息的日常感。",
       "plan": "和 Musée Picasso、Carnavalet、Marais 小店串起来；适合作为中途休息点。",
       "tip": "周末人多但不影响体验，周边餐厅价格差异大。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Place%20des%20Vosges%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%AD%9A%E6%97%A5%E5%B9%BF%E5%9C%BA%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Place des Vosges Paris"
@@ -6626,6 +6968,7 @@ window.TRIP_DATA = {
       "note": "理解法国王权、园林和宫廷审美的关键一日线；离巴黎不远但会消耗大半天体力。",
       "plan": "如果去，建议单独留一天或至少半天，不要和市内大馆硬拼；花园和 Trianon 比只看镜厅更完整。",
       "tip": "周一常见闭馆，喷泉/花园项目另有时段和票种；提前预约。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%A2teau%20de%20Versailles%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%87%A1%E5%B0%94%E8%B5%9B%E5%AE%AB%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Château de Versailles Paris"
@@ -6646,6 +6989,7 @@ window.TRIP_DATA = {
       "note": "尼斯最佳城市和海湾视角，能同时看老城、港口和天使湾，是到达后建立方向感的第一站。",
       "plan": "适合早晨或日落前上去；下山接 Cours Saleya、老城或 Port Lympia。",
       "tip": "上坡有台阶，也可找电梯；夏天正午暴晒。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Colline%20du%20Ch%C3%A2teau%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9F%8E%E5%A0%A1%E5%B1%B1%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Colline du Château Nice"
@@ -6666,6 +7010,7 @@ window.TRIP_DATA = {
       "note": "尼斯海岸生活的主轴，游客会来，本地人也会跑步、骑车、坐长椅看海。",
       "plan": "傍晚走一段即可，不必全程；可和 Negresco、Masséna 或海边 aperitif 合并。",
       "tip": "海滩多为卵石，想下水或久坐要准备鞋/垫。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Promenade%20des%20Anglais%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%8B%B1%E5%9B%BD%E4%BA%BA%E6%BC%AB%E6%AD%A5%E5%A4%A7%E9%81%93%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Promenade des Anglais Nice"
@@ -6686,6 +7031,7 @@ window.TRIP_DATA = {
       "note": "老城是尼斯游客核心，但巷子、食品店、socca 和市场仍保留很强的地方味道。",
       "plan": "早上看市场和食品店，晚上看酒吧和餐馆；和 Palais Lascaris、Fenocchio 同线。",
       "tip": "主街游客餐厅多，吃饭尽量查具体店。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Vieux%20Nice%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%BC%E6%96%AF%E8%80%81%E5%9F%8E%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Vieux Nice Nice"
@@ -6706,6 +7052,7 @@ window.TRIP_DATA = {
       "note": "尼斯俄罗斯东正教历史的地标，和海岸度假城市的多国社交史有关。",
       "plan": "适合和 Libération 或市中心步行串起来，停留时间不长。",
       "tip": "宗教场所注意着装和开放时间。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cath%C3%A9drale%20Saint-Nicolas%20de%20Nice%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B0%BC%E6%96%AF%E5%9C%A3%E5%B0%BC%E5%8F%A4%E6%8B%89%E4%B8%9C%E6%AD%A3%E6%95%99%E5%A4%A7%E6%95%99%E5%A0%82%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Cathédrale Saint-Nicolas de Nice Nice"
@@ -6726,6 +7073,7 @@ window.TRIP_DATA = {
       "note": "山城、石巷和地中海视野是 Côte d’Azur 的经典组合，比单纯海边更有层次。",
       "plan": "建议和 Villa Ephrussi 或 Villefranche 二选一组合，不要同天塞太多海岸城镇。",
       "tip": "上坡石路多，穿好走的鞋；热门时段游客多。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=%C3%88ze%20Village%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9F%83%E5%85%B9%E5%B1%B1%E5%9F%8E%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Èze Village Nice"
@@ -6746,6 +7094,7 @@ window.TRIP_DATA = {
       "note": "艺术家、画廊和山城景观结合的经典村镇，和 Fondation Maeght 能组成艺术半日。",
       "plan": "如果你更看重艺术，优先于 Monaco；适合从 Nice 包车或公交安排半日。",
       "tip": "公共交通时间要核对，晚上回程不如白天稳。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Saint-Paul-de-Vence%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E4%BF%9D%E7%BD%97%E5%BE%B7%E6%97%BA%E6%96%AF%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Saint-Paul-de-Vence Nice"
@@ -6766,6 +7115,7 @@ window.TRIP_DATA = {
       "note": "戛纳电影节的象征，建筑本身不一定惊艳，但作为电影文化地标值得打卡。",
       "plan": "和 Croisette、Le Suquet、Antibes 同一天即可；不要为它单独留太久。",
       "tip": "非电影节期间氛围会安静很多，重点看城市和海岸线。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Palais%20des%20Festivals%20de%20Cannes%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%88%9B%E7%BA%B3%E7%94%B5%E5%BD%B1%E5%AE%AB%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Palais des Festivals de Cannes Nice"
@@ -6786,6 +7136,7 @@ window.TRIP_DATA = {
       "note": "戛纳老城高地，比海滨大道更有生活和历史层次，能看港口和海湾。",
       "plan": "从 Palais des Festivals 走过去，上坡后找视角点，再下山吃饭。",
       "tip": "坡道和台阶多，正午较晒。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Suquet%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%88%9B%E7%BA%B3%E8%80%81%E5%9F%8E%E8%8B%8F%E5%87%AF%E5%8C%BA%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Le Suquet Nice"
@@ -6806,6 +7157,7 @@ window.TRIP_DATA = {
       "note": "从戛纳坐船可达的小岛，有海岸步道、堡垒和更安静的自然感。",
       "plan": "如果戛纳当天不想只看城市，可用半天给小岛；和 Antibes 同天会偏赶。",
       "tip": "船班、天气和返程时间要提前查。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=%C3%8Ele%20Sainte-Marguerite%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E7%8E%9B%E6%A0%BC%E4%B8%BD%E7%89%B9%E5%B2%9B%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Île Sainte-Marguerite Nice"
@@ -6826,6 +7178,7 @@ window.TRIP_DATA = {
       "note": "摩纳哥是 Riviera 的另一种世界：港口、赌场、王宫和极高密度的财富景观。",
       "plan": "如果你想看 Riviera 的奢华面，可从 Nice 半日往返；如果更想艺术和本地生活，可以跳过。",
       "tip": "旺季和展会期人多，餐饮价格高；注意返程火车。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Monaco%20%2F%20Monte%20Carlo%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%91%A9%E7%BA%B3%E5%93%A5%20%2F%20%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Monaco / Monte Carlo Nice"
@@ -6846,6 +7199,7 @@ window.TRIP_DATA = {
       "note": "芒通的彩色老城、市场和海边带有明显意法边境气质，比戛纳更符合本次东线。",
       "plan": "10/31 先从 Nice 去最远的 Menton，再向西回 Monaco、Nice 和机场，避免折返。",
       "tip": "老城有坡度；当天必须结合 Nice 到 Barcelona 的晚班机和行李寄存安排。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Menton%20Old%20Town%20Nice",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%8A%92%E9%80%9A%E8%80%81%E5%9F%8E%20%E5%B0%BC%E6%96%AF",
       "imageQuery": "Menton Old Town Nice"
@@ -6866,6 +7220,7 @@ window.TRIP_DATA = {
       "note": "Barcelona 最重要的游客景点和 Gaudí 核心作品，外部雕塑、内部光线和结构都值得认真看。",
       "plan": "必须提前预约，建议上午或下午光线好时段；和 Hospital de Sant Pau 可以同线。",
       "tip": "预约时段严格，安检排队要预留；不要只在外面拍照就走。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sagrada%20Fam%C3%ADlia%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E5%AE%B6%E5%A0%82%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Sagrada Família Barcelona"
@@ -6886,6 +7241,7 @@ window.TRIP_DATA = {
       "note": "Gaudí 把公园、城市视野和马赛克装饰结合在一起，游客多但仍是理解 Barcelona 想象力的关键点。",
       "plan": "提前买票，和 Gràcia 广场生活或 Bunkers del Carmel 合并；不要和太多市中心馆同天硬拼。",
       "tip": "坡路多，夏天暴晒；热门时段很挤。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Park%20G%C3%BCell%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8F%A4%E5%9F%83%E5%B0%94%E5%85%AC%E5%9B%AD%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Park Güell Barcelona"
@@ -6906,6 +7262,7 @@ window.TRIP_DATA = {
       "note": "Gaudí 在城市住宅尺度上的代表作，外立面、屋顶和室内动线都很强。",
       "plan": "适合和 La Pedrera、Eixample wine bar 同线；若预算有限，二选一可看你的审美偏好。",
       "tip": "票价较高，夜场/特殊票种要先比较。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Batll%C3%B3%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E7%89%B9%E7%BD%97%E4%B9%8B%E5%AE%B6%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Casa Batlló Barcelona"
@@ -6926,6 +7283,7 @@ window.TRIP_DATA = {
       "note": "更偏建筑结构和屋顶雕塑感，和 Casa Batlló 构成 Eixample 现代主义双核心。",
       "plan": "如果喜欢建筑，建议入内；时间紧可只看外观，把钱留给 Sagrada Família。",
       "tip": "屋顶受天气影响，夜场另有体验但不一定适合所有人。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Pedrera%20-%20Casa%20Mil%C3%A0%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%B1%B3%E6%8B%89%E4%B9%8B%E5%AE%B6%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "La Pedrera - Casa Milà Barcelona"
@@ -6946,6 +7304,7 @@ window.TRIP_DATA = {
       "note": "加泰罗尼亚现代主义音乐厅，彩色玻璃和装饰细节极强，比很多游客预期更惊艳。",
       "plan": "可选导览或直接买一场演出票；和 El Born、Castanyada 活动核心很近。",
       "tip": "导览和演出入口/时段不同，提前确认。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Palau%20de%20la%20M%C3%BAsica%20Catalana%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8A%A0%E6%B3%B0%E7%BD%97%E5%B0%BC%E4%BA%9A%E9%9F%B3%E4%B9%90%E5%AE%AB%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Palau de la Música Catalana Barcelona"
@@ -6966,6 +7325,7 @@ window.TRIP_DATA = {
       "note": "现代主义建筑群，游客密度通常低于 Gaudí 热点，但空间完整度非常高。",
       "plan": "和 Sagrada Família 沿 Avinguda de Gaudí 步行串联，是很顺的一条线。",
       "tip": "开放区域和展览可能变化，先看票务。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Hospital%20de%20Sant%20Pau%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E4%BF%9D%E7%BD%97%E5%8C%BB%E9%99%A2%E7%8E%B0%E4%BB%A3%E4%B8%BB%E4%B9%89%E5%BB%BA%E7%AD%91%E7%BE%A4%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Hospital de Sant Pau Barcelona"
@@ -6986,6 +7346,7 @@ window.TRIP_DATA = {
       "note": "哥特区核心地标，外部广场、回廊和周边巷道一起构成老城体验。",
       "plan": "和 MUHBA、Frederic Marès、老城甜品同线；清晨和傍晚人少一些。",
       "tip": "着装和收费时段要注意，周边扒手风险较高。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Barcelona%20Cathedral%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E4%B8%BB%E6%95%99%E5%BA%A7%E5%A0%82%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Barcelona Cathedral Barcelona"
@@ -7006,6 +7367,7 @@ window.TRIP_DATA = {
       "note": "El Born 的精神核心之一，空间比大教堂更朴素有力，也贴近街区生活。",
       "plan": "和 Picasso、Born CCM、La Vinya del Senyor、Paradiso/Bar Brutal 同线。",
       "tip": "入内时段和礼拜活动需核对。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Santa%20Maria%20del%20Mar%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E6%B5%B7%E4%B8%8A%E5%9C%A3%E6%AF%8D%E5%9C%A3%E6%AE%BF%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Santa Maria del Mar Barcelona"
@@ -7026,6 +7388,7 @@ window.TRIP_DATA = {
       "note": "游客很多，但作为 Barcelona 食物图像的经典市场仍值得快速看一次。",
       "plan": "早一点去，停留 30-45 分钟即可；更本地的市场体验交给 Sant Antoni 或 Concepció。",
       "tip": "主通道很挤，注意随身物品；不要在最游客摊位吃正餐。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mercat%20de%20la%20Boqueria%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8D%9A%E7%9B%96%E5%88%A9%E4%BA%9A%E5%B8%82%E5%9C%BA%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Mercat de la Boqueria Barcelona"
@@ -7046,6 +7409,7 @@ window.TRIP_DATA = {
       "note": "城市全景点，能把海、Eixample 网格和山地边界放在一起看。",
       "plan": "适合日落前后，和 Park Güell 可勉强同线；交通和步行上坡要预留。",
       "tip": "人多时管理可能严格，夜间回程注意交通。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bunkers%20del%20Carmel%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%8D%A1%E6%A2%85%E5%B0%94%E7%A2%89%E5%A0%A1%E8%A7%82%E6%99%AF%E5%8F%B0%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Bunkers del Carmel Barcelona"
@@ -7066,6 +7430,7 @@ window.TRIP_DATA = {
       "note": "山体、修道院和加泰罗尼亚精神象征结合的一日线，和市区建筑完全不同。",
       "plan": "如果你想在 Barcelona 段加自然/精神性，留一整天；否则不要和 Castanyada 核心日冲突。",
       "tip": "火车/缆车/齿轨车组合要提前规划，天气会影响视野。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Montserrat%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%92%99%E7%89%B9%E5%A1%9E%E6%8B%89%E7%89%B9%E5%B1%B1%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Montserrat Barcelona"
@@ -7086,6 +7451,7 @@ window.TRIP_DATA = {
       "note": "世界级大教堂和清真寺塔楼转化而来的 Giralda，是 Sevilla 历史层叠最集中的地标。",
       "plan": "建议提前预约，和 Archivo de Indias、Alcázar、Santa Cruz 同线；登塔视野值得。",
       "tip": "排队和安检耗时，着装注意；周边游客餐厅密集。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Catedral%20de%20Sevilla%20%2F%20La%20Giralda%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A%E5%A4%A7%E6%95%99%E5%A0%82%20%2F%20%E5%90%89%E6%8B%89%E8%BE%BE%E5%A1%94%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Catedral de Sevilla / La Giralda Sevilla"
@@ -7106,6 +7472,7 @@ window.TRIP_DATA = {
       "note": "Mudejar 建筑、宫殿庭院和花园构成 Sevilla 最重要的游客体验之一。",
       "plan": "放在上午第一段，慢慢看宫殿和花园；和大教堂同天可以但会很满。",
       "tip": "一定提前买票，热门日期容易售罄；入口和预约姓名要核对。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Real%20Alc%C3%A1zar%20de%20Sevilla%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A%E7%8E%8B%E5%AE%AB%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Real Alcázar de Sevilla Sevilla"
@@ -7126,6 +7493,7 @@ window.TRIP_DATA = {
       "note": "Sevilla 最上镜的广场，也是一种 20 世纪西班牙国家形象展示；游客感强但确实漂亮。",
       "plan": "清晨或傍晚去，和 Parque María Luisa、Casa de la Ciencia 同线。",
       "tip": "白天很晒，避开正午；拍照人多。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Plaza%20de%20Espa%C3%B1a%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E8%A5%BF%E7%8F%AD%E7%89%99%E5%B9%BF%E5%9C%BA%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Plaza de España Sevilla"
@@ -7146,6 +7514,7 @@ window.TRIP_DATA = {
       "note": "老犹太区巷道、庭院和小广场构成 Sevilla 游客经典漫游区。",
       "plan": "适合大教堂/Alcázar 后慢走，但吃饭不要随便进最游客的餐厅。",
       "tip": "巷子容易绕，晚上氛围好但人也多。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Barrio%20Santa%20Cruz%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E5%85%8B%E9%B2%81%E6%96%AF%E8%A1%97%E5%8C%BA%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Barrio Santa Cruz Sevilla"
@@ -7166,6 +7535,7 @@ window.TRIP_DATA = {
       "note": "现代木结构观景台，把古城地层、当代建筑和广场生活叠在一起。",
       "plan": "傍晚上去看屋顶视角，再去 Feria / Alameda 吃喝。",
       "tip": "日落时段热门，Antiquarium 在下方可顺带看。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Metropol%20Parasol%20%2F%20Las%20Setas%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%83%BD%E5%B8%82%E9%98%B3%E4%BC%9E%20%2F%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A%E8%98%91%E8%8F%87%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Metropol Parasol / Las Setas Sevilla"
@@ -7186,6 +7556,7 @@ window.TRIP_DATA = {
       "note": "河岸防御塔，是 Sevilla 航海和贸易想象的重要符号；外部和河边动线比入内更重要。",
       "plan": "和 Muelle de la Sal、Triana 桥、河边日落一起安排。",
       "tip": "入内不是必须，时间紧可以外观即可。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Torre%20del%20Oro%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%BB%84%E9%87%91%E5%A1%94%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Torre del Oro Sevilla"
@@ -7206,6 +7577,7 @@ window.TRIP_DATA = {
       "note": "斗牛场是理解 Andalusia 传统和争议文化的一部分，即使不看斗牛，建筑和博物馆也有信息量。",
       "plan": "如果对传统文化感兴趣，可短参观；和河岸、Teatro de la Maestranza 同线。",
       "tip": "斗牛文化有争议，不感兴趣可只看外部和历史背景。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Plaza%20de%20Toros%20de%20la%20Maestranza%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%9A%87%E5%AE%B6%E9%AA%91%E5%A3%AB%E6%96%97%E7%89%9B%E5%9C%BA%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Plaza de Toros de la Maestranza Sevilla"
@@ -7226,6 +7598,7 @@ window.TRIP_DATA = {
       "note": "Sevilla 最重要的城市公园，本地人散步、约会和带孩子都会来；和 Plaza de España 一起看更完整。",
       "plan": "早晨或傍晚走，避开正午热；适合给紧密城市行程降速。",
       "tip": "夏秋仍可能炎热，带水。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Parque%20de%20Mar%C3%ADa%20Luisa%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%8E%9B%E4%B8%BD%E4%BA%9A%C2%B7%E8%B7%AF%E6%98%93%E8%8E%8E%E5%85%AC%E5%9B%AD%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Parque de María Luisa Sevilla"
@@ -7246,6 +7619,7 @@ window.TRIP_DATA = {
       "note": "Macarena 圣母和 Semana Santa 传统相关，是 Sevilla 宗教生活的重要节点。",
       "plan": "和 Macarena 街区、Calle Feria、Mercado de Feria 同线，能从游客中心走向居民区。",
       "tip": "礼拜时段注意安静和着装。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bas%C3%ADlica%20de%20la%20Macarena%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E9%A9%AC%E5%8D%A1%E9%9B%B7%E7%BA%B3%E5%9C%A3%E6%AE%BF%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Basílica de la Macarena Sevilla"
@@ -7266,6 +7640,7 @@ window.TRIP_DATA = {
       "note": "罗马城市遗址和剧场，是 Sevilla 周边最有历史纵深的短途之一。",
       "plan": "如果想离开市中心半天，可和 Monasterio de San Isidoro del Campo 同线；不建议和 Córdoba 同天。",
       "tip": "公共交通和开放时间要提前查，午后日晒强。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=It%C3%A1lica%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E4%BC%8A%E5%A1%94%E5%88%A9%E5%8D%A1%E7%BD%97%E9%A9%AC%E9%81%97%E5%9D%80%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Itálica Sevilla"
@@ -7286,6 +7661,7 @@ window.TRIP_DATA = {
       "note": "西班牙最震撼的宗教空间之一，清真寺柱林和大教堂中殿并置，值得从 Sevilla 一日往返。",
       "plan": "如果 11/8 做 Córdoba day trip，把它作为当天核心；老城、罗马桥和小巷作为辅助。",
       "tip": "提前看火车和门票；旺季白天游客多，早到更好。",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mezquita-Catedral%20de%20C%C3%B3rdoba%20Sevilla",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E7%A7%91%E5%B0%94%E5%A4%9A%E7%93%A6%E6%B8%85%E7%9C%9F%E5%AF%BA-%E4%B8%BB%E6%95%99%E5%BA%A7%E5%A0%82%20%E5%A1%9E%E7%BB%B4%E5%88%A9%E4%BA%9A",
       "imageQuery": "Mezquita-Catedral de Córdoba Sevilla"
@@ -7307,6 +7683,35 @@ window.TRIP_DATA = {
       "plan": "10/24 傍晚先看重点，10/25 留完整时段深入；首日抵达延误时把主要参观放到 10/25。",
       "tip": "需购票并按票种入场；公众开放时间和单次入场规则出发前复核。",
       "source": "Art Basel Paris official event and ticket pages, checked 2026-07-19",
+      "evidenceSources": [
+        {
+          "title": "Art Basel Paris",
+          "url": "https://www.artbasel.com/Paris?lang=en",
+          "type": "official",
+          "role": "fact",
+          "language": "en",
+          "supports": [
+            "event-dates",
+            "venue"
+          ],
+          "checkedAt": "2026-07-19",
+          "status": "confirmed"
+        },
+        {
+          "title": "Art Basel Paris Tickets",
+          "url": "https://www.artbasel.com/paris/tickets?lang=en",
+          "type": "official",
+          "role": "visit",
+          "language": "en",
+          "supports": [
+            "opening-hours",
+            "tickets",
+            "entry-rules"
+          ],
+          "checkedAt": "2026-07-19",
+          "status": "confirmed"
+        }
+      ],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Art%20Basel%20Paris%20at%20Grand%20Palais%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E9%BB%8E%E5%B7%B4%E5%A1%9E%E5%B0%94%E8%89%BA%E6%9C%AF%E5%B1%95%20%2F%20%E5%A4%A7%E7%9A%87%E5%AE%AB%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Art Basel Paris at Grand Palais Paris"
@@ -7328,6 +7733,7 @@ window.TRIP_DATA = {
       "plan": "安排 10/28 开展日上午参观，午后再前往尼斯；只留 2-3 小时，不让跨城日过满。",
       "tip": "展商、现场活动与入场时段会更新；门票和节目以官方发布为准。",
       "source": "Salon du Chocolat Paris official site, checked 2026-07-19",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Salon%20du%20Chocolat%20Paris%202026%20Paris",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=2026%20%E5%B7%B4%E9%BB%8E%E5%B7%A7%E5%85%8B%E5%8A%9B%E5%B1%95%20%E5%B7%B4%E9%BB%8E",
       "imageQuery": "Salon du Chocolat Paris 2026 Paris"
@@ -7349,6 +7755,7 @@ window.TRIP_DATA = {
       "plan": "作为 11/1 上午主锚点，之后顺山体去花园、Poble-sec 和米罗基金会。",
       "tip": "保持安静并尊重家庭祭扫；2026 年开放、交通和纪念活动临近出发复核。",
       "source": "Generalitat de Catalunya festive heritage, checked 2026-07-19",
+      "evidenceSources": [],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=All%20Saints%20in%20Barcelona%20%2F%20Montju%C3%AFc%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3%E8%AF%B8%E5%9C%A3%E8%8A%82%20%2F%20%E8%92%99%E9%94%A5%E5%85%8B%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "All Saints in Barcelona / Montjuïc Barcelona"

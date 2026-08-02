@@ -8,6 +8,7 @@ const root = path.resolve(scriptDir, "..", "assets", "guide-template-europe-publ
 const sourcePois = JSON.parse(fs.readFileSync(path.join(root, "data", "pois.json"), "utf8"));
 const sourceItinerary = JSON.parse(fs.readFileSync(path.join(root, "data", "itinerary.json"), "utf8"));
 const sourceEvents = JSON.parse(fs.readFileSync(path.join(root, "data", "events.json"), "utf8"));
+const sourceSources = JSON.parse(fs.readFileSync(path.join(root, "data", "sources.json"), "utf8"));
 const travelerEvents = sourceEvents.map(({ sourceIds: _sourceIds, ...event }) => event);
 
 const INLINE_SCRIPT_ESCAPES = {
@@ -22,9 +23,44 @@ export function serializeForInlineScript(value, spacing = 0) {
   return JSON.stringify(value, null, spacing).replace(/[<>&\u2028\u2029]/g, (character) => INLINE_SCRIPT_ESCAPES[character]);
 }
 
-if (!Array.isArray(sourcePois) || !Array.isArray(sourceEvents) || !Array.isArray(sourceItinerary.days) || !Array.isArray(sourceItinerary.defaultAssignments)) {
+if (!Array.isArray(sourcePois) || !Array.isArray(sourceEvents) || !Array.isArray(sourceSources) || !Array.isArray(sourceItinerary.days) || !Array.isArray(sourceItinerary.defaultAssignments)) {
   throw new Error("public sample data must use the europe-autumn-2026-sample schema");
 }
+
+const sourceById = new Map();
+for (const source of sourceSources) {
+  if (sourceById.has(source.id)) throw new Error(`duplicate source id: ${source.id}`);
+  let url;
+  try {
+    url = new URL(source.url);
+  } catch {
+    throw new Error(`Source ${source.id} has unsafe URL`);
+  }
+  if (!["http:", "https:"].includes(url.protocol)) throw new Error(`Source ${source.id} has unsafe URL`);
+  sourceById.set(source.id, { ...source, url: url.href });
+}
+
+function publicEvidenceForPoi(poi) {
+  return (poi.sourceIds || []).map((sourceId) => {
+    const source = sourceById.get(sourceId);
+    if (!source) throw new Error(`POI ${poi.id || poi.name} references missing source ${sourceId}`);
+    return {
+      title: source.title,
+      url: source.url,
+      type: source.type,
+      role: source.role,
+      language: source.language,
+      supports: source.supports,
+      checkedAt: source.checkedAt,
+      status: source.status,
+    };
+  });
+}
+
+const travelerPois = sourcePois.map(({ sourceIds: _sourceIds, ...poi }) => ({
+  ...poi,
+  evidenceSources: publicEvidenceForPoi({ ...poi, sourceIds: _sourceIds }),
+}));
 
 const categoryLabels = {
   hotel: "住宿片区",
@@ -71,7 +107,7 @@ function slugify(value) {
 }
 
 const assignmentNames = new Set(sourceItinerary.defaultAssignments.map((rule) => rule.name));
-const pois = sourcePois.map((poi) => ({
+const pois = travelerPois.map((poi) => ({
   id: slugify(`${poi.city}-${poi.name}`),
   name: poi.name,
   name_zh: poi.zh || poi.name,
@@ -88,6 +124,7 @@ const pois = sourcePois.map((poi) => ({
   plan: poi.plan,
   tip: poi.tip,
   source: poi.source,
+  evidenceSources: poi.evidenceSources,
   mapUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${poi.name} ${poi.city}`)}`,
   experienceUrl: `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(`${poi.zh || poi.name} ${cityLabels[poi.city] || poi.city}`)}`,
   imageQuery: `${poi.name} ${poi.city}`,
@@ -303,7 +340,7 @@ const directTrip = {
   localStops: sourceItinerary.localStops,
   itineraryDays: sourceItinerary.days,
   transitSegmentsByDay: sourceItinerary.transitSegmentsByDay,
-  pois: sourcePois,
+  pois: travelerPois,
   defaultAssignments: sourceItinerary.defaultAssignments,
   events: travelerEvents,
 };

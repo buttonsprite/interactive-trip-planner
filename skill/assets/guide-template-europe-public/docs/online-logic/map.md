@@ -76,3 +76,7 @@
 - 内容层来自工作区明确指定的公开样例数据，不读取或复制任何私人行程目录。
 - 公开样例覆盖巴黎、尼斯、巴塞罗那和塞维利亚，住宿仅到片区级，交通不包含个人班次或订单。
 - Art Basel Paris、Salon du Chocolat、Castanyada 和诸圣节等易变化事实仍按 sources 的复核日期处理；尚未公布的节目、票务和开放时间不能写成已确认安排。
+- POI 的内部事实层可以在 `data/pois.json` 保存 `sourceIds`，并引用 `data/sources.json`。builder 会在发布边界解析引用，只向 `PUBLIC_TRIP_DATA` 与 `window.TRIP_DATA` 输出 `{ title, url, type, role, language, supports, checkedAt, status }` 组成的 `evidenceSources`；旅行者文件不保留原始 `sourceIds`。
+- source id 必须唯一；POI 引用不存在的 source 会让 build 直接失败。所有 source URL 在 builder 中解析并限制为 `http` / `https`，浏览器 renderer 也会再次丢弃不安全 URL；标题、标签和复核日期统一按动态文本转义，外链固定使用 `target="_blank" rel="noopener noreferrer"`。
+- 地点详情在“注意事项”后以紧凑的“资料依据”折叠区显示证据数量、来源角色、标题与复核日期。没有 `evidenceSources` 时才回退到旧 `source` 文本；两者都没有时不显示来源区。
+- evidence 的语言标签只说明原资料使用的语言，方便旅行者判断阅读门槛；它不是来源质量、可信度或推荐强度评分。质量仍需结合来源类型、支持的事实范围、状态与复核日期判断。

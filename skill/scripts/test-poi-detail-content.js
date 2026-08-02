@@ -5,10 +5,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const validator = path.join(scriptDir, "validate-trip-data.js");
+const publicMapPath = path.resolve(scriptDir, "..", "assets", "guide-template-europe-public", "maps", "itinerary-map.html");
 
 function basePoi(id) {
   return {
@@ -91,5 +93,71 @@ for (const [label, poi, expected] of [
   assert.notEqual(result.status, 0, `${label} should fail`);
   assert.match(result.output, expected, `${label} should explain the contract failure`);
 }
+
+const publicMapHtml = fs.readFileSync(publicMapPath, "utf8");
+const evidenceRuntimeMatch = publicMapHtml.match(/\/\* POI_EVIDENCE_RUNTIME_START \*\/([\s\S]*?)\/\* POI_EVIDENCE_RUNTIME_END \*\//);
+assert.ok(evidenceRuntimeMatch, "public map must expose the shipped POI evidence renderer for executable contract tests");
+const evidenceSandbox = { URL };
+vm.runInNewContext(
+  `${evidenceRuntimeMatch[1]}\nthis.renderPoiEvidence = renderPoiEvidence; this.renderPoiSourceEvidence = renderPoiSourceEvidence;`,
+  evidenceSandbox,
+);
+
+assert.equal(evidenceSandbox.renderPoiEvidence({ evidenceSources: [] }), "", "missing evidence must render nothing");
+assert.equal(evidenceSandbox.renderPoiEvidence({}), "", "legacy POIs without evidence must render nothing in the evidence renderer");
+
+const renderedEvidence = evidenceSandbox.renderPoiEvidence({
+  evidenceSources: [
+    {
+      title: "Sample <official> source",
+      url: "https://example.com/place?next=<unsafe>",
+      type: "editorial",
+      role: "recommendation",
+      language: "es",
+      supports: ["identity", "visit"],
+      checkedAt: "2026-08-02<script>",
+      status: "confirmed",
+    },
+  ],
+});
+assert.match(renderedEvidence, /^\s*<details class="poi-evidence">/);
+assert.match(renderedEvidence, /<span class="poi-evidence-count">1<\/span>/);
+assert.match(renderedEvidence, /西语餐饮媒体 · 推荐品类/);
+assert.match(renderedEvidence, /target="_blank" rel="noopener noreferrer"/);
+assert.match(renderedEvidence, /href="https:\/\/example\.com\/place\?next=%3Cunsafe%3E"/);
+assert.match(renderedEvidence, /Sample &lt;official&gt; source/);
+assert.match(renderedEvidence, /2026-08-02&lt;script&gt; 复核/);
+assert.doesNotMatch(renderedEvidence, /<script>|<official>/);
+
+const unsafeEvidence = evidenceSandbox.renderPoiEvidence({
+  evidenceSources: [{
+    title: "Unsafe source",
+    url: "javascript:alert(1)",
+    type: "official",
+    role: "fact",
+    language: "en",
+    checkedAt: "2026-08-02",
+  }],
+});
+assert.equal(unsafeEvidence, "", "renderer must discard non-HTTP(S) evidence URLs even if malformed data reaches the browser");
+
+const legacyFallback = evidenceSandbox.renderPoiSourceEvidence({ source: "Legacy <source> text" });
+assert.match(legacyFallback, /<h2>资料线索<\/h2>/);
+assert.match(legacyFallback, /Legacy &lt;source&gt; text/);
+assert.doesNotMatch(legacyFallback, /<source>/);
+const structuredEvidenceWins = evidenceSandbox.renderPoiSourceEvidence({
+  source: "Legacy text must stay hidden",
+  evidenceSources: [{
+    title: "Current source",
+    url: "https://example.com/current",
+    type: "official",
+    role: "fact",
+    language: "en",
+    checkedAt: "2026-08-02",
+  }],
+});
+assert.match(structuredEvidenceWins, /Current source/);
+assert.doesNotMatch(structuredEvidenceWins, /Legacy text must stay hidden/);
+assert.equal(evidenceSandbox.renderPoiSourceEvidence({}), "");
 
 console.log("POI detail content contract passed");

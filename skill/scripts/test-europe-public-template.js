@@ -38,17 +38,53 @@ assert.equal(pois.length, 379);
 assert.equal(embedded.trip.slug, itinerary.trip.slug);
 assert.equal(embedded.itineraryDays.length, 18);
 assert.equal(embedded.pois.length, 379);
-assert.deepEqual(embedded.pois, pois);
+assert.ok(embedded.pois.every((poi) => !Object.hasOwn(poi, "sourceIds")), "traveler HTML must not expose POI sourceIds");
 assert.deepEqual(embedded.itineraryDays, itinerary.days);
 assert.ok(events.every((event) => Array.isArray(event.sourceIds) && event.sourceIds.length > 0));
 assert.deepEqual(embedded.events, travelerEvents);
 assert.ok(embedded.events.every((event) => !Object.hasOwn(event, "sourceIds")));
 assert.ok(sources.every((source) => source.url && source.checkedAt && source.supports?.length));
 
+const sourcePoi = pois.find((poi) => poi.name === "Art Basel Paris at Grand Palais");
+const embeddedSourcePoi = embedded.pois.find((poi) => poi.name === sourcePoi?.name);
+assert.ok(sourcePoi?.sourceIds?.length >= 1, "public source data must include a source-backed sample POI");
+assert.ok(!Object.hasOwn(embeddedSourcePoi, "sourceIds"));
+assert.deepEqual(embeddedSourcePoi.evidenceSources, [
+  {
+    title: "Art Basel Paris",
+    url: "https://www.artbasel.com/Paris?lang=en",
+    type: "official",
+    role: "fact",
+    language: "en",
+    supports: ["event-dates", "venue"],
+    checkedAt: "2026-07-19",
+    status: "confirmed",
+  },
+  {
+    title: "Art Basel Paris Tickets",
+    url: "https://www.artbasel.com/paris/tickets?lang=en",
+    type: "official",
+    role: "visit",
+    language: "en",
+    supports: ["opening-hours", "tickets", "entry-rules"],
+    checkedAt: "2026-07-19",
+    status: "confirmed",
+  },
+]);
+assert.match(html, /function renderPoiEvidence\(item\)/);
+assert.match(html, /<details class="poi-evidence">/);
+
 const generatedSandbox = { window: {} };
 vm.runInNewContext(fs.readFileSync(tripDataPath, "utf8"), generatedSandbox);
 assert.deepEqual(JSON.parse(JSON.stringify(generatedSandbox.window.TRIP_DATA.events)), travelerEvents);
 assert.ok(generatedSandbox.window.TRIP_DATA.events.every((event) => !Object.hasOwn(event, "sourceIds")));
+assert.ok(generatedSandbox.window.TRIP_DATA.pois.every((poi) => !Object.hasOwn(poi, "sourceIds")));
+assert.deepEqual(
+  JSON.parse(JSON.stringify(
+    generatedSandbox.window.TRIP_DATA.pois.find((poi) => poi.name === sourcePoi.name)?.evidenceSources,
+  )),
+  embeddedSourcePoi.evidenceSources,
+);
 
 const eventRuntimeMatch = html.match(/\/\* EVENT_RUNTIME_PURE_START \*\/([\s\S]*?)\/\* EVENT_RUNTIME_PURE_END \*\//);
 assert.ok(eventRuntimeMatch, "public map must expose the shipped pure event runtime for executable contract tests");
@@ -315,7 +351,10 @@ const santAntoni = byName.get("Mercat de Sant Antoni");
 assert.equal(santAntoni?.contentTier, "deep");
 assert.ok(santAntoni?.whyWorthIt?.trim(), "deep sample should explain why it is worth visiting");
 assert.ok(santAntoni?.detailSections?.length >= 2 && santAntoni.detailSections.length <= 4);
-assert.deepEqual(embedded.pois.find((poi) => poi.name === "Mercat de Sant Antoni"), santAntoni);
+assert.deepEqual(
+  embedded.pois.find((poi) => poi.name === "Mercat de Sant Antoni"),
+  { ...santAntoni, evidenceSources: [] },
+);
 const hasChinese = (value) => /[\u3400-\u9fff]/.test(String(value || ""));
 for (const [name, expected] of [
   ["Sainte-Chapelle", "圣礼拜堂"],
@@ -391,11 +430,12 @@ const scripts = [...html.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/sc
 assert.equal(scripts.length, 1);
 new vm.Script(scripts[0], { filename: htmlPath });
 
-function runRealBuilderFixture({ nextItinerary, nextEvents = events, nextPois = pois }) {
+function runRealBuilderFixture({ nextItinerary, nextEvents = events, nextPois = pois, nextSources = sources }) {
   const originals = new Map([
     [itineraryPath, fs.readFileSync(itineraryPath, "utf8")],
     [eventsPath, fs.readFileSync(eventsPath, "utf8")],
     [poiPath, fs.readFileSync(poiPath, "utf8")],
+    [sourcesPath, fs.readFileSync(sourcesPath, "utf8")],
     [tripDataPath, fs.readFileSync(tripDataPath, "utf8")],
     [htmlPath, fs.readFileSync(htmlPath, "utf8")],
   ]);
@@ -403,6 +443,7 @@ function runRealBuilderFixture({ nextItinerary, nextEvents = events, nextPois = 
     fs.writeFileSync(itineraryPath, `${JSON.stringify(nextItinerary, null, 2)}\n`);
     fs.writeFileSync(eventsPath, `${JSON.stringify(nextEvents, null, 2)}\n`);
     fs.writeFileSync(poiPath, `${JSON.stringify(nextPois, null, 2)}\n`);
+    fs.writeFileSync(sourcesPath, `${JSON.stringify(nextSources, null, 2)}\n`);
     const result = spawnSync(process.execPath, [builderPath], { encoding: "utf8" });
     let builtTrip = null;
     if (result.status === 0) {
@@ -415,6 +456,69 @@ function runRealBuilderFixture({ nextItinerary, nextEvents = events, nextPois = 
     for (const [file, contents] of originals) fs.writeFileSync(file, contents);
   }
 }
+
+const sampleSourcePoi = {
+  ...pois[0],
+  id: "sample-source-poi",
+  name: "Sample source POI",
+  sourceIds: ["sample-official-source"],
+};
+const sampleSource = {
+  id: "sample-official-source",
+  title: "Sample official source",
+  url: "https://example.com/place",
+  type: "official",
+  role: "fact",
+  language: "es",
+  supports: ["identity", "visit"],
+  checkedAt: "2026-08-02",
+  status: "confirmed",
+};
+const sampleEvidenceBuild = runRealBuilderFixture({
+  nextItinerary: itinerary,
+  nextPois: [sampleSourcePoi, ...pois.slice(1)],
+  nextSources: [...sources, sampleSource],
+});
+assert.equal(sampleEvidenceBuild.result.status, 0, sampleEvidenceBuild.result.stderr);
+const generatedSamplePoi = sampleEvidenceBuild.builtTrip.pois.find((poi) => poi.name === sampleSourcePoi.name);
+assert.ok(!Object.hasOwn(generatedSamplePoi, "sourceIds"));
+assert.deepEqual(generatedSamplePoi.evidenceSources, [
+  {
+    title: "Sample official source",
+    url: "https://example.com/place",
+    type: "official",
+    role: "fact",
+    language: "es",
+    supports: ["identity", "visit"],
+    checkedAt: "2026-08-02",
+    status: "confirmed",
+  },
+]);
+
+const missingSourceBuild = runRealBuilderFixture({
+  nextItinerary: itinerary,
+  nextPois: [{ ...sampleSourcePoi, sourceIds: ["missing-source"] }, ...pois.slice(1)],
+});
+assert.notEqual(missingSourceBuild.result.status, 0, "unresolved POI source ids must fail the build");
+assert.match(
+  `${missingSourceBuild.result.stdout}${missingSourceBuild.result.stderr}`,
+  /POI sample-source-poi references missing source missing-source/,
+);
+
+const unsafeSourceBuild = runRealBuilderFixture({
+  nextItinerary: itinerary,
+  nextPois: [sampleSourcePoi, ...pois.slice(1)],
+  nextSources: [...sources, { ...sampleSource, url: "javascript:alert(1)" }],
+});
+assert.notEqual(unsafeSourceBuild.result.status, 0, "non-HTTP(S) source URLs must fail the build");
+assert.match(`${unsafeSourceBuild.result.stdout}${unsafeSourceBuild.result.stderr}`, /Source sample-official-source has unsafe URL/);
+
+const duplicateSourceBuild = runRealBuilderFixture({
+  nextItinerary: itinerary,
+  nextSources: [...sources, { ...sources[0] }],
+});
+assert.notEqual(duplicateSourceBuild.result.status, 0, "duplicate source ids must fail the build");
+assert.match(`${duplicateSourceBuild.result.stdout}${duplicateSourceBuild.result.stderr}`, /duplicate source id.*art-basel-paris-2026/i);
 
 const confirmedDefaultEvent = events.find((event) => event.scope === "venue" && event.status === "confirmed");
 assert.ok(confirmedDefaultEvent, "real builder fixture requires a confirmed venue event");

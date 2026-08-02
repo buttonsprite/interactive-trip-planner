@@ -30,13 +30,13 @@
 
 ## 同期活动
 
-- `data/events.json` 是内部事实源并保留 `sourceIds` 溯源；builder 写入旅行者可见的 `PUBLIC_TRIP_DATA.events` 和 `window.TRIP_DATA.events` 时逐条移除 `sourceIds`，其余 event 字段与顺序必须一致。旧攻略没有 `events` 字段时按空数组运行，原有 POI、DOM、storage key 和行程修改行为不变。
+- `data/events.json` 是内部事实源并保留 `sourceIds` 溯源；builder 写入旅行者可见的 `PUBLIC_TRIP_DATA.events` 和 `window.TRIP_DATA.events` 时逐条移除 `sourceIds`，其余 event 字段与顺序必须一致。写入内联 `<script>` 时使用 script-context serializer，把 `<`、`>`、`&`、U+2028 和 U+2029 编码为 Unicode escape，活动或用户文案中的 `</script>` 不能提前结束脚本。旧攻略没有 `events` 字段时按空数组运行，原有 POI、DOM、storage key 和行程修改行为不变。
 - 只有 `scope: venue` 且能从 event 坐标或 `venuePoiId` 对应地点取得有效坐标的记录会在浏览器运行时生成 `event:<id>` synthetic POI；它使用 `E / 同期活动` marker 和独立图层。`hosted` 与 `citywide` 不生成额外 marker，避免把同一个活动重复画成多个地点。
-- 浏览器只消费符合 `/^[A-Za-z0-9][A-Za-z0-9._-]*$/` 的 event id；不符合 grammar 的 venue 不生成 synthetic POI，hosted/citywide 也不进入任何 HTML renderer，避免把未经约束的 id 带入 marker 的 data attribute。转换、状态清理、日期匹配和 event HTML 由同一个 bounded pure runtime block 提供，Node VM contract tests 直接执行这份 shipped logic。
+- 浏览器以同一个 traveler visibility gate 消费活动：id 必须符合 `/^[A-Za-z0-9][A-Za-z0-9._-]*$/`，且 status 不能是 `historical-lead`。不符合 gate 的 venue 不生成 synthetic POI，hosted/citywide 也不进入任何 HTML renderer，避免历史线索伪装成当前活动或把未经约束的 id 带入 marker 的 data attribute。转换、状态清理、日期匹配和 event HTML 由同一个 bounded pure runtime block 提供，Node VM contract tests 直接执行这份 shipped logic。
 - `hosted` 活动跟随 `hostPoiId`，在该地点原有类型化详情段之后显示日期、自然语言状态、安排建议、注意事项和官网入口；不显示 schema enum 或 `sourceIds`。
-- `citywide` 活动按旅行年份、当天 `MM/DD`、起止日期和城市（含可选 `affectedCities`）匹配，并显示在当天路线滚动列表顶部。它用于解释人流、交通、纪念或节庆语境，不进入地点详情，也不成为默认安排。
-- 普通 POI 始终可以加入日期；event synthetic POI 只有 `eventStatus === "confirmed"` 可以加入。其他状态在详情日期选择、速查加入按钮和当天候选加入按钮中统一 disabled，并显示“等待具体节目”或“等待场次确认”；最终 `assignPoiToDay` mutation boundary 会再次拒绝写入，旧 storage 中残留的非确认 event assignment 也不会恢复为有效安排。
-- 默认 assignment 与浏览器恢复 assignment 都先经过同一 `sanitizeEventAssignments`：status 从 confirmed 变为 pending 的 event、以及已经从当前 event 数据中删除的 `event:*` 都不会靠旧 storage 继续出现在当天路线；未知的普通非 event POI id 仍保留，兼容旧地图状态。
+- `citywide` 活动先取合法 ISO `day.date`；没有 ISO 时才按旅行年份解析当天 `MM/DD` 或 `MM-DD`，再与起止日期及城市（含可选 `affectedCities`）匹配，并显示在当天路线滚动列表顶部。它用于解释人流、交通、纪念或节庆语境，不进入地点详情，也不成为默认安排。
+- 普通 POI 始终可以加入日期；event synthetic POI 必须同时满足 `confirmed + venue + 当天落在活动窗口内 + day.city 命中 event.city/affectedCities`。详情日期下拉只列合格日期，速查加入按钮、当天候选、最终 `assignPoiToDay` mutation boundary 都调用同一 day-specific helper；其他状态显示“等待具体节目”或“等待场次确认”，已确认但日期/城市不符时显示“不在活动日期或城市”。
+- 默认 assignment 与浏览器恢复 assignment 都先经过同一 `sanitizeEventAssignments`：活动被删除、status/scope 退回、活动日期或城市变化、目标日期消失或不再落在窗口内时，旧 `event:*` assignment 都会移除；未知的普通非 event POI id 仍保留，兼容旧地图状态。
 - 当前公开 fixture 以 Art Basel Paris 官方公众开放日作为 confirmed venue 示例；Castanyada 和诸圣节只有官方传统日期、没有足够具体的 2026 街区节目，因此保持 `program-pending`，分别进入 host detail 与 Barcelona 当天城市提示。
 
 ## 状态恢复

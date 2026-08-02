@@ -2610,7 +2610,7 @@
         },
         {
           "time": "21:00",
-          "title": "西巴黎酒吧线：Bar Nouveau -> Harry's Bar Paris",
+          "title": "西巴黎酒吧线：Bar Nouveau -\u003E Harry's Bar Paris",
           "note": "游船后直接叫车去 Bar Nouveau；如果还想喝，再坐车去 Harry's Bar Paris，不夜间长距离步行。",
           "coords": [
             48.8727,
@@ -4035,7 +4035,7 @@
         "distance": "约 300 米",
         "duration": "约 5 分钟",
         "summary": "步行到同区 Sips",
-        "detail": "默认路线是 Gresca -> Sips。如果选 Paradiso，应在下午 Born 行程后留在该区，并放弃 Gresca / Sips 组合。"
+        "detail": "默认路线是 Gresca -\u003E Sips。如果选 Paradiso，应在下午 Born 行程后留在该区，并放弃 Gresca / Sips 组合。"
       }
     ],
     "d1104": [
@@ -5585,7 +5585,7 @@
     {
       "city": "Barcelona",
       "category": "wine",
-      "name": "Quimet & Quimet",
+      "name": "Quimet \u0026 Quimet",
       "area": "Poble-sec",
       "coords": [
         41.3737,
@@ -5629,7 +5629,7 @@
     {
       "city": "Barcelona",
       "category": "wine",
-      "name": "Juvé & Camps",
+      "name": "Juvé \u0026 Camps",
       "area": "Sant Sadurní d'Anoia",
       "coords": [
         41.423,
@@ -6816,7 +6816,7 @@
       "note": "Marais 当代 bistro，空间和酒单都很稳，适合把玛黑晚餐做得更精致。",
       "plan": "保留为玛黑晚间候选；当前 10/25 在 16:00 回左岸入住后不再折返，因此不进入默认路线。",
       "tip": "订位优先；如果想轻松热闹，Chez Janou 更随意。",
-      "source": "House & Garden 2026 Paris restaurant guide + 小红书入口",
+      "source": "House \u0026 Garden 2026 Paris restaurant guide + 小红书入口",
       "zh": "Parcelles 小酒馆"
     },
     {
@@ -7182,7 +7182,7 @@
     {
       "city": "Nice",
       "category": "food",
-      "name": "Olive & Artichaut",
+      "name": "Olive \u0026 Artichaut",
       "area": "Vieux Nice",
       "coords": [
         43.6965,
@@ -8392,7 +8392,7 @@
     {
       "city": "Barcelona",
       "category": "coffee",
-      "name": "Nømad Coffee Lab & Shop",
+      "name": "Nømad Coffee Lab \u0026 Shop",
       "area": "El Born",
       "coords": [
         41.3864,
@@ -8509,7 +8509,7 @@
     {
       "city": "Sevilla",
       "category": "coffee",
-      "name": "Jester Coffee & Juices",
+      "name": "Jester Coffee \u0026 Juices",
       "area": "Santa Cruz",
       "coords": [
         37.3862,
@@ -9497,7 +9497,7 @@
       "order": 3
     },
     {
-      "name": "Nømad Coffee Lab & Shop",
+      "name": "Nømad Coffee Lab \u0026 Shop",
       "dayId": "d1103",
       "order": 4
     },
@@ -9879,6 +9879,12 @@
       return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value);
     }
 
+    function isTravelerVisibleEvent(event) {
+      return Boolean(event)
+        && isSlugSafeEventId(event.id)
+        && event.status !== "historical-lead";
+    }
+
     function isUsableEventCoords(coords) {
       return Array.isArray(coords)
         && coords.length === 2
@@ -9893,7 +9899,7 @@
     function buildRuntimeEventPois(events, sourcePois) {
       const availablePois = Array.isArray(sourcePois) ? sourcePois : [];
       return (Array.isArray(events) ? events : []).flatMap((event) => {
-        if (!event || event.scope !== "venue" || !isSlugSafeEventId(event.id)) {
+        if (!isTravelerVisibleEvent(event) || event.scope !== "venue") {
           return [];
         }
         const venue = event.venuePoiId
@@ -9920,30 +9926,86 @@
           officialUrl: event.officialUrl,
           imageQuery: `${event.name} ${event.city}`,
           eventId: event.id,
-          eventStatus: event.status
+          eventStatus: event.status,
+          eventScope: event.scope,
+          eventStartsAt: event.startsAt,
+          eventEndsAt: event.endsAt,
+          eventAffectedCities: Array.isArray(event.affectedCities) ? event.affectedCities.filter((city) => typeof city === "string") : []
         }];
       });
     }
 
-    const isEventAssignable = (item) => item.category !== "event" || item.eventStatus === "confirmed";
+    function normalizeCalendarDate(year, month, day) {
+      const yearNumber = Number(year);
+      const monthNumber = Number(month);
+      const dayNumber = Number(day);
+      if (!Number.isInteger(yearNumber) || !Number.isInteger(monthNumber) || !Number.isInteger(dayNumber)) return "";
+      const date = new Date(Date.UTC(yearNumber, monthNumber - 1, dayNumber));
+      if (
+        date.getUTCFullYear() !== yearNumber
+        || date.getUTCMonth() !== monthNumber - 1
+        || date.getUTCDate() !== dayNumber
+      ) return "";
+      return `${String(yearNumber).padStart(4, "0")}-${String(monthNumber).padStart(2, "0")}-${String(dayNumber).padStart(2, "0")}`;
+    }
 
-    function sanitizeEventAssignments(assignments, items) {
+    function getDayIsoDate(day, tripStartDate) {
+      const isoMatch = /^(\d{4})-(\d{2})-(\d{2})(?:\D|$)/.exec(day?.date || "");
+      if (isoMatch) return normalizeCalendarDate(isoMatch[1], isoMatch[2], isoMatch[3]);
+      const year = /^(\d{4})-/.exec(tripStartDate || "")?.[1];
+      if (!year) return "";
+      for (const value of [day?.short, day?.date]) {
+        const shortMatch = /^(\d{1,2})[/-](\d{1,2})(?:\D|$)/.exec(value || "");
+        if (shortMatch) return normalizeCalendarDate(year, shortMatch[1], shortMatch[2]);
+      }
+      return "";
+    }
+
+    function getEventIsoDate(value) {
+      const match = /^(\d{4})-(\d{2})-(\d{2})(?:\D|$)/.exec(value || "");
+      return match ? normalizeCalendarDate(match[1], match[2], match[3]) : "";
+    }
+
+    function eventMatchesDayCity(eventLike, dayCity) {
+      if (typeof dayCity !== "string" || !dayCity.trim() || dayCity === "Transit") return false;
+      const target = dayCity.trim().toLocaleLowerCase("en-US");
+      const affectedCities = eventLike?.eventAffectedCities ?? eventLike?.affectedCities;
+      return [eventLike?.city, ...(Array.isArray(affectedCities) ? affectedCities : [])]
+        .filter((city) => typeof city === "string" && city.trim())
+        .some((city) => city.trim().toLocaleLowerCase("en-US") === target);
+    }
+
+    function isEventAssignable(item, day, tripStartDate) {
+      if (item?.category !== "event") return true;
+      if (item.eventStatus !== "confirmed" || item.eventScope !== "venue") return false;
+      const dayDate = getDayIsoDate(day, tripStartDate);
+      const startsOn = getEventIsoDate(item.eventStartsAt);
+      const endsOn = getEventIsoDate(item.eventEndsAt);
+      return Boolean(dayDate && startsOn && endsOn)
+        && eventMatchesDayCity(item, day?.city)
+        && startsOn <= dayDate
+        && dayDate <= endsOn;
+    }
+
+    function sanitizeEventAssignments(assignments, items, days, tripStartDate) {
       const itemById = new Map((Array.isArray(items) ? items : []).map((item) => [item.id, item]));
-      return Object.fromEntries(Object.entries(assignments || {}).filter(([poiId]) => {
+      const dayById = new Map((Array.isArray(days) ? days : []).map((day) => [day.id, day]));
+      return Object.fromEntries(Object.entries(assignments || {}).filter(([poiId, assignment]) => {
         const item = itemById.get(poiId);
         if (!item) return !poiId.startsWith("event:");
-        return isEventAssignable(item);
+        return isEventAssignable(item, dayById.get(assignment?.dayId), tripStartDate);
       }));
     }
 
     const getEventWaitingCopy = (item) => item?.eventStatus === "program-pending"
       ? "等待具体节目"
-      : "等待场次确认";
+      : item?.eventStatus === "confirmed"
+        ? "不在活动日期或城市"
+        : "等待场次确认";
 
     function getEventStatusCopy(event) {
       if (event.status === "confirmed") return "时间地点已确认";
       if (event.status === "program-pending") return "等待具体节目";
-      if (event.status === "historical-lead") return "等待本届确认";
       return "等待场次确认";
     }
 
@@ -9953,22 +10015,14 @@
       return start && end && start !== end ? `${start} 至 ${end}` : start;
     }
 
-    function getDayIsoDate(day, tripStartDate) {
-      const match = /^(\d{1,2})\/(\d{1,2})$/.exec(day?.short || "");
-      const year = String(tripStartDate || "").slice(0, 4);
-      if (!match || !/^\d{4}$/.test(year)) return "";
-      return `${year}-${match[1].padStart(2, "0")}-${match[2].padStart(2, "0")}`;
-    }
-
     function getCityEventsForDay(events, day, tripStartDate) {
       const dayDate = getDayIsoDate(day, tripStartDate);
       if (!dayDate) return [];
       return (Array.isArray(events) ? events : []).filter((event) => {
-        if (!event || event.scope !== "citywide" || !isSlugSafeEventId(event.id)) return false;
-        const affectedCities = [event.city, ...(Array.isArray(event.affectedCities) ? event.affectedCities : [])];
-        const startsOn = String(event.startsAt || "").slice(0, 10);
-        const endsOn = String(event.endsAt || "").slice(0, 10);
-        return affectedCities.includes(day.city) && startsOn <= dayDate && dayDate <= endsOn;
+        if (!isTravelerVisibleEvent(event) || event.scope !== "citywide") return false;
+        const startsOn = getEventIsoDate(event.startsAt);
+        const endsOn = getEventIsoDate(event.endsAt);
+        return eventMatchesDayCity(event, day.city) && startsOn <= dayDate && dayDate <= endsOn;
       });
     }
 
@@ -9984,7 +10038,7 @@
     function renderHostedEventsForItem(events, item) {
       const hostedEvents = (Array.isArray(events) ? events : []).filter((event) => (
         event?.scope === "hosted"
-        && isSlugSafeEventId(event.id)
+        && isTravelerVisibleEvent(event)
         && event.hostPoiId === item?.id
       ));
       if (!hostedEvents.length) return "";
@@ -10224,7 +10278,9 @@
     const dayById = Object.fromEntries(itineraryDays.map((day) => [day.id, day]));
     const rawDefaultItineraryAssignments = {};
     for (const rule of defaultItineraryAssignmentRules) {
-      const poi = pois.find((item) => item.name === rule.name);
+      const poi = typeof rule.poiId === "string"
+        ? pois.find((item) => item.id === rule.poiId)
+        : pois.find((item) => item.name === rule.name);
       if (poi && dayById[rule.dayId]) {
         rawDefaultItineraryAssignments[poi.id] = {
           dayId: rule.dayId,
@@ -10232,9 +10288,9 @@
         };
       }
     }
-    const defaultItineraryAssignments = sanitizeEventAssignments(rawDefaultItineraryAssignments, pois);
+    const defaultItineraryAssignments = sanitizeEventAssignments(rawDefaultItineraryAssignments, pois, itineraryDays, PUBLIC_TRIP_DATA.trip.startDate);
     const itineraryPlan = loadItineraryPlan();
-    itineraryPlan.assignments = sanitizeEventAssignments(itineraryPlan.assignments, pois);
+    itineraryPlan.assignments = sanitizeEventAssignments(itineraryPlan.assignments, pois, itineraryDays, PUBLIC_TRIP_DATA.trip.startDate);
     const clonePlainData = (value) => JSON.parse(JSON.stringify(value));
     const createItinerarySnapshot = () => ({
       assignments: clonePlainData(itineraryPlan.assignments),
@@ -10301,13 +10357,14 @@
 
     const getPoiAssignment = (poiId) => {
       const item = poiById.get(poiId);
-      if (item && !isEventAssignable(item)) {
-        return null;
-      }
       if (itineraryPlan.removed[poiId]) {
         return null;
       }
-      return itineraryPlan.assignments[poiId] || defaultItineraryAssignments[poiId] || null;
+      const assignment = itineraryPlan.assignments[poiId] || defaultItineraryAssignments[poiId] || null;
+      if (item && assignment && !isEventAssignable(item, dayById[assignment.dayId], PUBLIC_TRIP_DATA.trip.startDate)) {
+        return null;
+      }
+      return assignment;
     };
 
     const isPoiScheduled = (poiId) => Boolean(getPoiAssignment(poiId));
@@ -10332,7 +10389,11 @@
       if (!selectedDay || selectedDay.city === "Transit") {
         return false;
       }
-      return !isPoiScheduled(item.id) && item.city === selectedDay.city;
+      return !isPoiScheduled(item.id) && (
+        item.category === "event"
+          ? isEventAssignable(item, selectedDay, PUBLIC_TRIP_DATA.trip.startDate)
+          : item.city === selectedDay.city
+      );
     };
 
     let visibleDayCandidateIds = new Set();
@@ -10385,7 +10446,11 @@
         ? scheduledCoords
         : day.events.map((event) => event.coords).filter(Boolean);
       const ranked = pois
-        .filter((item) => !isPoiScheduled(item.id) && item.city === day.city && item.category !== "hotel")
+        .filter((item) => !isPoiScheduled(item.id) && item.category !== "hotel" && (
+          item.category === "event"
+            ? isEventAssignable(item, day, PUBLIC_TRIP_DATA.trip.startDate)
+            : item.city === day.city
+        ))
         .map((item) => ({
           item,
           priorityRank: dayCandidatePriorityRank[priorities[item.id]] ?? 4,
@@ -10489,10 +10554,12 @@
 
     const poiDetailItineraryControlsHtml = (item) => {
       const assignment = getPoiAssignment(item.id);
-      const assignable = isEventAssignable(item);
       const selectedPriority = priorities[item.id] || "";
-      const dayOptions = assignable ? itineraryDays
+      const eligibleDays = itineraryDays
         .filter((day) => day.city !== "Transit")
+        .filter((day) => isEventAssignable(item, day, PUBLIC_TRIP_DATA.trip.startDate));
+      const assignable = item.category !== "event" || eligibleDays.length > 0;
+      const dayOptions = assignable ? eligibleDays
         .map((day) => `<option value="${day.id}" ${assignment?.dayId === day.id ? "selected" : ""}>${escapeHtml(day.short)} · ${escapeHtml(cityLabels[day.city] || day.city)}</option>`)
         .join("") : "";
       const priorityButtons = priorityLevels.map((level) => `
@@ -11161,7 +11228,7 @@
         const priority = priorities[item.id] || "";
         const assignment = getPoiAssignment(item.id);
         const selectedDay = getVisibleDay();
-        const assignable = isEventAssignable(item);
+        const assignable = selectedDay && isEventAssignable(item, selectedDay, PUBLIC_TRIP_DATA.trip.startDate);
         const addToTodayButton = selectedDay && selectedDay.city !== "Transit" && assignment?.dayId !== selectedDay.id
           ? (assignable
             ? `<button type="button" class="poi-list-priority-btn" data-assign-day="${selectedDay.id}" data-poi-id="${item.id}" aria-label="${escapeHtml(zhName)} 加入今天">加</button>`
@@ -11334,7 +11401,7 @@
 
     const assignPoiToDay = (poiId, dayId, refreshDetail = false) => {
       const item = markerByPoiId.get(poiId)?.item;
-      if (!item || !isEventAssignable(item) || !dayById[dayId]) {
+      if (!item || !dayById[dayId] || !isEventAssignable(item, dayById[dayId], PUBLIC_TRIP_DATA.trip.startDate)) {
         return;
       }
       const current = getPoiAssignment(poiId);
@@ -12043,7 +12110,7 @@
           const meta = poiCategories[item.category];
           const zhName = getZhName(item);
           const active = activePoiDetailId === item.id;
-          const assignable = isEventAssignable(item);
+          const assignable = isEventAssignable(item, day, PUBLIC_TRIP_DATA.trip.startDate);
           return `
             <div class="poi-detail-day-place candidate ${active ? "active" : ""}" style="--place-color:${meta.color};">
               <span class="poi-detail-day-place-spacer" aria-hidden="true"></span>

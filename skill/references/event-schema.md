@@ -35,9 +35,9 @@ The command prints `{ eventCount, scopes, statuses, warnings, errors }` and exit
 }
 ```
 
-Every record requires non-empty `id`, `name`, `city`, `startsAt`, `endsAt`, `whyWorthIt`, `plan`, and `tip`; an `http` or `https` `officialUrl`; and a non-empty `sourceIds` list. Each source id must exist in `sources.json`. `startsAt` and `endsAt` accept `YYYY-MM-DD` date windows or ISO date-times, must parse as valid dates, and cannot run backwards. `confirmed` records require date-times for both fields.
+Every record requires non-empty `id`, `name`, `city`, `startsAt`, `endsAt`, `whyWorthIt`, `plan`, and `tip`; an `http` or `https` `officialUrl`; and a non-empty `sourceIds` list. `id` must match exactly `/^[A-Za-z0-9][A-Za-z0-9._-]*$/`; the validator rejects whitespace, path separators, colons, leading punctuation, and other characters outside this grammar rather than relying on the browser to discard them. Each source id must exist in `sources.json`. `startsAt` and `endsAt` accept `YYYY-MM-DD` date windows or ISO date-times, must parse as valid dates, and cannot run backwards. `confirmed` records require date-times for both fields.
 
-Optional fields include `name_zh`, `area`, `coords` (`[lat, lng]`), `venuePoiId`, `hostPoiId`, and `recheckAt` (`YYYY-MM-DD`). Coordinates, when supplied, must be valid latitude/longitude values.
+Optional fields include `name_zh`, `area`, `coords` (`[lat, lng]`), `venuePoiId`, `hostPoiId`, `affectedCities` (an array of additional city ids), and `recheckAt` (`YYYY-MM-DD`). Coordinates, when supplied, must be valid latitude/longitude values. `recheckAt` must be a real calendar date. Referenced source records may use `recheckBefore`; when present it must also be a real `YYYY-MM-DD` calendar date.
 
 ## Scopes and route impact
 
@@ -54,7 +54,9 @@ Optional fields include `name_zh`, `area`, `coords` (`[lat, lng]`), `venuePoiId`
 - `program-pending`: an official window exists but useful sessions are not published; show it as a recheck item, never as a fabricated stop.
 - `historical-lead`: only a past edition or secondary discovery lead exists; retain it for research and recheck it before presenting it as current.
 
-Use `event:<id>` only for event references in itinerary `anchors`, `candidates`, or `routeStops[].poiId`. The validator recognizes only references with that prefix and rejects a missing, non-venue, or non-confirmed event.
+Use `event:<id>` only for event references in itinerary `anchors`, `candidates`, `routeStops[].poiId`, or an object itinerary's `defaultAssignments[].poiId`. The validator also resolves the builder-compatible legacy `defaultAssignments[].name` form when its exact value names an event, so it cannot bypass the event checks. The validator accepts both the legacy itinerary array and the canonical `{ trip, days, defaultAssignments }` object. An event assignment is valid only when all of these are true: the event exists, is `confirmed`, uses `scope: venue`, the target is not a `Transit` day, the day date falls inclusively inside the event window, and the day city matches `city` or one of `affectedCities`. Canonical day matching prefers an ISO `day.date`; otherwise it accepts `MM/DD` or `MM-DD` using `trip.startDate` for the year. Changing an event's status, scope, date window, or city can therefore make a previously stored assignment stale; validators and the traveler runtime remove or reject it.
+
+`historical-lead` remains internal research material. Traveler builders and renderers must exclude it from venue markers, hosted-place details, and citywide day notices.
 
 ## Sources
 

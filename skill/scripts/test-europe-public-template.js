@@ -52,6 +52,8 @@ const eventRuntimeMatch = html.match(/\/\* EVENT_RUNTIME_PURE_START \*\/([\s\S]*
 assert.ok(eventRuntimeMatch, "public map must expose the shipped pure event runtime for executable contract tests");
 const eventRuntimeNames = [
   "isSlugSafeEventId",
+  "isTravelerVisibleEvent",
+  "getDayIsoDate",
   "buildRuntimeEventPois",
   "isEventAssignable",
   "sanitizeEventAssignments",
@@ -87,6 +89,9 @@ const runtimeEvents = [
     city: "Paris",
     area: "Event area",
     status: "confirmed",
+    startsAt: "2026-10-24T10:00:00+02:00",
+    endsAt: "2026-10-25T18:00:00+02:00",
+    affectedCities: ["Versailles"],
     venuePoiId: "venue-1",
     whyWorthIt: "Worth it",
     plan: "Plan it",
@@ -99,6 +104,8 @@ const runtimeEvents = [
     scope: "venue",
     city: "Paris",
     status: "program-pending",
+    startsAt: "2026-10-24",
+    endsAt: "2026-10-25",
     coords: [48.7, 2.2],
     whyWorthIt: "Pending worth",
     plan: "Pending plan",
@@ -107,6 +114,16 @@ const runtimeEvents = [
   },
   { id: "hosted-event", name: "Hosted", scope: "hosted", city: "Paris", status: "announced", hostPoiId: "host-1" },
   { id: "city-event", name: "Citywide", scope: "citywide", city: "Paris", status: "program-pending" },
+  {
+    id: "historical-venue",
+    name: "Historical venue",
+    scope: "venue",
+    city: "Paris",
+    status: "historical-lead",
+    startsAt: "2026-10-24",
+    endsAt: "2026-10-25",
+    coords: [48.6, 2.2],
+  },
   {
     id: 'bad" onmouseover="alert(1)',
     name: "Malicious",
@@ -136,15 +153,39 @@ assert.deepEqual(syntheticPois[0], {
   imageQuery: "Confirmed event Paris",
   eventId: "confirmed.event-1",
   eventStatus: "confirmed",
+  eventScope: "venue",
+  eventStartsAt: "2026-10-24T10:00:00+02:00",
+  eventEndsAt: "2026-10-25T18:00:00+02:00",
+  eventAffectedCities: ["Versailles"],
 });
 assert.deepEqual(syntheticPois.map((item) => item.id), ["event:confirmed.event-1", "event:pending-event"]);
 assert.equal(eventRuntime.isSlugSafeEventId('bad" onmouseover="alert(1)'), false);
+assert.equal(eventRuntime.isTravelerVisibleEvent({ id: "safe", status: "historical-lead" }), false);
+assert.equal(eventRuntime.isTravelerVisibleEvent({ id: "safe", status: "confirmed" }), true);
+
+for (const day of [
+  { date: "2026-10-24", short: "10/31", city: "Paris" },
+  { date: "2026-10-25", short: "10/31", city: "Paris" },
+  { date: "2026-10-24", short: "10/31", city: "Versailles" },
+]) {
+  assert.equal(eventRuntime.isEventAssignable(syntheticPois[0], day, "2026-10-24"), true);
+}
+for (const day of [
+  { date: "2026-10-23", short: "10/24", city: "Paris" },
+  { date: "2026-10-26", short: "10/24", city: "Paris" },
+  { date: "2026-10-24", short: "10/24", city: "Barcelona" },
+  { date: "2026-10-24", short: "10/24", city: "Transit" },
+]) {
+  assert.equal(eventRuntime.isEventAssignable(syntheticPois[0], day, "2026-10-24"), false);
+}
+assert.equal(eventRuntime.isEventAssignable({ id: "normal", category: "art" }, null, "2026-10-24"), true);
 
 const assignmentItems = [
   { id: "normal", category: "art" },
   syntheticPois[0],
   syntheticPois[1],
 ];
+const assignmentDays = [{ id: "d1", date: "2026-10-24", short: "10/24", city: "Paris" }];
 for (const label of ["default", "restored"]) {
   const input = {
     normal: { dayId: "d1", order: 1 },
@@ -153,7 +194,12 @@ for (const label of ["default", "restored"]) {
     "event:removed-event": { dayId: "d1", order: 4 },
     "legacy-missing-poi": { dayId: "d1", order: 5 },
   };
-  const sanitized = JSON.parse(JSON.stringify(eventRuntime.sanitizeEventAssignments(input, assignmentItems)));
+  const sanitized = JSON.parse(JSON.stringify(eventRuntime.sanitizeEventAssignments(
+    input,
+    assignmentItems,
+    assignmentDays,
+    "2026-10-24",
+  )));
   assert.deepEqual(sanitized, {
     normal: { dayId: "d1", order: 1 },
     "event:confirmed.event-1": { dayId: "d1", order: 2 },
@@ -161,14 +207,34 @@ for (const label of ["default", "restored"]) {
   }, `${label} assignments must exclude pending and removed events`);
   assert.ok(input["event:pending-event"], `${label} sanitization must not mutate its input`);
 }
+for (const [label, staleItem] of [
+  ["window moved", { ...syntheticPois[0], eventStartsAt: "2026-10-25T10:00:00+02:00", eventEndsAt: "2026-10-26T18:00:00+02:00" }],
+  ["city changed", { ...syntheticPois[0], city: "Barcelona", eventAffectedCities: [] }],
+  ["scope changed", { ...syntheticPois[0], eventScope: "hosted" }],
+]) {
+  const sanitized = eventRuntime.sanitizeEventAssignments(
+    { [staleItem.id]: { dayId: "d1", order: 1 } },
+    [staleItem],
+    assignmentDays,
+    "2026-10-24",
+  );
+  assert.deepEqual(JSON.parse(JSON.stringify(sanitized)), {}, `${label} must remove a stale event assignment`);
+}
 assert.ok(
-  html.includes("const defaultItineraryAssignments = sanitizeEventAssignments(rawDefaultItineraryAssignments, pois)"),
+  html.includes("const defaultItineraryAssignments = sanitizeEventAssignments(rawDefaultItineraryAssignments, pois, itineraryDays, PUBLIC_TRIP_DATA.trip.startDate)"),
   "default assignments must use the executable event sanitizer",
 );
 assert.ok(
-  html.includes("itineraryPlan.assignments = sanitizeEventAssignments(itineraryPlan.assignments, pois)"),
+  html.includes("itineraryPlan.assignments = sanitizeEventAssignments(itineraryPlan.assignments, pois, itineraryDays, PUBLIC_TRIP_DATA.trip.startDate)"),
   "restored assignments must use the executable event sanitizer",
 );
+for (const token of [
+  ".filter((day) => isEventAssignable(item, day, PUBLIC_TRIP_DATA.trip.startDate))",
+  "isEventAssignable(item, selectedDay, PUBLIC_TRIP_DATA.trip.startDate)",
+  "isEventAssignable(item, dayById[dayId], PUBLIC_TRIP_DATA.trip.startDate)",
+]) {
+  assert.ok(html.includes(token), `all assignment controls and mutations must use day eligibility: ${token}`);
+}
 
 const boundaryEvents = [{
   id: "all-saints",
@@ -180,6 +246,43 @@ const boundaryEvents = [{
 for (const short of ["11/1", "11/2", "11/3"]) {
   assert.equal(eventRuntime.getCityEventsForDay(boundaryEvents, { short, city: "Barcelona" }, "2026-10-24").length, 1);
 }
+assert.equal(
+  eventRuntime.getDayIsoDate({ date: "2026-11-03", short: "10/31" }, "2026-10-24"),
+  "2026-11-03",
+  "ISO day.date must win over a conflicting short label",
+);
+assert.equal(eventRuntime.getDayIsoDate({ short: "11-03" }, "2026-10-24"), "2026-11-03");
+assert.equal(eventRuntime.getDayIsoDate({ short: "2/30" }, "2026-10-24"), "");
+
+const historicalScopeEvents = [
+  {
+    id: "historical-hosted",
+    name: "Historical hosted",
+    scope: "hosted",
+    status: "historical-lead",
+    hostPoiId: "host-1",
+    startsAt: "2026-10-24",
+    endsAt: "2026-10-24",
+  },
+  {
+    id: "historical-citywide",
+    name: "Historical citywide",
+    scope: "citywide",
+    city: "Paris",
+    status: "historical-lead",
+    startsAt: "2026-10-24",
+    endsAt: "2026-10-24",
+  },
+];
+assert.equal(eventRuntime.renderHostedEventsForItem(historicalScopeEvents, { id: "host-1" }), "");
+assert.equal(
+  eventRuntime.renderCityEventNoticesForDay(
+    historicalScopeEvents,
+    { date: "2026-10-24", short: "10/24", city: "Paris" },
+    "2026-10-24",
+  ),
+  "",
+);
 for (const [short, city] of [["10/31", "Barcelona"], ["11/4", "Barcelona"], ["11/2", "Madrid"]]) {
   assert.equal(eventRuntime.getCityEventsForDay(boundaryEvents, { short, city }, "2026-10-24").length, 0);
 }
@@ -243,7 +346,7 @@ for (const token of [
   "const tripEvents = PUBLIC_TRIP_DATA.events || []",
   "const renderHostedEvents",
   "const renderCityEventNotices",
-  "const isEventAssignable",
+  "function isEventAssignable",
   'event: { label: "同期活动"',
   "等待具体节目",
   "poi-detail-list",
@@ -285,6 +388,21 @@ const scripts = [...html.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/sc
   .filter((script) => script.trim());
 assert.equal(scripts.length, 1);
 new vm.Script(scripts[0], { filename: htmlPath });
+
+const builderModule = await import("./build-europe-public-template.js?serializer-contract");
+assert.equal(typeof builderModule.serializeForInlineScript, "function", "builder must export its script-context serializer");
+const breakoutPayload = {
+  text: "</script><script>globalThis.scriptBreakout = true</script>&>\u2028\u2029",
+};
+const serializedBreakout = builderModule.serializeForInlineScript(breakoutPayload, 2);
+assert.doesNotMatch(serializedBreakout, /[<>&\u2028\u2029]/, "inline serializer must escape script-breaking code points");
+const breakoutSandbox = {};
+vm.runInNewContext(`globalThis.roundTrip = ${serializedBreakout};`, breakoutSandbox);
+assert.deepEqual(JSON.parse(JSON.stringify(breakoutSandbox.roundTrip)), breakoutPayload);
+assert.equal(breakoutSandbox.scriptBreakout, undefined);
+const generatedBreakoutHtml = `<script>globalThis.roundTrip = ${serializedBreakout};</script>`;
+assert.equal([...generatedBreakoutHtml.matchAll(/<\/script>/gi)].length, 1, "payload must not terminate generated script context");
+new vm.Script(generatedBreakoutHtml.match(/<script>([\s\S]*)<\/script>/i)[1]);
 
 const publicText = [html, JSON.stringify(pois), JSON.stringify(itinerary), JSON.stringify(sources)].join("\n");
 for (const pattern of [

@@ -10,6 +10,18 @@ const sourceItinerary = JSON.parse(fs.readFileSync(path.join(root, "data", "itin
 const sourceEvents = JSON.parse(fs.readFileSync(path.join(root, "data", "events.json"), "utf8"));
 const travelerEvents = sourceEvents.map(({ sourceIds: _sourceIds, ...event }) => event);
 
+const INLINE_SCRIPT_ESCAPES = {
+  "<": "\\u003C",
+  ">": "\\u003E",
+  "&": "\\u0026",
+  "\u2028": "\\u2028",
+  "\u2029": "\\u2029",
+};
+
+export function serializeForInlineScript(value, spacing = 0) {
+  return JSON.stringify(value, null, spacing).replace(/[<>&\u2028\u2029]/g, (character) => INLINE_SCRIPT_ESCAPES[character]);
+}
+
 if (!Array.isArray(sourcePois) || !Array.isArray(sourceEvents) || !Array.isArray(sourceItinerary.days) || !Array.isArray(sourceItinerary.defaultAssignments)) {
   throw new Error("public sample data must use the europe-autumn-2026-sample schema");
 }
@@ -187,7 +199,7 @@ const html = fs.readFileSync(htmlPath, "utf8");
 const dataStart = html.indexOf("const PUBLIC_TRIP_DATA = ");
 const aliasStart = html.indexOf("    const stops = PUBLIC_TRIP_DATA.stops;", dataStart);
 if (dataStart < 0 || aliasStart < 0) throw new Error("canonical HTML is missing the PUBLIC_TRIP_DATA boundary");
-const nextHtml = `${html.slice(0, dataStart)}const PUBLIC_TRIP_DATA = ${JSON.stringify(directTrip, null, 2)};\n\n${html.slice(aliasStart)}`;
+const nextHtml = `${html.slice(0, dataStart)}const PUBLIC_TRIP_DATA = ${serializeForInlineScript(directTrip, 2)};\n\n${html.slice(aliasStart)}`;
 fs.writeFileSync(htmlPath, nextHtml);
 
 console.log(`built Europe direct-copy public sample: ${sourcePois.length} places, ${sourceItinerary.days.length} days, ${sourceEvents.length} events`);

@@ -68,14 +68,25 @@ function isValidCoords(coords) {
     && coords[1] <= 180;
 }
 
+function hasValidCalendarDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value || "");
+  if (!match) return false;
+  const [, yearText, monthText, dayText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  if (month < 1 || month > 12 || day < 1) return false;
+  const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day <= daysInMonth[month - 1];
+}
+
 function isCalendarDate(value) {
-  if (!hasText(value) || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const parsed = new Date(`${value}T00:00:00.000Z`);
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+  return hasText(value) && /^\d{4}-\d{2}-\d{2}$/.test(value) && hasValidCalendarDate(value);
 }
 
 function isDateTime(value) {
-  if (!hasText(value) || !/^\d{4}-\d{2}-\d{2}T/.test(value)) return false;
+  if (!hasText(value) || !/^\d{4}-\d{2}-\d{2}T/.test(value) || !hasValidCalendarDate(value)) return false;
   return !Number.isNaN(Date.parse(value));
 }
 

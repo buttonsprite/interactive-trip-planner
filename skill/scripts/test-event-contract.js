@@ -98,6 +98,8 @@ for (const [label, events, itinerary, expected] of [
   ["missing host", [{ ...validHosted, hostPoiId: undefined }], [], /hosted event requires hostPoiId/],
   ["missing venue location", [{ ...validVenue, venuePoiId: undefined }], [], /venue event requires venuePoiId or valid coords/],
   ["missing confirmed date time", [{ ...validVenue, startsAt: "2026-10-18", endsAt: "2026-10-18" }], [], /confirmed event requires startsAt and endsAt with date and time/],
+  ["impossible calendar date time", [{ ...validVenue, startsAt: "2026-02-30T19:30:00+02:00" }], [], /invalid startsAt/],
+  ["impossible calendar date", [{ ...validHosted, startsAt: "2026-02-30" }], [], /invalid startsAt/],
   ["missing source record", [{ ...validVenue, sourceIds: ["missing-source"] }], [], /references missing source: missing-source/],
   ["unconfirmed itinerary event", [validHosted], [{ id: "day-1", routeStops: [{ poiId: "event:market-workshop" }] }], /event:market-workshop must reference a confirmed venue event/],
 ]) {

@@ -39,8 +39,11 @@
 - 为什么去：`note` 或 `whyWorthIt`。
 - 怎么安排：`plan`。
 - 注意事项：`tip`。
+- 资料依据：有结构化来源时，在注意事项之后显示可展开的 `evidenceSources`；每条只使用 `title`、`url`、`type`、`role`、`language`、`supports`、`checkedAt`、`status` 八个公开字段，并为外链使用安全的 HTTP(S) URL 与 `noopener noreferrer`。
 - 官网或预约入口、Google Maps 或等价地图入口、体验线索入口。
 - 修改优先级、加入某天、移出、移动日期和当天顺序控制。
+
+`sourceIds` 是构建阶段的内部关联键，公开 `PUBLIC_TRIP_DATA`、地图 HTML 和旅行者可见详情不得保留或显示 raw `sourceIds`。构建器必须先解析所有 id；缺失来源或非 HTTP(S) 链接应使构建失败。旧地点只有非结构化 `source` 时可以作为兼容回退，但只要 `evidenceSources` 非空，就隐藏旧文本，避免同一结论展示两套资料口径。
 
 完整地点详情只能有一个。地图 popup 可以省略；如果保留，只作为轻量定位提示，不能再复制一套完整详情。
 

@@ -8,8 +8,10 @@ function parseArgs(argv) {
     const item = argv[i];
     if (item === "--pois") args.pois = argv[++i];
     else if (item === "--itinerary") args.itinerary = argv[++i];
+    else if (item === "--sources") args.sources = argv[++i];
     else if (item === "--day") args.day = argv[++i];
     else if (item === "--strict-routes") args.strictRoutes = true;
+    else if (item === "--require-route-evidence") args.requireRouteEvidence = true;
     else if (item === "--help" || item === "-h") args.help = true;
     else throw new Error(`Unknown argument: ${item}`);
   }
@@ -19,7 +21,7 @@ function parseArgs(argv) {
 function usage() {
   return [
     "Usage:",
-    "  node validate-trip-data.js --pois data/pois.json --itinerary data/itinerary.json [--strict-routes] [--day day-id]",
+    "  node validate-trip-data.js --pois data/pois.json --itinerary data/itinerary.json [--sources data/sources.json] [--require-route-evidence] [--strict-routes] [--day day-id]",
   ].join("\n");
 }
 
@@ -53,6 +55,76 @@ function isValidRouteCoord(coords) {
     && coords[1] <= 90;
 }
 
+function isNonEmptyString(value) {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function isSafeHttpUrl(value) {
+  if (!isNonEmptyString(value)) return false;
+  try {
+    const parsed = new URL(value);
+    return (parsed.protocol === "http:" || parsed.protocol === "https:") && Boolean(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function isGenericWhyWorthIt(value) {
+  if (!isNonEmptyString(value)) return false;
+  const placeholder = /(感受当地生活|体验当地生活|随便逛逛|值得一去|feel (?:the )?local life|wander around|worth a visit)/iu;
+  if (!placeholder.test(value)) return false;
+  const placeSpecificRemainder = value
+    .replace(new RegExp(placeholder.source, "giu"), "")
+    .replace(/[\p{P}\p{S}\p{N}\s]/gu, "");
+  return placeSpecificRemainder.length < 20;
+}
+
+function itineraryDays(itinerary, errors) {
+  if (Array.isArray(itinerary)) return itinerary;
+  if (itinerary && typeof itinerary === "object" && !Array.isArray(itinerary) && Array.isArray(itinerary.days)) {
+    if (itinerary.defaultAssignments != null && !Array.isArray(itinerary.defaultAssignments)) {
+      errors.push("itinerary.defaultAssignments must be an array when provided");
+    }
+    return itinerary.days;
+  }
+  errors.push("itinerary must be an array or a public-template object with a days array");
+  return [];
+}
+
+function validateSourceRegistry(sources, errors) {
+  const sourceById = new Map();
+  if (sources == null) return sourceById;
+  if (!Array.isArray(sources)) {
+    errors.push("sources must be an array");
+    return sourceById;
+  }
+
+  sources.forEach((source, index) => {
+    const id = isNonEmptyString(source?.id) ? source.id.trim() : null;
+    const label = id || `<source ${index}>`;
+    if (!id) {
+      errors.push(`Source ${label} missing non-empty id`);
+      return;
+    }
+    if (sourceById.has(id)) {
+      errors.push(`Duplicate source id: ${id}`);
+      return;
+    }
+    sourceById.set(id, source);
+
+    for (const field of ["title", "type", "role", "language", "checkedAt", "status"]) {
+      if (!isNonEmptyString(source[field])) errors.push(`Source ${id} missing ${field}`);
+    }
+    if (!isSafeHttpUrl(source.url)) errors.push(`Source ${id} requires an HTTP(S) URL`);
+    if (!Array.isArray(source.supports)
+      || source.supports.length === 0
+      || !source.supports.every(isNonEmptyString)) {
+      errors.push(`Source ${id} requires non-empty supports`);
+    }
+  });
+  return sourceById;
+}
+
 function asPoiId(stop) {
   if (typeof stop === "string") return stop;
   if (stop && typeof stop.poiId === "string") return stop.poiId;
@@ -79,26 +151,37 @@ function main() {
     console.log(usage());
     process.exit(args.help ? 0 : 1);
   }
+  if (args.requireRouteEvidence && !args.sources) {
+    console.error("--sources is required when --require-route-evidence is enabled");
+    process.exit(1);
+  }
 
   const pois = readJson(path.resolve(args.pois));
   const itinerary = readJson(path.resolve(args.itinerary));
+  const sources = args.sources ? readJson(path.resolve(args.sources)) : null;
   const errors = [];
   const warnings = [];
 
   if (!Array.isArray(pois)) errors.push("pois must be an array");
-  if (!Array.isArray(itinerary)) errors.push("itinerary must be an array");
+  const days = itineraryDays(itinerary, errors);
   if (errors.length) {
     console.error(errors.join("\n"));
     process.exit(1);
   }
+  const sourceById = validateSourceRegistry(sources, errors);
+  const usesPublicTemplateSchema = !Array.isArray(itinerary);
 
-  const required = ["id", "name", "name_zh", "category", "coords", "note", "plan", "tip", "source"];
+  const required = usesPublicTemplateSchema
+    ? ["name", "category", "coords", "note"]
+    : ["id", "name", "name_zh", "category", "coords", "note", "plan", "tip", "source"];
   const allowedPriorities = new Set(["", "must", "preferred", "nearby", "archive", "pending", "booked", "S", "A", "B", "C"]);
   const allowedContentTiers = new Set(["deep", "standard", "compact"]);
   const ids = new Set();
   const identityKeys = new Map();
   const categoryCounts = new Map();
   const cityCounts = new Map();
+  const poiById = new Map();
+  const poisByName = new Map();
 
   for (const poi of pois) {
     for (const field of required) {
@@ -109,6 +192,12 @@ function main() {
     if (typeof poi.id === "string") {
       if (ids.has(poi.id)) errors.push(`Duplicate POI id: ${poi.id}`);
       ids.add(poi.id);
+      poiById.set(poi.id, poi);
+    }
+    if (isNonEmptyString(poi.name)) {
+      const named = poisByName.get(poi.name) || [];
+      named.push(poi);
+      poisByName.set(poi.name, named);
     }
     if (!isValidCoord(poi.coords)) errors.push(`POI ${poi.id || poi.name} has invalid coords`);
     if (poi.priority != null && !allowedPriorities.has(poi.priority)) {
@@ -169,8 +258,8 @@ function main() {
   }
 
   const selectedItinerary = args.day
-    ? itinerary.filter((day) => day.id === args.day)
-    : itinerary;
+    ? days.filter((day) => day.id === args.day)
+    : days;
   if (args.day && selectedItinerary.length === 0) errors.push(`Unknown day id: ${args.day}`);
 
   for (const day of selectedItinerary) {
@@ -252,9 +341,129 @@ function main() {
     }
   }
 
+  if (args.requireRouteEvidence) {
+    const scheduled = new Map();
+    const allDayIds = new Set(days.map((day) => day.id).filter(isNonEmptyString));
+    const selectedDayIds = new Set(selectedItinerary.map((day) => day.id).filter(isNonEmptyString));
+
+    const resolveById = (poiId, context) => {
+      const poi = poiById.get(poiId);
+      if (!poi) errors.push(`${context} references unknown POI id: ${poiId}`);
+      return poi;
+    };
+    const resolveByName = (name, context) => {
+      const matches = poisByName.get(name) || [];
+      if (matches.length === 0) {
+        errors.push(`${context} has unknown default-assignment name: ${name}`);
+        return null;
+      }
+      if (matches.length > 1) {
+        errors.push(`${context} has ambiguous default-assignment name: ${name}; use poiId or make the exact name unique`);
+        return null;
+      }
+      return matches[0];
+    };
+    const addScheduled = (poi, context) => {
+      if (!poi) return;
+      const index = pois.indexOf(poi);
+      const key = isNonEmptyString(poi.id) ? `id:${poi.id}` : `index:${index}`;
+      if (!scheduled.has(key)) scheduled.set(key, { poi, contexts: [] });
+      scheduled.get(key).contexts.push(context);
+    };
+    const isLodgingBase = (poi) => poi?.category === "hotel"
+      || poi?.category === "lodging"
+      || poi?.lodgingRole === "base";
+    const handleOrderedReference = (poi, order, context) => {
+      if (!poi) return;
+      if (order != null && Number.isFinite(Number(order)) && Number(order) <= 0) {
+        if (isLodgingBase(poi)) return;
+        errors.push(`${context} uses non-positive order ${order}; only a lodging base may be excluded from formal-route evidence`);
+        return;
+      }
+      addScheduled(poi, context);
+    };
+
+    for (const day of selectedItinerary) {
+      const dayLabel = day.id || day.date || day.title || "<unknown day>";
+      for (const stop of Array.isArray(day.routeStops) ? day.routeStops : []) {
+        const poiId = asPoiId(stop);
+        const named = stop && typeof stop === "object" && isNonEmptyString(stop.name) ? stop.name : null;
+        const referenceLabel = poiId || named || "<unknown route stop>";
+        const context = `day ${dayLabel} route stop ${referenceLabel}`;
+        let poi = null;
+        if (poiId) poi = resolveById(poiId, context);
+        else if (named) poi = resolveByName(named, context);
+        else errors.push(`${context} must provide poiId or an exact name`);
+        const order = stop && typeof stop === "object" ? stop.order : null;
+        handleOrderedReference(poi, order, context);
+      }
+    }
+
+    if (!Array.isArray(itinerary) && Array.isArray(itinerary.defaultAssignments)) {
+      for (const assignment of itinerary.defaultAssignments) {
+        const dayId = assignment?.dayId;
+        const referenceLabel = assignment?.poiId || assignment?.name || "<unknown assignment>";
+        const context = `day ${dayId || "<unknown day>"} default assignment ${referenceLabel}`;
+        if (!isNonEmptyString(dayId) || !allDayIds.has(dayId)) {
+          errors.push(`${context} references unknown dayId`);
+          continue;
+        }
+        if (args.day && !selectedDayIds.has(dayId)) continue;
+
+        let poi = null;
+        if (isNonEmptyString(assignment.poiId)) poi = resolveById(assignment.poiId, context);
+        else if (isNonEmptyString(assignment.name)) poi = resolveByName(assignment.name, context);
+        else errors.push(`${context} must provide poiId or an exact name`);
+
+        if (assignment.order == null || !Number.isFinite(Number(assignment.order))) {
+          errors.push(`${context} must provide a numeric order`);
+          continue;
+        }
+        handleOrderedReference(poi, assignment.order, context);
+      }
+    }
+
+    for (const { poi, contexts } of scheduled.values()) {
+      const poiLabel = poi.id || poi.name || "<unknown POI>";
+      const context = `${contexts[0]} POI ${poiLabel}`;
+      if (poi.contentTier !== "standard" && poi.contentTier !== "deep") {
+        errors.push(`${context} requires contentTier standard or deep`);
+      }
+      if (!isNonEmptyString(poi.whyWorthIt) || poi.whyWorthIt.trim().length < 40) {
+        errors.push(`${context} requires concrete whyWorthIt of at least 40 characters`);
+      } else if (isGenericWhyWorthIt(poi.whyWorthIt)) {
+        errors.push(`${context} whyWorthIt must be place-specific, not a padded generic placeholder`);
+      }
+      if (!Array.isArray(poi.detailSections) || poi.detailSections.length === 0) {
+        errors.push(`${context} requires at least one detailSections entry`);
+      }
+      const actionableItems = Array.isArray(poi.detailSections)
+        ? poi.detailSections.flatMap((section) => Array.isArray(section?.items)
+          ? section.items.filter(isNonEmptyString)
+          : [])
+        : [];
+      if (actionableItems.length < 2) {
+        errors.push(`${context} requires at least 2 non-empty actionable items across detailSections`);
+      }
+
+      if (!Array.isArray(poi.sourceIds)
+        || poi.sourceIds.length === 0
+        || !poi.sourceIds.every(isNonEmptyString)) {
+        errors.push(`${context} requires non-empty sourceIds`);
+      } else {
+        for (const rawSourceId of poi.sourceIds) {
+          const sourceId = rawSourceId.trim();
+          if (!sourceById.has(sourceId)) {
+            errors.push(`${context} has unknown source id: ${sourceId}`);
+          }
+        }
+      }
+    }
+  }
+
   const summary = {
     poiCount: pois.length,
-    dayCount: itinerary.length,
+    dayCount: days.length,
     categories: Object.fromEntries([...categoryCounts.entries()].sort()),
     cities: Object.fromEntries([...cityCounts.entries()].sort()),
     warnings,

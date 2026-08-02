@@ -351,6 +351,22 @@ Semporna diving October visibility official marine weather
 
 ## 资料记录格式
 
+### 正式路线的证据边界
+
+来源 `role` 要明确区分事实（`fact`）、推荐/发现（`recommendation` 或 `discovery`）和体验（`experience`）：事实来源支持地址、开放、菜单、场次等可核实结论；推荐来源支持“为什么进入候选”和值得点的品类，但不能自动证明营业或库存；体验来源补充排队、服务节奏、入口和现场感，不能单独支持法规、安全或当前活动。
+
+每条正式路线地点在内部数据中保存非空 `sourceIds`。被引用的来源必须包含非空 `id`、`title`、`type`、`role`、`language`、`checkedAt`、`status`、非空 `supports`，以及 `http`/`https` URL。`supports` 只列这张页面真实支持的结论；来源角色不同不代表可信度高低，而是限制它能证明什么。
+
+生成公开地图时，构建器按 `sourceIds` 顺序解析并只输出 `{title,url,type,role,language,supports,checkedAt,status}` 八字段 `evidenceSources`；公开数据不得保留 raw `sourceIds`。地图把这些资料放在可展开的“资料依据”中，而不是给每个地点增加常驻置信度徽章。
+
+`validate-trip-data.js --sources <sources.json>` 会检查来源注册表的 id、必填字段、`supports` 和 HTTP(S) URL，但不会自动把路线升级为正式证据合同；只有同时使用 `--require-route-evidence`，才会检查 canonical `routeStops` 和公开母版的正序 `defaultAssignments`。新攻略最终运行：
+
+```bash
+node scripts/validate-trip-data.js --pois <pois.json> --itinerary <itinerary.json> --sources <sources.json> --require-route-evidence --strict-routes
+```
+
+不带 `--require-route-evidence` 的 legacy 成功只表示旧数据仍兼容，不是正式路线的证据认证。
+
 在 `data/sources.json` 保存结构化来源：
 
 ```json
@@ -359,6 +375,8 @@ Semporna diving October visibility official marine weather
   "title": "Sagrada Familia official opening hours",
   "url": "https://...",
   "type": "official",
+  "role": "fact",
+  "language": "es",
   "checkedAt": "2026-07-18",
   "supports": ["opening-hours", "tickets", "entry-rules"],
   "recheckBefore": "2026-10-15",

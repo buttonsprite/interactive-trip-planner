@@ -23,6 +23,7 @@ const tasteReference = read("references/hybrid-taste-models.md");
 const sourcePackReference = read("references/regional-source-packs.md");
 const tasteSourceOnlineLogic = read("references/taste-and-source-online-logic.md");
 const poiSchema = read("references/poi-schema.md");
+const mapFeatureContract = read("references/map-feature-contract.md");
 const template = read("assets/guide-template/maps/itinerary-map.html");
 const goldenDataRoot = path.join(skillRoot, "assets", "samples", "golden");
 const repositoryReadmePath = path.join(repositoryRoot, "README.md");
@@ -44,6 +45,7 @@ assert.match(skill, /明确要求改变交互[^\n]*interaction fork/i);
 assert.match(skill, /轻量模板[^\n]*用户明确要求/);
 assert.match(skill, /validate-europe-derived-map\.js/);
 assert.match(skill, /--strict-routes/);
+assert.match(skill, /--sources <sources\.json>[\s\S]*--require-route-evidence/);
 assert.match(skill, /build-redskill-release\.js/);
 assert.match(skill, /test-redskill-release\.js/);
 assert.match(skill, /每两个相邻地点/);
@@ -130,6 +132,12 @@ assert.match(skill, /不同类型[^\n]*不[^\n]*同样/);
 assert.match(poiSchema, /deep[^\n]*standard[^\n]*compact/);
 assert.match(poiSchema, /detailSections/);
 assert.match(poiSchema, /市场[^\n]*(买什么|逛什么)/);
+assert.match(poiSchema, /价值陈述[^\n]*现场动作[^\n]*可解析证据/);
+assert.match(poiSchema, /至少 40/);
+assert.match(poiSchema, /sourceIds[^\n]*evidenceSources/);
+assert.match(mapFeatureContract, /evidenceSources/);
+assert.match(mapFeatureContract, /不得[^\n]*sourceIds/);
+assert.match(sources, /事实[^\n]*推荐[^\n]*体验/);
 assert.match(skill, /data\/events\.json/);
 assert.match(skill, /venue[^\n]*hosted[^\n]*citywide/);
 assert.match(skill, /confirmed[^\n]*program-pending/);
@@ -280,5 +288,28 @@ const strictRouteValidation = spawnSync(
 );
 assert.notEqual(strictRouteValidation.status, 0, "strict route validation must reject missing adjacent transit segments");
 assert.match(strictRouteValidation.stdout + strictRouteValidation.stderr, /missing adjacent transit segment/);
+
+const publicDataRoot = path.join(skillRoot, "assets", "guide-template-europe-public", "data");
+const publicValidationArgs = [
+  path.join(scriptDir, "validate-trip-data.js"),
+  "--pois", path.join(publicDataRoot, "pois.json"),
+  "--itinerary", path.join(publicDataRoot, "itinerary.json"),
+];
+const publicLegacyValidation = spawnSync(process.execPath, publicValidationArgs, { encoding: "utf8" });
+assert.equal(
+  publicLegacyValidation.status,
+  0,
+  `legacy public-template validation should remain compatible:\n${publicLegacyValidation.stdout}${publicLegacyValidation.stderr}`,
+);
+
+const publicStrictEvidenceValidation = spawnSync(process.execPath, [
+  ...publicValidationArgs,
+  "--sources", path.join(publicDataRoot, "sources.json"),
+  "--require-route-evidence",
+], { encoding: "utf8" });
+const publicStrictOutput = publicStrictEvidenceValidation.stdout + publicStrictEvidenceValidation.stderr;
+assert.notEqual(publicStrictEvidenceValidation.status, 0, "legacy Europe sample must not be misreported as evidence certified");
+assert.doesNotMatch(publicStrictOutput, /itinerary must be an array/i, "strict public-template validation must understand the object schema");
+assert.match(publicStrictOutput, /d\d+[\s\S]*(?:contentTier|sourceIds)/i, "strict failure must identify a positive day assignment and missing formal evidence");
 
 console.log("interactive-trip-planner contract tests passed");

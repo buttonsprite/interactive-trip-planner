@@ -63,7 +63,7 @@ description: Use when 用户想规划旅行、制作旅游攻略、寻找适合�
 2. 选择 Global Base 与一个匹配的地区包，按 A/B/C 可访问性先探测来源；B/C 失败时执行明确 fallback。中国大陆先运行 `scripts/check-amap-cli.js` 探测可选增强，不读取或输出密钥；CLI 不可用时明确未完成高德路网复核，不伪造路线。
 3. 使用地区包的十类查询意图，至少组合中文、英文和目的地当地语言搜索。先从官方旅游、文化日历、地图和主题资料发现候选，再用地点官网、主办方、交通运营方和订位入口逐项核实。具名本地编辑源必须说明覆盖地区、beat、检索方法和事实边界，不能用模糊来源名称代替。活动扫描必须写入 `data/events.json`：`venue` 是可地图化活动地点，`hosted` 关联既有地点的特别项目，`citywide` 只影响城市或当天语境；字段与引用按 `references/event-schema.md`。
 4. 按体验角色补候选，而不是按类别凑数量：主题主锚点、代表性景点、当地生活、酒店基地、正式餐、地方经典、小吃、咖啡甜品、夜间体验、休息点、交通节点和天气/闭馆替代。城市有至少两个完整旅行日时，逐城至少评估 3 个代表性景点并写明采用或舍弃理由；在该城市停留段内保留的主锚点接到同方向当地生活角色：市场、居民广场、社区空间、街区咖啡、社区饭馆、传统商业或短半径夜间体验。
-5. 每个准备进入资料池的地点都要回答：为什么符合这个模板（未选模板时为什么符合用户偏好）、为什么安排在这里、与附近地点如何衔接、需要预约或复核什么。按地点在路线中的角色分配 `contentTier`：主锚点和必去地点用 `deep`，正式路线中的支撑地点用 `standard`，候选池与留档地点用 `compact`。不同类型地点不强制写同样的四段；市场、博物馆、餐厅、咖啡/酒吧、街区、酒店/交通使用与现场体验相匹配的 `detailSections`。当来源同时支持当地食材结构、居民使用方式和行程月份季节时，市场详情必须连起来写；库存未核实时用“留意/询问”而非断言。只有可靠且能帮助现场理解的历史才写故事，不为凑结构编造。
+5. 每个准备进入资料池的地点都要回答：为什么符合这个模板（未选模板时为什么符合用户偏好）、为什么安排在这里、与附近地点如何衔接、需要预约或复核什么。按地点在路线中的角色分配 `contentTier`：主锚点和必去地点用 `deep`，正式路线中的支撑地点用 `standard`，候选池与留档地点用 `compact`。正式路线地点使用“具体价值陈述 → 类型化现场动作 → 可解析证据”三层合同：`whyWorthIt` 说明这个地方独有的路线价值，`detailSections` 告诉旅行者到场做什么，`sourceIds` 必须解析到结构化来源。不同类型地点不强制写同样的四段；市场、博物馆、餐厅、咖啡/酒吧、街区、酒店/交通使用与现场体验相匹配的 `detailSections`。当来源同时支持当地食材结构、居民使用方式和行程月份季节时，市场详情必须连起来写；库存未核实时用“留意/询问”而非断言。只有可靠且能帮助现场理解的历史才写故事，不为凑结构编造，也不使用“感受当地生活”“随便逛逛”“值得一去”等没有地点特异性的占位表达。
 6. 对营业时间、票务、活动日期、交通时刻、价格、安全、天气、海况和入境规则等易变化信息，使用当前来源复核并记录检查日期。只有真实的可变事实、来源冲突或高影响事实未确认时显示“需要临近复核”，不增加常驻来源徽章。
 7. 对落选的著名地点保留简短取舍理由，避免用户看见缺失却不知道为什么。
 
@@ -243,7 +243,7 @@ node scripts/test-redskill-release.js <release-directory>
 运行与当前产物对应的验证：
 
 ```bash
-node scripts/validate-trip-data.js --pois <pois.json> --itinerary <itinerary.json> --strict-routes
+node scripts/validate-trip-data.js --pois <pois.json> --itinerary <itinerary.json> --sources <sources.json> --require-route-evidence --strict-routes
 node scripts/validate-trip-events.js --events <events.json> --pois <pois.json> --itinerary <itinerary.json> --sources <sources.json>
 node scripts/validate-design-tokens.js <design-tokens.json>
 node scripts/validate-map-html.js <itinerary-map.html>
@@ -256,5 +256,7 @@ node scripts/test-redskill-release.js <release-directory>
 ```
 
 静态验证不能替代浏览器验证。完成前实际检查页面加载、底图、地点、日期与分类筛选、路线、地点详情、修改、撤销、修改汇总、刷新恢复、桌面、手机和 console。
+
+新建 0.1 攻略的最终数据验收必须运行带 `--require-route-evidence` 的命令；只运行不带该 flag 的旧命令仅表示 legacy 数据结构仍可读取，不代表正式路线已经获得内容或证据认证。
 
 最终交付使用自然语言，说明旅行主线和取舍、酒店与吃饭逻辑、关键路线、资料来源、需要临近复核的事项、地图位置和实际验证结果。没有运行过的验证不得声称通过。

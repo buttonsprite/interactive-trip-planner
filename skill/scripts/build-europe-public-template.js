@@ -8,6 +8,7 @@ const root = path.resolve(scriptDir, "..", "assets", "guide-template-europe-publ
 const sourcePois = JSON.parse(fs.readFileSync(path.join(root, "data", "pois.json"), "utf8"));
 const sourceItinerary = JSON.parse(fs.readFileSync(path.join(root, "data", "itinerary.json"), "utf8"));
 const sourceEvents = JSON.parse(fs.readFileSync(path.join(root, "data", "events.json"), "utf8"));
+const travelerEvents = sourceEvents.map(({ sourceIds: _sourceIds, ...event }) => event);
 
 if (!Array.isArray(sourcePois) || !Array.isArray(sourceEvents) || !Array.isArray(sourceItinerary.days) || !Array.isArray(sourceItinerary.defaultAssignments)) {
   throw new Error("public sample data must use the europe-autumn-2026-sample schema");
@@ -165,7 +166,7 @@ const trip = {
   },
   pois,
   days,
-  events: sourceEvents,
+  events: travelerEvents,
 };
 
 const output = `// Generated from the public europe-autumn-2026-sample data.\nwindow.TRIP_DATA = ${JSON.stringify(trip, null, 2)};\n`;
@@ -179,7 +180,7 @@ const directTrip = {
   transitSegmentsByDay: sourceItinerary.transitSegmentsByDay,
   pois: sourcePois,
   defaultAssignments: sourceItinerary.defaultAssignments,
-  events: sourceEvents,
+  events: travelerEvents,
 };
 const htmlPath = path.join(root, "maps", "itinerary-map.html");
 const html = fs.readFileSync(htmlPath, "utf8");

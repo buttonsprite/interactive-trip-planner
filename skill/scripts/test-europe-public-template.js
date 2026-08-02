@@ -24,6 +24,7 @@ const pois = JSON.parse(fs.readFileSync(poiPath, "utf8"));
 const itinerary = JSON.parse(fs.readFileSync(itineraryPath, "utf8"));
 const sources = JSON.parse(fs.readFileSync(sourcesPath, "utf8"));
 const events = JSON.parse(fs.readFileSync(eventsPath, "utf8"));
+const travelerEvents = events.map(({ sourceIds: _sourceIds, ...event }) => event);
 const dataMatch = html.match(/const PUBLIC_TRIP_DATA = (\{[\s\S]*?\});\n\n    const stops = PUBLIC_TRIP_DATA\.stops;/);
 assert.ok(dataMatch, "public HTML must expose a single replaceable PUBLIC_TRIP_DATA block");
 const embedded = JSON.parse(dataMatch[1]);
@@ -37,12 +38,15 @@ assert.equal(embedded.itineraryDays.length, 18);
 assert.equal(embedded.pois.length, 379);
 assert.deepEqual(embedded.pois, pois);
 assert.deepEqual(embedded.itineraryDays, itinerary.days);
-assert.deepEqual(embedded.events, events);
+assert.ok(events.every((event) => Array.isArray(event.sourceIds) && event.sourceIds.length > 0));
+assert.deepEqual(embedded.events, travelerEvents);
+assert.ok(embedded.events.every((event) => !Object.hasOwn(event, "sourceIds")));
 assert.ok(sources.every((source) => source.url && source.checkedAt && source.supports?.length));
 
 const generatedSandbox = { window: {} };
 vm.runInNewContext(fs.readFileSync(tripDataPath, "utf8"), generatedSandbox);
-assert.deepEqual(JSON.parse(JSON.stringify(generatedSandbox.window.TRIP_DATA.events)), events);
+assert.deepEqual(JSON.parse(JSON.stringify(generatedSandbox.window.TRIP_DATA.events)), travelerEvents);
+assert.ok(generatedSandbox.window.TRIP_DATA.events.every((event) => !Object.hasOwn(event, "sourceIds")));
 
 const eventRuntimeMatch = html.match(/\/\* EVENT_RUNTIME_PURE_START \*\/([\s\S]*?)\/\* EVENT_RUNTIME_PURE_END \*\//);
 assert.ok(eventRuntimeMatch, "public map must expose the shipped pure event runtime for executable contract tests");

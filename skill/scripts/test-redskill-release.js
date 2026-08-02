@@ -79,6 +79,18 @@ for (const mapPath of mapPaths) {
   }
 }
 
+const publicTravelerFiles = [
+  path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "itinerary-map.html"),
+  path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "assets", "trip-data.js"),
+];
+for (const travelerFile of publicTravelerFiles) {
+  assert.doesNotMatch(
+    fs.readFileSync(travelerFile, "utf8"),
+    /"sourceIds"\s*:/,
+    `${path.relative(skillRoot, travelerFile)} must omit internal event sourceIds`,
+  );
+}
+
 for (const vendorPath of [
   path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "vendor", "leaflet"),
   path.join(skillRoot, "assets", "guide-template", "maps", "vendor", "leaflet"),

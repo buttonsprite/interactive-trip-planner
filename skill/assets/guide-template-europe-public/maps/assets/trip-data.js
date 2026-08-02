@@ -8342,10 +8342,6 @@ window.TRIP_DATA = {
       "plan": "在 10/24 或 10/25 选择一个完整时段；首日抵达延误时优先保留 10/25。",
       "tip": "公众开放为 10 月 23–25 日 11:00–19:00；按票种复核单次入场和最终入口。",
       "officialUrl": "https://www.artbasel.com/paris/visitor-information?lang=en",
-      "sourceIds": [
-        "art-basel-paris-2026",
-        "art-basel-paris-tickets-2026"
-      ],
       "recheckAt": "2026-10-01"
     },
     {
@@ -8364,9 +8360,6 @@ window.TRIP_DATA = {
       "plan": "保留老城的烤栗子、烤红薯和 panellets 夜线，具体活动只在节目发布后再决定是否停留。",
       "tip": "临近出发复核街区节目、摊位位置和晚间回程；当前只按节日氛围安排。",
       "officialUrl": "https://www.barcelonaturisme.com/wv3/ca/page/5343/descobriu-el-captivador-encant-tardorenc-de-barcelona.html",
-      "sourceIds": [
-        "barcelona-autumn-traditions"
-      ],
       "recheckAt": "2026-10-15"
     },
     {
@@ -8383,9 +8376,6 @@ window.TRIP_DATA = {
       "plan": "11 月 1 日只把纪念传统作为城市语境；开放、交通和纪念活动发布后再调整蒙锥克路线。",
       "tip": "尊重家庭祭扫，不把纪念活动当作表演；出发前复核墓园开放与公共交通。",
       "officialUrl": "https://patrimonifestiu.cultura.gencat.cat/Tots-Sants-Barcelona-la-Castanyada",
-      "sourceIds": [
-        "catalonia-all-saints-castanyada"
-      ],
       "recheckAt": "2026-10-15"
     }
   ]

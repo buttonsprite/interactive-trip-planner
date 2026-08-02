@@ -147,6 +147,7 @@ for (const token of [
 
 for (const pattern of [
   /@media \(max-width: 820px\)[\s\S]*?\.mobile-app-bar\s*\{/,
+  /@media \(max-width: 820px\)[\s\S]*?#map\s*\{[\s\S]*?height:\s*calc\(100dvh - var\(--mobile-app-bar-height\)\);/,
   /@media \(max-width: 820px\)[\s\S]*?\.mobile-bottom-sheet\s*\{/,
   /--mobile-sheet-compact-height:\s*43dvh;/,
   /\.poi-detail-day-button\.active\s*\{[\s\S]*?background:\s*#0f766e;/,
@@ -169,6 +170,8 @@ for (const pattern of [
   /const undoLastItineraryChange = \(\) => \{[\s\S]*?invalidateReplanFallback\(\);[\s\S]*?refreshItineraryView\(\);/,
   /saveItineraryPlan\(itineraryPlan\);\s*refreshItineraryView\(\);\s*if \(!isListPriority\)/,
   /changes\.map\(\(change\) => `<li>\$\{escapeHtml\(describeItineraryChange\(change\)\)\}<\/li>`\)/,
+  /const invalidateMapAfterViewportTransition = \(\) => \{[\s\S]*?requestAnimationFrame\([\s\S]*?map\.invalidateSize\(\{ pan: false \}\)/,
+  /window\.addEventListener\("resize", \(\) => \{[\s\S]*?invalidateMapAfterViewportTransition\(\);/,
 ]) {
   assert.match(html, pattern, `missing mobile layout/behavior contract: ${pattern}`);
 }

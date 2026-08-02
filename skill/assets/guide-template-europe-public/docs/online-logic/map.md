@@ -30,7 +30,7 @@
 
 ## 同期活动
 
-- `data/events.json` 由 builder 原样写入 `PUBLIC_TRIP_DATA.events` 和 `window.TRIP_DATA.events`；source 与两份 generated data 中的 event 数组必须一致。旧攻略没有 `events` 字段时按空数组运行，原有 POI、DOM、storage key 和行程修改行为不变。
+- `data/events.json` 是内部事实源并保留 `sourceIds` 溯源；builder 写入旅行者可见的 `PUBLIC_TRIP_DATA.events` 和 `window.TRIP_DATA.events` 时逐条移除 `sourceIds`，其余 event 字段与顺序必须一致。旧攻略没有 `events` 字段时按空数组运行，原有 POI、DOM、storage key 和行程修改行为不变。
 - 只有 `scope: venue` 且能从 event 坐标或 `venuePoiId` 对应地点取得有效坐标的记录会在浏览器运行时生成 `event:<id>` synthetic POI；它使用 `E / 同期活动` marker 和独立图层。`hosted` 与 `citywide` 不生成额外 marker，避免把同一个活动重复画成多个地点。
 - 浏览器只消费符合 `/^[A-Za-z0-9][A-Za-z0-9._-]*$/` 的 event id；不符合 grammar 的 venue 不生成 synthetic POI，hosted/citywide 也不进入任何 HTML renderer，避免把未经约束的 id 带入 marker 的 data attribute。转换、状态清理、日期匹配和 event HTML 由同一个 bounded pure runtime block 提供，Node VM contract tests 直接执行这份 shipped logic。
 - `hosted` 活动跟随 `hostPoiId`，在该地点原有类型化详情段之后显示日期、自然语言状态、安排建议、注意事项和官网入口；不显示 schema enum 或 `sourceIds`。
@@ -48,6 +48,7 @@
 ## 响应式布局
 
 - 桌面端为左侧旅行工作台、右侧地图。
+- 手机端地图使用明确的动态视口高度；跨越 820px breakpoint 或横竖屏切换后，在新布局完成的 animation frame 再让 Leaflet 重新量尺寸，避免不刷新页面时地图高度归零或沿用旧瓦片尺寸。
 - `max-width: 820px` 使用独立的 map-first mobile shell；桌面端原有三栏详情布局和默认展开的 Leaflet 图层控制不变。
 - 手机 app bar 显示返回/总览、当前旅行或 `MM/DD · 城市`、地点数、搜索和图层动作。Leaflet 图层控制在手机端默认收起，由 app bar 打开为 popover；跨过 820 px 响应式边界时恢复对应的收起/展开状态。
 - 手机 bottom sheet 有 compact 和 expanded 两档；visible handle 可点击切换。compact 高度为约 43% viewport，地图在 app bar 下方保留更大的主要表面；expanded 仍填满 app bar 以下区域。

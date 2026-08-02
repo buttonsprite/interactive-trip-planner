@@ -9884,6 +9884,163 @@
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
 
+    /* EVENT_RUNTIME_PURE_START */
+    function isSlugSafeEventId(value) {
+      return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value);
+    }
+
+    function isUsableEventCoords(coords) {
+      return Array.isArray(coords)
+        && coords.length === 2
+        && Number.isFinite(coords[0])
+        && Number.isFinite(coords[1])
+        && coords[0] >= -90
+        && coords[0] <= 90
+        && coords[1] >= -180
+        && coords[1] <= 180;
+    }
+
+    function buildRuntimeEventPois(events, sourcePois) {
+      const availablePois = Array.isArray(sourcePois) ? sourcePois : [];
+      return (Array.isArray(events) ? events : []).flatMap((event) => {
+        if (!event || event.scope !== "venue" || !isSlugSafeEventId(event.id)) {
+          return [];
+        }
+        const venue = event.venuePoiId
+          ? availablePois.find((item) => item.id === event.venuePoiId)
+          : null;
+        const coords = isUsableEventCoords(event.coords) ? event.coords : venue?.coords;
+        if (!isUsableEventCoords(coords)) {
+          return [];
+        }
+        return [{
+          id: `event:${event.id}`,
+          name: event.name,
+          name_zh: event.name_zh || event.name,
+          zh: event.name_zh || event.name,
+          city: event.city,
+          area: event.area || venue?.area || "活动场地",
+          category: "event",
+          priority: event.status === "confirmed" ? "preferred" : "pending",
+          coords,
+          note: event.whyWorthIt,
+          whyWorthIt: event.whyWorthIt,
+          plan: event.plan,
+          tip: event.tip,
+          officialUrl: event.officialUrl,
+          imageQuery: `${event.name} ${event.city}`,
+          eventId: event.id,
+          eventStatus: event.status
+        }];
+      });
+    }
+
+    const isEventAssignable = (item) => item.category !== "event" || item.eventStatus === "confirmed";
+
+    function sanitizeEventAssignments(assignments, items) {
+      const itemById = new Map((Array.isArray(items) ? items : []).map((item) => [item.id, item]));
+      return Object.fromEntries(Object.entries(assignments || {}).filter(([poiId]) => {
+        const item = itemById.get(poiId);
+        return !item || isEventAssignable(item);
+      }));
+    }
+
+    const getEventWaitingCopy = (item) => item?.eventStatus === "program-pending"
+      ? "等待具体节目"
+      : "等待场次确认";
+
+    function getEventStatusCopy(event) {
+      if (event.status === "confirmed") return "时间地点已确认";
+      if (event.status === "program-pending") return "等待具体节目";
+      if (event.status === "historical-lead") return "等待本届确认";
+      return "等待场次确认";
+    }
+
+    function getEventDateCopy(event) {
+      const start = String(event.startsAt || "").slice(0, 10);
+      const end = String(event.endsAt || "").slice(0, 10);
+      return start && end && start !== end ? `${start} 至 ${end}` : start;
+    }
+
+    function getDayIsoDate(day, tripStartDate) {
+      const match = /^(\d{1,2})\/(\d{1,2})$/.exec(day?.short || "");
+      const year = String(tripStartDate || "").slice(0, 4);
+      if (!match || !/^\d{4}$/.test(year)) return "";
+      return `${year}-${match[1].padStart(2, "0")}-${match[2].padStart(2, "0")}`;
+    }
+
+    function getCityEventsForDay(events, day, tripStartDate) {
+      const dayDate = getDayIsoDate(day, tripStartDate);
+      if (!dayDate) return [];
+      return (Array.isArray(events) ? events : []).filter((event) => {
+        if (!event || event.scope !== "citywide" || !isSlugSafeEventId(event.id)) return false;
+        const affectedCities = [event.city, ...(Array.isArray(event.affectedCities) ? event.affectedCities : [])];
+        const startsOn = String(event.startsAt || "").slice(0, 10);
+        const endsOn = String(event.endsAt || "").slice(0, 10);
+        return affectedCities.includes(day.city) && startsOn <= dayDate && dayDate <= endsOn;
+      });
+    }
+
+    function escapeEventHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function renderHostedEventsForItem(events, item) {
+      const hostedEvents = (Array.isArray(events) ? events : []).filter((event) => (
+        event?.scope === "hosted"
+        && isSlugSafeEventId(event.id)
+        && event.hostPoiId === item?.id
+      ));
+      if (!hostedEvents.length) return "";
+      return `
+        <section class="poi-detail-section hosted-events" data-hosted-event-content>
+          <h2>同期活动</h2>
+          <div class="hosted-event-list">
+            ${hostedEvents.map((event) => `
+              <article class="hosted-event-card">
+                <strong>${escapeEventHtml(event.name_zh || event.name)}</strong>
+                <span>${escapeEventHtml(getEventDateCopy(event))} · ${escapeEventHtml(getEventStatusCopy(event))}</span>
+                <p>${escapeEventHtml(event.whyWorthIt)}</p>
+                <p><strong>怎么安排：</strong>${escapeEventHtml(event.plan)}</p>
+                <p><strong>注意：</strong>${escapeEventHtml(event.tip)}</p>
+                <div class="poi-detail-actions"><a href="${escapeEventHtml(event.officialUrl)}" target="_blank" rel="noopener noreferrer">查看活动官网</a></div>
+              </article>
+            `).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderCityEventNoticesForDay(events, day, tripStartDate) {
+      const matchingEvents = getCityEventsForDay(events, day, tripStartDate);
+      if (!matchingEvents.length) return "";
+      return `
+        <section class="city-event-notices" data-city-event-content aria-label="当天同期活动提示">
+          ${matchingEvents.map((event) => `
+            <article class="city-event-notice">
+              <strong>${escapeEventHtml(event.name_zh || event.name)}</strong>
+              <span>${escapeEventHtml(getEventStatusCopy(event))} · ${escapeEventHtml(event.whyWorthIt)}</span>
+              <span>${escapeEventHtml(event.plan)}</span>
+            </article>
+          `).join("")}
+        </section>
+      `;
+    }
+
+    function composePoiDetailEventSections(detailSectionsHtml, hostedEventsHtml) {
+      return `${detailSectionsHtml || ""}${hostedEventsHtml || ""}`;
+    }
+
+    function composeDayListEventSections(cityEventNoticesHtml, routeWarningHtml, scheduledHtml, candidateHtml) {
+      return `${cityEventNoticesHtml || ""}${routeWarningHtml || ""}${scheduledHtml || ""}${candidateHtml || ""}`;
+    }
+    /* EVENT_RUNTIME_PURE_END */
+
     const userLanguage = PUBLIC_TRIP_DATA.trip.language || document.documentElement.lang || "zh-CN";
     document.documentElement.lang = userLanguage;
     const isChineseInterface = /^zh(?:-|$)/i.test(userLanguage);
@@ -10068,60 +10225,25 @@
       item.id = item.id || slugify(`${item.city}-${item.name}`);
     }
 
-    const runtimeEventPois = tripEvents.flatMap((event) => {
-      if (!event || event.scope !== "venue") {
-        return [];
-      }
-      const venue = event.venuePoiId
-        ? pois.find((item) => item.id === event.venuePoiId)
-        : null;
-      const coords = Array.isArray(event.coords) && event.coords.length === 2
-        ? event.coords
-        : venue?.coords;
-      if (!Array.isArray(coords) || coords.length !== 2 || !coords.every(Number.isFinite)) {
-        return [];
-      }
-      return [{
-        id: `event:${event.id}`,
-        name: event.name,
-        name_zh: event.name_zh || event.name,
-        zh: event.name_zh || event.name,
-        city: event.city,
-        area: event.area || venue?.area || "活动场地",
-        category: "event",
-        priority: event.status === "confirmed" ? "preferred" : "pending",
-        coords,
-        note: event.whyWorthIt,
-        whyWorthIt: event.whyWorthIt,
-        plan: event.plan,
-        tip: event.tip,
-        officialUrl: event.officialUrl,
-        imageQuery: `${event.name} ${event.city}`,
-        eventId: event.id,
-        eventStatus: event.status
-      }];
-    });
+    const runtimeEventPois = buildRuntimeEventPois(tripEvents, pois);
     pois.push(...runtimeEventPois);
     const poiById = new Map(pois.map((item) => [item.id, item]));
 
-    const isEventAssignable = (item) => item.category !== "event" || item.eventStatus === "confirmed";
-    const getEventWaitingCopy = (item) => item?.eventStatus === "program-pending"
-      ? "等待具体节目"
-      : "等待场次确认";
-
     const stopById = Object.fromEntries(stops.map((stop) => [stop.id, stop]));
     const dayById = Object.fromEntries(itineraryDays.map((day) => [day.id, day]));
-    const defaultItineraryAssignments = {};
+    const rawDefaultItineraryAssignments = {};
     for (const rule of defaultItineraryAssignmentRules) {
       const poi = pois.find((item) => item.name === rule.name);
       if (poi && dayById[rule.dayId]) {
-        defaultItineraryAssignments[poi.id] = {
+        rawDefaultItineraryAssignments[poi.id] = {
           dayId: rule.dayId,
           order: rule.order
         };
       }
     }
+    const defaultItineraryAssignments = sanitizeEventAssignments(rawDefaultItineraryAssignments, pois);
     const itineraryPlan = loadItineraryPlan();
+    itineraryPlan.assignments = sanitizeEventAssignments(itineraryPlan.assignments, pois);
     const clonePlainData = (value) => JSON.parse(JSON.stringify(value));
     const createItinerarySnapshot = () => ({
       assignments: clonePlainData(itineraryPlan.assignments),
@@ -10425,40 +10547,7 @@
       }).join("");
     };
 
-    const getEventStatusCopy = (event) => {
-      if (event.status === "confirmed") return "时间地点已确认";
-      if (event.status === "program-pending") return "等待具体节目";
-      if (event.status === "historical-lead") return "等待本届确认";
-      return "等待场次确认";
-    };
-
-    const getEventDateCopy = (event) => {
-      const start = String(event.startsAt || "").slice(0, 10);
-      const end = String(event.endsAt || "").slice(0, 10);
-      return start && end && start !== end ? `${start} 至 ${end}` : start;
-    };
-
-    const renderHostedEvents = (item) => {
-      const hostedEvents = tripEvents.filter((event) => event.scope === "hosted" && event.hostPoiId === item.id);
-      if (!hostedEvents.length) return "";
-      return `
-        <section class="poi-detail-section hosted-events" data-hosted-event-content>
-          <h2>同期活动</h2>
-          <div class="hosted-event-list">
-            ${hostedEvents.map((event) => `
-              <article class="hosted-event-card">
-                <strong>${escapeHtml(event.name_zh || event.name)}</strong>
-                <span>${escapeHtml(getEventDateCopy(event))} · ${escapeHtml(getEventStatusCopy(event))}</span>
-                <p>${escapeHtml(event.whyWorthIt)}</p>
-                <p><strong>怎么安排：</strong>${escapeHtml(event.plan)}</p>
-                <p><strong>注意：</strong>${escapeHtml(event.tip)}</p>
-                <div class="poi-detail-actions"><a href="${escapeHtml(event.officialUrl)}" target="_blank" rel="noopener noreferrer">查看活动官网</a></div>
-              </article>
-            `).join("")}
-          </div>
-        </section>
-      `;
-    };
+    const renderHostedEvents = (item) => renderHostedEventsForItem(tripEvents, item);
 
     const poiDetailHtml = (item) => {
       const meta = poiCategories[item.category];
@@ -10475,6 +10564,7 @@
         </section>
       ` : "";
       const detailSectionsHtml = renderPoiDetailSections(item);
+      const detailEventSectionsHtml = composePoiDetailEventSections(detailSectionsHtml, renderHostedEvents(item));
 
       return `
         <div class="poi-detail-context">${itineraryLine} · ${escapeHtml(cityLabels[item.city] || item.city)} · ${escapeHtml(item.area)} · ${escapeHtml(meta.label)}</div>
@@ -10494,8 +10584,7 @@
           <h2>为什么值得去</h2>
           <p>${escapeHtml(item.whyWorthIt || item.note)}</p>
         </section>
-        ${detailSectionsHtml}
-        ${renderHostedEvents(item)}
+        ${detailEventSectionsHtml}
         <section class="poi-detail-section">
           <h2>怎么安排</h2>
           <p>${escapeHtml(item.plan || categoryPlans[item.category])}</p>
@@ -10706,37 +10795,11 @@
       `;
     };
 
-    const getDayIsoDate = (day) => {
-      const match = /^(\d{1,2})\/(\d{1,2})$/.exec(day?.short || "");
-      const year = String(PUBLIC_TRIP_DATA.trip.startDate || "").slice(0, 4);
-      if (!match || !/^\d{4}$/.test(year)) return "";
-      return `${year}-${match[1].padStart(2, "0")}-${match[2].padStart(2, "0")}`;
-    };
-
-    const renderCityEventNotices = (day) => {
-      const dayDate = getDayIsoDate(day);
-      if (!dayDate) return "";
-      const matchingEvents = tripEvents.filter((event) => {
-        if (event.scope !== "citywide") return false;
-        const affectedCities = [event.city, ...(Array.isArray(event.affectedCities) ? event.affectedCities : [])];
-        const cityMatches = affectedCities.includes(day.city);
-        const startsOn = String(event.startsAt || "").slice(0, 10);
-        const endsOn = String(event.endsAt || "").slice(0, 10);
-        return cityMatches && startsOn <= dayDate && dayDate <= endsOn;
-      });
-      if (!matchingEvents.length) return "";
-      return `
-        <section class="city-event-notices" data-city-event-content aria-label="当天同期活动提示">
-          ${matchingEvents.map((event) => `
-            <article class="city-event-notice">
-              <strong>${escapeHtml(event.name_zh || event.name)}</strong>
-              <span>${escapeHtml(getEventStatusCopy(event))} · ${escapeHtml(event.whyWorthIt)}</span>
-              <span>${escapeHtml(event.plan)}</span>
-            </article>
-          `).join("")}
-        </section>
-      `;
-    };
+    const renderCityEventNotices = (day) => renderCityEventNoticesForDay(
+      tripEvents,
+      day,
+      PUBLIC_TRIP_DATA.trip.startDate
+    );
 
     const renderDayList = () => {
       dayList.innerHTML = itineraryDays.map((day, index) => {
@@ -11931,7 +11994,12 @@
       poiDetailDaySummary.textContent = `${cityLabels[day.city] || day.city} · ${dayPois.length} 个地点${needsReroute ? " · 路线需要重新安排" : ""}`;
       poiDetailDaySummary.classList.toggle("needs-reroute", needsReroute);
       if (day.city === "Transit") {
-        poiDetailDayList.innerHTML = cityEventNoticesHtml + `<div class="poi-detail-day-list-empty">${day.city === "Transit" ? "交通日没有单独的地点详情，路线节点仍显示在地图上。" : "这一天还没有安排地点。"}</div>`;
+        poiDetailDayList.innerHTML = composeDayListEventSections(
+          cityEventNoticesHtml,
+          "",
+          `<div class="poi-detail-day-list-empty">交通日没有单独的地点详情，路线节点仍显示在地图上。</div>`,
+          ""
+        );
         return;
       }
 
@@ -12005,7 +12073,12 @@
       const routeWarningHtml = needsReroute
         ? '<div class="poi-detail-day-route-warning">顺序或安排已调整，交通待复核。原路线仅作参考，可用“撤销上一步”恢复最近修改。</div>'
         : "";
-      poiDetailDayList.innerHTML = cityEventNoticesHtml + routeWarningHtml + scheduledHtml + candidateHtml;
+      poiDetailDayList.innerHTML = composeDayListEventSections(
+        cityEventNoticesHtml,
+        routeWarningHtml,
+        scheduledHtml,
+        candidateHtml
+      );
     };
 
     const renderDetailNavigation = () => {

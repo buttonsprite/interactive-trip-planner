@@ -34,10 +34,10 @@
     "title": "Barcelona Turisme autumn traditions",
     "url": "https://www.barcelonaturisme.com/wv3/ca/page/5343/descobriu-el-captivador-encant-tardorenc-de-barcelona.html",
     "type": "official",
-    "checkedAt": "2026-07-19",
-    "supports": ["castanyada", "local-traditions"],
+    "checkedAt": "2026-08-01",
+    "supports": ["castanyada", "castanyada-date", "local-traditions"],
     "recheckBefore": "2026-10-15",
-    "notes": "支持烤栗子、烤红薯和 panellets 的秋季传统；不代表 2026 街区节目已公布。"
+    "notes": "官方当前页面明确写明 Castanyada 在 10 月 31 日庆祝，并介绍街头烤栗子、烤红薯和 panellets 传统；不代表 2026 街区节目已公布。"
   },
   {
     "id": "catalonia-all-saints-castanyada",

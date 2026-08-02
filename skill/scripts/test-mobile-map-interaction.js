@@ -10,6 +10,97 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..", "assets", "guide-template-europe-public");
 const htmlPath = path.join(root, "maps", "itinerary-map.html");
 const html = fs.readFileSync(htmlPath, "utf8");
+const eventRuntimeMatch = html.match(/\/\* EVENT_RUNTIME_PURE_START \*\/([\s\S]*?)\/\* EVENT_RUNTIME_PURE_END \*\//);
+assert.ok(eventRuntimeMatch, "mobile contract needs the shipped pure event runtime");
+const eventRuntimeNames = [
+  "renderHostedEventsForItem",
+  "renderCityEventNoticesForDay",
+  "composePoiDetailEventSections",
+  "composeDayListEventSections",
+];
+const eventRuntimeSandbox = {};
+vm.runInNewContext(
+  `${eventRuntimeMatch[1]}\nthis.eventRuntime = { ${eventRuntimeNames.join(", ")} };`,
+  eventRuntimeSandbox,
+);
+const eventRuntime = eventRuntimeSandbox.eventRuntime;
+const hostedHtml = eventRuntime.renderHostedEventsForItem([
+  {
+    id: "safe-hosted",
+    name: '<img src=x onerror="alert(1)">',
+    scope: "hosted",
+    status: "program-pending",
+    startsAt: "2026-10-31",
+    endsAt: "2026-10-31",
+    hostPoiId: "host-1",
+    whyWorthIt: "值得 <script>alert(1)</script>",
+    plan: "按当天安排",
+    tip: "等待具体节目",
+    officialUrl: 'https://example.com/?q="><script>alert(1)</script>',
+  },
+  {
+    id: 'bad" data-breakout="1',
+    name: "must not render",
+    scope: "hosted",
+    status: "confirmed",
+    hostPoiId: "host-1",
+  },
+], { id: "host-1" });
+assert.match(hostedHtml, /data-hosted-event-content/);
+assert.match(hostedHtml, /&lt;img src=x onerror=&quot;alert\(1\)&quot;&gt;/);
+assert.doesNotMatch(hostedHtml, /<script>|must not render|data-breakout/);
+
+const cityHtml = eventRuntime.renderCityEventNoticesForDay([
+  {
+    id: "safe-citywide",
+    name: "City <notice>",
+    scope: "citywide",
+    city: "Barcelona",
+    status: "program-pending",
+    startsAt: "2026-11-01",
+    endsAt: "2026-11-01",
+    whyWorthIt: "Crowds & routes",
+    plan: "Recheck > later",
+  },
+  {
+    id: 'bad" data-breakout="1',
+    name: "citywide must not render",
+    scope: "citywide",
+    city: "Barcelona",
+    status: "confirmed",
+    startsAt: "2026-11-01",
+    endsAt: "2026-11-01",
+  },
+], { short: "11/1", city: "Barcelona" }, "2026-10-24");
+assert.match(cityHtml, /data-city-event-content/);
+assert.match(cityHtml, /City &lt;notice&gt;/);
+assert.doesNotMatch(cityHtml, /City <notice>|citywide must not render|data-breakout/);
+
+const mobileSurfaces = {
+  "poi-detail-content": { innerHTML: "" },
+  "poi-detail-day-list": { innerHTML: "" },
+};
+mobileSurfaces["poi-detail-content"].innerHTML = eventRuntime.composePoiDetailEventSections(
+  '<section data-type-detail="1">类型详情</section>',
+  hostedHtml,
+);
+mobileSurfaces["poi-detail-day-list"].innerHTML = eventRuntime.composeDayListEventSections(
+  cityHtml,
+  '<div data-route-warning="1"></div>',
+  '<div data-scheduled="1"></div>',
+  '<div data-candidate="1"></div>',
+);
+assert.ok(
+  mobileSurfaces["poi-detail-content"].innerHTML.indexOf("data-type-detail")
+    < mobileSurfaces["poi-detail-content"].innerHTML.indexOf("data-hosted-event-content"),
+  "hosted content must follow type details inside the existing detail scroll surface",
+);
+assert.ok(
+  mobileSurfaces["poi-detail-day-list"].innerHTML.indexOf("data-city-event-content")
+    < mobileSurfaces["poi-detail-day-list"].innerHTML.indexOf("data-scheduled"),
+  "citywide content must lead the existing day-list scroll surface",
+);
+assert.deepEqual(Object.keys(mobileSurfaces), ["poi-detail-content", "poi-detail-day-list"]);
 
 for (const token of [
   'data-mobile-shell="map-first-v1"',
@@ -50,8 +141,6 @@ for (const token of [
   "const copyReplanRequest =",
   "mobileReplanFallback.value = requestText",
   "mobileReplanFallback.hidden = false",
-  "renderHostedEvents(item)",
-  "const cityEventNoticesHtml = renderCityEventNotices(day)",
 ]) {
   assert.ok(html.includes(token), `missing mobile interaction contract token: ${token}`);
 }
@@ -80,8 +169,6 @@ for (const pattern of [
   /const undoLastItineraryChange = \(\) => \{[\s\S]*?invalidateReplanFallback\(\);[\s\S]*?refreshItineraryView\(\);/,
   /saveItineraryPlan\(itineraryPlan\);\s*refreshItineraryView\(\);\s*if \(!isListPriority\)/,
   /changes\.map\(\(change\) => `<li>\$\{escapeHtml\(describeItineraryChange\(change\)\)\}<\/li>`\)/,
-  /\$\{detailSectionsHtml\}\s*\$\{renderHostedEvents\(item\)\}/,
-  /poiDetailDayList\.innerHTML = cityEventNoticesHtml \+ routeWarningHtml \+ scheduledHtml \+ candidateHtml;/,
 ]) {
   assert.match(html, pattern, `missing mobile layout/behavior contract: ${pattern}`);
 }

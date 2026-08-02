@@ -44,6 +44,139 @@ const generatedSandbox = { window: {} };
 vm.runInNewContext(fs.readFileSync(tripDataPath, "utf8"), generatedSandbox);
 assert.deepEqual(JSON.parse(JSON.stringify(generatedSandbox.window.TRIP_DATA.events)), events);
 
+const eventRuntimeMatch = html.match(/\/\* EVENT_RUNTIME_PURE_START \*\/([\s\S]*?)\/\* EVENT_RUNTIME_PURE_END \*\//);
+assert.ok(eventRuntimeMatch, "public map must expose the shipped pure event runtime for executable contract tests");
+const eventRuntimeNames = [
+  "isSlugSafeEventId",
+  "buildRuntimeEventPois",
+  "isEventAssignable",
+  "sanitizeEventAssignments",
+  "getCityEventsForDay",
+  "renderHostedEventsForItem",
+  "renderCityEventNoticesForDay",
+  "composePoiDetailEventSections",
+  "composeDayListEventSections",
+];
+const eventRuntimeSandbox = {};
+vm.runInNewContext(
+  `${eventRuntimeMatch[1]}\nthis.eventRuntime = { ${eventRuntimeNames.join(", ")} };`,
+  eventRuntimeSandbox,
+);
+const eventRuntime = eventRuntimeSandbox.eventRuntime;
+const runtimePois = [
+  {
+    id: "venue-1",
+    name: "Venue",
+    city: "Paris",
+    area: "Venue area",
+    coords: [48.8, 2.3],
+    category: "art",
+  },
+  { id: "host-1", name: "Host", city: "Paris", area: "Host area", coords: [48.9, 2.4], category: "art" },
+];
+const runtimeEvents = [
+  {
+    id: "confirmed.event-1",
+    name: "Confirmed event",
+    name_zh: "确认活动",
+    scope: "venue",
+    city: "Paris",
+    area: "Event area",
+    status: "confirmed",
+    venuePoiId: "venue-1",
+    whyWorthIt: "Worth it",
+    plan: "Plan it",
+    tip: "Check it",
+    officialUrl: "https://example.com/confirmed",
+  },
+  {
+    id: "pending-event",
+    name: "Pending event",
+    scope: "venue",
+    city: "Paris",
+    status: "program-pending",
+    coords: [48.7, 2.2],
+    whyWorthIt: "Pending worth",
+    plan: "Pending plan",
+    tip: "Pending tip",
+    officialUrl: "https://example.com/pending",
+  },
+  { id: "hosted-event", name: "Hosted", scope: "hosted", city: "Paris", status: "announced", hostPoiId: "host-1" },
+  { id: "city-event", name: "Citywide", scope: "citywide", city: "Paris", status: "program-pending" },
+  {
+    id: 'bad" onmouseover="alert(1)',
+    name: "Malicious",
+    scope: "venue",
+    city: "Paris",
+    status: "confirmed",
+    coords: [48.6, 2.1],
+  },
+];
+const syntheticPois = JSON.parse(JSON.stringify(eventRuntime.buildRuntimeEventPois(runtimeEvents, runtimePois)));
+assert.equal(syntheticPois.length, 2, "only safe, located venue events should become synthetic POIs");
+assert.deepEqual(syntheticPois[0], {
+  id: "event:confirmed.event-1",
+  name: "Confirmed event",
+  name_zh: "确认活动",
+  zh: "确认活动",
+  city: "Paris",
+  area: "Event area",
+  category: "event",
+  priority: "preferred",
+  coords: [48.8, 2.3],
+  note: "Worth it",
+  whyWorthIt: "Worth it",
+  plan: "Plan it",
+  tip: "Check it",
+  officialUrl: "https://example.com/confirmed",
+  imageQuery: "Confirmed event Paris",
+  eventId: "confirmed.event-1",
+  eventStatus: "confirmed",
+});
+assert.deepEqual(syntheticPois.map((item) => item.id), ["event:confirmed.event-1", "event:pending-event"]);
+assert.equal(eventRuntime.isSlugSafeEventId('bad" onmouseover="alert(1)'), false);
+
+const assignmentItems = [
+  { id: "normal", category: "art" },
+  syntheticPois[0],
+  syntheticPois[1],
+];
+for (const label of ["default", "restored"]) {
+  const input = {
+    normal: { dayId: "d1", order: 1 },
+    "event:confirmed.event-1": { dayId: "d1", order: 2 },
+    "event:pending-event": { dayId: "d1", order: 3 },
+  };
+  const sanitized = JSON.parse(JSON.stringify(eventRuntime.sanitizeEventAssignments(input, assignmentItems)));
+  assert.deepEqual(sanitized, {
+    normal: { dayId: "d1", order: 1 },
+    "event:confirmed.event-1": { dayId: "d1", order: 2 },
+  }, `${label} assignments must exclude pending venue events`);
+  assert.ok(input["event:pending-event"], `${label} sanitization must not mutate its input`);
+}
+assert.ok(
+  html.includes("const defaultItineraryAssignments = sanitizeEventAssignments(rawDefaultItineraryAssignments, pois)"),
+  "default assignments must use the executable event sanitizer",
+);
+assert.ok(
+  html.includes("itineraryPlan.assignments = sanitizeEventAssignments(itineraryPlan.assignments, pois)"),
+  "restored assignments must use the executable event sanitizer",
+);
+
+const boundaryEvents = [{
+  id: "all-saints",
+  scope: "citywide",
+  city: "Barcelona",
+  startsAt: "2026-11-01",
+  endsAt: "2026-11-03",
+}];
+for (const short of ["11/1", "11/2", "11/3"]) {
+  assert.equal(eventRuntime.getCityEventsForDay(boundaryEvents, { short, city: "Barcelona" }, "2026-10-24").length, 1);
+}
+for (const [short, city] of [["10/31", "Barcelona"], ["11/4", "Barcelona"], ["11/2", "Madrid"]]) {
+  assert.equal(eventRuntime.getCityEventsForDay(boundaryEvents, { short, city }, "2026-10-24").length, 0);
+}
+
 const slugify = (value) => String(value)
   .toLowerCase()
   .normalize("NFD")
@@ -59,12 +192,11 @@ assert.ok(
   itinerary.days.some((day) => day.city === citywidePendingEvent.city && day.short === "11/1"),
   "citywide program-pending event must overlap a visible public itinerary day",
 );
-assert.ok(
-  itinerary.defaultAssignments.every((rule) => !JSON.stringify(rule).includes(`event:${citywidePendingEvent.id}`)),
-  "citywide program-pending event must not be assigned by default",
-);
 const confirmedVenueEvents = events.filter((event) => event.scope === "venue" && event.status === "confirmed");
 assert.equal(confirmedVenueEvents.length, 1, "public fixture should produce one confirmed venue event POI");
+const castanyadaSource = sources.find((source) => source.id === "barcelona-autumn-traditions");
+assert.ok(castanyadaSource?.supports.includes("castanyada-date"));
+assert.match(castanyadaSource?.notes || "", /10 月 31 日/);
 
 const byName = new Map(pois.map((poi) => [poi.name, poi]));
 const santAntoni = byName.get("Mercat de Sant Antoni");
@@ -130,17 +262,6 @@ for (const token of [
 ]) {
   assert.ok(html.includes(token), `missing direct-copy interaction token: ${token}`);
 }
-
-assert.match(
-  html,
-  /const runtimeEventPois = tripEvents[\s\S]*?event\.scope !== "venue"[\s\S]*?id: `event:\$\{event\.id\}`/,
-  "confirmed venue fixture must become a runtime synthetic event POI",
-);
-assert.match(
-  html,
-  /const assignPoiToDay = \(poiId, dayId, refreshDetail = false\) => \{\s*const item = markerByPoiId\.get\(poiId\)\?\.item;\s*if \(!item \|\| !isEventAssignable\(item\) \|\| !dayById\[dayId\]\) \{/,
-  "the assignment mutation boundary must reject non-assignable events",
-);
 
 const focusMatch = html.match(/function calculatePoiFocusZoom\(currentZoom, mapSize\) \{[\s\S]*?\n    \}/);
 assert.ok(focusMatch, "public template should expose a pure size-aware POI focus calculation");

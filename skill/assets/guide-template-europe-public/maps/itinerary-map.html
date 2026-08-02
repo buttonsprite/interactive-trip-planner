@@ -10420,14 +10420,15 @@
         const assignment = savedAssignment && typeof savedAssignment === "object"
           ? savedAssignment
           : defaultAssignment;
-        if (!assignment || !validDayIds.has(assignment.dayId) || Number(assignment.order) <= 0) return;
+        const order = assignment?.order;
+        if (!assignment || !validDayIds.has(assignment.dayId) || !Number.isFinite(order) || order <= 0) return;
         if (!positiveStopsByDay.has(assignment.dayId)) {
           positiveStopsByDay.set(assignment.dayId, []);
         }
         positiveStopsByDay.get(assignment.dayId).push({
           poiId,
           dayId: assignment.dayId,
-          order: Number(assignment.order),
+          order,
           sourceIndex
         });
       });

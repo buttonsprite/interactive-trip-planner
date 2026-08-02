@@ -109,6 +109,39 @@ assert.equal(
 assert.equal(Object.hasOwn(lodgingOverrides, "lodging"), false, "order 0 lodging must stay unnumbered");
 assert.equal(lodgingDefaults.lodging.order, 0, "lodging assignment input must stay unchanged");
 
+const malformedSavedOrders = {
+  lodging: { dayId: "d1017" },
+  missing: { dayId: "d1017" },
+  text: { dayId: "d1017", order: "not-a-number" },
+  infinite: { dayId: "d1017", order: Infinity },
+};
+const malformedBefore = {
+  lodging: { ...malformedSavedOrders.lodging },
+  missing: { ...malformedSavedOrders.missing },
+  text: { ...malformedSavedOrders.text },
+  infinite: { ...malformedSavedOrders.infinite },
+};
+const malformedOverrides = buildSavedOrderOverrides(
+  {
+    lodging: { dayId: "d1017", order: 0 },
+    visit: { dayId: "d1017", order: 1 },
+  },
+  malformedSavedOrders,
+  {},
+  ["d1017"],
+);
+assert.equal(
+  JSON.stringify(malformedOverrides),
+  JSON.stringify({}),
+  "missing, non-numeric, and infinite saved orders must not enter positive route normalization",
+);
+assert.equal(
+  Object.hasOwn(malformedOverrides, "lodging"),
+  false,
+  "a saved lodging assignment without order must not promote default order 0 to a route stop",
+);
+assert.deepEqual(malformedSavedOrders, malformedBefore, "malformed saved assignments must not be mutated");
+
 const dayPois = [
   { item: { category: "hotel" }, assignment: { dayId: "d1017", order: 0 } },
   { item: { category: "sight" }, assignment: { dayId: "d1017", order: 1 } },

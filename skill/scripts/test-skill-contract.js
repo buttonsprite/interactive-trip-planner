@@ -24,6 +24,7 @@ const sourcePackReference = read("references/regional-source-packs.md");
 const tasteSourceOnlineLogic = read("references/taste-and-source-online-logic.md");
 const poiSchema = read("references/poi-schema.md");
 const mapFeatureContract = read("references/map-feature-contract.md");
+const mapStandards = read("references/map-standards.md");
 const template = read("assets/guide-template/maps/itinerary-map.html");
 const goldenDataRoot = path.join(skillRoot, "assets", "samples", "golden");
 const repositoryReadmePath = path.join(repositoryRoot, "README.md");
@@ -44,6 +45,10 @@ assert.match(skill, /顺序引导线[^\n]*不代表[^\n]*道路/);
 assert.match(skill, /明确要求改变交互[^\n]*interaction fork/i);
 assert.match(skill, /轻量模板[^\n]*用户明确要求/);
 assert.match(skill, /validate-europe-derived-map\.js/);
+assert.match(skill, /完整攻略[^\n]*guide-template-europe-public[^\n]*validate-europe-derived-map\.js/);
+assert.match(skill, /轻量[^\n]*guide-template[^\n]*validate-map-html\.js/);
+assert.match(skill, /同一产物[^\n]*不[^\n]*两个[^\n]*validator/i);
+assert.match(skill, /共享[^\n]*(数据|design|设计)[^\n]*(活动|event)[^\n]*验证[^\n]*仍[^\n]*适用/i);
 assert.match(skill, /--strict-routes/);
 assert.match(skill, /--sources <sources\.json>[\s\S]*--require-route-evidence/);
 assert.match(skill, /build-redskill-release\.js/);
@@ -183,6 +188,29 @@ for (const testFile of ["test-core-map-state.js", "test-core-map-template.js", "
   assert.equal(result.status, 0, result.stdout + result.stderr);
 }
 
+for (const [label, document] of [["SKILL.md", skill], ["map-standards.md", mapStandards]]) {
+  for (const match of document.matchAll(/```(?:bash|sh)?\n([\s\S]*?)```/g)) {
+    const commandBlock = match[1];
+    assert.ok(
+      !(commandBlock.includes("validate-map-html.js") && commandBlock.includes("validate-europe-derived-map.js")),
+      `${label} must not present both template-specific validators as one unconditional command sequence`,
+    );
+  }
+}
+
+assert.match(mapStandards, /完整攻略[^\n]*guide-template-europe-public[^\n]*validate-europe-derived-map\.js/);
+assert.match(mapStandards, /轻量[^\n]*guide-template[^\n]*validate-map-html\.js/);
+assert.match(mapStandards, /同一产物[^\n]*不[^\n]*两个[^\n]*validator/i);
+assert.match(mapStandards, /共享[^\n]*(数据|design|设计)[^\n]*(活动|event)[^\n]*验证[^\n]*仍[^\n]*适用/i);
+
+const lightValidator = path.join(scriptDir, "validate-map-html.js");
+const lightTemplateValidation = spawnSync(
+  process.execPath,
+  [lightValidator, path.join(skillRoot, "assets", "guide-template", "maps", "itinerary-map.html")],
+  { encoding: "utf8" },
+);
+assert.equal(lightTemplateValidation.status, 0, lightTemplateValidation.stdout + lightTemplateValidation.stderr);
+
 const derivedValidator = path.join(scriptDir, "validate-europe-derived-map.js");
 assert.ok(fs.existsSync(derivedValidator), "missing Europe-derived map validator");
 const derivedValidation = spawnSync(
@@ -220,13 +248,13 @@ const modifiedThemeValidation = spawnSync(
 );
 assert.equal(modifiedThemeValidation.status, 0, modifiedThemeValidation.stdout + modifiedThemeValidation.stderr);
 
-const lightTemplateValidation = spawnSync(
+const lightTemplateAgainstDerivedValidation = spawnSync(
   process.execPath,
   [derivedValidator, path.join(skillRoot, "assets", "guide-template", "maps", "itinerary-map.html")],
   { encoding: "utf8" },
 );
 assert.notEqual(
-  lightTemplateValidation.status,
+  lightTemplateAgainstDerivedValidation.status,
   0,
   "lightweight template must not pass the Europe-derived full-map interaction contract",
 );

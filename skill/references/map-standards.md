@@ -74,7 +74,10 @@
 - 地点和每日路线数据可解析，引用存在且无重复。
 - Core HTML 容器和本地脚本存在。
 - JavaScript 语法通过。
-- `validate-map-html.js` 的 `coreMissing` 为空。
+- 共享的数据、设计与活动验证仍按相关范围适用，不因地图模板不同而跳过。
+- 地图 HTML validator 按模板互斥路由；同一产物不要求、也不得同时运行两个 template-specific validator。
+- 完整攻略基于 `assets/guide-template-europe-public/` 或它的派生地图时，运行 `validate-europe-derived-map.js`。
+- 轻量低保真或内部原型基于 `assets/guide-template/` 时，运行 `validate-map-html.js`，并要求其 `coreMissing` 为空。
 
 浏览器验证：
 

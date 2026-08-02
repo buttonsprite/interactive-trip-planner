@@ -123,7 +123,7 @@ node skill/scripts/probe-source-access.js --context <sources.json>
 3. 默认保留直接复制版的 DOM、状态、地图、列表与详情行为：真实地图、地点标记、全程总览、连续日期、当天有序列表、段间移动提示、动态顺路候选、统一地点详情、分类图层、搜索筛选、加入/移出、优先级、拖拽排序和刷新恢复。拖拽排序必须保留左侧 44px 专用手柄、160ms 长按、插入线、路线列表顶部/底部边缘自动滚动、取消不保存和上移/下移降级；卡片正文继续打开详情，不把整张卡片变成拖拽区。
 4. 地点详情先显示 `whyWorthIt`（旧数据回退到 `note`），再按数据顺序渲染类型化 `detailSections`，最后显示如何安排、注意事项、当前行程归类，以及官网、预约、外部地图和体验线索。不同类型地点不强制显示相同栏目；没有类型化内容的旧数据继续使用 `note`、`plan`、`tip`。只有真实异常显示“需要临近复核”。地图标记、每日路线和地点速查必须打开同一个详情界面。
 5. 只有经过路网计算或人工复核的路径才能显示为正式路线。完整攻略的非纯移动日应保存正式路线；只有地点顺序时可以显示编号和顺序引导线，顺序引导线只是顺序参考、不代表道路，并提供外部导航入口，不能把引导线称为路线，也不能用直线距离自动补成移动时间。
-6. 数据替换完成后先运行 `node scripts/validate-europe-derived-map.js <itinerary-map.html>`，并检查主语言、主要地点译名和选点后的尺寸自适应聚焦，再做浏览器验收。校验失败时先恢复母版交互，不通过删功能或改验证器绕过。
+6. 完整攻略基于 `assets/guide-template-europe-public/` 时只运行 `node scripts/validate-europe-derived-map.js <itinerary-map.html>` 作为地图 HTML 合同校验，并检查主语言、主要地点译名和选点后的尺寸自适应聚焦，再做浏览器验收。校验失败时先恢复母版交互，不通过删功能或改验证器绕过。
 7. 基础功能交互通过后再做视觉增强。生活品味模板只提供 3–5 个关键词、信息密度、语气、图片策略、marker、色彩、材质和文字 moodboard；与目的地线索共同形成本次视觉。配色、字体、标记、路线色、圆角、阴影和图层控件外观可以在单文件 `<style>` 的 design token 与组件外观中微调，但不能携带第二套 HTML，也不能改变直接复制版的布局层级、状态与交互。
 8. 轻量模板 `assets/guide-template/` 只用于用户明确要求的低保真原型、内部功能试验或三天以内且不需要完整修改闭环的简单地图；不能把它作为完整攻略交付后声称与欧洲版交互一致。
 9. 把地图当前实际行为写入 `docs/online-logic/map.md`，不把尚未实现的想法写成事实。
@@ -240,20 +240,23 @@ node scripts/test-redskill-release.js <release-directory>
 
 ## 验证和交付
 
-运行与当前产物对应的验证：
+先运行与当前产物相关的共享验证；共享的数据、设计与活动验证仍按相关范围适用：
 
 ```bash
 node scripts/validate-trip-data.js --pois <pois.json> --itinerary <itinerary.json> --sources <sources.json> --require-route-evidence --strict-routes
 node scripts/validate-trip-events.js --events <events.json> --pois <pois.json> --itinerary <itinerary.json> --sources <sources.json>
 node scripts/validate-design-tokens.js <design-tokens.json>
-node scripts/validate-map-html.js <itinerary-map.html>
-node scripts/validate-europe-derived-map.js <itinerary-map.html>
 node scripts/test-core-map-route.js
 node scripts/test-skill-contract.js
 node scripts/test-europe-public-template.js
 node scripts/test-redskill-package.js
 node scripts/test-redskill-release.js <release-directory>
 ```
+
+地图 HTML 验证按模板互斥路由；同一产物不要求、也不得为了通过文档清单而同时运行两个 template-specific validator：
+
+- 完整攻略基于 `assets/guide-template-europe-public/` 或它的派生地图，只运行 Europe direct-copy validator：`node scripts/validate-europe-derived-map.js <itinerary-map.html>`。
+- 轻量低保真或内部原型基于 `assets/guide-template/`，只运行 light-template validator：`node scripts/validate-map-html.js <itinerary-map.html>`。
 
 静态验证不能替代浏览器验证。完成前实际检查页面加载、底图、地点、日期与分类筛选、路线、地点详情、修改、撤销、修改汇总、刷新恢复、桌面、手机和 console。
 

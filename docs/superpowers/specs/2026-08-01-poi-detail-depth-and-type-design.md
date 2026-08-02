@@ -41,6 +41,20 @@ Section titles and content follow the place type instead of a fixed universal li
 
 `story` is not a required section name. A story section appears only when verified context materially improves the visit.
 
+## Local-life content quality
+
+A local-life section must explain why the observed behavior or product belongs to this place, season, or food culture. Generic actions such as “look at fish, meat, and prepared food” are not sufficient because they could describe almost any market.
+
+Market content should connect three layers when reliable sources support them:
+
+1. **Distinct local pantry**: identify market categories or products that reveal the destination's food habits, rather than naming universal groceries.
+2. **Resident use**: explain how local residents combine, cook, serve, or schedule those products in everyday life. A dish name is useful only when it makes the relationship concrete.
+3. **Date-specific season**: identify products or rituals relevant to the travel month. Phrase them as things to look or ask for unless current stall-level availability is verified.
+
+At least one action should help the traveler participate without turning the visit into a shopping checklist. Suitable actions include comparing a prepared component with its home-cooking use, asking a vendor what is seasonal and how they cook it, or choosing one small item that connects to a later meal.
+
+Copy must distinguish source-backed facts from interpretation. Official market categories can prove that a type of stall exists; they do not prove that a particular item will be in stock on the visit date. Seasonal guides support “look for” and “ask about” language, not guaranteed availability.
+
 ## Rendering
 
 The map always shows one concise `whyWorthIt || note` paragraph. It then renders zero to four `detailSections` in their stored order. A section may contain a paragraph (`body`), a short list (`items`), or both. `plan`, `tip`, and source sections remain below the experience content.
@@ -60,6 +74,8 @@ The renderer escapes headings, paragraphs, and list items. Empty or invalid sect
 ## Spain acceptance example
 
 `Mercat de Sant Antoni` is the first deep example. Its copy must distinguish the Tuesday 2026-10-13 visit from the Sunday book market, give concrete on-site actions and observation cues, and ground the building story in official Barcelona market sources.
+
+Its local-life explanation must use the market's documented cooked-legume, salt-cod, olive/preserve, charcuterie and prepared-food categories to show how a resident can assemble an everyday Catalan meal. It should connect these categories to examples such as `botifarra amb mongetes`, `esqueixada` or vermut snacks, then add an October “look or ask for” layer around mushrooms, chestnuts, sweet potatoes and pumpkin. It must not claim that a specific product is guaranteed in stock.
 
 ## Token boundary
 

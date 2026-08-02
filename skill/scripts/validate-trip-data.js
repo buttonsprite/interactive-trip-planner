@@ -6,16 +6,32 @@ function parseArgs(argv) {
   const args = {};
   for (let i = 2; i < argv.length; i += 1) {
     const item = argv[i];
-    if (item === "--pois") args.pois = argv[++i];
-    else if (item === "--itinerary") args.itinerary = argv[++i];
-    else if (item === "--sources") args.sources = argv[++i];
-    else if (item === "--day") args.day = argv[++i];
-    else if (item === "--strict-routes") args.strictRoutes = true;
+    if (item === "--pois") {
+      args.pois = valueArg(argv, i, item);
+      i += 1;
+    } else if (item === "--itinerary") {
+      args.itinerary = valueArg(argv, i, item);
+      i += 1;
+    } else if (item === "--sources") {
+      args.sources = valueArg(argv, i, item);
+      i += 1;
+    } else if (item === "--day") {
+      args.day = valueArg(argv, i, item);
+      i += 1;
+    } else if (item === "--strict-routes") args.strictRoutes = true;
     else if (item === "--require-route-evidence") args.requireRouteEvidence = true;
     else if (item === "--help" || item === "-h") args.help = true;
     else throw new Error(`Unknown argument: ${item}`);
   }
   return args;
+}
+
+function valueArg(argv, index, flag) {
+  const value = argv[index + 1];
+  if (typeof value !== "string" || value.length === 0 || value.startsWith("-")) {
+    throw new Error(`${flag} needs a value\n${usage()}`);
+  }
+  return value;
 }
 
 function usage() {
@@ -69,14 +85,40 @@ function isSafeHttpUrl(value) {
   }
 }
 
-function isGenericWhyWorthIt(value) {
-  if (!isNonEmptyString(value)) return false;
-  const placeholder = /(感受当地生活|体验当地生活|随便逛逛|值得一去|feel (?:the )?local life|wander around|worth a visit)/iu;
-  if (!placeholder.test(value)) return false;
-  const placeSpecificRemainder = value
-    .replace(new RegExp(placeholder.source, "giu"), "")
-    .replace(/[\p{P}\p{S}\p{N}\s]/gu, "");
-  return placeSpecificRemainder.length < 20;
+function fillerPattern(phrases) {
+  const escaped = [...phrases]
+    .sort((left, right) => right.length - left.length)
+    .map((phrase) => phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  return new RegExp(`(?:${escaped.join("|")})`, "giu");
+}
+
+const valueFillerPattern = fillerPattern([
+  "感受当地生活", "体验当地生活", "独特城市生活节奏", "城市生活节奏", "感受这里的当地氛围",
+  "感受当地氛围", "当地氛围", "本地氛围", "适合游客", "适合旅行者", "很有特色", "有特色",
+  "慢慢体验一下", "慢慢体验", "体验一下", "专门来看看", "专门来逛逛", "来看看", "来逛逛",
+  "随便逛逛", "慢慢逛逛", "随便看看", "慢慢看看", "值得一去", "这个地方", "生活节奏",
+  "这里", "地方", "感受", "值得", "看看", "逛逛",
+  "soak up the local atmosphere", "experience the local atmosphere", "feel the local atmosphere",
+  "unique city rhythm", "local atmosphere", "worth a visit", "worth visiting", "good for visitors",
+  "suitable for visitors", "take your time", "this place", "very special", "wander around", "look around",
+]);
+
+const actionFillerPattern = fillerPattern([
+  "感受当地生活", "体验当地生活", "感受这里的当地氛围", "感受当地氛围", "感受氛围", "当地氛围",
+  "独特城市生活节奏", "城市生活节奏", "慢慢体验一下", "慢慢体验", "体验一下", "专门来看看",
+  "专门来逛逛", "随便看看", "慢慢看看", "随便逛逛", "慢慢逛逛", "来看看", "来逛逛",
+  "生活节奏", "这个地方", "看看", "逛逛", "感受", "体验", "慢慢", "一下", "这里", "地方",
+  "soak up the atmosphere", "experience the atmosphere", "take it in", "wander around", "look around", "experience",
+]);
+
+function substantiveLength(value, pattern) {
+  if (!isNonEmptyString(value)) return 0;
+  const substantive = value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(pattern, "")
+    .replace(/[\p{P}\p{S}\s]/gu, "");
+  return Array.from(substantive).length;
 }
 
 function itineraryDays(itinerary, errors) {
@@ -431,8 +473,8 @@ function main() {
       }
       if (!isNonEmptyString(poi.whyWorthIt) || poi.whyWorthIt.trim().length < 40) {
         errors.push(`${context} requires concrete whyWorthIt of at least 40 characters`);
-      } else if (isGenericWhyWorthIt(poi.whyWorthIt)) {
-        errors.push(`${context} whyWorthIt must be place-specific, not a padded generic placeholder`);
+      } else if (substantiveLength(poi.whyWorthIt, valueFillerPattern) < 16) {
+        errors.push(`${context} whyWorthIt requires at least 16 substantive characters after generic filler normalization`);
       }
       if (!Array.isArray(poi.detailSections) || poi.detailSections.length === 0) {
         errors.push(`${context} requires at least one detailSections entry`);
@@ -442,8 +484,10 @@ function main() {
           ? section.items.filter(isNonEmptyString)
           : [])
         : [];
-      if (actionableItems.length < 2) {
-        errors.push(`${context} requires at least 2 non-empty actionable items across detailSections`);
+      const meaningfulActionableItems = actionableItems
+        .filter((item) => substantiveLength(item, actionFillerPattern) >= 8);
+      if (meaningfulActionableItems.length < 2) {
+        errors.push(`${context} requires at least 2 meaningful actionable items with at least 8 substantive characters each after generic action filler normalization`);
       }
 
       if (!Array.isArray(poi.sourceIds)

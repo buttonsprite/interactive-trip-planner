@@ -79,9 +79,11 @@
 
 正式路线采用“具体价值陈述 → 类型化现场动作 → 可解析证据”三层合同。canonical itinerary 的每个 `routeStops` 地点，以及公开母版 `defaultAssignments` 中 `order > 0` 的每个地点，都必须满足：
 
-1. 价值陈述：`contentTier` 是 `standard` 或 `deep`；`whyWorthIt` 去除首尾空白后至少 40 个字符，并写出该地点相对同类地点的具体价值。不能只写“感受当地生活”“随便逛逛”“值得一去”，也不能用拉长的泛化句子冒充地点特异性。
-2. 现场动作：至少有一个 `detailSections`，所有 section 合计至少两个非空 `items`。动作应当能在现场执行或观察，`body` 可以补背景，但不能代替这两个动作。
+1. 价值陈述：`contentTier` 是 `standard` 或 `deep`；`whyWorthIt` 去除首尾空白后至少 40 个字符。validator 还会规范化文字、剥离标点与“这里、地方、很有特色、适合游客、慢慢体验、感受、当地氛围、独特城市生活节奏、值得、专门来看看、逛逛”等泛化 filler，剥离后必须保留至少 16 个实质字符，用来承载地点、品类、菜品、作品、人物、历史、空间或做法等具体信息。
+2. 现场动作：至少有一个 `detailSections`；所有 section 合计至少两个有意义的 `items`。每条动作在剥离标点以及“看看、逛逛、体验一下、感受氛围”等泛化动作后，必须仍保留至少 8 个实质字符。动作应当能在现场执行或观察，`body` 可以补背景，但不能代替这两个动作。
 3. 可解析证据：至少一个非空 `sourceIds`，每个 id 都必须解析到 `data/sources.json`。内部 `sourceIds` 在构建公开地图时转换为八字段 `evidenceSources`，不得把 raw `sourceIds` 暴露给旅行者。
+
+16/8 字符规则只是防止空洞占位的最低启发式门槛，不是语义质量或事实真伪审查。通过门槛仍不证明文字具体、来源支持结论或现场动作合理；规划者必须继续人工阅读，并用 `sourceIds` 对应证据复核。
 
 合法的非正序住宿基底（`order <= 0` 且地点类型为酒店/住宿基底）不属于游玩编号，可以不套正式路线合同；任何正序 assignment 都不能用住宿或旧数据兼容为由跳过。旧攻略可以继续通过不带 `--require-route-evidence` 的 legacy 验证，但这不等于 evidence certification。
 

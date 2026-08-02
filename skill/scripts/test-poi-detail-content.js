@@ -53,6 +53,11 @@ function runValidation(pois) {
   return runTripValidation({ pois });
 }
 
+function runRawValidation(args) {
+  const result = spawnSync(process.execPath, [validator, ...args], { encoding: "utf8" });
+  return { status: result.status, output: result.stdout + result.stderr };
+}
+
 const validDeep = {
   ...basePoi("deep"),
   contentTier: "deep",
@@ -197,6 +202,20 @@ const validFormalRoute = runTripValidation({
 });
 assert.equal(validFormalRoute.status, 0, validFormalRoute.output);
 
+const synonymFillerRoute = runTripValidation({
+  pois: formalPois.map((poi, index) => index ? poi : {
+    ...poi,
+    whyWorthIt: "这里很有特色，适合游客慢慢体验，感受当地氛围和独特城市生活节奏，值得专门来看看和逛逛。",
+    detailSections: [{ title: "到这里做什么", items: ["看看", "逛逛"] }],
+  }),
+  itinerary: canonicalFormalItinerary,
+  sources: formalSources,
+  extraArgs: strictEvidenceArgs,
+});
+assert.notEqual(synonymFillerRoute.status, 0, "synonym-only value copy and trivial actions must fail strict validation");
+assert.match(synonymFillerRoute.output, /food-stop[\s\S]*whyWorthIt[\s\S]*at least 16 substantive/i);
+assert.match(synonymFillerRoute.output, /food-stop[\s\S]*at least 2[\s\S]*meaningful actionable items[\s\S]*8 substantive/i);
+
 const missingSourcesArgument = runTripValidation({
   pois: formalPois,
   itinerary: canonicalFormalItinerary,
@@ -220,10 +239,12 @@ for (const [label, mutatePois, mutateSources, expected] of [
   ["unknown source id", (pois) => pois.map((poi, index) => index ? poi : { ...poi, sourceIds: ["missing-source"] }), null, /day-route[\s\S]*food-stop[\s\S]*unknown source id[\s\S]*missing-source/i],
   ["compact scheduled POI", (pois) => pois.map((poi, index) => index ? poi : { ...poi, contentTier: "compact", detailSections: undefined }), null, /day-route[\s\S]*food-stop[\s\S]*contentTier[\s\S]*standard[\s\S]*deep/i],
   ["vague whyWorthIt", (pois) => pois.map((poi, index) => index ? poi : { ...poi, whyWorthIt: "值得一去" }), null, /day-route[\s\S]*food-stop[\s\S]*whyWorthIt[\s\S]*40/i],
-  ["padded placeholder whyWorthIt", (pois) => pois.map((poi, index) => index ? poi : { ...poi, whyWorthIt: "感受当地生活，随便逛逛，值得一去。".repeat(4) }), null, /day-route[\s\S]*food-stop[\s\S]*whyWorthIt[\s\S]*place-specific/i],
+  ["padded placeholder whyWorthIt", (pois) => pois.map((poi, index) => index ? poi : { ...poi, whyWorthIt: "感受当地生活，随便逛逛，值得一去。".repeat(4) }), null, /day-route[\s\S]*food-stop[\s\S]*whyWorthIt[\s\S]*at least 16 substantive/i],
   ["empty whyWorthIt", (pois) => pois.map((poi, index) => index ? poi : { ...poi, whyWorthIt: " " }), null, /day-route[\s\S]*food-stop[\s\S]*whyWorthIt/i],
   ["zero detail sections", (pois) => pois.map((poi, index) => index ? poi : { ...poi, detailSections: [] }), null, /day-route[\s\S]*food-stop[\s\S]*detailSections/i],
-  ["fewer than two actions", (pois) => pois.map((poi, index) => index ? poi : { ...poi, detailSections: [{ title: "What to order", items: ["Order the stew."] }] }), null, /day-route[\s\S]*food-stop[\s\S]*at least 2[\s\S]*actionable items/i],
+  ["fewer than two actions", (pois) => pois.map((poi, index) => index ? poi : { ...poi, detailSections: [{ title: "What to order", items: ["Order the stew."] }] }), null, /day-route[\s\S]*food-stop[\s\S]*at least 2[\s\S]*meaningful actionable items[\s\S]*8 substantive/i],
+  ["two short empty actions", (pois) => pois.map((poi, index) => index ? poi : { ...poi, detailSections: [{ title: "到这里做什么", items: ["看", "逛"] }] }), null, /day-route[\s\S]*food-stop[\s\S]*at least 2[\s\S]*meaningful actionable items[\s\S]*8 substantive/i],
+  ["two long filler actions", (pois) => pois.map((poi, index) => index ? poi : { ...poi, detailSections: [{ title: "到这里做什么", items: ["慢慢看看，体验一下，感受这里的当地氛围。", "专门来逛逛，慢慢体验一下独特城市生活节奏。"] }] }), null, /day-route[\s\S]*food-stop[\s\S]*at least 2[\s\S]*meaningful actionable items[\s\S]*8 substantive/i],
   ["duplicate source ids", (pois) => pois, (sources) => [...sources, { ...sources[0] }], /Duplicate source id:[\s\S]*food-source/i],
   ["empty source id", (pois) => pois, (sources) => sources.map((item, index) => index ? item : { ...item, id: "" }), /Source <source 0>[\s\S]*non-empty id/i],
   ["unsafe source URL", (pois) => pois, (sources) => sources.map((item, index) => index ? item : { ...item, url: "javascript:alert(1)" }), /Source food-source[\s\S]*HTTP\(S\) URL/i],
@@ -334,6 +355,22 @@ const legacyWithoutEvidenceFlag = runTripValidation({
   itinerary: [{ id: "legacy-day", routeStops: [{ poiId: "food-stop", order: 1 }] }],
 });
 assert.equal(legacyWithoutEvidenceFlag.status, 0, legacyWithoutEvidenceFlag.output);
+
+for (const [flag, args] of [
+  ["--pois", ["--pois", "--itinerary"]],
+  ["--itinerary", ["--itinerary"]],
+  ["--sources", ["--pois", "unused-pois.json", "--itinerary", "unused-itinerary.json", "--sources", "--require-route-evidence"]],
+  ["--day", ["--pois", "unused-pois.json", "--itinerary", "unused-itinerary.json", "--day", "--strict-routes"]],
+]) {
+  const result = runRawValidation(args);
+  assert.notEqual(result.status, 0, `${flag} without a value should fail`);
+  assert.match(result.output, new RegExp(`${flag} needs a value`), `${flag} should identify its missing value`);
+  assert.match(result.output, /Usage:/, `${flag} value error should include actionable usage`);
+}
+
+const unknownFlag = runRawValidation(["--unknown-contract-flag"]);
+assert.notEqual(unknownFlag.status, 0, "unknown flags must still fail");
+assert.match(unknownFlag.output, /Unknown argument: --unknown-contract-flag/);
 
 const publicMapHtml = fs.readFileSync(publicMapPath, "utf8");
 const evidenceRuntimeMatch = publicMapHtml.match(/\/\* POI_EVIDENCE_RUNTIME_START \*\/([\s\S]*?)\/\* POI_EVIDENCE_RUNTIME_END \*\//);

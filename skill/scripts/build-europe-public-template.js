@@ -7,8 +7,9 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..", "assets", "guide-template-europe-public");
 const sourcePois = JSON.parse(fs.readFileSync(path.join(root, "data", "pois.json"), "utf8"));
 const sourceItinerary = JSON.parse(fs.readFileSync(path.join(root, "data", "itinerary.json"), "utf8"));
+const sourceEvents = JSON.parse(fs.readFileSync(path.join(root, "data", "events.json"), "utf8"));
 
-if (!Array.isArray(sourcePois) || !Array.isArray(sourceItinerary.days) || !Array.isArray(sourceItinerary.defaultAssignments)) {
+if (!Array.isArray(sourcePois) || !Array.isArray(sourceEvents) || !Array.isArray(sourceItinerary.days) || !Array.isArray(sourceItinerary.defaultAssignments)) {
   throw new Error("public sample data must use the europe-autumn-2026-sample schema");
 }
 
@@ -22,6 +23,7 @@ const categoryLabels = {
   art: "艺术",
   "local-life": "本地生活",
   sight: "著名景区",
+  event: "同期活动",
 };
 
 const cityLabels = {
@@ -163,6 +165,7 @@ const trip = {
   },
   pois,
   days,
+  events: sourceEvents,
 };
 
 const output = `// Generated from the public europe-autumn-2026-sample data.\nwindow.TRIP_DATA = ${JSON.stringify(trip, null, 2)};\n`;
@@ -176,6 +179,7 @@ const directTrip = {
   transitSegmentsByDay: sourceItinerary.transitSegmentsByDay,
   pois: sourcePois,
   defaultAssignments: sourceItinerary.defaultAssignments,
+  events: sourceEvents,
 };
 const htmlPath = path.join(root, "maps", "itinerary-map.html");
 const html = fs.readFileSync(htmlPath, "utf8");
@@ -185,4 +189,4 @@ if (dataStart < 0 || aliasStart < 0) throw new Error("canonical HTML is missing 
 const nextHtml = `${html.slice(0, dataStart)}const PUBLIC_TRIP_DATA = ${JSON.stringify(directTrip, null, 2)};\n\n${html.slice(aliasStart)}`;
 fs.writeFileSync(htmlPath, nextHtml);
 
-console.log(`built Europe direct-copy public sample: ${sourcePois.length} places, ${sourceItinerary.days.length} days`);
+console.log(`built Europe direct-copy public sample: ${sourcePois.length} places, ${sourceItinerary.days.length} days, ${sourceEvents.length} events`);

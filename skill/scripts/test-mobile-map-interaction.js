@@ -50,6 +50,8 @@ for (const token of [
   "const copyReplanRequest =",
   "mobileReplanFallback.value = requestText",
   "mobileReplanFallback.hidden = false",
+  "renderHostedEvents(item)",
+  "const cityEventNoticesHtml = renderCityEventNotices(day)",
 ]) {
   assert.ok(html.includes(token), `missing mobile interaction contract token: ${token}`);
 }
@@ -78,6 +80,8 @@ for (const pattern of [
   /const undoLastItineraryChange = \(\) => \{[\s\S]*?invalidateReplanFallback\(\);[\s\S]*?refreshItineraryView\(\);/,
   /saveItineraryPlan\(itineraryPlan\);\s*refreshItineraryView\(\);\s*if \(!isListPriority\)/,
   /changes\.map\(\(change\) => `<li>\$\{escapeHtml\(describeItineraryChange\(change\)\)\}<\/li>`\)/,
+  /\$\{detailSectionsHtml\}\s*\$\{renderHostedEvents\(item\)\}/,
+  /poiDetailDayList\.innerHTML = cityEventNoticesHtml \+ routeWarningHtml \+ scheduledHtml \+ candidateHtml;/,
 ]) {
   assert.match(html, pattern, `missing mobile layout/behavior contract: ${pattern}`);
 }
@@ -86,6 +90,12 @@ assert.doesNotMatch(
   html,
   /saveItineraryPlan\(itineraryPlan\);\s*entry\.marker\.setIcon\(poiIcon\(entry\.item\)\);\s*renderPoiList\(\);\s*if \(!isListPriority\)/,
   "priority changes must not bypass the unified itinerary/map refresh",
+);
+
+assert.doesNotMatch(
+  html,
+  /(?:id|class)="[^"]*event[^"]*modal/i,
+  "hosted and citywide event content must stay in existing mobile scroll surfaces, not a new modal",
 );
 
 const pureFunctionNames = [

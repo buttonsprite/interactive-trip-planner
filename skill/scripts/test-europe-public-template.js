@@ -12,8 +12,10 @@ const htmlPath = path.join(root, "maps", "itinerary-map.html");
 const poiPath = path.join(root, "data", "pois.json");
 const itineraryPath = path.join(root, "data", "itinerary.json");
 const sourcesPath = path.join(root, "data", "sources.json");
+const eventsPath = path.join(root, "data", "events.json");
+const tripDataPath = path.join(root, "maps", "assets", "trip-data.js");
 
-for (const file of [htmlPath, poiPath, itineraryPath, sourcesPath]) {
+for (const file of [htmlPath, poiPath, itineraryPath, sourcesPath, eventsPath, tripDataPath]) {
   assert.ok(fs.existsSync(file) && fs.statSync(file).size > 0, `missing public template file: ${file}`);
 }
 
@@ -21,6 +23,7 @@ const html = fs.readFileSync(htmlPath, "utf8");
 const pois = JSON.parse(fs.readFileSync(poiPath, "utf8"));
 const itinerary = JSON.parse(fs.readFileSync(itineraryPath, "utf8"));
 const sources = JSON.parse(fs.readFileSync(sourcesPath, "utf8"));
+const events = JSON.parse(fs.readFileSync(eventsPath, "utf8"));
 const dataMatch = html.match(/const PUBLIC_TRIP_DATA = (\{[\s\S]*?\});\n\n    const stops = PUBLIC_TRIP_DATA\.stops;/);
 assert.ok(dataMatch, "public HTML must expose a single replaceable PUBLIC_TRIP_DATA block");
 const embedded = JSON.parse(dataMatch[1]);
@@ -34,7 +37,34 @@ assert.equal(embedded.itineraryDays.length, 18);
 assert.equal(embedded.pois.length, 379);
 assert.deepEqual(embedded.pois, pois);
 assert.deepEqual(embedded.itineraryDays, itinerary.days);
+assert.deepEqual(embedded.events, events);
 assert.ok(sources.every((source) => source.url && source.checkedAt && source.supports?.length));
+
+const generatedSandbox = { window: {} };
+vm.runInNewContext(fs.readFileSync(tripDataPath, "utf8"), generatedSandbox);
+assert.deepEqual(JSON.parse(JSON.stringify(generatedSandbox.window.TRIP_DATA.events)), events);
+
+const slugify = (value) => String(value)
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-|-$/g, "");
+const publicPoiIds = new Set(pois.map((poi) => slugify(`${poi.city}-${poi.name}`)));
+const hostedEvent = events.find((event) => event.scope === "hosted");
+assert.ok(hostedEvent && publicPoiIds.has(hostedEvent.hostPoiId), "hosted event must reference a real public POI");
+const citywidePendingEvent = events.find((event) => event.scope === "citywide" && event.status === "program-pending");
+assert.ok(citywidePendingEvent, "public fixture must include a visible citywide program-pending event");
+assert.ok(
+  itinerary.days.some((day) => day.city === citywidePendingEvent.city && day.short === "11/1"),
+  "citywide program-pending event must overlap a visible public itinerary day",
+);
+assert.ok(
+  itinerary.defaultAssignments.every((rule) => !JSON.stringify(rule).includes(`event:${citywidePendingEvent.id}`)),
+  "citywide program-pending event must not be assigned by default",
+);
+const confirmedVenueEvents = events.filter((event) => event.scope === "venue" && event.status === "confirmed");
+assert.equal(confirmedVenueEvents.length, 1, "public fixture should produce one confirmed venue event POI");
 
 const byName = new Map(pois.map((poi) => [poi.name, poi]));
 const santAntoni = byName.get("Mercat de Sant Antoni");
@@ -71,6 +101,12 @@ for (const token of [
   "renderPoiDetailDayList",
   "openPoiDetail",
   "const renderPoiDetailSections",
+  "const tripEvents = PUBLIC_TRIP_DATA.events || []",
+  "const renderHostedEvents",
+  "const renderCityEventNotices",
+  "const isEventAssignable",
+  'event: { label: "同期活动"',
+  "等待具体节目",
   "poi-detail-list",
   "item.whyWorthIt || item.note",
   "const userLanguage = PUBLIC_TRIP_DATA.trip.language",
@@ -94,6 +130,17 @@ for (const token of [
 ]) {
   assert.ok(html.includes(token), `missing direct-copy interaction token: ${token}`);
 }
+
+assert.match(
+  html,
+  /const runtimeEventPois = tripEvents[\s\S]*?event\.scope !== "venue"[\s\S]*?id: `event:\$\{event\.id\}`/,
+  "confirmed venue fixture must become a runtime synthetic event POI",
+);
+assert.match(
+  html,
+  /const assignPoiToDay = \(poiId, dayId, refreshDetail = false\) => \{\s*const item = markerByPoiId\.get\(poiId\)\?\.item;\s*if \(!item \|\| !isEventAssignable\(item\) \|\| !dayById\[dayId\]\) \{/,
+  "the assignment mutation boundary must reject non-assignable events",
+);
 
 const focusMatch = html.match(/function calculatePoiFocusZoom\(currentZoom, mapSize\) \{[\s\S]*?\n    \}/);
 assert.ok(focusMatch, "public template should expose a pure size-aware POI focus calculation");

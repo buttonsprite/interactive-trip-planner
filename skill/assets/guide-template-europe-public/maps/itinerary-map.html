@@ -918,6 +918,32 @@
       border-radius: 4px;
     }
 
+    .city-event-notices {
+      display: grid;
+      gap: 6px;
+      margin: 2px 4px 8px;
+    }
+
+    .city-event-notice {
+      padding: 8px 9px;
+      color: #513717;
+      font-size: 10px;
+      line-height: 1.45;
+      background: #fff8e8;
+      border-left: 3px solid #d97706;
+      border-radius: 4px;
+    }
+
+    .city-event-notice strong,
+    .city-event-notice span {
+      display: block;
+    }
+
+    .city-event-notice span {
+      margin-top: 3px;
+      color: #745734;
+    }
+
     .poi-detail-day-section-label {
       display: flex;
       align-items: baseline;
@@ -1144,6 +1170,13 @@
       cursor: default;
     }
 
+    .poi-detail-day-toggle:disabled,
+    .poi-list-priority-btn:disabled,
+    .poi-list-select:disabled {
+      cursor: default;
+      opacity: 0.58;
+    }
+
     .poi-detail-day-list-empty {
       padding: 18px 10px;
       color: var(--muted);
@@ -1277,6 +1310,30 @@
       color: var(--muted);
       font-size: 13px;
       line-height: 1.6;
+    }
+
+    .hosted-event-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .hosted-event-card {
+      padding: 10px 11px;
+      background: #fff8e8;
+      border: 1px solid #f0d6a8;
+      border-radius: 7px;
+    }
+
+    .hosted-event-card strong,
+    .hosted-event-card span {
+      display: block;
+    }
+
+    .hosted-event-card span {
+      margin: 3px 0 6px;
+      color: #8a5b1c;
+      font-size: 11px;
+      font-weight: 700;
     }
 
     .poi-detail-list {
@@ -1554,6 +1611,11 @@
 
     .poi-marker.sight {
       background: #c58a1f;
+    }
+
+    .poi-marker.event {
+      background: #d97706;
+      box-shadow: 0 0 0 2px rgba(255, 248, 232, 0.95), 0 2px 9px rgba(22, 32, 42, 0.3);
     }
 
     .mobile-app-bar,
@@ -9589,6 +9651,74 @@
       "dayId": "d1106",
       "order": 5
     }
+  ],
+  "events": [
+    {
+      "id": "art-basel-paris-public-days-2026",
+      "name": "Art Basel Paris 2026 public days",
+      "name_zh": "2026 巴黎巴塞尔艺术展公众开放日",
+      "scope": "venue",
+      "city": "Paris",
+      "area": "Grand Palais / 8e",
+      "status": "confirmed",
+      "startsAt": "2026-10-23T11:00:00+02:00",
+      "endsAt": "2026-10-25T19:00:00+01:00",
+      "venuePoiId": "paris-art-basel-paris-at-grand-palais",
+      "coords": [
+        48.8661,
+        2.3125
+      ],
+      "routeImpact": "anchor",
+      "whyWorthIt": "公众开放日把巴黎段的当代艺术兴趣集中到 Grand Palais，也提供了明确的同期活动时间窗。",
+      "plan": "在 10/24 或 10/25 选择一个完整时段；首日抵达延误时优先保留 10/25。",
+      "tip": "公众开放为 10 月 23–25 日 11:00–19:00；按票种复核单次入场和最终入口。",
+      "officialUrl": "https://www.artbasel.com/paris/visitor-information?lang=en",
+      "sourceIds": [
+        "art-basel-paris-2026",
+        "art-basel-paris-tickets-2026"
+      ],
+      "recheckAt": "2026-10-01"
+    },
+    {
+      "id": "barcelona-castanyada-program-2026",
+      "name": "Barcelona Castanyada program recheck",
+      "name_zh": "巴塞罗那 Castanyada 街区节目待公布",
+      "scope": "hosted",
+      "city": "Barcelona",
+      "area": "Ciutat Vella",
+      "status": "program-pending",
+      "startsAt": "2026-10-31",
+      "endsAt": "2026-10-31",
+      "hostPoiId": "barcelona-la-castanyada-activity-core",
+      "routeImpact": "nearby",
+      "whyWorthIt": "官方旅游资料确认 10 月 31 日的 Castanyada 传统，但公开样例没有把尚未发布的街区节目写成确定场次。",
+      "plan": "保留老城的烤栗子、烤红薯和 panellets 夜线，具体活动只在节目发布后再决定是否停留。",
+      "tip": "临近出发复核街区节目、摊位位置和晚间回程；当前只按节日氛围安排。",
+      "officialUrl": "https://www.barcelonaturisme.com/wv3/ca/page/5343/descobriu-el-captivador-encant-tardorenc-de-barcelona.html",
+      "sourceIds": [
+        "barcelona-autumn-traditions"
+      ],
+      "recheckAt": "2026-10-15"
+    },
+    {
+      "id": "barcelona-all-saints-city-context-2026",
+      "name": "Barcelona All Saints city context",
+      "name_zh": "巴塞罗那诸圣节城市提示",
+      "scope": "citywide",
+      "city": "Barcelona",
+      "status": "program-pending",
+      "startsAt": "2026-11-01",
+      "endsAt": "2026-11-01",
+      "routeImpact": "avoidance",
+      "whyWorthIt": "诸圣节会改变墓园周边的人流与城市纪念氛围，值得在当天路线中提前提示。",
+      "plan": "11 月 1 日只把纪念传统作为城市语境；开放、交通和纪念活动发布后再调整蒙锥克路线。",
+      "tip": "尊重家庭祭扫，不把纪念活动当作表演；出发前复核墓园开放与公共交通。",
+      "officialUrl": "https://patrimonifestiu.cultura.gencat.cat/Tots-Sants-Barcelona-la-Castanyada",
+      "sourceIds": [
+        "catalonia-all-saints-castanyada"
+      ],
+      "recheckAt": "2026-10-15"
+    }
   ]
 };
 
@@ -9613,7 +9743,8 @@
       food: { label: "吃饭", short: "F", color: "#256f73" },
       art: { label: "艺术", short: "A", color: "#2f7fb9" },
       "local-life": { label: "本地生活", short: "L", color: "#6f8f37" },
-      sight: { label: "著名景区", short: "T", color: "#c58a1f" }
+      sight: { label: "著名景区", short: "T", color: "#c58a1f" },
+      event: { label: "同期活动", short: "E", color: "#d97706" }
     };
 
     const categoryPlans = {
@@ -9625,7 +9756,8 @@
       food: "餐厅优先按当天街区和时间段嵌入：午餐选市场/小馆，晚餐选 bistro、tapas 或自然酒配餐；热门店先预约，不要为了单店横穿城市。",
       art: "建议按街区成组安排，不要一天连刷太多大馆；小馆更适合补充城市气质，热门展览要提前看预约。",
       "local-life": "这是观察当地人日常的点：买菜、看电影、读书、遛娃、下班喝一杯或坐广场；适合留出慢时间，不要只拍照打卡。",
-      sight: "游客第一次到访值得看，但建议和附近街区、餐酒馆、市场合并成半日动线；热门景点尽量提前订票或早到。"
+      sight: "游客第一次到访值得看，但建议和附近街区、餐酒馆、市场合并成半日动线；热门景点尽量提前订票或早到。",
+      event: "同期活动先按官方日期、场地与当天街区嵌入；只有时间和场地都确认后才加入具体日期。"
     };
 
     const categoryTips = {
@@ -9637,10 +9769,12 @@
       food: "餐厅营业日、订位窗口、厨房休息时段和排队规则变化快；需要在出发前用官网/地图/小红书复核。",
       art: "临时展、闭馆日和夜间开放会变化；进馆前复查开放时间。",
       "local-life": "当地生活点最吃时间段：早市看上午，广场/酒吧看傍晚，跳蚤市看周末或固定日。",
-      sight: "热门景区人流大，预约制和安检常见；优先把必须看的点放在当天第一段。"
+      sight: "热门景区人流大，预约制和安检常见；优先把必须看的点放在当天第一段。",
+      event: "活动时间、入口和票务可能继续调整；出发前用官网复核最终场次。"
     };
 
     const pois = PUBLIC_TRIP_DATA.pois;
+    const tripEvents = PUBLIC_TRIP_DATA.events || [];
     const zhNames = Object.fromEntries(pois.filter((item) => item.zh).map((item) => [item.name, item.zh]));
     const officialUrls = Object.fromEntries(pois.filter((item) => item.officialUrl).map((item) => [item.name, item.officialUrl]));
     const imageQueries = Object.fromEntries(pois.filter((item) => item.imageQuery).map((item) => [item.name, item.imageQuery]));
@@ -9686,7 +9820,8 @@
       food: true,
       art: false,
       localLife: false,
-      sight: true
+      sight: true,
+      event: true
     };
 
     function calculateEdgeAutoScrollVelocity(pointerY, top, bottom, threshold = 48, maxSpeed = 14) {
@@ -9757,7 +9892,7 @@
       : (item.name || item.zh);
     const getZhName = getDisplayName;
     const getSearchQuery = (item) => `${item.name} ${item.city}`;
-    const getOfficialUrl = (item) => officialUrls[item.name] || `https://www.google.com/search?q=${encodeURIComponent(`${getSearchQuery(item)} official website`)}`;
+    const getOfficialUrl = (item) => item.officialUrl || officialUrls[item.name] || `https://www.google.com/search?q=${encodeURIComponent(`${getSearchQuery(item)} official website`)}`;
     const getImageUrl = (item) => `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(getSearchQuery(item))}`;
     const getMapUrl = (item) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(getSearchQuery(item))}`;
     const getXiaohongshuUrl = (item) => `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(`${getZhName(item)} ${item.name} ${cityLabels[item.city] || item.city}`)}`;
@@ -9933,6 +10068,47 @@
       item.id = item.id || slugify(`${item.city}-${item.name}`);
     }
 
+    const runtimeEventPois = tripEvents.flatMap((event) => {
+      if (!event || event.scope !== "venue") {
+        return [];
+      }
+      const venue = event.venuePoiId
+        ? pois.find((item) => item.id === event.venuePoiId)
+        : null;
+      const coords = Array.isArray(event.coords) && event.coords.length === 2
+        ? event.coords
+        : venue?.coords;
+      if (!Array.isArray(coords) || coords.length !== 2 || !coords.every(Number.isFinite)) {
+        return [];
+      }
+      return [{
+        id: `event:${event.id}`,
+        name: event.name,
+        name_zh: event.name_zh || event.name,
+        zh: event.name_zh || event.name,
+        city: event.city,
+        area: event.area || venue?.area || "活动场地",
+        category: "event",
+        priority: event.status === "confirmed" ? "preferred" : "pending",
+        coords,
+        note: event.whyWorthIt,
+        whyWorthIt: event.whyWorthIt,
+        plan: event.plan,
+        tip: event.tip,
+        officialUrl: event.officialUrl,
+        imageQuery: `${event.name} ${event.city}`,
+        eventId: event.id,
+        eventStatus: event.status
+      }];
+    });
+    pois.push(...runtimeEventPois);
+    const poiById = new Map(pois.map((item) => [item.id, item]));
+
+    const isEventAssignable = (item) => item.category !== "event" || item.eventStatus === "confirmed";
+    const getEventWaitingCopy = (item) => item?.eventStatus === "program-pending"
+      ? "等待具体节目"
+      : "等待场次确认";
+
     const stopById = Object.fromEntries(stops.map((stop) => [stop.id, stop]));
     const dayById = Object.fromEntries(itineraryDays.map((day) => [day.id, day]));
     const defaultItineraryAssignments = {};
@@ -9979,7 +10155,8 @@
       food: "food",
       art: "art",
       "local-life": "localLife",
-      sight: "sight"
+      sight: "sight",
+      event: "event"
     };
 
     const describeChangeEndpoint = (change, value) => {
@@ -10010,6 +10187,10 @@
     };
 
     const getPoiAssignment = (poiId) => {
+      const item = poiById.get(poiId);
+      if (item && !isEventAssignable(item)) {
+        return null;
+      }
       if (itineraryPlan.removed[poiId]) {
         return null;
       }
@@ -10195,19 +10376,20 @@
 
     const poiDetailItineraryControlsHtml = (item) => {
       const assignment = getPoiAssignment(item.id);
+      const assignable = isEventAssignable(item);
       const selectedPriority = priorities[item.id] || "";
-      const dayOptions = itineraryDays
+      const dayOptions = assignable ? itineraryDays
         .filter((day) => day.city !== "Transit")
         .map((day) => `<option value="${day.id}" ${assignment?.dayId === day.id ? "selected" : ""}>${escapeHtml(day.short)} · ${escapeHtml(cityLabels[day.city] || day.city)}</option>`)
-        .join("");
+        .join("") : "";
       const priorityButtons = priorityLevels.map((level) => `
         <button type="button" class="priority-btn ${selectedPriority === level ? "active" : ""}" data-priority="${level}" data-poi-id="${item.id}" aria-label="标记为${priorityNaturalLabels[level]}"><span class="desktop-priority-label">${level}</span><span class="mobile-priority-label">${priorityNaturalLabels[level]}</span></button>
       `).join("");
       return `
         <div class="poi-detail-control-row">
           <span class="poi-detail-control-label">行程</span>
-          <select class="poi-list-select" data-move-poi="${item.id}" aria-label="${assignment ? "移动到其他日期" : "安排到某一天"}">
-            <option value="">${assignment ? "移动到日期..." : "安排到日期..."}</option>
+          <select class="poi-list-select" data-move-poi="${item.id}" aria-label="${assignable ? (assignment ? "移动到其他日期" : "安排到某一天") : getEventWaitingCopy(item)}" ${assignable ? "" : "disabled"}>
+            <option value="">${assignable ? (assignment ? "移动到日期..." : "安排到日期...") : getEventWaitingCopy(item)}</option>
             ${dayOptions}
           </select>
         </div>
@@ -10243,9 +10425,44 @@
       }).join("");
     };
 
+    const getEventStatusCopy = (event) => {
+      if (event.status === "confirmed") return "时间地点已确认";
+      if (event.status === "program-pending") return "等待具体节目";
+      if (event.status === "historical-lead") return "等待本届确认";
+      return "等待场次确认";
+    };
+
+    const getEventDateCopy = (event) => {
+      const start = String(event.startsAt || "").slice(0, 10);
+      const end = String(event.endsAt || "").slice(0, 10);
+      return start && end && start !== end ? `${start} 至 ${end}` : start;
+    };
+
+    const renderHostedEvents = (item) => {
+      const hostedEvents = tripEvents.filter((event) => event.scope === "hosted" && event.hostPoiId === item.id);
+      if (!hostedEvents.length) return "";
+      return `
+        <section class="poi-detail-section hosted-events" data-hosted-event-content>
+          <h2>同期活动</h2>
+          <div class="hosted-event-list">
+            ${hostedEvents.map((event) => `
+              <article class="hosted-event-card">
+                <strong>${escapeHtml(event.name_zh || event.name)}</strong>
+                <span>${escapeHtml(getEventDateCopy(event))} · ${escapeHtml(getEventStatusCopy(event))}</span>
+                <p>${escapeHtml(event.whyWorthIt)}</p>
+                <p><strong>怎么安排：</strong>${escapeHtml(event.plan)}</p>
+                <p><strong>注意：</strong>${escapeHtml(event.tip)}</p>
+                <div class="poi-detail-actions"><a href="${escapeHtml(event.officialUrl)}" target="_blank" rel="noopener noreferrer">查看活动官网</a></div>
+              </article>
+            `).join("")}
+          </div>
+        </section>
+      `;
+    };
+
     const poiDetailHtml = (item) => {
       const meta = poiCategories[item.category];
-      const officialLabel = officialUrls[item.name] ? "打开官网" : "官网搜索";
+      const officialLabel = item.officialUrl || officialUrls[item.name] ? "打开官网" : "官网搜索";
       const urls = getResourceUrls(item);
       const assignment = getPoiAssignment(item.id);
       const itineraryLine = assignment
@@ -10278,6 +10495,7 @@
           <p>${escapeHtml(item.whyWorthIt || item.note)}</p>
         </section>
         ${detailSectionsHtml}
+        ${renderHostedEvents(item)}
         <section class="poi-detail-section">
           <h2>怎么安排</h2>
           <p>${escapeHtml(item.plan || categoryPlans[item.category])}</p>
@@ -10317,7 +10535,8 @@
       { key: "food", label: () => categoryLayerLabel("food"), layer: poiLayers.food },
       { key: "art", label: () => categoryLayerLabel("art"), layer: poiLayers.art },
       { key: "localLife", label: () => categoryLayerLabel("local-life"), layer: poiLayers["local-life"] },
-      { key: "sight", label: () => categoryLayerLabel("sight"), layer: poiLayers.sight }
+      { key: "sight", label: () => categoryLayerLabel("sight"), layer: poiLayers.sight },
+      { key: "event", label: () => categoryLayerLabel("event"), layer: poiLayers.event }
     ];
     const layerKeyByLeafletId = new Map();
 
@@ -10484,6 +10703,38 @@
           </summary>
           <div class="day-transit-detail">${escapeHtml(transit.detail)}</div>
         </details>
+      `;
+    };
+
+    const getDayIsoDate = (day) => {
+      const match = /^(\d{1,2})\/(\d{1,2})$/.exec(day?.short || "");
+      const year = String(PUBLIC_TRIP_DATA.trip.startDate || "").slice(0, 4);
+      if (!match || !/^\d{4}$/.test(year)) return "";
+      return `${year}-${match[1].padStart(2, "0")}-${match[2].padStart(2, "0")}`;
+    };
+
+    const renderCityEventNotices = (day) => {
+      const dayDate = getDayIsoDate(day);
+      if (!dayDate) return "";
+      const matchingEvents = tripEvents.filter((event) => {
+        if (event.scope !== "citywide") return false;
+        const affectedCities = [event.city, ...(Array.isArray(event.affectedCities) ? event.affectedCities : [])];
+        const cityMatches = affectedCities.includes(day.city);
+        const startsOn = String(event.startsAt || "").slice(0, 10);
+        const endsOn = String(event.endsAt || "").slice(0, 10);
+        return cityMatches && startsOn <= dayDate && dayDate <= endsOn;
+      });
+      if (!matchingEvents.length) return "";
+      return `
+        <section class="city-event-notices" data-city-event-content aria-label="当天同期活动提示">
+          ${matchingEvents.map((event) => `
+            <article class="city-event-notice">
+              <strong>${escapeHtml(event.name_zh || event.name)}</strong>
+              <span>${escapeHtml(getEventStatusCopy(event))} · ${escapeHtml(event.whyWorthIt)}</span>
+              <span>${escapeHtml(event.plan)}</span>
+            </article>
+          `).join("")}
+        </section>
       `;
     };
 
@@ -10856,8 +11107,11 @@
         const priority = priorities[item.id] || "";
         const assignment = getPoiAssignment(item.id);
         const selectedDay = getVisibleDay();
+        const assignable = isEventAssignable(item);
         const addToTodayButton = selectedDay && selectedDay.city !== "Transit" && assignment?.dayId !== selectedDay.id
-          ? `<button type="button" class="poi-list-priority-btn" data-assign-day="${selectedDay.id}" data-poi-id="${item.id}" aria-label="${escapeHtml(zhName)} 加入今天">加</button>`
+          ? (assignable
+            ? `<button type="button" class="poi-list-priority-btn" data-assign-day="${selectedDay.id}" data-poi-id="${item.id}" aria-label="${escapeHtml(zhName)} 加入今天">加</button>`
+            : `<button type="button" class="poi-list-priority-btn" disabled aria-label="${escapeHtml(getEventWaitingCopy(item))}" title="${escapeHtml(getEventWaitingCopy(item))}">${escapeHtml(getEventWaitingCopy(item))}</button>`)
           : "";
         const removeButton = assignment
           ? `<button type="button" class="poi-list-priority-btn" data-remove-itinerary="${item.id}" aria-label="${escapeHtml(zhName)} 从行程移除">移</button>`
@@ -11025,7 +11279,8 @@
     };
 
     const assignPoiToDay = (poiId, dayId, refreshDetail = false) => {
-      if (!markerByPoiId.has(poiId) || !dayById[dayId]) {
+      const item = markerByPoiId.get(poiId)?.item;
+      if (!item || !isEventAssignable(item) || !dayById[dayId]) {
         return;
       }
       const current = getPoiAssignment(poiId);
@@ -11043,7 +11298,6 @@
         normalizeDayPoiOrders(current.dayId);
       }
       markDaysForReroute(dayId, current?.dayId);
-      const item = markerByPoiId.get(poiId).item;
       recordItineraryChange(
         current?.dayId ? "move" : "add",
         `${current?.dayId ? "移动" : "加入"} ${getZhName(item)} 到 ${dayById[dayId].short}`,
@@ -11672,11 +11926,12 @@
       const candidateResult = getDayCandidatePois(dayId, dayPois);
       const movableDayPois = dayPois.filter(({ assignment }) => Number(assignment.order) > 0);
       const needsReroute = Boolean(itineraryPlan.dirtyDays[dayId]);
+      const cityEventNoticesHtml = renderCityEventNotices(day);
       poiDetailDayHeading.innerHTML = `<span class="desktop-only-label">${escapeHtml(day.short)}</span><span class="mobile-only-label">当天安排</span>`;
       poiDetailDaySummary.textContent = `${cityLabels[day.city] || day.city} · ${dayPois.length} 个地点${needsReroute ? " · 路线需要重新安排" : ""}`;
       poiDetailDaySummary.classList.toggle("needs-reroute", needsReroute);
       if (day.city === "Transit") {
-        poiDetailDayList.innerHTML = `<div class="poi-detail-day-list-empty">${day.city === "Transit" ? "交通日没有单独的地点详情，路线节点仍显示在地图上。" : "这一天还没有安排地点。"}</div>`;
+        poiDetailDayList.innerHTML = cityEventNoticesHtml + `<div class="poi-detail-day-list-empty">${day.city === "Transit" ? "交通日没有单独的地点详情，路线节点仍显示在地图上。" : "这一天还没有安排地点。"}</div>`;
         return;
       }
 
@@ -11725,6 +11980,7 @@
           const meta = poiCategories[item.category];
           const zhName = getZhName(item);
           const active = activePoiDetailId === item.id;
+          const assignable = isEventAssignable(item);
           return `
             <div class="poi-detail-day-place candidate ${active ? "active" : ""}" style="--place-color:${meta.color};">
               <span class="poi-detail-day-place-spacer" aria-hidden="true"></span>
@@ -11733,10 +11989,13 @@
                 <span class="poi-detail-day-place-copy">
                   <strong>${escapeHtml(zhName)}</strong>
                   <span>${escapeHtml(meta.label)} · ${escapeHtml(item.area)}</span>
+                  ${assignable ? "" : `<span>${escapeHtml(getEventWaitingCopy(item))}</span>`}
                 </span>
               </button>
               <span class="poi-detail-day-place-actions">
-                <button type="button" class="poi-detail-day-toggle add" data-assign-day="${dayId}" data-poi-id="${item.id}" aria-label="加入 ${escapeHtml(zhName)} 到 ${escapeHtml(day.short)}" title="加入这一天">+</button>
+                ${assignable
+                  ? `<button type="button" class="poi-detail-day-toggle add" data-assign-day="${dayId}" data-poi-id="${item.id}" aria-label="加入 ${escapeHtml(zhName)} 到 ${escapeHtml(day.short)}" title="加入这一天">+</button>`
+                  : `<button type="button" class="poi-detail-day-toggle add" disabled aria-label="${escapeHtml(getEventWaitingCopy(item))}" title="${escapeHtml(getEventWaitingCopy(item))}">?</button>`}
               </span>
             </div>
           `;
@@ -11746,7 +12005,7 @@
       const routeWarningHtml = needsReroute
         ? '<div class="poi-detail-day-route-warning">顺序或安排已调整，交通待复核。原路线仅作参考，可用“撤销上一步”恢复最近修改。</div>'
         : "";
-      poiDetailDayList.innerHTML = routeWarningHtml + scheduledHtml + candidateHtml;
+      poiDetailDayList.innerHTML = cityEventNoticesHtml + routeWarningHtml + scheduledHtml + candidateHtml;
     };
 
     const renderDetailNavigation = () => {

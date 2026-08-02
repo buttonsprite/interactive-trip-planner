@@ -93,19 +93,86 @@ const pois = sourcePois.map((poi) => ({
   imageQuery: `${poi.name} ${poi.city}`,
 }));
 
-const poiByName = new Map(pois.map((poi) => [poi.name, poi]));
-const assignmentsByDay = new Map(sourceItinerary.days.map((day) => [day.id, []]));
-for (const rule of sourceItinerary.defaultAssignments) {
-  const poi = poiByName.get(rule.name);
-  if (!poi || !assignmentsByDay.has(rule.dayId)) {
-    throw new Error(`invalid public sample assignment: ${rule.name} -> ${rule.dayId}`);
+function groupBy(values, getKey) {
+  const grouped = new Map();
+  for (const value of values) {
+    const key = getKey(value);
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(value);
   }
-  assignmentsByDay.get(rule.dayId).push({ poi, order: Number(rule.order) });
+  return grouped;
 }
 
 function isoDate(shortDate) {
   const [month, day] = shortDate.split("/").map(Number);
   return `2026-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+const poiByName = new Map(pois.map((poi) => [poi.name, poi]));
+const poisByName = groupBy(pois, (poi) => poi.name);
+const poisById = groupBy(pois, (poi) => poi.id);
+const eventsByName = groupBy(sourceEvents, (event) => event.name);
+const eventsById = groupBy(sourceEvents, (event) => event.id);
+const dayById = new Map(sourceItinerary.days.map((day) => [day.id, day]));
+
+function eventAssignmentPoi(event, day) {
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(event.id || "")) {
+    throw new Error(`invalid public sample event assignment id: ${event.id || "<missing>"}`);
+  }
+  if (event.status !== "confirmed" || event.scope !== "venue") {
+    throw new Error(`public sample event assignment must be confirmed + venue: ${event.name}`);
+  }
+  const dayDate = isoDate(day.short);
+  const startsOn = String(event.startsAt || "").slice(0, 10);
+  const endsOn = String(event.endsAt || "").slice(0, 10);
+  const dayCity = String(day.city || "").trim().toLocaleLowerCase("en-US");
+  const eventCities = [event.city, ...(Array.isArray(event.affectedCities) ? event.affectedCities : [])]
+    .filter((city) => typeof city === "string")
+    .map((city) => city.trim().toLocaleLowerCase("en-US"));
+  if (day.city === "Transit" || !eventCities.includes(dayCity) || dayDate < startsOn || dayDate > endsOn) {
+    throw new Error(`public sample event assignment is outside its eligible day: ${event.name} -> ${day.id}`);
+  }
+  const venue = poisById.get(event.venuePoiId)?.[0];
+  const coords = Array.isArray(event.coords) ? event.coords : venue?.coords;
+  if (!Array.isArray(coords) || coords.length !== 2) {
+    throw new Error(`public sample event assignment has no usable location: ${event.name}`);
+  }
+  return {
+    id: `event:${event.id}`,
+    name: event.name,
+    name_zh: event.name_zh || event.name,
+    city: event.city,
+    area: event.area || venue?.area || event.city,
+    category: "event",
+    priority: "preferred",
+    coords,
+  };
+}
+
+function resolveAssignmentItem(rule, day) {
+  let poiMatches = [];
+  let eventMatches = [];
+  if (typeof rule.poiId === "string" && rule.poiId.startsWith("event:")) {
+    eventMatches = eventsById.get(rule.poiId.slice("event:".length)) || [];
+  } else if (typeof rule.poiId === "string") {
+    poiMatches = poisById.get(rule.poiId) || [];
+  } else if (typeof rule.name === "string") {
+    poiMatches = poisByName.get(rule.name) || [];
+    eventMatches = eventsByName.get(rule.name) || [];
+  }
+  const matchCount = poiMatches.length + eventMatches.length;
+  const label = rule.name || rule.poiId || "<missing>";
+  if (matchCount > 1) throw new Error(`ambiguous public sample assignment name: ${label} (${matchCount} matches)`);
+  if (matchCount === 0) throw new Error(`invalid public sample assignment: ${label} -> ${rule.dayId}`);
+  return eventMatches.length ? eventAssignmentPoi(eventMatches[0], day) : poiMatches[0];
+}
+
+const assignmentsByDay = new Map(sourceItinerary.days.map((day) => [day.id, []]));
+for (const rule of sourceItinerary.defaultAssignments) {
+  const day = dayById.get(rule.dayId);
+  if (!day) throw new Error(`invalid public sample assignment day: ${rule.dayId || "<missing>"}`);
+  const poi = resolveAssignmentItem(rule, day);
+  assignmentsByDay.get(rule.dayId).push({ poi, order: Number(rule.order) });
 }
 
 function distanceSquared(a, b) {
@@ -116,7 +183,7 @@ function distanceSquared(a, b) {
 }
 
 const assignedIds = new Set(
-  sourceItinerary.defaultAssignments.map((rule) => poiByName.get(rule.name)?.id).filter(Boolean),
+  [...assignmentsByDay.values()].flatMap((entries) => entries.map((entry) => entry.poi.id)),
 );
 
 const days = sourceItinerary.days.map((day) => {

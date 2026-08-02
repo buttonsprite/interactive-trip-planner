@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
@@ -14,6 +15,7 @@ const itineraryPath = path.join(root, "data", "itinerary.json");
 const sourcesPath = path.join(root, "data", "sources.json");
 const eventsPath = path.join(root, "data", "events.json");
 const tripDataPath = path.join(root, "maps", "assets", "trip-data.js");
+const builderPath = path.join(scriptDir, "build-europe-public-template.js");
 
 for (const file of [htmlPath, poiPath, itineraryPath, sourcesPath, eventsPath, tripDataPath]) {
   assert.ok(fs.existsSync(file) && fs.statSync(file).size > 0, `missing public template file: ${file}`);
@@ -388,6 +390,67 @@ const scripts = [...html.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/sc
   .filter((script) => script.trim());
 assert.equal(scripts.length, 1);
 new vm.Script(scripts[0], { filename: htmlPath });
+
+function runRealBuilderFixture({ nextItinerary, nextEvents = events }) {
+  const originals = new Map([
+    [itineraryPath, fs.readFileSync(itineraryPath, "utf8")],
+    [eventsPath, fs.readFileSync(eventsPath, "utf8")],
+    [tripDataPath, fs.readFileSync(tripDataPath, "utf8")],
+    [htmlPath, fs.readFileSync(htmlPath, "utf8")],
+  ]);
+  try {
+    fs.writeFileSync(itineraryPath, `${JSON.stringify(nextItinerary, null, 2)}\n`);
+    fs.writeFileSync(eventsPath, `${JSON.stringify(nextEvents, null, 2)}\n`);
+    const result = spawnSync(process.execPath, [builderPath], { encoding: "utf8" });
+    let builtTrip = null;
+    if (result.status === 0) {
+      const sandbox = { window: {} };
+      vm.runInNewContext(fs.readFileSync(tripDataPath, "utf8"), sandbox, { filename: tripDataPath });
+      builtTrip = JSON.parse(JSON.stringify(sandbox.window.TRIP_DATA));
+    }
+    return { result, builtTrip };
+  } finally {
+    for (const [file, contents] of originals) fs.writeFileSync(file, contents);
+  }
+}
+
+const confirmedDefaultEvent = events.find((event) => event.scope === "venue" && event.status === "confirmed");
+assert.ok(confirmedDefaultEvent, "real builder fixture requires a confirmed venue event");
+const itineraryWithEventDefault = {
+  ...itinerary,
+  defaultAssignments: [
+    ...itinerary.defaultAssignments,
+    { name: confirmedDefaultEvent.name, dayId: "d1024", order: 99 },
+    { poiId: `event:${confirmedDefaultEvent.id}`, dayId: "d1025", order: 99 },
+  ],
+};
+const eventDefaultBuild = runRealBuilderFixture({ nextItinerary: itineraryWithEventDefault });
+assert.equal(
+  eventDefaultBuild.result.status,
+  0,
+  `real builder must resolve a confirmed event default by name:\n${eventDefaultBuild.result.stdout}${eventDefaultBuild.result.stderr}`,
+);
+for (const dayId of ["d1024", "d1025"]) {
+  assert.ok(
+    eventDefaultBuild.builtTrip.days
+      .find((day) => day.id === dayId)
+      ?.routeStops.some((stop) => stop.poiId === `event:${confirmedDefaultEvent.id}`),
+    `generated trip output must contain the synthetic event id for ${dayId}`,
+  );
+}
+
+const ambiguousEventBuild = runRealBuilderFixture({
+  nextItinerary: itineraryWithEventDefault,
+  nextEvents: [
+    ...events,
+    { ...confirmedDefaultEvent, id: `${confirmedDefaultEvent.id}-duplicate` },
+  ],
+});
+assert.notEqual(ambiguousEventBuild.result.status, 0, "ambiguous event names must fail the real builder");
+assert.match(
+  `${ambiguousEventBuild.result.stdout}${ambiguousEventBuild.result.stderr}`,
+  /ambiguous public sample assignment name.*Art Basel Paris 2026 public days/i,
+);
 
 const builderModule = await import("./build-europe-public-template.js?serializer-contract");
 assert.equal(typeof builderModule.serializeForInlineScript, "function", "builder must export its script-context serializer");

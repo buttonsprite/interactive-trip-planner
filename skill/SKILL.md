@@ -61,9 +61,9 @@ description: Use when 用户想规划旅行、制作旅游攻略、寻找适合�
 
 1. 建立搜索任务单：明确日期、区域、主题、用户偏好、选中的生活品味、必须覆盖的地点角色和需要实时复核的事实。
 2. 选择 Global Base 与一个匹配的地区包，按 A/B/C 可访问性先探测来源；B/C 失败时执行明确 fallback。中国大陆先运行 `scripts/check-amap-cli.js` 探测可选增强，不读取或输出密钥；CLI 不可用时明确未完成高德路网复核，不伪造路线。
-3. 使用地区包的十类查询意图，至少组合中文、英文和目的地当地语言搜索。先从官方旅游、文化日历、地图和主题资料发现候选，再用地点官网、主办方、交通运营方和订位入口逐项核实。具名本地编辑源必须说明覆盖地区、beat、检索方法和事实边界，不能用模糊来源名称代替。
+3. 使用地区包的十类查询意图，至少组合中文、英文和目的地当地语言搜索。先从官方旅游、文化日历、地图和主题资料发现候选，再用地点官网、主办方、交通运营方和订位入口逐项核实。具名本地编辑源必须说明覆盖地区、beat、检索方法和事实边界，不能用模糊来源名称代替。活动扫描必须写入 `data/events.json`：`venue` 是可地图化活动地点，`hosted` 关联既有地点的特别项目，`citywide` 只影响城市或当天语境；字段与引用按 `references/event-schema.md`。
 4. 按体验角色补候选，而不是按类别凑数量：主题主锚点、代表性景点、当地生活、酒店基地、正式餐、地方经典、小吃、咖啡甜品、夜间体验、休息点、交通节点和天气/闭馆替代。城市有至少两个完整旅行日时，逐城至少评估 3 个代表性景点并写明采用或舍弃理由；在该城市停留段内保留的主锚点接到同方向当地生活角色：市场、居民广场、社区空间、街区咖啡、社区饭馆、传统商业或短半径夜间体验。
-5. 每个准备进入资料池的地点都要回答：为什么符合这个模板（未选模板时为什么符合用户偏好）、为什么安排在这里、与附近地点如何衔接、需要预约或复核什么。按地点在路线中的角色分配 `contentTier`：主锚点和必去地点用 `deep`，正式路线中的支撑地点用 `standard`，候选池与留档地点用 `compact`。不同类型地点不强制写同样的四段；市场、博物馆、餐厅、咖啡/酒吧、街区、酒店/交通使用与现场体验相匹配的 `detailSections`。只有可靠且能帮助现场理解的历史才写故事，不为凑结构编造。
+5. 每个准备进入资料池的地点都要回答：为什么符合这个模板（未选模板时为什么符合用户偏好）、为什么安排在这里、与附近地点如何衔接、需要预约或复核什么。按地点在路线中的角色分配 `contentTier`：主锚点和必去地点用 `deep`，正式路线中的支撑地点用 `standard`，候选池与留档地点用 `compact`。不同类型地点不强制写同样的四段；市场、博物馆、餐厅、咖啡/酒吧、街区、酒店/交通使用与现场体验相匹配的 `detailSections`。当来源同时支持当地食材结构、居民使用方式和行程月份季节时，市场详情必须连起来写；库存未核实时用“留意/询问”而非断言。只有可靠且能帮助现场理解的历史才写故事，不为凑结构编造。
 6. 对营业时间、票务、活动日期、交通时刻、价格、安全、天气、海况和入境规则等易变化信息，使用当前来源复核并记录检查日期。只有真实的可变事实、来源冲突或高影响事实未确认时显示“需要临近复核”，不增加常驻来源徽章。
 7. 对落选的著名地点保留简短取舍理由，避免用户看见缺失却不知道为什么。
 
@@ -85,7 +85,7 @@ node skill/scripts/probe-source-access.js --context <sources.json>
 
 进入下一阶段：每个行程段已经有核心地点、合理备选、吃住与交通支撑；高影响事实已经核实或明确标为“需要临近出发复核”；继续搜索得到的主要是重复结果，而不是新的路线价值。
 
-阶段产物写入 `data/pois.json`、`data/sources.json`、`docs/sources.md`、`docs/hotels.md` 和 `docs/reservations.md`。地点字段按 `references/poi-schema.md`，酒店解释按 `references/hotel-selection.md`。
+阶段产物写入 `data/pois.json`、`data/events.json`、`data/sources.json`、`docs/sources.md`、`docs/hotels.md` 和 `docs/reservations.md`。地点字段按 `references/poi-schema.md`，活动字段按 `references/event-schema.md`，酒店解释按 `references/hotel-selection.md`。
 
 ### 阶段三：规划每日行程
 
@@ -93,7 +93,7 @@ node skill/scripts/probe-source-access.js --context <sources.json>
 
 执行：
 
-1. 先放入航班、火车、已预约、节庆、演出、闭馆日和固定餐厅等硬约束。
+1. 先放入航班、火车、已预约、节庆、演出、闭馆日和固定餐厅等硬约束。`confirmed` 的固定活动场次是硬约束，`announced` 项目只是当天候选，`program-pending` 窗口只作复核事项，`historical-lead` 不得作为当前活动展示；`venue` 只在确认后以 `event:<id>` 排入路线，`hosted` 通过其既有地点安排，`citywide` 只改变当天语境或避让判断。
 2. 先设计城市段和住宿基地，再设计每天；跨城移动日只安排抵达后顺路、低强度、可取消的活动。
 3. 每天安排 1-3 个主锚点。已确认 `first-visit` 或到访史未知而暂定 `balanced-visitor` 的城市，在该城市停留段内保留代表性景点与当地生活的平衡；重型代表性景点每天最多 1 个，并把它与同方向当地生活角色相接。当地生活角色可以是市场、居民广场、社区空间、街区咖啡、社区饭馆、传统商业或短半径夜间体验。其他地点不强制必须同街区，但要顺着步行方向、交通轴线、时间窗口或驾驶顺序，避免为了普通地点折返和横穿城市。
 4. 把酒店当作每天出发、午休、行李和晚间回程的路线锚点，不作为行程之外的附录。
@@ -200,6 +200,7 @@ guides/<trip-slug>/
   data/
     design-tokens.json
     pois.json
+    events.json
     itinerary.json
     sources.json
   maps/itinerary-map.html
@@ -243,6 +244,7 @@ node scripts/test-redskill-release.js <release-directory>
 
 ```bash
 node scripts/validate-trip-data.js --pois <pois.json> --itinerary <itinerary.json> --strict-routes
+node scripts/validate-trip-events.js --events <events.json> --pois <pois.json> --itinerary <itinerary.json> --sources <sources.json>
 node scripts/validate-design-tokens.js <design-tokens.json>
 node scripts/validate-map-html.js <itinerary-map.html>
 node scripts/validate-europe-derived-map.js <itinerary-map.html>

@@ -57,9 +57,22 @@ const validStandard = {
 };
 const validCompact = { ...basePoi("compact"), contentTier: "compact" };
 const validLegacy = basePoi("legacy");
+const validMarketDeep = {
+  ...basePoi("market-deep"),
+  category: "market",
+  contentTier: "deep",
+  whyWorthIt: "A market stop that explains a distinctive local pantry through resident use.",
+  detailSections: [
+    { title: "What to look for", items: ["Look for salted cod used in family stews.", "Ask which late-autumn mushrooms are in today instead of assuming stock."] },
+    { title: "Local pantry", body: "The stall mix connects preserved fish and seasonal mushrooms to everyday resident cooking." },
+  ],
+};
+const marketDeepFixtureCopy = JSON.stringify(validMarketDeep);
+assert.match(marketDeepFixtureCopy, /salted cod used in family stews/i, "market fixture needs a distinctive dish or resident-use signal");
+assert.match(marketDeepFixtureCopy, /(?:look|ask)[^\\"]*(?:autumn|today)/i, "market fixture needs seasonal look or ask wording");
 
 assert.equal(
-  runValidation([validLegacy, validDeep, validStandard, validCompact]).status,
+  runValidation([validLegacy, validDeep, validStandard, validCompact, validMarketDeep]).status,
   0,
   "legacy and valid tiered POIs should pass",
 );

@@ -130,6 +130,11 @@ assert.match(skill, /不同类型[^\n]*不[^\n]*同样/);
 assert.match(poiSchema, /deep[^\n]*standard[^\n]*compact/);
 assert.match(poiSchema, /detailSections/);
 assert.match(poiSchema, /市场[^\n]*(买什么|逛什么)/);
+assert.match(skill, /data\/events\.json/);
+assert.match(skill, /venue[^\n]*hosted[^\n]*citywide/);
+assert.match(skill, /confirmed[^\n]*program-pending/);
+assert.match(skill, /当地食材结构[^\n]*居民[^\n]*季节/);
+assert.match(sources, /历史届次[^\n]*不[^\n]*当前活动/);
 
 if (repositoryReadme !== null) {
   assert.match(repositoryReadme, /developer-preview contract slice/);

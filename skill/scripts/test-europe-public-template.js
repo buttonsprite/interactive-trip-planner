@@ -3,6 +3,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
@@ -88,6 +89,8 @@ assert.deepEqual(
 
 const eventRuntimeMatch = html.match(/\/\* EVENT_RUNTIME_PURE_START \*\/([\s\S]*?)\/\* EVENT_RUNTIME_PURE_END \*\//);
 assert.ok(eventRuntimeMatch, "public map must expose the shipped pure event runtime for executable contract tests");
+const publicUrlRuntimeMatch = html.match(/\/\* PUBLIC_URL_RUNTIME_START \*\/([\s\S]*?)\/\* PUBLIC_URL_RUNTIME_END \*\//);
+assert.ok(publicUrlRuntimeMatch, "public map must expose the shared public URL runtime contract");
 const eventRuntimeNames = [
   "isSlugSafeEventId",
   "isTravelerVisibleEvent",
@@ -101,9 +104,9 @@ const eventRuntimeNames = [
   "composePoiDetailEventSections",
   "composeDayListEventSections",
 ];
-const eventRuntimeSandbox = {};
+const eventRuntimeSandbox = { URL };
 vm.runInNewContext(
-  `${eventRuntimeMatch[1]}\nthis.eventRuntime = { ${eventRuntimeNames.join(", ")} };`,
+  `${publicUrlRuntimeMatch[1]}\n${eventRuntimeMatch[1]}\nthis.eventRuntime = { ${eventRuntimeNames.join(", ")} };`,
   eventRuntimeSandbox,
 );
 const eventRuntime = eventRuntimeSandbox.eventRuntime;
@@ -263,8 +266,8 @@ assert.ok(
   "default assignments must use the executable event sanitizer",
 );
 assert.ok(
-  html.includes("itineraryPlan.assignments = sanitizeEventAssignments(itineraryPlan.assignments, pois, itineraryDays, PUBLIC_TRIP_DATA.trip.startDate)"),
-  "restored assignments must use the executable event sanitizer",
+  /const itineraryPlan = initializeItineraryPlan\([\s\S]*?\(assignments\) => sanitizeEventAssignments\(\s*assignments,\s*pois,\s*itineraryDays,\s*PUBLIC_TRIP_DATA\.trip\.startDate\s*\)\s*\);/.test(html),
+  "restored assignments must sanitize saved structure before the executable event sanitizer",
 );
 for (const token of [
   ".filter((day) => isEventAssignable(item, day, PUBLIC_TRIP_DATA.trip.startDate))",
@@ -321,6 +324,26 @@ assert.equal(
   ),
   "",
 );
+const unsafeHostedEvent = {
+  id: "unsafe-hosted-event",
+  name: "Unsafe hosted event",
+  scope: "hosted",
+  status: "announced",
+  hostPoiId: "host-1",
+  startsAt: "2026-10-24",
+  endsAt: "2026-10-24",
+  whyWorthIt: "Visible copy remains available.",
+  plan: "Keep the notice without a link.",
+  tip: "Do not follow an unsafe URL.",
+  officialUrl: "javascript:alert(1)",
+};
+const unsafeHostedHtml = eventRuntime.renderHostedEventsForItem([unsafeHostedEvent], { id: "host-1" });
+assert.match(unsafeHostedHtml, /Unsafe hosted event/, "unsafe runtime event should retain its escaped notice copy");
+assert.doesNotMatch(unsafeHostedHtml, /<a\b/i, "javascript event URL must render no anchor");
+const credentialHostedHtml = eventRuntime.renderHostedEventsForItem([
+  { ...unsafeHostedEvent, id: "credential-hosted-event", officialUrl: "https://user:secret@example.com/event" },
+], { id: "host-1" });
+assert.doesNotMatch(credentialHostedHtml, /<a\b/i, "credential-bearing event URL must render no anchor");
 for (const [short, city] of [["10/31", "Barcelona"], ["11/4", "Barcelona"], ["11/2", "Madrid"]]) {
   assert.equal(eventRuntime.getCityEventsForDay(boundaryEvents, { short, city }, "2026-10-24").length, 0);
 }
@@ -430,30 +453,49 @@ const scripts = [...html.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/sc
 assert.equal(scripts.length, 1);
 new vm.Script(scripts[0], { filename: htmlPath });
 
-function runRealBuilderFixture({ nextItinerary, nextEvents = events, nextPois = pois, nextSources = sources }) {
-  const originals = new Map([
-    [itineraryPath, fs.readFileSync(itineraryPath, "utf8")],
-    [eventsPath, fs.readFileSync(eventsPath, "utf8")],
-    [poiPath, fs.readFileSync(poiPath, "utf8")],
-    [sourcesPath, fs.readFileSync(sourcesPath, "utf8")],
-    [tripDataPath, fs.readFileSync(tripDataPath, "utf8")],
-    [htmlPath, fs.readFileSync(htmlPath, "utf8")],
-  ]);
+function runRealBuilderFixture({
+  nextItinerary,
+  nextEvents = events,
+  nextPois = pois,
+  nextSources = sources,
+  mutateHtml = (value) => value,
+}) {
+  const fixtureParent = fs.mkdtempSync(path.join(os.tmpdir(), "europe-public-builder-"));
+  const fixtureRoot = path.join(fixtureParent, "guide-template-europe-public");
   try {
-    fs.writeFileSync(itineraryPath, `${JSON.stringify(nextItinerary, null, 2)}\n`);
-    fs.writeFileSync(eventsPath, `${JSON.stringify(nextEvents, null, 2)}\n`);
-    fs.writeFileSync(poiPath, `${JSON.stringify(nextPois, null, 2)}\n`);
-    fs.writeFileSync(sourcesPath, `${JSON.stringify(nextSources, null, 2)}\n`);
-    const result = spawnSync(process.execPath, [builderPath], { encoding: "utf8" });
+    fs.cpSync(root, fixtureRoot, { recursive: true });
+    const fixtureItineraryPath = path.join(fixtureRoot, "data", "itinerary.json");
+    const fixtureEventsPath = path.join(fixtureRoot, "data", "events.json");
+    const fixturePoiPath = path.join(fixtureRoot, "data", "pois.json");
+    const fixtureSourcesPath = path.join(fixtureRoot, "data", "sources.json");
+    const fixtureTripDataPath = path.join(fixtureRoot, "maps", "assets", "trip-data.js");
+    const fixtureHtmlPath = path.join(fixtureRoot, "maps", "itinerary-map.html");
+    fs.writeFileSync(fixtureItineraryPath, `${JSON.stringify(nextItinerary, null, 2)}\n`);
+    fs.writeFileSync(fixtureEventsPath, `${JSON.stringify(nextEvents, null, 2)}\n`);
+    fs.writeFileSync(fixturePoiPath, `${JSON.stringify(nextPois, null, 2)}\n`);
+    fs.writeFileSync(fixtureSourcesPath, `${JSON.stringify(nextSources, null, 2)}\n`);
+    fs.writeFileSync(fixtureHtmlPath, mutateHtml(fs.readFileSync(fixtureHtmlPath, "utf8")));
+    const assetBefore = fs.readFileSync(fixtureTripDataPath, "utf8");
+    const htmlBefore = fs.readFileSync(fixtureHtmlPath, "utf8");
+    const result = spawnSync(
+      process.execPath,
+      [builderPath, "--template-root", fixtureRoot],
+      { encoding: "utf8" },
+    );
     let builtTrip = null;
     if (result.status === 0) {
       const sandbox = { window: {} };
-      vm.runInNewContext(fs.readFileSync(tripDataPath, "utf8"), sandbox, { filename: tripDataPath });
+      vm.runInNewContext(fs.readFileSync(fixtureTripDataPath, "utf8"), sandbox, { filename: fixtureTripDataPath });
       builtTrip = JSON.parse(JSON.stringify(sandbox.window.TRIP_DATA));
     }
-    return { result, builtTrip };
+    return {
+      result,
+      builtTrip,
+      assetUnchanged: fs.readFileSync(fixtureTripDataPath, "utf8") === assetBefore,
+      htmlUnchanged: fs.readFileSync(fixtureHtmlPath, "utf8") === htmlBefore,
+    };
   } finally {
-    for (const [file, contents] of originals) fs.writeFileSync(file, contents);
+    fs.rmSync(fixtureParent, { recursive: true, force: true });
   }
 }
 
@@ -481,6 +523,7 @@ const sampleEvidenceBuild = runRealBuilderFixture({
 });
 assert.equal(sampleEvidenceBuild.result.status, 0, sampleEvidenceBuild.result.stderr);
 const generatedSamplePoi = sampleEvidenceBuild.builtTrip.pois.find((poi) => poi.name === sampleSourcePoi.name);
+assert.ok(generatedSamplePoi, "the real builder must write the requested temporary template root");
 assert.ok(!Object.hasOwn(generatedSamplePoi, "sourceIds"));
 assert.deepEqual(generatedSamplePoi.evidenceSources, [
   {
@@ -513,12 +556,74 @@ const unsafeSourceBuild = runRealBuilderFixture({
 assert.notEqual(unsafeSourceBuild.result.status, 0, "non-HTTP(S) source URLs must fail the build");
 assert.match(`${unsafeSourceBuild.result.stdout}${unsafeSourceBuild.result.stderr}`, /Source sample-official-source has unsafe URL/);
 
+const credentialSourceBuild = runRealBuilderFixture({
+  nextItinerary: itinerary,
+  nextPois: [sampleSourcePoi, ...pois.slice(1)],
+  nextSources: [...sources, { ...sampleSource, url: "https://reader:secret@example.com/place" }],
+});
+assert.notEqual(credentialSourceBuild.result.status, 0, "credential-bearing evidence source URLs must fail the build");
+assert.match(`${credentialSourceBuild.result.stdout}${credentialSourceBuild.result.stderr}`, /Source sample-official-source has unsafe URL/);
+
+for (const [label, officialUrl] of [
+  ["javascript", "javascript:alert(1)"],
+  ["credential-bearing", "https://reader:secret@example.com/event"],
+]) {
+  const unsafeEventBuild = runRealBuilderFixture({
+    nextItinerary: itinerary,
+    nextEvents: events.map((event, index) => index === 0 ? { ...event, officialUrl } : event),
+  });
+  assert.notEqual(unsafeEventBuild.result.status, 0, `${label} event officialUrl must fail the build`);
+  assert.match(
+    `${unsafeEventBuild.result.stdout}${unsafeEventBuild.result.stderr}`,
+    /Event .* has unsafe officialUrl/,
+  );
+}
+
+const normalizedEventSource = "HTTPS://Example.COM:443/normalized-event";
+const normalizedEventBuild = runRealBuilderFixture({
+  nextItinerary: itinerary,
+  nextEvents: events.map((event, index) => index === 0 ? { ...event, officialUrl: normalizedEventSource } : event),
+});
+assert.equal(normalizedEventBuild.result.status, 0, normalizedEventBuild.result.stderr);
+assert.equal(
+  normalizedEventBuild.builtTrip.events.find((event) => event.id === events[0].id)?.officialUrl,
+  new URL(normalizedEventSource).href,
+  "event officialUrl must be normalized before public serialization",
+);
+
 const duplicateSourceBuild = runRealBuilderFixture({
   nextItinerary: itinerary,
   nextSources: [...sources, { ...sources[0] }],
 });
 assert.notEqual(duplicateSourceBuild.result.status, 0, "duplicate source ids must fail the build");
 assert.match(`${duplicateSourceBuild.result.stdout}${duplicateSourceBuild.result.stderr}`, /duplicate source id.*art-basel-paris-2026/i);
+
+for (const [label, mutateHtml, expected] of [
+  [
+    "missing declaration",
+    (value) => value.replace("const PUBLIC_TRIP_DATA = ", "const BROKEN_TRIP_DATA = "),
+    /exactly one PUBLIC_TRIP_DATA block|missing the PUBLIC_TRIP_DATA boundary/i,
+  ],
+  [
+    "missing alias boundary",
+    (value) => value.replace("    const stops = PUBLIC_TRIP_DATA.stops;", "    const stops = BROKEN_TRIP_DATA.stops;"),
+    /alias boundary|PUBLIC_TRIP_DATA boundary/i,
+  ],
+  [
+    "duplicate declaration",
+    (value) => value.replace("const PUBLIC_TRIP_DATA = ", "const PUBLIC_TRIP_DATA = {};\n    const PUBLIC_TRIP_DATA = "),
+    /exactly one PUBLIC_TRIP_DATA block|PUBLIC_TRIP_DATA boundary/i,
+  ],
+]) {
+  const brokenBoundaryBuild = runRealBuilderFixture({
+    nextItinerary: itinerary,
+    mutateHtml,
+  });
+  assert.notEqual(brokenBoundaryBuild.result.status, 0, `${label} must fail the real builder`);
+  assert.match(`${brokenBoundaryBuild.result.stdout}${brokenBoundaryBuild.result.stderr}`, expected);
+  assert.equal(brokenBoundaryBuild.assetUnchanged, true, `${label} must leave trip-data.js byte-identical`);
+  assert.equal(brokenBoundaryBuild.htmlUnchanged, true, `${label} must leave itinerary-map.html byte-identical`);
+}
 
 const confirmedDefaultEvent = events.find((event) => event.scope === "venue" && event.status === "confirmed");
 assert.ok(confirmedDefaultEvent, "real builder fixture requires a confirmed venue event");

@@ -10347,21 +10347,12 @@
         .replace(/'/g, "&#39;");
     }
 
-    function safePoiEvidenceUrl(value) {
-      try {
-        const url = new URL(String(value));
-        return ["http:", "https:"].includes(url.protocol) ? url.href : "";
-      } catch {
-        return "";
-      }
-    }
-
     function renderPoiEvidence(item) {
       const languageLabels = { zh: "中文", en: "英语", es: "西语", fr: "法语", ca: "加泰语" };
       const typeLabels = { official: "官方来源", editorial: "餐饮媒体", media: "媒体", community: "社区线索" };
       const roleLabels = { fact: "事实核实", visit: "参观信息", recommendation: "推荐品类", discovery: "候选发现" };
       const evidenceItems = (Array.isArray(item?.evidenceSources) ? item.evidenceSources : []).flatMap((source) => {
-        const url = safePoiEvidenceUrl(source?.url);
+        const url = safePublicUrl(source?.url);
         const title = typeof source?.title === "string" ? source.title.trim() : "";
         if (!url || !title) return [];
         const language = languageLabels[source.language] || source.language || "未标注语言";
@@ -10400,6 +10391,51 @@
       `;
     }
     /* POI_EVIDENCE_RUNTIME_END */
+
+    /* SAVED_ASSIGNMENT_RUNTIME_START */
+    function isPlainDataObject(value) {
+      if (Object.prototype.toString.call(value) !== "[object Object]") return false;
+      const prototype = Object.getPrototypeOf(value);
+      return prototype === null || Object.getPrototypeOf(prototype) === null;
+    }
+
+    function isLodgingBasePoi(item) {
+      return item?.category === "hotel"
+        || item?.category === "lodging"
+        || item?.lodgingRole === "base";
+    }
+
+    function sanitizeSavedAssignments(savedAssignments, defaultAssignments, dayIds, poiMetadata) {
+      const saved = isPlainDataObject(savedAssignments) ? savedAssignments : {};
+      const defaults = isPlainDataObject(defaultAssignments) ? defaultAssignments : {};
+      const validDayIds = new Set(Array.isArray(dayIds) ? dayIds : []);
+      const metadataById = new Map(
+        (Array.isArray(poiMetadata) ? poiMetadata : [])
+          .filter((item) => item && typeof item.id === "string")
+          .map((item) => [item.id, item])
+      );
+      const sanitized = {};
+
+      for (const [poiId, assignment] of Object.entries(saved)) {
+        if (!isPlainDataObject(assignment)) continue;
+        const { dayId, order } = assignment;
+        if (!validDayIds.has(dayId) || typeof order !== "number" || !Number.isFinite(order) || !Number.isInteger(order) || order < 0) {
+          continue;
+        }
+        const knownPoi = metadataById.get(poiId);
+        const isKnown = Boolean(knownPoi) || Object.hasOwn(defaults, poiId);
+        if (order === 0 && (!isKnown || !isLodgingBasePoi(knownPoi))) continue;
+        sanitized[poiId] = { ...assignment };
+      }
+      return sanitized;
+    }
+
+    function getEffectivePoiAssignment(poiId, itineraryPlan, defaultAssignments) {
+      if (itineraryPlan?.removed?.[poiId]) return null;
+      const saved = isPlainDataObject(itineraryPlan?.assignments) ? itineraryPlan.assignments : {};
+      const defaults = isPlainDataObject(defaultAssignments) ? defaultAssignments : {};
+      return saved[poiId] || defaults[poiId] || null;
+    }
 
     function buildSavedOrderOverrides(defaultAssignments, savedAssignments, removed, dayIds) {
       const validDayIds = new Set(Array.isArray(dayIds) ? dayIds : []);
@@ -10447,6 +10483,39 @@
       return overrides;
     }
 
+    function initializeItineraryPlan(
+      loadPlan,
+      savePlan,
+      defaultAssignments,
+      dayIds,
+      poiMetadata,
+      sanitizeEvents
+    ) {
+      const loaded = loadPlan();
+      const loadedPlan = isPlainDataObject(loaded) ? loaded : {};
+      const rawAssignments = loadedPlan.assignments;
+      const sanitizedAssignments = sanitizeSavedAssignments(
+        rawAssignments,
+        defaultAssignments,
+        dayIds,
+        poiMetadata
+      );
+      const eventSafeAssignments = sanitizeEvents(sanitizedAssignments);
+      const savedOrderOverrides = buildSavedOrderOverrides(
+        defaultAssignments,
+        eventSafeAssignments,
+        loadedPlan.removed,
+        dayIds
+      );
+      const assignments = { ...eventSafeAssignments, ...savedOrderOverrides };
+      const itineraryPlan = { ...loadedPlan, assignments };
+      if (JSON.stringify(rawAssignments ?? {}) !== JSON.stringify(assignments)) {
+        savePlan(itineraryPlan);
+      }
+      return itineraryPlan;
+    }
+    /* SAVED_ASSIGNMENT_RUNTIME_END */
+
     function summarizeScheduledPlaces(dayPois) {
       const scheduled = Array.isArray(dayPois) ? dayPois : [];
       const lodgingBases = scheduled.filter(({ item }) => item?.category === "hotel").length;
@@ -10470,6 +10539,21 @@
     }
 
     /* EVENT_RUNTIME_PURE_START */
+    /* PUBLIC_URL_RUNTIME_START */
+    function safePublicUrl(value) {
+      if (typeof value !== "string" || !value.trim()) return "";
+      try {
+        const url = new URL(value);
+        if (!["http:", "https:"].includes(url.protocol) || !url.hostname || url.username || url.password) {
+          return "";
+        }
+        return url.href;
+      } catch {
+        return "";
+      }
+    }
+    /* PUBLIC_URL_RUNTIME_END */
+
     function isSlugSafeEventId(value) {
       return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value);
     }
@@ -10518,7 +10602,7 @@
           whyWorthIt: event.whyWorthIt,
           plan: event.plan,
           tip: event.tip,
-          officialUrl: event.officialUrl,
+          officialUrl: safePublicUrl(event.officialUrl),
           imageQuery: `${event.name} ${event.city}`,
           eventId: event.id,
           eventStatus: event.status,
@@ -10648,7 +10732,9 @@
                 <p>${escapeEventHtml(event.whyWorthIt)}</p>
                 <p><strong>怎么安排：</strong>${escapeEventHtml(event.plan)}</p>
                 <p><strong>注意：</strong>${escapeEventHtml(event.tip)}</p>
-                <div class="poi-detail-actions"><a href="${escapeEventHtml(event.officialUrl)}" target="_blank" rel="noopener noreferrer">查看活动官网</a></div>
+                ${safePublicUrl(event.officialUrl)
+                  ? `<div class="poi-detail-actions"><a href="${escapeEventHtml(safePublicUrl(event.officialUrl))}" target="_blank" rel="noopener noreferrer">查看活动官网</a></div>`
+                  : ""}
               </article>
             `).join("")}
           </div>
@@ -10689,7 +10775,8 @@
       : (item.name || item.zh);
     const getZhName = getDisplayName;
     const getSearchQuery = (item) => `${item.name} ${item.city}`;
-    const getOfficialUrl = (item) => item.officialUrl || officialUrls[item.name] || `https://www.google.com/search?q=${encodeURIComponent(`${getSearchQuery(item)} official website`)}`;
+    const getOfficialUrl = (item) => safePublicUrl(item.officialUrl || officialUrls[item.name])
+      || (item.category === "event" ? "" : `https://www.google.com/search?q=${encodeURIComponent(`${getSearchQuery(item)} official website`)}`);
     const getImageUrl = (item) => `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(getSearchQuery(item))}`;
     const getMapUrl = (item) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(getSearchQuery(item))}`;
     const getXiaohongshuUrl = (item) => `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(`${getZhName(item)} ${item.name} ${cityLabels[item.city] || item.city}`)}`;
@@ -10884,18 +10971,19 @@
       }
     }
     const defaultItineraryAssignments = sanitizeEventAssignments(rawDefaultItineraryAssignments, pois, itineraryDays, PUBLIC_TRIP_DATA.trip.startDate);
-    const itineraryPlan = loadItineraryPlan();
-    itineraryPlan.assignments = sanitizeEventAssignments(itineraryPlan.assignments, pois, itineraryDays, PUBLIC_TRIP_DATA.trip.startDate);
-    const savedOrderOverrides = buildSavedOrderOverrides(
+    const itineraryPlan = initializeItineraryPlan(
+      loadItineraryPlan,
+      saveItineraryPlan,
       defaultItineraryAssignments,
-      itineraryPlan.assignments,
-      itineraryPlan.removed,
-      itineraryDays.map((day) => day.id)
+      itineraryDays.map((day) => day.id),
+      pois,
+      (assignments) => sanitizeEventAssignments(
+        assignments,
+        pois,
+        itineraryDays,
+        PUBLIC_TRIP_DATA.trip.startDate
+      )
     );
-    if (Object.keys(savedOrderOverrides).length) {
-      Object.assign(itineraryPlan.assignments, savedOrderOverrides);
-      saveItineraryPlan(itineraryPlan);
-    }
     const clonePlainData = (value) => JSON.parse(JSON.stringify(value));
     const createItinerarySnapshot = () => ({
       assignments: clonePlainData(itineraryPlan.assignments),
@@ -10962,10 +11050,7 @@
 
     const getPoiAssignment = (poiId) => {
       const item = poiById.get(poiId);
-      if (itineraryPlan.removed[poiId]) {
-        return null;
-      }
-      const assignment = itineraryPlan.assignments[poiId] || defaultItineraryAssignments[poiId] || null;
+      const assignment = getEffectivePoiAssignment(poiId, itineraryPlan, defaultItineraryAssignments);
       if (item && assignment && !isEventAssignable(item, dayById[assignment.dayId], PUBLIC_TRIP_DATA.trip.startDate)) {
         return null;
       }
@@ -11214,7 +11299,7 @@
 
     const poiDetailHtml = (item) => {
       const meta = poiCategories[item.category];
-      const officialLabel = item.officialUrl || officialUrls[item.name] ? "打开官网" : "官网搜索";
+      const officialLabel = safePublicUrl(item.officialUrl || officialUrls[item.name]) ? "打开官网" : "官网搜索";
       const urls = getResourceUrls(item);
       const assignment = getPoiAssignment(item.id);
       const itineraryLine = assignment
@@ -11235,7 +11320,7 @@
             <a href="${urls.images}" target="_blank" rel="noopener noreferrer">更多图片</a>
             <a href="${urls.xhs}" target="_blank" rel="noopener noreferrer">小红书</a>
             <a href="${urls.map}" target="_blank" rel="noopener noreferrer">外部地图</a>
-            <a href="${urls.official}" target="_blank" rel="noopener noreferrer">${officialLabel}</a>
+            ${urls.official ? `<a href="${escapeHtml(urls.official)}" target="_blank" rel="noopener noreferrer">${officialLabel}</a>` : ""}
           </div>
         </section>
         <section class="poi-detail-section">

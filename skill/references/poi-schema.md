@@ -172,6 +172,8 @@
 
 `anchors` 建议每天 1-3 个。`routeStops` 是当天地图上显示路线顺序的核心点；`candidates` 是同日可替换或补充点。
 
+`--strict-routes` 下，canonical `routeStops` 的每项必须是对象，包含非空 `poiId` 与真正的有限整数 `order`；字符串 stop 只在不启用 strict 的 legacy 模式兼容。排除合法住宿基底后，正整数 order 必须唯一并且完整覆盖 `1..N`；重复、缺口、字符串、分数、缺失与负数都是错误。`order: 0` 只允许引用 category 为 `hotel` / `lodging` 或明确 `lodgingRole: base` 的地点。证据验证不会把结构错误的 strict stop 认证为合格路线。
+
 `transitSegments` 必须覆盖 `routeStops` 中每一对相邻地点：
 
 ```json

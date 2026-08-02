@@ -248,6 +248,7 @@ for (const [label, mutatePois, mutateSources, expected] of [
   ["duplicate source ids", (pois) => pois, (sources) => [...sources, { ...sources[0] }], /Duplicate source id:[\s\S]*food-source/i],
   ["empty source id", (pois) => pois, (sources) => sources.map((item, index) => index ? item : { ...item, id: "" }), /Source <source 0>[\s\S]*non-empty id/i],
   ["unsafe source URL", (pois) => pois, (sources) => sources.map((item, index) => index ? item : { ...item, url: "javascript:alert(1)" }), /Source food-source[\s\S]*HTTP\(S\) URL/i],
+  ["credential-bearing source URL", (pois) => pois, (sources) => sources.map((item, index) => index ? item : { ...item, url: "https://reader:secret@example.com/place" }), /Source food-source[\s\S]*HTTP\(S\) URL/i],
   ["missing source title", (pois) => pois, (sources) => sources.map((item, index) => index ? item : { ...item, title: "" }), /Source food-source[\s\S]*missing title/i],
   ["missing source role", (pois) => pois, (sources) => sources.map((item, index) => index ? item : { ...item, role: "" }), /Source food-source[\s\S]*missing role/i],
   ["empty source supports", (pois) => pois, (sources) => sources.map((item, index) => index ? item : { ...item, supports: [] }), /Source food-source[\s\S]*non-empty supports/i],
@@ -263,6 +264,73 @@ for (const [label, mutatePois, mutateSources, expected] of [
   assert.notEqual(result.status, 0, `${label} should fail strict formal-route validation`);
   assert.match(result.output, expected, `${label} should identify the actionable contract failure`);
 }
+
+const strictRoutePois = [
+  { ...basePoi("hotel-base"), category: "hotel" },
+  basePoi("route-one"),
+  basePoi("route-two"),
+  basePoi("route-three"),
+];
+
+function strictRouteItinerary(routeStops) {
+  const stopIds = routeStops.map((stop) => typeof stop === "string" ? stop : stop?.poiId).filter(Boolean);
+  return [{
+    id: "strict-day",
+    routeStops,
+    transitSegments: stopIds.slice(1).map((toPoiId, index) => ({
+      fromPoiId: stopIds[index],
+      toPoiId,
+      mode: "walk",
+      label: "verified fixture segment",
+    })),
+  }];
+}
+
+for (const [label, routeStops, expected] of [
+  ["missing order", [{ poiId: "route-one" }], /strict-day[\s\S]*route-one[\s\S]*finite integer order/i],
+  ["string order", [{ poiId: "route-one", order: "1" }], /strict-day[\s\S]*route-one[\s\S]*finite integer order/i],
+  ["fractional order", [{ poiId: "route-one", order: 1.5 }], /strict-day[\s\S]*route-one[\s\S]*finite integer order/i],
+  ["negative order", [{ poiId: "route-one", order: -1 }], /strict-day[\s\S]*route-one[\s\S]*negative order/i],
+  ["duplicate order", [{ poiId: "route-one", order: 1 }, { poiId: "route-two", order: 1 }], /strict-day[\s\S]*duplicate route stop order[\s\S]*1/i],
+  ["gapped order", [{ poiId: "route-one", order: 1 }, { poiId: "route-two", order: 3 }], /strict-day[\s\S]*contiguous[\s\S]*1\.\.2/i],
+  ["legacy string stop", ["route-one"], /strict-day[\s\S]*route stop 0[\s\S]*object/i],
+  ["empty poiId", [{ poiId: " ", order: 1 }], /strict-day[\s\S]*route stop 0[\s\S]*non-empty poiId/i],
+  ["non-lodging zero", [{ poiId: "route-one", order: 0 }], /strict-day[\s\S]*route-one[\s\S]*order 0[\s\S]*lodging/i],
+]) {
+  const result = runTripValidation({
+    pois: strictRoutePois,
+    itinerary: strictRouteItinerary(routeStops),
+    extraArgs: ["--strict-routes"],
+  });
+  assert.notEqual(result.status, 0, `${label} must fail strict canonical route validation`);
+  assert.match(result.output, expected, `${label} must explain the strict route-order boundary`);
+}
+
+const validStrictRoute = runTripValidation({
+  pois: strictRoutePois,
+  itinerary: strictRouteItinerary([
+    { poiId: "hotel-base", order: 0 },
+    { poiId: "route-one", order: 1 },
+    { poiId: "route-two", order: 2 },
+  ]),
+  extraArgs: ["--strict-routes"],
+});
+assert.equal(validStrictRoute.status, 0, validStrictRoute.output);
+
+const legacyStringWithoutStrict = runTripValidation({
+  pois: strictRoutePois,
+  itinerary: strictRouteItinerary(["route-one"]),
+});
+assert.equal(legacyStringWithoutStrict.status, 0, legacyStringWithoutStrict.output);
+
+const malformedEvidenceRoute = runTripValidation({
+  pois: formalPois,
+  itinerary: strictRouteItinerary(["food-stop"]),
+  sources: formalSources,
+  extraArgs: ["--require-route-evidence", "--strict-routes"],
+});
+assert.notEqual(malformedEvidenceRoute.status, 0, "evidence collection must not certify a malformed strict route stop");
+assert.match(malformedEvidenceRoute.output, /strict-day[\s\S]*route stop 0[\s\S]*object/i);
 
 const publicNamedPoi = {
   name: "Named market",
@@ -373,11 +441,13 @@ assert.notEqual(unknownFlag.status, 0, "unknown flags must still fail");
 assert.match(unknownFlag.output, /Unknown argument: --unknown-contract-flag/);
 
 const publicMapHtml = fs.readFileSync(publicMapPath, "utf8");
+const publicUrlRuntimeMatch = publicMapHtml.match(/\/\* PUBLIC_URL_RUNTIME_START \*\/([\s\S]*?)\/\* PUBLIC_URL_RUNTIME_END \*\//);
+assert.ok(publicUrlRuntimeMatch, "public map must expose the shared public URL runtime contract");
 const evidenceRuntimeMatch = publicMapHtml.match(/\/\* POI_EVIDENCE_RUNTIME_START \*\/([\s\S]*?)\/\* POI_EVIDENCE_RUNTIME_END \*\//);
 assert.ok(evidenceRuntimeMatch, "public map must expose the shipped POI evidence renderer for executable contract tests");
 const evidenceSandbox = { URL };
 vm.runInNewContext(
-  `${evidenceRuntimeMatch[1]}\nthis.renderPoiEvidence = renderPoiEvidence; this.renderPoiSourceEvidence = renderPoiSourceEvidence;`,
+  `${publicUrlRuntimeMatch[1]}\n${evidenceRuntimeMatch[1]}\nthis.renderPoiEvidence = renderPoiEvidence; this.renderPoiSourceEvidence = renderPoiSourceEvidence;`,
   evidenceSandbox,
 );
 
@@ -418,6 +488,18 @@ const unsafeEvidence = evidenceSandbox.renderPoiEvidence({
   }],
 });
 assert.equal(unsafeEvidence, "", "renderer must discard non-HTTP(S) evidence URLs even if malformed data reaches the browser");
+
+const credentialEvidence = evidenceSandbox.renderPoiEvidence({
+  evidenceSources: [{
+    title: "Credential source",
+    url: "https://reader:secret@example.com/place",
+    type: "official",
+    role: "fact",
+    language: "en",
+    checkedAt: "2026-08-02",
+  }],
+});
+assert.equal(credentialEvidence, "", "renderer must discard credential-bearing evidence URLs");
 
 const legacyFallback = evidenceSandbox.renderPoiSourceEvidence({ source: "Legacy <source> text" });
 assert.match(legacyFallback, /<h2>资料线索<\/h2>/);

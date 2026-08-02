@@ -4,12 +4,37 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(scriptDir, "..", "assets", "guide-template-europe-public");
+const defaultRoot = path.resolve(scriptDir, "..", "assets", "guide-template-europe-public");
+
+function parseTemplateRoot(args) {
+  if (!args.length) return defaultRoot;
+  if (args.length === 2 && args[0] === "--template-root") return path.resolve(args[1]);
+  throw new Error("usage: build-europe-public-template.js [--template-root <template-directory>]");
+}
+
+const root = parseTemplateRoot(process.argv.slice(2));
 const sourcePois = JSON.parse(fs.readFileSync(path.join(root, "data", "pois.json"), "utf8"));
 const sourceItinerary = JSON.parse(fs.readFileSync(path.join(root, "data", "itinerary.json"), "utf8"));
 const sourceEvents = JSON.parse(fs.readFileSync(path.join(root, "data", "events.json"), "utf8"));
 const sourceSources = JSON.parse(fs.readFileSync(path.join(root, "data", "sources.json"), "utf8"));
-const travelerEvents = sourceEvents.map(({ sourceIds: _sourceIds, ...event }) => event);
+
+function normalizePublicUrl(value, errorMessage) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(errorMessage);
+  }
+  if (!["http:", "https:"].includes(url.protocol) || !url.hostname || url.username || url.password) {
+    throw new Error(errorMessage);
+  }
+  return url.href;
+}
+
+const travelerEvents = sourceEvents.map(({ sourceIds: _sourceIds, ...event }) => ({
+  ...event,
+  officialUrl: normalizePublicUrl(event.officialUrl, `Event ${event.id || event.name || "<missing>"} has unsafe officialUrl`),
+}));
 
 const INLINE_SCRIPT_ESCAPES = {
   "<": "\\u003C",
@@ -30,14 +55,7 @@ if (!Array.isArray(sourcePois) || !Array.isArray(sourceEvents) || !Array.isArray
 const sourceById = new Map();
 for (const source of sourceSources) {
   if (sourceById.has(source.id)) throw new Error(`duplicate source id: ${source.id}`);
-  let url;
-  try {
-    url = new URL(source.url);
-  } catch {
-    throw new Error(`Source ${source.id} has unsafe URL`);
-  }
-  if (!["http:", "https:"].includes(url.protocol)) throw new Error(`Source ${source.id} has unsafe URL`);
-  sourceById.set(source.id, { ...source, url: url.href });
+  sourceById.set(source.id, { ...source, url: normalizePublicUrl(source.url, `Source ${source.id} has unsafe URL`) });
 }
 
 function publicEvidenceForPoi(poi) {
@@ -332,7 +350,6 @@ const trip = {
 };
 
 const output = `// Generated from the public europe-autumn-2026-sample data.\nwindow.TRIP_DATA = ${JSON.stringify(trip, null, 2)};\n`;
-fs.writeFileSync(path.join(root, "maps", "assets", "trip-data.js"), output);
 
 const directTrip = {
   trip: sourceItinerary.trip,
@@ -346,10 +363,23 @@ const directTrip = {
 };
 const htmlPath = path.join(root, "maps", "itinerary-map.html");
 const html = fs.readFileSync(htmlPath, "utf8");
-const dataStart = html.indexOf("const PUBLIC_TRIP_DATA = ");
-const aliasStart = html.indexOf("    const stops = PUBLIC_TRIP_DATA.stops;", dataStart);
+const declaration = "const PUBLIC_TRIP_DATA = ";
+const aliasMarker = "    const stops = PUBLIC_TRIP_DATA.stops;";
+const declarationCount = (html.match(/const PUBLIC_TRIP_DATA = /g) || []).length;
+const aliasCount = html.split(aliasMarker).length - 1;
+if (declarationCount !== 1) {
+  throw new Error(`canonical HTML must contain exactly one PUBLIC_TRIP_DATA block; found ${declarationCount}`);
+}
+if (aliasCount !== 1) {
+  throw new Error(`canonical HTML must contain exactly one PUBLIC_TRIP_DATA alias boundary; found ${aliasCount}`);
+}
+const dataStart = html.indexOf(declaration);
+const aliasStart = html.indexOf(aliasMarker, dataStart);
 if (dataStart < 0 || aliasStart < 0) throw new Error("canonical HTML is missing the PUBLIC_TRIP_DATA boundary");
 const nextHtml = `${html.slice(0, dataStart)}const PUBLIC_TRIP_DATA = ${serializeForInlineScript(directTrip, 2)};\n\n${html.slice(aliasStart)}`;
+
+// Complete both outputs and all foreseeable validation before the first real write.
+fs.writeFileSync(path.join(root, "maps", "assets", "trip-data.js"), output);
 fs.writeFileSync(htmlPath, nextHtml);
 
 console.log(`built Europe direct-copy public sample: ${sourcePois.length} places, ${sourceItinerary.days.length} days, ${sourceEvents.length} events`);

@@ -22,7 +22,8 @@
 ## 修改行程
 
 - 优先级、加入/移出日期与同日顺序沿用欧洲地图原交互并立即保存。优先级变化统一刷新动态候选排序、地点列表和地图可见 marker，保证移动端 top-8 候选口径一致；桌面与手机都从卡片左侧 44px 专用手柄启动排序，卡片正文仍打开详情，右侧按钮仍负责移出或精确上移/下移；移出的地点重新参与同城动态候选排序。
-- 恢复浏览器中已保存的行程后，先移除已经不再合格的 event assignment，再按用户当前有效的日期归类与移除状态，把每一天的正数路线序号归一化为连续的 `1..N`。迁移只写入序号确实变化的 assignment override，不改动 `removed`、默认行程、零或负数的住宿基底语义，也不制造修改记录；没有变化时不重复写入浏览器存储。
+- 恢复浏览器中已保存的行程后，先执行结构 sanitizer：assignment 必须是普通对象，`dayId` 必须仍存在，`order` 必须是有限整数；负数、缺失、字符串、分数和无穷值都会被删除。已知普通 POI 只接受正整数，只有已知酒店/住宿基底接受 `order: 0`；未知未来 POI 只保留合法日期上的正整数，不能以未知身份保留 0。被删除的已知 saved override 会自然回退到仍合法的默认 assignment。
+- 结构 sanitizer 之后才移除已经不再合格的 event assignment，再按用户当前有效的日期归类与移除状态，把每一天的正数路线序号归一化为连续的 `1..N`。sanitizer、event cleanup 与 normalization 合并成一次初始化写入；不改动 `removed`、优先级、dirty days、修改记录、撤销历史或默认行程，没有变化时不重复写入浏览器存储。
 - 排序手柄按住 160ms 后才进入拖动状态。拖动卡片浮起，目标位置出现插入线；手指进入列表顶部或底部 48px 时只自动滚动当天路线列表，速度随靠近边缘而增加并限制在每帧 14px。`pointercancel`、页面级 `Escape` 或未改变位置都会取消本次排序，不写入修改。
 - 松手改变顺序后调用原有 `reorderDayPois`，因此沿用已有的修改记录、撤销快照、浏览器保存、重新编号、路线弱化和“请 Codex 重新安排”闭环。受影响日期不再把旧相邻交通或规划估算描述成新顺序的有效交通，统一显示“顺序或安排已调整，交通待复核”。
 - 每次上述修改会在同一份公开 itinerary plan 状态中保存包含 `type / before / after / affectedDays` 的结构化修改记录和最多 20 步撤销快照；移动端底部工具栏可撤销上一步、查看原值、新值与受影响日期。撤销后若没有剩余修改，汇总自动关闭。
@@ -31,10 +32,10 @@
 
 ## 同期活动
 
-- `data/events.json` 是内部事实源并保留 `sourceIds` 溯源；builder 写入旅行者可见的 `PUBLIC_TRIP_DATA.events` 和 `window.TRIP_DATA.events` 时逐条移除 `sourceIds`，其余 event 字段与顺序必须一致。写入内联 `<script>` 时使用 script-context serializer，把 `<`、`>`、`&`、U+2028 和 U+2029 编码为 Unicode escape，活动或用户文案中的 `</script>` 不能提前结束脚本。旧攻略没有 `events` 字段时按空数组运行，原有 POI、DOM、storage key 和行程修改行为不变。
+- `data/events.json` 是内部事实源并保留 `sourceIds` 溯源；builder 写入旅行者可见的 `PUBLIC_TRIP_DATA.events` 和 `window.TRIP_DATA.events` 时逐条移除 `sourceIds`，并在写入前把每个 `officialUrl` 解析为规范化 URL。URL 只允许 `http:` / `https:`、非空 hostname 且不得携带 username/password；任一活动不合格时两份公开输出都不写。写入内联 `<script>` 时使用 script-context serializer，把 `<`、`>`、`&`、U+2028 和 U+2029 编码为 Unicode escape，活动或用户文案中的 `</script>` 不能提前结束脚本。
 - 只有 `scope: venue` 且能从 event 坐标或 `venuePoiId` 对应地点取得有效坐标的记录会在浏览器运行时生成 `event:<id>` synthetic POI；它使用 `E / 同期活动` marker 和独立图层。`hosted` 与 `citywide` 不生成额外 marker，避免把同一个活动重复画成多个地点。
 - 浏览器以同一个 traveler visibility gate 消费活动：id 必须符合 `/^[A-Za-z0-9][A-Za-z0-9._-]*$/`，且 status 不能是 `historical-lead`。不符合 gate 的 venue 不生成 synthetic POI，hosted/citywide 也不进入任何 HTML renderer，避免历史线索伪装成当前活动或把未经约束的 id 带入 marker 的 data attribute。转换、状态清理、日期匹配和 event HTML 由同一个 bounded pure runtime block 提供，Node VM contract tests 直接执行这份 shipped logic。
-- `hosted` 活动跟随 `hostPoiId`，在该地点原有类型化详情段之后显示日期、自然语言状态、安排建议、注意事项和官网入口；不显示 schema enum 或 `sourceIds`。
+- `hosted` 活动跟随 `hostPoiId`，在该地点原有类型化详情段之后显示日期、自然语言状态、安排建议和注意事项；只有 runtime 再次通过同一公开 URL gate 时才显示官网 anchor，不安全或带凭据的 URL 不渲染链接。页面不显示 schema enum 或 `sourceIds`。
 - `citywide` 活动先取合法 ISO `day.date`；没有 ISO 时才按旅行年份解析当天 `MM/DD` 或 `MM-DD`，再与起止日期及城市（含可选 `affectedCities`）匹配，并显示在当天路线滚动列表顶部。它用于解释人流、交通、纪念或节庆语境，不进入地点详情，也不成为默认安排。
 - 桌面日期说明、手机 app bar 与当天详情摘要统一把正式安排拆成“路线站点 / 住宿基底 / 体验与吃喝”三个计数。匹配当天与城市的 `citywide` 记录另显示“同期活动提示 N 条，不计入路线编号”；没有可见提示时不显示这句话，活动提示不会增加路线总数、体验数或站点序号。
 - 普通 POI 始终可以加入日期；event synthetic POI 必须同时满足 `confirmed + venue + 当天落在活动窗口内 + day.city 命中 event.city/affectedCities`。详情日期下拉只列合格日期，速查加入按钮、当天候选、最终 `assignPoiToDay` mutation boundary 都调用同一 day-specific helper；其他状态显示“等待具体节目”或“等待场次确认”，已确认但日期/城市不符时显示“不在活动日期或城市”。
@@ -79,6 +80,7 @@
 - 公开样例覆盖巴黎、尼斯、巴塞罗那和塞维利亚，住宿仅到片区级，交通不包含个人班次或订单。
 - Art Basel Paris、Salon du Chocolat、Castanyada 和诸圣节等易变化事实仍按 sources 的复核日期处理；尚未公布的节目、票务和开放时间不能写成已确认安排。
 - POI 的内部事实层可以在 `data/pois.json` 保存 `sourceIds`，并引用 `data/sources.json`。builder 会在发布边界解析引用，只向 `PUBLIC_TRIP_DATA` 与 `window.TRIP_DATA` 输出 `{ title, url, type, role, language, supports, checkedAt, status }` 组成的 `evidenceSources`；旅行者文件不保留原始 `sourceIds`。
-- source id 必须唯一；POI 引用不存在的 source 会让 build 直接失败。所有 source URL 在 builder 中解析并限制为 `http` / `https`，浏览器 renderer 也会再次丢弃不安全 URL；标题、标签和复核日期统一按动态文本转义，外链固定使用 `target="_blank" rel="noopener noreferrer"`。
+- source id 必须唯一；POI 引用不存在的 source 会让 build 直接失败。所有 source URL 与 event `officialUrl` 共用同一公开边界：只允许 `http:` / `https:`、非空 hostname、空 username/password，并以 `new URL(...).href` 规范化后才序列化。浏览器 evidence/event renderer 会再次丢弃不安全 URL；标题、标签和复核日期统一按动态文本转义，外链固定使用 `target="_blank" rel="noopener noreferrer"`。
+- Europe builder 先完成 source registry、events、traveler POIs、trip data、asset 字符串、HTML 中唯一 declaration/alias boundary 计数与完整 `nextHtml`，再开始第一次真实写入。缺失、损坏或重复的 `PUBLIC_TRIP_DATA` boundary 以及可预见数据错误都会让 asset 与 HTML 保持 byte-identical。
 - 地点详情在“注意事项”后以紧凑的“资料依据”折叠区显示证据数量、来源角色、标题与复核日期。没有 `evidenceSources` 时才回退到旧 `source` 文本；两者都没有时不显示来源区。
 - evidence 的语言标签只说明原资料使用的语言，方便旅行者判断阅读门槛；它不是来源质量、可信度或推荐强度评分。质量仍需结合来源类型、支持的事实范围、状态与复核日期判断。

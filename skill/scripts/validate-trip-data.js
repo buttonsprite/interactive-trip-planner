@@ -79,7 +79,10 @@ function isSafeHttpUrl(value) {
   if (!isNonEmptyString(value)) return false;
   try {
     const parsed = new URL(value);
-    return (parsed.protocol === "http:" || parsed.protocol === "https:") && Boolean(parsed.hostname);
+    return (parsed.protocol === "http:" || parsed.protocol === "https:")
+      && Boolean(parsed.hostname)
+      && !parsed.username
+      && !parsed.password;
   } catch {
     return false;
   }
@@ -171,6 +174,12 @@ function asPoiId(stop) {
   if (typeof stop === "string") return stop;
   if (stop && typeof stop.poiId === "string") return stop.poiId;
   return null;
+}
+
+function isLodgingBasePoi(poi) {
+  return poi?.category === "hotel"
+    || poi?.category === "lodging"
+    || poi?.lodgingRole === "base";
 }
 
 function haversineMeters(left, right) {
@@ -320,6 +329,49 @@ function main() {
     }
 
     if (Array.isArray(day.routeStops)) {
+      if (args.strictRoutes) {
+        const positiveOrders = [];
+        const firstIndexByOrder = new Map();
+        day.routeStops.forEach((stop, index) => {
+          const stopContext = `${dayLabel} route stop ${index}`;
+          if (!stop || typeof stop !== "object" || Array.isArray(stop)) {
+            errors.push(`${stopContext} must be an object with non-empty poiId and finite integer order`);
+            return;
+          }
+          if (!isNonEmptyString(stop.poiId)) {
+            errors.push(`${stopContext} must provide a non-empty poiId`);
+            return;
+          }
+          const poiId = stop.poiId.trim();
+          if (typeof stop.order !== "number" || !Number.isFinite(stop.order) || !Number.isInteger(stop.order)) {
+            errors.push(`${dayLabel} route stop ${poiId} must provide a finite integer order`);
+            return;
+          }
+          if (stop.order < 0) {
+            errors.push(`${dayLabel} route stop ${poiId} has negative order ${stop.order}`);
+            return;
+          }
+          if (stop.order === 0) {
+            if (!isLodgingBasePoi(poiById.get(poiId))) {
+              errors.push(`${dayLabel} route stop ${poiId} uses order 0; only a lodging base may use order 0`);
+            }
+            return;
+          }
+          if (firstIndexByOrder.has(stop.order)) {
+            errors.push(`${dayLabel} has duplicate route stop order ${stop.order}`);
+          } else {
+            firstIndexByOrder.set(stop.order, index);
+          }
+          positiveOrders.push(stop.order);
+        });
+
+        const sortedPositiveOrders = [...positiveOrders].sort((left, right) => left - right);
+        const expectedPositiveOrders = sortedPositiveOrders.map((_, index) => index + 1);
+        if (sortedPositiveOrders.some((order, index) => order !== expectedPositiveOrders[index])) {
+          errors.push(`${dayLabel} positive route stop orders must be unique and contiguous 1..${positiveOrders.length}`);
+        }
+      }
+
       const stopIds = day.routeStops.map(asPoiId).filter(Boolean);
       const duplicateStopIds = stopIds.filter((id, index) => stopIds.indexOf(id) !== index);
       if (duplicateStopIds.length) errors.push(`${dayLabel} repeats route stops: ${[...new Set(duplicateStopIds)].join(", ")}`);
@@ -328,7 +380,9 @@ function main() {
         .map((stop) => (typeof stop === "object" ? stop.order : null))
         .filter((order) => order != null);
       const duplicateOrders = orders.filter((order, index) => orders.indexOf(order) !== index);
-      if (duplicateOrders.length) warnings.push(`${dayLabel} has duplicate route stop orders: ${[...new Set(duplicateOrders)].join(", ")}`);
+      if (duplicateOrders.length && !args.strictRoutes) {
+        warnings.push(`${dayLabel} has duplicate route stop orders: ${[...new Set(duplicateOrders)].join(", ")}`);
+      }
 
       const segments = Array.isArray(day.transitSegments) ? day.transitSegments : [];
       for (let index = 1; index < stopIds.length; index += 1) {

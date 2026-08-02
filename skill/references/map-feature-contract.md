@@ -39,7 +39,7 @@
 - 为什么去：`note` 或 `whyWorthIt`。
 - 怎么安排：`plan`。
 - 注意事项：`tip`。
-- 资料依据：有结构化来源时，在注意事项之后显示可展开的 `evidenceSources`；每条只使用 `title`、`url`、`type`、`role`、`language`、`supports`、`checkedAt`、`status` 八个公开字段，并为外链使用安全的 HTTP(S) URL 与 `noopener noreferrer`。
+- 资料依据：有结构化来源时，在注意事项之后显示可展开的 `evidenceSources`；每条只使用 `title`、`url`、`type`、`role`、`language`、`supports`、`checkedAt`、`status` 八个公开字段。公开 URL 必须是规范化的 HTTP(S)、有 hostname 且不含 username/password，外链使用 `noopener noreferrer`。
 - 官网或预约入口、Google Maps 或等价地图入口、体验线索入口。
 - 修改优先级、加入某天、移出、移动日期和当天顺序控制。
 
@@ -67,7 +67,8 @@
 ## Core：状态恢复
 
 - 保存和恢复日期、地点详情、筛选、优先级、日期归类、顺序、修改记录和撤销快照。
-- 恢复时过滤已经不存在的地点和日期。
+- 恢复时先过滤非普通 assignment、已经不存在的日期、非有限整数 order、负数、普通地点的 0 与身份未知的 0；已知酒店/住宿基底可保留 0，合法未知未来地点只保留正整数。已知地点的 malformed override 删除后回退到合法 default。
+- saved structure sanitation、event eligibility sanitation 与连续编号 normalization 必须按此顺序执行，并在任一环节改变状态时合并为一次持久化；不得清空其他有效用户修改或 history。
 - 关闭详情后刷新不重新打开已关闭地点。
 
 ## Enhancement

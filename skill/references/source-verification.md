@@ -355,7 +355,7 @@ Semporna diving October visibility official marine weather
 
 来源 `role` 要明确区分事实（`fact`）、推荐/发现（`recommendation` 或 `discovery`）和体验（`experience`）：事实来源支持地址、开放、菜单、场次等可核实结论；推荐来源支持“为什么进入候选”和值得点的品类，但不能自动证明营业或库存；体验来源补充排队、服务节奏、入口和现场感，不能单独支持法规、安全或当前活动。
 
-每条正式路线地点在内部数据中保存非空 `sourceIds`。被引用的来源必须包含非空 `id`、`title`、`type`、`role`、`language`、`checkedAt`、`status`、非空 `supports`，以及 `http`/`https` URL。`supports` 只列这张页面真实支持的结论；来源角色不同不代表可信度高低，而是限制它能证明什么。
+每条正式路线地点在内部数据中保存非空 `sourceIds`。被引用的来源必须包含非空 `id`、`title`、`type`、`role`、`language`、`checkedAt`、`status`、非空 `supports`，以及安全公开 URL：只允许 `http:` / `https:`、非空 hostname 与空 username/password。构建器以 `new URL(...).href` 规范化后才公开序列化；活动 `officialUrl` 使用同一边界。`supports` 只列这张页面真实支持的结论；来源角色不同不代表可信度高低，而是限制它能证明什么。
 
 生成公开地图时，构建器按 `sourceIds` 顺序解析并只输出 `{title,url,type,role,language,supports,checkedAt,status}` 八字段 `evidenceSources`；公开数据不得保留 raw `sourceIds`。地图把这些资料放在可展开的“资料依据”中，而不是给每个地点增加常驻置信度徽章。
 

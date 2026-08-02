@@ -103,9 +103,46 @@ function groupBy(values, getKey) {
   return grouped;
 }
 
-function isoDate(shortDate) {
-  const [month, day] = shortDate.split("/").map(Number);
-  return `2026-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+function normalizedCalendarDate(year, month, day) {
+  const yearNumber = Number(year);
+  const monthNumber = Number(month);
+  const dayNumber = Number(day);
+  if (!Number.isInteger(yearNumber) || !Number.isInteger(monthNumber) || !Number.isInteger(dayNumber)) return "";
+  const date = new Date(Date.UTC(yearNumber, monthNumber - 1, dayNumber));
+  if (
+    date.getUTCFullYear() !== yearNumber
+    || date.getUTCMonth() !== monthNumber - 1
+    || date.getUTCDate() !== dayNumber
+  ) return "";
+  return `${String(yearNumber).padStart(4, "0")}-${String(monthNumber).padStart(2, "0")}-${String(dayNumber).padStart(2, "0")}`;
+}
+
+function getDayIsoDate(day, tripStartDate) {
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})(?:\D|$)/.exec(day?.date || "");
+  if (isoMatch) return normalizedCalendarDate(isoMatch[1], isoMatch[2], isoMatch[3]);
+  const startMatch = /^(\d{4})-(\d{2})-(\d{2})(?:\D|$)/.exec(tripStartDate || "");
+  if (!startMatch || !normalizedCalendarDate(startMatch[1], startMatch[2], startMatch[3])) return "";
+  for (const value of [day?.short, day?.date]) {
+    const shortMatch = /^(\d{1,2})[/-](\d{1,2})(?:\D|$)/.exec(value || "");
+    if (shortMatch) return normalizedCalendarDate(startMatch[1], shortMatch[1], shortMatch[2]);
+  }
+  return "";
+}
+
+function requireDayIsoDate(day) {
+  const value = getDayIsoDate(day, sourceItinerary.trip?.startDate);
+  if (!value) throw new Error(`invalid public sample day date: ${day?.id || "<missing>"}`);
+  return value;
+}
+
+function isUsableCoords(coords) {
+  return Array.isArray(coords)
+    && coords.length === 2
+    && coords.every((value) => typeof value === "number" && Number.isFinite(value))
+    && coords[0] >= -90
+    && coords[0] <= 90
+    && coords[1] >= -180
+    && coords[1] <= 180;
 }
 
 const poiByName = new Map(pois.map((poi) => [poi.name, poi]));
@@ -122,19 +159,28 @@ function eventAssignmentPoi(event, day) {
   if (event.status !== "confirmed" || event.scope !== "venue") {
     throw new Error(`public sample event assignment must be confirmed + venue: ${event.name}`);
   }
-  const dayDate = isoDate(day.short);
-  const startsOn = String(event.startsAt || "").slice(0, 10);
-  const endsOn = String(event.endsAt || "").slice(0, 10);
+  const dayDate = requireDayIsoDate(day);
+  const startsOnMatch = /^(\d{4})-(\d{2})-(\d{2})(?:\D|$)/.exec(event.startsAt || "");
+  const endsOnMatch = /^(\d{4})-(\d{2})-(\d{2})(?:\D|$)/.exec(event.endsAt || "");
+  const startsOn = startsOnMatch ? normalizedCalendarDate(startsOnMatch[1], startsOnMatch[2], startsOnMatch[3]) : "";
+  const endsOn = endsOnMatch ? normalizedCalendarDate(endsOnMatch[1], endsOnMatch[2], endsOnMatch[3]) : "";
   const dayCity = String(day.city || "").trim().toLocaleLowerCase("en-US");
   const eventCities = [event.city, ...(Array.isArray(event.affectedCities) ? event.affectedCities : [])]
     .filter((city) => typeof city === "string")
     .map((city) => city.trim().toLocaleLowerCase("en-US"));
-  if (day.city === "Transit" || !eventCities.includes(dayCity) || dayDate < startsOn || dayDate > endsOn) {
+  if (!startsOn || !endsOn || day.city === "Transit" || !eventCities.includes(dayCity) || dayDate < startsOn || dayDate > endsOn) {
     throw new Error(`public sample event assignment is outside its eligible day: ${event.name} -> ${day.id}`);
   }
-  const venue = poisById.get(event.venuePoiId)?.[0];
-  const coords = Array.isArray(event.coords) ? event.coords : venue?.coords;
-  if (!Array.isArray(coords) || coords.length !== 2) {
+  const venueMatches = typeof event.venuePoiId === "string" ? (poisById.get(event.venuePoiId) || []) : [];
+  if (typeof event.venuePoiId === "string" && venueMatches.length === 0) {
+    throw new Error(`public sample event assignment references missing venue POI: ${event.venuePoiId}`);
+  }
+  if (venueMatches.length > 1) {
+    throw new Error(`public sample event assignment references ambiguous venue POI: ${event.venuePoiId}`);
+  }
+  const venue = venueMatches[0];
+  const coords = isUsableCoords(event.coords) ? event.coords : venue?.coords;
+  if (!isUsableCoords(coords)) {
     throw new Error(`public sample event assignment has no usable location: ${event.name}`);
   }
   return {
@@ -215,7 +261,7 @@ const days = sourceItinerary.days.map((day) => {
 
   return {
     id: day.id,
-    date: isoDate(day.short),
+    date: requireDayIsoDate(day),
     title: day.title,
     city: day.city,
     summary: day.summary,

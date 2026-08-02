@@ -391,16 +391,18 @@ const scripts = [...html.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/sc
 assert.equal(scripts.length, 1);
 new vm.Script(scripts[0], { filename: htmlPath });
 
-function runRealBuilderFixture({ nextItinerary, nextEvents = events }) {
+function runRealBuilderFixture({ nextItinerary, nextEvents = events, nextPois = pois }) {
   const originals = new Map([
     [itineraryPath, fs.readFileSync(itineraryPath, "utf8")],
     [eventsPath, fs.readFileSync(eventsPath, "utf8")],
+    [poiPath, fs.readFileSync(poiPath, "utf8")],
     [tripDataPath, fs.readFileSync(tripDataPath, "utf8")],
     [htmlPath, fs.readFileSync(htmlPath, "utf8")],
   ]);
   try {
     fs.writeFileSync(itineraryPath, `${JSON.stringify(nextItinerary, null, 2)}\n`);
     fs.writeFileSync(eventsPath, `${JSON.stringify(nextEvents, null, 2)}\n`);
+    fs.writeFileSync(poiPath, `${JSON.stringify(nextPois, null, 2)}\n`);
     const result = spawnSync(process.execPath, [builderPath], { encoding: "utf8" });
     let builtTrip = null;
     if (result.status === 0) {
@@ -431,13 +433,148 @@ assert.equal(
   `real builder must resolve a confirmed event default by name:\n${eventDefaultBuild.result.stdout}${eventDefaultBuild.result.stderr}`,
 );
 for (const dayId of ["d1024", "d1025"]) {
+  const generatedDay = eventDefaultBuild.builtTrip.days.find((day) => day.id === dayId);
   assert.ok(
-    eventDefaultBuild.builtTrip.days
-      .find((day) => day.id === dayId)
-      ?.routeStops.some((stop) => stop.poiId === `event:${confirmedDefaultEvent.id}`),
+    generatedDay?.routeStops.some((stop) => stop.poiId === `event:${confirmedDefaultEvent.id}`),
     `generated trip output must contain the synthetic event id for ${dayId}`,
   );
+  const baselineStops = JSON.parse(JSON.stringify(
+    generatedSandbox.window.TRIP_DATA.days.find((day) => day.id === dayId)?.routeStops || [],
+  ));
+  assert.deepEqual(
+    generatedDay.routeStops.filter((stop) => !stop.poiId.startsWith("event:")),
+    baselineStops,
+    `event resolution must not alter stable POI defaults for ${dayId}`,
+  );
 }
+
+const isoPrecedenceItinerary = {
+  ...itinerary,
+  days: itinerary.days.map((day) => day.id === "d1024"
+    ? { ...day, date: "2026-10-25", short: "10/26" }
+    : day),
+  defaultAssignments: [
+    ...itinerary.defaultAssignments,
+    { name: confirmedDefaultEvent.name, dayId: "d1024", order: 99 },
+  ],
+};
+const isoPrecedenceBuild = runRealBuilderFixture({ nextItinerary: isoPrecedenceItinerary });
+assert.equal(
+  isoPrecedenceBuild.result.status,
+  0,
+  `valid ISO day.date must win over a conflicting short label:\n${isoPrecedenceBuild.result.stdout}${isoPrecedenceBuild.result.stderr}`,
+);
+assert.equal(isoPrecedenceBuild.builtTrip.days.find((day) => day.id === "d1024")?.date, "2026-10-25");
+assert.ok(
+  isoPrecedenceBuild.builtTrip.days
+    .find((day) => day.id === "d1024")
+    ?.routeStops.some((stop) => stop.poiId === `event:${confirmedDefaultEvent.id}`),
+);
+
+const fallbackYear = "2031";
+const fallbackYearItinerary = {
+  ...itinerary,
+  trip: { ...itinerary.trip, startDate: `${fallbackYear}-10-24` },
+  days: itinerary.days.map((day) => day.id === "d1024"
+    ? { ...day, date: "10/24 周五", short: "10-24" }
+    : day),
+  defaultAssignments: [
+    ...itinerary.defaultAssignments,
+    { name: confirmedDefaultEvent.name, dayId: "d1024", order: 99 },
+  ],
+};
+const fallbackYearEvents = events.map((event) => event.id === confirmedDefaultEvent.id
+  ? {
+      ...event,
+      startsAt: `${fallbackYear}-10-23T11:00:00+02:00`,
+      endsAt: `${fallbackYear}-10-25T19:00:00+01:00`,
+    }
+  : event);
+const fallbackYearBuild = runRealBuilderFixture({
+  nextItinerary: fallbackYearItinerary,
+  nextEvents: fallbackYearEvents,
+});
+assert.equal(
+  fallbackYearBuild.result.status,
+  0,
+  `short fallback must use trip.startDate year and accept MM-DD:\n${fallbackYearBuild.result.stdout}${fallbackYearBuild.result.stderr}`,
+);
+assert.equal(fallbackYearBuild.builtTrip.days.find((day) => day.id === "d1024")?.date, "2031-10-24");
+
+const impossibleIsoItinerary = {
+  ...itinerary,
+  days: itinerary.days.map((day) => day.id === "d1024"
+    ? { ...day, date: "2026-02-30", short: "10/24" }
+    : day),
+  defaultAssignments: [
+    ...itinerary.defaultAssignments,
+    { name: confirmedDefaultEvent.name, dayId: "d1024", order: 99 },
+  ],
+};
+const impossibleIsoBuild = runRealBuilderFixture({ nextItinerary: impossibleIsoItinerary });
+assert.notEqual(impossibleIsoBuild.result.status, 0, "impossible ISO day.date must fail the real builder");
+assert.match(
+  `${impossibleIsoBuild.result.stdout}${impossibleIsoBuild.result.stderr}`,
+  /invalid public sample day date.*d1024/i,
+);
+
+for (const [label, coords] of [
+  ["non-finite", [Number.POSITIVE_INFINITY, 2.3]],
+  ["latitude out of range", [91, 2.3]],
+  ["longitude out of range", [48.8, 181]],
+]) {
+  const invalidLocationEvents = events.map((event) => event.id === confirmedDefaultEvent.id
+    ? { ...event, venuePoiId: undefined, coords }
+    : event);
+  const invalidLocationBuild = runRealBuilderFixture({
+    nextItinerary: {
+      ...itinerary,
+      defaultAssignments: [
+        ...itinerary.defaultAssignments,
+        { name: confirmedDefaultEvent.name, dayId: "d1024", order: 99 },
+      ],
+    },
+    nextEvents: invalidLocationEvents,
+  });
+  assert.notEqual(invalidLocationBuild.result.status, 0, `${label} event coords must fail the real builder`);
+  assert.match(
+    `${invalidLocationBuild.result.stdout}${invalidLocationBuild.result.stderr}`,
+    /no usable location.*Art Basel Paris 2026 public days/i,
+  );
+}
+
+const venueSourcePoi = pois.find((poi) => slugify(`${poi.city}-${poi.name}`) === confirmedDefaultEvent.venuePoiId);
+assert.ok(venueSourcePoi, "real builder fixture requires the confirmed event venue POI");
+const invalidVenueBuild = runRealBuilderFixture({
+  nextItinerary: {
+    ...itinerary,
+    defaultAssignments: [
+      ...itinerary.defaultAssignments,
+      { name: confirmedDefaultEvent.name, dayId: "d1024", order: 99 },
+    ],
+  },
+  nextEvents: events.map((event) => event.id === confirmedDefaultEvent.id
+    ? { ...event, coords: undefined }
+    : event),
+  nextPois: pois.map((poi) => poi === venueSourcePoi ? { ...poi, coords: [91, 2.3] } : poi),
+});
+assert.notEqual(invalidVenueBuild.result.status, 0, "out-of-range venue POI coords must fail the real builder");
+assert.match(`${invalidVenueBuild.result.stdout}${invalidVenueBuild.result.stderr}`, /no usable location/i);
+
+const missingVenueBuild = runRealBuilderFixture({
+  nextItinerary: {
+    ...itinerary,
+    defaultAssignments: [
+      ...itinerary.defaultAssignments,
+      { name: confirmedDefaultEvent.name, dayId: "d1024", order: 99 },
+    ],
+  },
+  nextEvents: events.map((event) => event.id === confirmedDefaultEvent.id
+    ? { ...event, venuePoiId: "missing-venue-poi" }
+    : event),
+});
+assert.notEqual(missingVenueBuild.result.status, 0, "missing venuePoiId target must fail the real builder");
+assert.match(`${missingVenueBuild.result.stdout}${missingVenueBuild.result.stderr}`, /missing venue POI/i);
 
 const ambiguousEventBuild = runRealBuilderFixture({
   nextItinerary: itineraryWithEventDefault,

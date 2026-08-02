@@ -2386,6 +2386,28 @@ window.TRIP_DATA = {
         2.1625
       ],
       "note": "市场、咖啡、vermut，适合生活感半日。",
+      "contentTier": "deep",
+      "whyWorthIt": "这里不是只供游客拍照的市场，而是把生鲜采购、街区社交和不同日期的旧货与书刊市集叠在同一座城市建筑里，适合从居民的日常节奏理解 Sant Antoni。",
+      "detailSections": [
+        {
+          "title": "到市场做什么",
+          "items": [
+            "先逛生鲜大厅，观察鱼档、熟食、橄榄与居民采购的组合",
+            "按当天开放内容选择小份食物或 vermut，不把它安排成完整正餐任务"
+          ]
+        },
+        {
+          "title": "重点看什么",
+          "items": [
+            "市场占据完整街区的铁结构与四向入口",
+            "室内摊位、外围商业和周边街道如何连成社区生活空间"
+          ]
+        },
+        {
+          "title": "这个市场的故事",
+          "body": "它是巴塞罗那城墙外早期的重要市场建筑，后来又容纳生鲜、Encants 旧货和周日书刊收藏市集；理解这三种节奏，比只拍建筑外观更有意思。"
+        }
+      ],
       "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mercat%20de%20Sant%20Antoni%20Barcelona",
       "experienceUrl": "https://www.xiaohongshu.com/search_result?keyword=%E5%9C%A3%E5%AE%89%E4%B8%9C%E5%B0%BC%E5%B8%82%E5%9C%BA%20%E5%B7%B4%E5%A1%9E%E7%BD%97%E9%82%A3",
       "imageQuery": "Mercat de Sant Antoni Barcelona"

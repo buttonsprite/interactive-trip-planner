@@ -37,6 +37,11 @@ assert.deepEqual(embedded.itineraryDays, itinerary.days);
 assert.ok(sources.every((source) => source.url && source.checkedAt && source.supports?.length));
 
 const byName = new Map(pois.map((poi) => [poi.name, poi]));
+const santAntoni = byName.get("Mercat de Sant Antoni");
+assert.equal(santAntoni?.contentTier, "deep");
+assert.ok(santAntoni?.whyWorthIt?.trim(), "deep sample should explain why it is worth visiting");
+assert.ok(santAntoni?.detailSections?.length >= 2 && santAntoni.detailSections.length <= 4);
+assert.deepEqual(embedded.pois.find((poi) => poi.name === "Mercat de Sant Antoni"), santAntoni);
 const hasChinese = (value) => /[\u3400-\u9fff]/.test(String(value || ""));
 for (const [name, expected] of [
   ["Sainte-Chapelle", "圣礼拜堂"],
@@ -65,6 +70,9 @@ for (const token of [
   "renderDetailDayRail",
   "renderPoiDetailDayList",
   "openPoiDetail",
+  "const renderPoiDetailSections",
+  "poi-detail-list",
+  "item.whyWorthIt || item.note",
   "const userLanguage = PUBLIC_TRIP_DATA.trip.language",
   "const getDisplayName = (item)",
   "function calculatePoiFocusZoom(currentZoom, mapSize)",

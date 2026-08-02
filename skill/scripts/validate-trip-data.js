@@ -94,6 +94,7 @@ function main() {
 
   const required = ["id", "name", "name_zh", "category", "coords", "note", "plan", "tip", "source"];
   const allowedPriorities = new Set(["", "must", "preferred", "nearby", "archive", "pending", "booked", "S", "A", "B", "C"]);
+  const allowedContentTiers = new Set(["deep", "standard", "compact"]);
   const ids = new Set();
   const identityKeys = new Map();
   const categoryCounts = new Map();
@@ -115,6 +116,48 @@ function main() {
     }
     if (["S", "A", "B", "C"].includes(poi.priority)) {
       warnings.push(`POI ${poi.id || poi.name} uses legacy priority ${poi.priority}; prefer semantic values must/preferred/nearby/archive`);
+    }
+
+    if (poi.contentTier != null) {
+      const poiLabel = poi.id || poi.name || "<unknown>";
+      if (!allowedContentTiers.has(poi.contentTier)) {
+        errors.push(`POI ${poiLabel} has invalid contentTier: ${poi.contentTier}`);
+      }
+
+      const sections = poi.detailSections;
+      const hasWhy = typeof poi.whyWorthIt === "string" && poi.whyWorthIt.trim().length > 0;
+      if (["deep", "standard"].includes(poi.contentTier) && !hasWhy) {
+        errors.push(`POI ${poiLabel} ${poi.contentTier} content requires whyWorthIt`);
+      }
+      if (poi.contentTier === "deep" && (!Array.isArray(sections) || sections.length < 2 || sections.length > 4)) {
+        errors.push(`POI ${poiLabel} deep content requires 2-4 detailSections`);
+      }
+      if (poi.contentTier === "standard" && Array.isArray(sections) && sections.length > 2) {
+        errors.push(`POI ${poiLabel} standard content allows at most 2 detailSections`);
+      }
+      if (poi.contentTier === "compact" && sections != null && (!Array.isArray(sections) || sections.length > 0)) {
+        errors.push(`POI ${poiLabel} compact content must omit detailSections`);
+      }
+      if (sections != null && !Array.isArray(sections)) {
+        errors.push(`POI ${poiLabel} detailSections must be an array`);
+      }
+      if (Array.isArray(sections)) {
+        sections.forEach((section, index) => {
+          const titleValid = typeof section?.title === "string" && section.title.trim().length > 0;
+          if (!titleValid) errors.push(`POI ${poiLabel} detailSections[${index}] missing title`);
+
+          const bodyValid = typeof section?.body === "string" && section.body.trim().length > 0;
+          const itemsValid = Array.isArray(section?.items)
+            && section.items.length >= 1
+            && section.items.length <= 5
+            && section.items.every((item) => typeof item === "string" && item.trim().length > 0);
+          if (section?.items != null && !itemsValid) {
+            errors.push(`POI ${poiLabel} detailSections[${index}] needs body or 1-5 items`);
+          } else if (!bodyValid && !itemsValid) {
+            errors.push(`POI ${poiLabel} detailSections[${index}] needs body or 1-5 items`);
+          }
+        });
+      }
     }
 
     const key = [poi.city || "", poi.category || "", poi.name || ""].join(" / ");

@@ -22,6 +22,7 @@ const coreContractPath = path.join(skillRoot, "references", "core-interaction-co
 const tasteReference = read("references/hybrid-taste-models.md");
 const sourcePackReference = read("references/regional-source-packs.md");
 const tasteSourceOnlineLogic = read("references/taste-and-source-online-logic.md");
+const poiSchema = read("references/poi-schema.md");
 const template = read("assets/guide-template/maps/itinerary-map.html");
 const goldenDataRoot = path.join(skillRoot, "assets", "samples", "golden");
 const repositoryReadmePath = path.join(repositoryRoot, "README.md");
@@ -124,6 +125,11 @@ assert.match(tasteSourceOnlineLogic, /PRD V1 public acceptance/);
 assert.match(tasteSourceOnlineLogic, /8 个海外 Regional Source Pack/);
 assert.match(tasteSourceOnlineLogic, /每个 taste model 至少 3 个 unseen cities/);
 assert.doesNotMatch(tasteSourceOnlineLogic, /8\+[^\n]*已实现|跨 3 城[^\n]*已完成/);
+assert.match(skill, /contentTier/);
+assert.match(skill, /不同类型[^\n]*不[^\n]*同样/);
+assert.match(poiSchema, /deep[^\n]*standard[^\n]*compact/);
+assert.match(poiSchema, /detailSections/);
+assert.match(poiSchema, /市场[^\n]*(买什么|逛什么)/);
 
 if (repositoryReadme !== null) {
   assert.match(repositoryReadme, /developer-preview contract slice/);

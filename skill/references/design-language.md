@@ -14,6 +14,10 @@
 - `data/design-tokens.json`：给 HTML 使用的结构化 tokens。
 - 公开母版单文件 HTML 的 `<style>`：只调整 design token 和组件外观，不改直接复制版的布局层级与交互结构。
 
+## UI theme 与旅行主题的关系
+
+旅行叙事主题回答“这趟旅行体验什么”，taste model 回答“按什么品味选点和安排节奏”，UI theme 只回答“同一份地图怎样呈现”。三者可以组合，不能互相替代。已有攻略级 `design-language.md` 和 `design-tokens.json` 仍是目的地视觉事实层；需要复用完整组件语言时，先读取 `assets/themes/index.json`，选择一个兼容当前 Core 的 UI theme，再用目的地 preset 生成攻略自己的 token 快照和 CSS override。未命中合适 preset 时沿用本节流程自行设计，不按 registry 顺序兜底。
+
 ## 设计流程
 
 1. 视觉研究

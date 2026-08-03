@@ -125,6 +125,7 @@ node skill/scripts/probe-source-access.js --context <sources.json>
 5. 只有经过路网计算或人工复核的路径才能显示为正式路线。完整攻略的非纯移动日应保存正式路线；只有地点顺序时可以显示编号和顺序引导线，顺序引导线只是顺序参考、不代表道路，并提供外部导航入口，不能把引导线称为路线，也不能用直线距离自动补成移动时间。
 6. 完整攻略基于 `assets/guide-template-europe-public/` 时只运行 `node scripts/validate-europe-derived-map.js <itinerary-map.html>` 作为地图 HTML 合同校验，并检查主语言、主要地点译名和选点后的尺寸自适应聚焦，再做浏览器验收。校验失败时先恢复母版交互，不通过删功能或改验证器绕过。
 7. 基础功能交互通过后再做视觉增强。生活品味模板只提供 3–5 个关键词、信息密度、语气、图片策略、marker、色彩、材质和文字 moodboard；与目的地线索共同形成本次视觉。配色、字体、标记、路线色、圆角、阴影和图层控件外观可以在单文件 `<style>` 的 design token 与组件外观中微调，但不能携带第二套 HTML，也不能改变直接复制版的布局层级、状态与交互。
+   旅行叙事主题、taste model 与 UI theme 是三个独立层次：前两者决定体验和选点，UI theme 只决定地图呈现。需要复用完整组件语言时读取 `assets/themes/index.json`，选择与 `europe-map-direct-v1` 兼容的主题与目的地 preset；选择结果仍需写回当前攻略自己的 design tokens、设计语言和单文件 HTML，不能让地图运行时依赖 theme registry。
 8. 轻量模板 `assets/guide-template/` 只用于用户明确要求的低保真原型、内部功能试验或三天以内且不需要完整修改闭环的简单地图；不能把它作为完整攻略交付后声称与欧洲版交互一致。
 9. 把地图当前实际行为写入 `docs/online-logic/map.md`，不把尚未实现的想法写成事实。
 10. 只有用户明确要求改变交互时，才建立独立的 **interaction fork**：先写差异规格、验证新状态语义和回退边界，再复制并改 Core。视觉方向、配色和装饰变化不构成 interaction fork。

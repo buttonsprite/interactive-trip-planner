@@ -121,6 +121,7 @@ const scheduledMarkerHtml = markerRuntime.renderPoiMarkerMarkup({
   item: { id: "event:confirmed.event-1", category: "event", eventStatus: "confirmed" },
   scheduled: true,
   currentDay: true,
+  pendingReroute: true,
   selected: true,
   mainHtml: '<span class="schedule-main">2</span>',
   scheduleCategoryHtml: '<span class="schedule-category">E</span>',
@@ -140,7 +141,12 @@ for (const [label, rendered] of [["scheduled", scheduledMarkerHtml], ["unschedul
   assert.equal((rendered.match(/class="poi-marker-surface"/g) || []).length, 1, `${label} marker must contain one visual surface`);
 }
 assert.match(scheduledMarkerHtml, /class="poi-marker[^"']* event [^"']*selected/);
+assert.match(scheduledMarkerHtml, /class="poi-marker[^"']* pending-reroute(?:\s|\")/);
 assert.match(candidateMarkerHtml, /class="poi-marker[^"']* event [^"']*event-status-program-pending/);
+assert.ok(
+  html.includes("pendingReroute: Boolean(itineraryPlan.dirtyDays[assignment.dayId])"),
+  "poiIcon must derive pending-reroute from the assigned day's real itinerary dirty state",
+);
 assert.match(
   scheduledMarkerHtml,
   /<span class="poi-marker-surface"><span class="schedule-main">2<\/span><\/span><span class="schedule-category">/,

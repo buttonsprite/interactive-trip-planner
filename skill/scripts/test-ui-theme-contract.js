@@ -12,6 +12,35 @@ const themesRoot = path.join(skillRoot, "assets", "themes");
 const read = (filePath) => fs.readFileSync(filePath, "utf8");
 const readJson = (filePath) => JSON.parse(read(filePath));
 
+const publicCoreHtml = read(path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "itinerary-map.html"));
+const publicCoreCss = [...publicCoreHtml.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)]
+  .map((match) => match[1])
+  .join("\n");
+
+const resolveCombinedMarkerSurfaceProperty = (themeCss, ancestorClasses, property) => {
+  let winner = null;
+  let order = 0;
+  for (const css of [publicCoreCss, themeCss]) {
+    for (const rule of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      for (const rawSelector of rule[1].split(",")) {
+        const selector = rawSelector.trim();
+        if (!selector.endsWith(".poi-marker-surface")) continue;
+        const selectorClasses = [...selector.matchAll(/\.([a-z0-9_-]+)/gi)].map((match) => match[1]);
+        const requiredAncestorClasses = selectorClasses.filter((className) => className !== "poi-marker-surface");
+        if (!requiredAncestorClasses.every((className) => ancestorClasses.includes(className))) continue;
+        const declaration = rule[2].match(new RegExp(`(?:^|;)\\s*${property.replace("-", "\\-")}\\s*:\\s*([^;]+)`, "i"));
+        if (!declaration) continue;
+        order += 1;
+        const specificity = selectorClasses.length;
+        if (!winner || specificity > winner.specificity || (specificity === winner.specificity && order > winner.order)) {
+          winner = { value: declaration[1].trim().replace(/\s*!important\s*$/i, ""), specificity, order };
+        }
+      }
+    }
+  }
+  return winner?.value || "";
+};
+
 const assertMarkerSilhouettesHaveDeepCuts = (css, label) => {
   const corners = [[0, 0], [100, 0], [100, 100], [0, 100]];
   for (let index = 0; index < 5; index += 1) {
@@ -55,6 +84,26 @@ for (const entry of registry.themes) {
   }
 
   const css = read(cssPath);
+  assert.equal(theme.tokens?.shadow?.marker, "none", "combined marker cascade must honor the no-shadow theme token");
+  for (const ancestorClasses of [
+    ["poi-marker"],
+    ["poi-marker", "scheduled"],
+    ["poi-marker", "scheduled", "current-day"],
+    ["poi-marker", "event"],
+    ["poi-marker", "scheduled", "current-day", "event"],
+  ]) {
+    const label = ancestorClasses.join(".");
+    assert.equal(
+      resolveCombinedMarkerSurfaceProperty(css, ancestorClasses, "border-radius"),
+      "0",
+      `combined Core + Market Roof cascade must remove circular radius for ${label}`,
+    );
+    assert.equal(
+      resolveCombinedMarkerSurfaceProperty(css, ancestorClasses, "box-shadow"),
+      "none",
+      `combined Core + Market Roof cascade must remove Core surface shadows for ${label}`,
+    );
+  }
   assert.match(css, /ARCHITECTURAL-COLLAGE-THEME-START/);
   assert.match(css, /--trip-bg:\s*#F7F0DF/i);
   assert.match(css, /--trip-accent:\s*#283E64/i);
@@ -73,6 +122,7 @@ for (const entry of registry.themes) {
   assert.match(css, /\.poi-marker\.candidate\s+\.poi-marker-surface\s*\{/);
   assert.match(css, /\.poi-marker\.event\s*\{[\s\S]*?--marker-semantic-color:\s*var\(--trip-category-event\)/);
   assert.match(css, /\.poi-marker\.event-status-program-pending\s*\{[\s\S]*?--marker-semantic-color:\s*var\(--trip-warning\)/);
+  assert.match(css, /\.poi-marker\.pending-reroute\s*\{[\s\S]*?--marker-semantic-color:\s*var\(--trip-warning\)/);
   assert.match(css, /\.poi-marker\.selected\s*\{[\s\S]*?--marker-semantic-color:\s*var\(--trip-accent\)/);
   assert.match(css, /\.poi-marker-surface\s*\{[\s\S]*?background:\s*var\(--marker-semantic-color,\s*var\(--marker-variant-color\)\)/);
   assert.match(css, /\.poi-marker\.selected\s+\.poi-marker-surface\s*\{[\s\S]*?background-image:\s*var\(--trip-divider-image\)/);

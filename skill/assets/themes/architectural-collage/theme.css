@@ -197,6 +197,10 @@ select {
   --marker-semantic-color: var(--trip-warning);
 }
 
+.poi-marker.pending-reroute {
+  --marker-semantic-color: var(--trip-warning);
+}
+
 .poi-marker-surface {
   position: absolute;
   inset: 0;
@@ -205,6 +209,17 @@ select {
   border: 2px solid var(--trip-bg);
   clip-path: var(--marker-shape);
   pointer-events: none;
+}
+
+.poi-marker .poi-marker-surface {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.poi-marker.scheduled .poi-marker-surface,
+.poi-marker.scheduled.current-day .poi-marker-surface,
+.poi-marker.event .poi-marker-surface {
+  box-shadow: none;
 }
 
 .poi-marker-main,

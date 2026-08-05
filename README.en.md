@@ -95,7 +95,7 @@ Free-form submissions and community signals do not become trusted facts by thems
 
 **REDSkill**
 
-Use the complete contents of [`releases/redskill-0.1.0/interactive-trip-planner/`](releases/redskill-0.1.0/interactive-trip-planner/); the [REDSkill installation guide](releases/redskill-0.1.0/INSTALL.zh-CN.md) provides upload and installation steps. This edition excludes Codex metadata and keeps only file formats supported by the platform.
+Use the complete contents of [`releases/redskill-0.1.0/interactive-trip-planner/`](releases/redskill-0.1.0/interactive-trip-planner/); the [Chinese REDSkill installation guide](releases/redskill-0.1.0/INSTALL.zh-CN.md) provides upload and installation steps. This edition excludes Codex metadata and keeps only file formats supported by the platform.
 
 ## Development and verification
 

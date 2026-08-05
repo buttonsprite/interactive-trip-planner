@@ -16,13 +16,15 @@ const itineraryPath = path.join(root, "data", "itinerary.json");
 const sourcesPath = path.join(root, "data", "sources.json");
 const eventsPath = path.join(root, "data", "events.json");
 const tripDataPath = path.join(root, "maps", "assets", "trip-data.js");
+const onlineLogicPath = path.join(root, "docs", "online-logic", "map.md");
 const builderPath = path.join(scriptDir, "build-europe-public-template.js");
 
-for (const file of [htmlPath, poiPath, itineraryPath, sourcesPath, eventsPath, tripDataPath]) {
+for (const file of [htmlPath, poiPath, itineraryPath, sourcesPath, eventsPath, tripDataPath, onlineLogicPath]) {
   assert.ok(fs.existsSync(file) && fs.statSync(file).size > 0, `missing public template file: ${file}`);
 }
 
 const html = fs.readFileSync(htmlPath, "utf8");
+const onlineLogic = fs.readFileSync(onlineLogicPath, "utf8");
 const pois = JSON.parse(fs.readFileSync(poiPath, "utf8"));
 const itinerary = JSON.parse(fs.readFileSync(itineraryPath, "utf8"));
 const sources = JSON.parse(fs.readFileSync(sourcesPath, "utf8"));
@@ -97,6 +99,18 @@ vm.runInNewContext(
   markerRuntimeSandbox,
 );
 const markerRuntime = markerRuntimeSandbox.markerRuntime;
+assert.match(onlineLogic, /POI id[^\n]*(确定性|稳定)[^\n]*(shape|形状)[^\n]*(tone|色调)/i);
+assert.match(onlineLogic, /`\.poi-marker-surface`/);
+assert.match(onlineLogic, /(badge|徽标)[^\n]*(label|标签)[^\n]*(外部|外侧|outside)/i);
+assert.match(onlineLogic, /(未启用主题|无主题|no-theme)[^\n]*(圆形|circular)[^\n]*(类别色|category)/i);
+for (const semanticState of ["selected", "event", "program-pending", "pending-reroute"]) {
+  assert.match(
+    onlineLogic,
+    new RegExp(`${semanticState}[^\\n]*(优先|precedence|覆盖)`, "i"),
+    `online logic must document semantic precedence for ${semanticState}`,
+  );
+}
+assert.match(onlineLogic, /`itineraryPlan\.dirtyDays\[assignment\.dayId\]`/);
 const stableVariant = markerRuntime.getPoiMarkerVariant("barcelona-mercat-de-sant-antoni");
 assert.deepEqual(
   JSON.parse(JSON.stringify(markerRuntime.getPoiMarkerVariant("barcelona-mercat-de-sant-antoni"))),

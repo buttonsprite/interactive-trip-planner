@@ -13,6 +13,11 @@
 - 地图标记、当天列表和地点速查都打开同一个详情，不重复显示另一套长弹窗。
 - 地点详情兼容三档内容深度：`deep` 用于主锚点并展示 2–4 个类型化详情段，`standard` 用于路线支撑点，`compact` 与未迁移旧数据继续展示简洁的 `note`、`plan`、`tip`。详情先显示 `whyWorthIt`（缺失时回退到 `note`），再按数据顺序通用渲染 `detailSections`；市场、博物馆、餐厅、酒吧、街区、酒店与交通不被强制套用同一组标题。
 - 当天地点使用编号；地图类别标识固定为 `H / 50 / W / S / C / F / A / L / T / E` 并使用各自主题色。当天视图显示当天地点、同城动态候选和当前选中地点，回到总览后显示完整地点池。
+- marker runtime 用 POI id 做确定性映射，为每个地点生成稳定的 shape 与 tone variant；相同 id 在重载和重建后保持同一组视觉变体，不把随机结果写入行程状态。
+- 每个地点的可裁切视觉只放在 `.poi-marker-surface` 内；route number 或类别主标识位于 surface 中，而 schedule-category badge、priority badge 与选中 label 都留在裁切区域外侧，避免不规则轮廓截断语义信息。
+- 未启用主题时，Core 的 `.poi-marker-surface` 保持原有圆形、阴影与 category 类别色，因此新增 runtime hook 不改变默认地图的识别方式；Market Roof 只通过主题 CSS 覆盖 surface 的轮廓和颜色。
+- Market Roof 中 `selected` 语义色优先于 decorative tone；`event` 语义色优先于 selected；`program-pending` warning 优先于普通 event；dirty-day 的 `pending-reroute` warning 优先于其他 marker 色。这样稳定的 shape/tone 只提供装饰变化，不会遮盖状态语义。
+- 已安排地点的 `pending-reroute` 不从视觉主题推断，而是读取真实状态 `itineraryPlan.dirtyDays[assignment.dayId]`；仅当该 assignment 所在日期已被修改并等待重排时才显示 warning。
 - 日期栏切换不反复强制缩放，并保留用户地图视野。桌面继续并排保留当前地点详情；手机若正处于地点详情，切换日期后会返回所选日期的当天路线，让日期变化、路线与候选立即可见，当前地点选择仍保留在状态中。
 - 从地图、当天列表或地点速查选中地点时，先完成详情布局和地图尺寸更新，再按更新后地图短边选择 `14 / 15 / 16` 的聚焦基准；保留合理的当前 zoom，并限制过度放大，不能在布局变化前固定写死 zoom。
 - 右上角控制行程与移动、地点分类图层。开关保存到当前攻略状态；进入某一天自动恢复行程图层，打开地点自动恢复对应分类图层。

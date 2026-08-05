@@ -31,6 +31,10 @@ const repositoryReadmePath = path.join(repositoryRoot, "README.md");
 const repositoryReadme = fs.existsSync(repositoryReadmePath)
   ? fs.readFileSync(repositoryReadmePath, "utf8")
   : null;
+const repositoryEnglishReadmePath = path.join(repositoryRoot, "README.en.md");
+const repositoryEnglishReadme = fs.existsSync(repositoryEnglishReadmePath)
+  ? fs.readFileSync(repositoryEnglishReadmePath, "utf8")
+  : null;
 
 assert.match(skill, /面向旅行者的语言/);
 assert.match(skill, /一次旅行设计提案/);
@@ -150,8 +154,15 @@ assert.match(skill, /当地食材结构[^\n]*居民[^\n]*季节/);
 assert.match(sources, /历史届次[^\n]*不[^\n]*当前活动/);
 
 if (repositoryReadme !== null) {
-  assert.match(repositoryReadme, /developer-preview contract slice/);
-  assert.match(repositoryReadme, /PRD V1 public acceptance/);
+  assert.match(repositoryReadme, /0\.1\.0[^\n]*developer preview/i);
+  assert.match(repositoryReadme, /不等于 Public V1/i);
+  assert.match(repositoryReadme, /8 个海外 Regional Source Pack/i);
+  assert.match(repositoryReadme, /每个 Taste Model 至少 3 个 unseen cities/i);
+  assert.match(repositoryReadme, /representative evidence/i);
+  assert.match(
+    repositoryReadme,
+    /\[[^\]]*详细验收边界[^\]]*\]\(skill\/references\/taste-and-source-online-logic\.md\)/i,
+  );
   for (const command of [
     "recommend-taste-models.js",
     "build-source-query-matrix.js",
@@ -161,10 +172,18 @@ if (repositoryReadme !== null) {
   }
   assert.match(repositoryReadme, /--context <file>/);
   assert.match(repositoryReadme, /--stdin/);
-  assert.match(repositoryReadme, /needs-local-language-terms/);
+  assert.match(repositoryReadme, /西班牙语[^\n]*加泰罗尼亚语[^\n]*词库/);
+  assert.match(repositoryReadme, /词库[^\n]*不等于地区来源包/);
   assert.match(repositoryReadme, /代表性景点[^\n]*当地生活/);
-  assert.match(repositoryReadme, /仅.*访问.*探测|访问.*探测.*不.*事实复核/);
+  assert.match(repositoryReadme, /source probe[^\n]*有界[^\n]*访问状态[^\n]*不能证明/i);
   assert.match(repositoryReadme, /Spain[^\n]*Regional Source Pack|西班牙[^\n]*Regional Source Pack/);
+}
+
+if (repositoryEnglishReadme !== null) {
+  assert.match(
+    repositoryEnglishReadme,
+    /\[Chinese REDSkill installation guide\]\(releases\/redskill-0\.1\.0\/INSTALL\.zh-CN\.md\)/,
+  );
 }
 
 for (const mode of ["first-visit", "return-visit", "landmark-light", "local-only", "balanced-visitor"]) {

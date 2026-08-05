@@ -261,7 +261,13 @@ try {
   writeJson(curatorModelPath, curatorModel);
 
   const privateExampleNote = path.join(curatorExampleRoot, "docs", "private-owner-note.md");
-  fs.writeFileSync(privateExampleNote, "Private source path: /Users/fixture-curator/private-trip\n");
+  const privateMacHomePath = path.join(
+    path.parse(process.cwd()).root,
+    "Users",
+    "fixture-curator",
+    "private-trip",
+  );
+  fs.writeFileSync(privateExampleNote, `Private source path: ${privateMacHomePath}\n`);
   assert.throws(() => validateTasteModels({ skillRoot: fixtureSkillRoot }), /privacy scan/i);
   fs.rmSync(privateExampleNote);
 

@@ -72,7 +72,7 @@ Hybrid Taste Model（混合生活品味模型）记录的是可以迁移到新�
 
 它还不能保证每个国家都有专属地区来源包，也不保证搜索结果天然正确或所有路线都经过真实路网复核。节庆、营业、价格、交通、预约、天气和安全信息仍需在出发前按提醒复核；社媒和论坛不能作为这些事实的唯一证据。
 
-当前版本也不等于 Public V1：更广的海外来源包、每个 Taste Model 在更多未见城市上的评估，以及更强的代表性证据仍属于后续工作。公开样例、截图和发布包不得包含真实订单、航班、住宿、姓名、账号、凭据或私人行程；OpenStreetMap 底图与 Wikimedia Commons 图片需要浏览器联网加载。
+当前版本也不等于 Public V1：仍需 8 个海外 Regional Source Pack、每个 Taste Model 至少 3 个 unseen cities 的评估，以及更强的 representative evidence；[详细验收边界见线上逻辑文档](skill/references/taste-and-source-online-logic.md)。公开样例、截图和发布包不得包含真实订单、航班、住宿、姓名、账号、凭据或私人行程；OpenStreetMap 底图与 Wikimedia Commons 图片需要浏览器联网加载。
 
 ## 贡献你的品味与地区知识
 

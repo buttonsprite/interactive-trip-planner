@@ -72,7 +72,7 @@ Version 0.1.0 is a developer preview that can support real trip planning, local-
 
 It cannot yet guarantee a dedicated Regional Source Pack for every country, that search results are inherently correct, or that every route has been checked against a real transport network. Events, hours, prices, transport, reservations, weather, and safety still need the indicated pre-departure checks; social and forum content cannot be their only evidence.
 
-This release is not Public V1. Broader international source-pack coverage, evaluation of each Taste Model in more unseen cities, and stronger representative evidence remain future work. Public samples, screenshots, and release packages must not include real orders, flights, accommodation, names, accounts, credentials, or private itineraries. OpenStreetMap tiles and Wikimedia Commons images require a browser network connection.
+This release is not Public V1. It still requires eight overseas Regional Source Packs, evaluation of each Taste Model in at least three unseen cities, and stronger representative evidence; see the [detailed acceptance boundary](skill/references/taste-and-source-online-logic.md). Public samples, screenshots, and release packages must not include real orders, flights, accommodation, names, accounts, credentials, or private itineraries. OpenStreetMap tiles and Wikimedia Commons images require a browser network connection.
 
 ## Contribute your taste and regional knowledge
 

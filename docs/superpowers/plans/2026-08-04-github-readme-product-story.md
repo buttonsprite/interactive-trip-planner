@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Publish `interactive-trip-planner` 0.1.0 on GitHub with a product-first README, a clean Spain product screenshot, the current Hybrid Taste/source/theme implementation, and a validated REDSkill release.
+**Goal:** Publish `interactive-trip-planner` 0.1.0 on GitHub with product-first Chinese and English READMEs, a clean Spain product screenshot, the current Hybrid Taste/source/theme implementation, and a validated REDSkill release.
 
-**Architecture:** Keep `skill/` as the only editable Skill source and regenerate `releases/redskill-0.1.0/` from it. Treat the README as a product landing page first and an open-source handbook second; use one public Spain screenshot as proof, while keeping all runtime contracts and developer details in the lower sections. Publish the existing feature branch as a draft PR to `main` without merging it.
+**Architecture:** Keep `skill/` as the only editable Skill source and regenerate `releases/redskill-0.1.0/` from it. Use `README.md` as the default Chinese landing page and `README.en.md` as its English counterpart, with reciprocal language links and shared product evidence. Treat both files as product landing pages first and open-source handbooks second; publish the existing feature branch as a draft PR to `main` without merging it.
 
 **Tech Stack:** Markdown, static HTML/CSS/JavaScript map, Node.js 18+, npm scripts, Git, GitHub CLI, Codex browser screenshot tooling.
 
@@ -13,6 +13,7 @@
 - Keep the package version at `0.1.0`.
 - Keep `skill/` as the only editable Skill source; never hand-edit `releases/redskill-0.1.0/`.
 - The README first screen must not lead with repository layout, CLI commands, JSON contracts, or `developer-preview contract slice` language.
+- `README.md` and `README.en.md` must have reciprocal language links, the same section order, and equivalent claims.
 - The public screenshot must contain no real booking, flight, hotel, identity, account, local path, browser comment, or private itinerary data.
 - The REDSkill release may contain only Markdown, HTML, CSS, JavaScript, and JSON files supported by the repository contract.
 - Do not stage `.superpowers/`, `experiments/`, personal guide files, or unrelated changes from `/Users/cyx/Desktop/interactive-trip-planner`.
@@ -80,10 +81,11 @@ Expected: valid PNG, no larger than `2 MB`.
 
 ---
 
-### Task 2: Rewrite the README as a product-first landing page
+### Task 2: Rewrite the Chinese and English READMEs as product-first landing pages
 
 **Files:**
 - Modify: `README.md`
+- Create: `README.en.md`
 - Reference: `docs/superpowers/specs/2026-08-04-github-readme-product-story-design.md`
 - Reference: `skill/references/hybrid-taste-models.md`
 - Reference: `skill/references/regional-source-packs.md`
@@ -91,7 +93,7 @@ Expected: valid PNG, no larger than `2 MB`.
 
 **Interfaces:**
 - Consumes: the approved product-story design and current 0.1 implementation facts
-- Produces: the GitHub landing page and installation/contribution entrypoint
+- Produces: reciprocal Chinese and English GitHub landing pages and installation/contribution entrypoints
 
 - [ ] **Step 1: Establish the hero and product promise**
 
@@ -99,6 +101,8 @@ Replace the current technical opening with this positioning:
 
 ```markdown
 # Interactive Trip Planner
+
+**中文** | [English](README.en.md)
 
 ## 把你的生活品味带到陌生城市
 
@@ -113,6 +117,26 @@ Place one natural-language invocation directly below the hero:
 请使用 interactive-trip-planner，帮我规划一趟既有第一次到访重点、也能体验当地生活的旅行。
 ```
 
+Create `README.en.md` with this opening:
+
+```markdown
+# Interactive Trip Planner
+
+[中文](README.md) | **English**
+
+## Bring your taste in everyday life to a city you've never visited
+
+It goes beyond generating a list of attractions. It learns how you want to travel, combines local-language research with landmark context, neighborhood life, and practical constraints, then turns them into a comfortable, trustworthy itinerary you can keep editing.
+
+![Sant Antoni Market, the daily itinerary, and the Market Roof interactive map in the Spain example](docs/assets/readme/spain-market-roof-map.png)
+```
+
+Place this invocation below the English hero:
+
+```text
+Use interactive-trip-planner to plan a first visit that includes both the city's defining places and the texture of local everyday life.
+```
+
 - [ ] **Step 2: Add the product comparison and deliverables**
 
 Add these top-level sections before any installation or repository details:
@@ -122,6 +146,15 @@ Add these top-level sections before any installation or repository details:
 你最终会得到什么
 从品味到陌生城市
 当地语言和数据源
+```
+
+Use the same order in English:
+
+```text
+How this differs from a typical AI itinerary
+What you will get
+From personal taste to an unfamiliar city
+Local-language research and sources
 ```
 
 Use the six-row comparison from the approved design. Describe deliverables as itinerary brief, source-backed POI pool, daily anchors and nearby alternatives, event/recheck reminders, and editable interactive map.
@@ -150,6 +183,17 @@ Keep this lower-page order:
 仓库结构
 ```
 
+Mirror it in English as:
+
+```text
+Get started
+What 0.1 can do—and what it cannot guarantee
+Contribute your taste and regional knowledge
+Installation
+Development and verification
+Repository structure
+```
+
 Provide separate Codex and REDSkill installation paths. Link contributors to the taste model, source pack, theme, and sample conventions already in `skill/references/` and `skill/assets/`.
 
 - [ ] **Step 5: Verify README product structure and relative links**
@@ -158,29 +202,45 @@ Run:
 
 ```bash
 sed -n '1,80p' README.md
-rg -n '^## ' README.md
-if sed -n '1,45p' README.md | rg -n 'contract slice|Discovery CLI|releases/redskill|唯一源码事实层'; then
-  exit 1
-fi
+sed -n '1,80p' README.en.md
+rg -n '^## ' README.md README.en.md
+for file in README.md README.en.md; do
+  if sed -n '1,45p' "$file" | rg -n 'contract slice|Discovery CLI|releases/redskill|唯一源码事实层'; then
+    exit 1
+  fi
+done
 node --input-type=module -e '
   import fs from "node:fs";
   import path from "node:path";
-  const markdown = fs.readFileSync("README.md", "utf8");
-  const refs = [...markdown.matchAll(/\[[^\]]*\]\((?!https?:|#)([^)]+)\)|!\[[^\]]*\]\((?!https?:)([^)]+)\)/g)]
-    .map((match) => match[1] || match[2]);
-  const missing = refs.filter((ref) => !fs.existsSync(path.resolve(ref.split("#")[0])));
-  if (missing.length) throw new Error(`Missing README targets: ${missing.join(", ")}`);
-  console.log(`README relative targets OK: ${refs.length}`);
+  for (const file of ["README.md", "README.en.md"]) {
+    const markdown = fs.readFileSync(file, "utf8");
+    const refs = [...markdown.matchAll(/\[[^\]]*\]\((?!https?:|#)([^)]+)\)|!\[[^\]]*\]\((?!https?:)([^)]+)\)/g)]
+      .map((match) => match[1] || match[2]);
+    const missing = refs.filter((ref) => !fs.existsSync(path.resolve(ref.split("#")[0])));
+    if (missing.length) throw new Error(`${file} missing targets: ${missing.join(", ")}`);
+    console.log(`${file} relative targets OK: ${refs.length}`);
+  }
 '
-git diff --check -- README.md
+node --input-type=module -e '
+  import fs from "node:fs";
+  const zh = fs.readFileSync("README.md", "utf8");
+  const en = fs.readFileSync("README.en.md", "utf8");
+  const zhSections = [...zh.matchAll(/^## (.+)$/gm)].map((match) => match[1]);
+  const enSections = [...en.matchAll(/^## (.+)$/gm)].map((match) => match[1]);
+  if (zhSections.length !== enSections.length) throw new Error(`Section count mismatch: ${zhSections.length} vs ${enSections.length}`);
+  if (!zh.includes("[English](README.en.md)")) throw new Error("Chinese README is missing English switch");
+  if (!en.includes("[中文](README.md)")) throw new Error("English README is missing Chinese switch");
+  console.log(`Bilingual README structure OK: ${zhSections.length} sections each`);
+'
+git diff --check -- README.md README.en.md
 ```
 
-Expected: product promise and screenshot appear in the first 45 lines, all relative targets exist, and `git diff --check` is silent.
+Expected: both product promises and the screenshot appear in the first 45 lines, the language switches work, both files have the same section count, all relative targets exist, and `git diff --check` is silent.
 
 - [ ] **Step 6: Commit README and screenshot**
 
 ```bash
-git add README.md docs/assets/readme/spain-market-roof-map.png
+git add README.md README.en.md docs/assets/readme/spain-market-roof-map.png
 git commit -m "docs: make README product-first"
 ```
 
@@ -264,6 +324,7 @@ git commit -m "feat: finalize Market Roof 0.1 theme"
 
 **Files:**
 - Verify: `README.md`
+- Verify: `README.en.md`
 - Verify: `skill/`
 - Verify: `releases/redskill-0.1.0/`
 - Verify: `docs/assets/readme/spain-market-roof-map.png`
@@ -284,7 +345,7 @@ Expected: all Skill, theme, source-pack, CLI, event, map, REDSkill, privacy, and
 
 ```bash
 if rg -n '/Users/|/private/tmp|/var/folders|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY' \
-  README.md skill releases/redskill-0.1.0 docs/assets/readme; then
+  README.md README.en.md skill releases/redskill-0.1.0 docs/assets/readme; then
   exit 1
 fi
 ```
@@ -306,6 +367,7 @@ Expected: no whitespace errors; the worktree is clean; no forbidden path is in t
 
 ```bash
 git diff main...HEAD -- README.md \
+  README.en.md \
   docs/superpowers/specs/2026-08-04-github-readme-product-story-design.md \
   docs/superpowers/plans/2026-08-04-github-readme-product-story.md
 ```
@@ -350,7 +412,7 @@ Use `apply_patch` to create `/tmp/interactive-trip-planner-0.1.0-pr-body.md` wit
 
 ```markdown
 ## What changed
-- Product-first README with a real Spain map example
+- Product-first Chinese and English READMEs with a real Spain map example
 - Hybrid Taste Model and first-visit tourist/local balance
 - Regional source packs, Spanish/Catalan query generation, and bounded source probes
 - Tiered POI explanations, events, route evidence, and Market Roof theme
@@ -386,7 +448,7 @@ Expected: a draft PR URL targeting `main`.
 
 ```bash
 gh repo edit buttonsprite/interactive-trip-planner \
-  --description "把个人品味、当地语言资料和现实约束，变成可继续修改的旅行路线与交互地图。"
+  --description "Personal taste, local-language research, and real-world constraints—turned into editable itineraries and interactive maps."
 ```
 
 Expected: the command succeeds and `gh repo view` returns the new description.

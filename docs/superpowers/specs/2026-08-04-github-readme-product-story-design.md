@@ -2,7 +2,7 @@
 
 ## 目标
 
-把仓库首页从“面向开发者的目录和合同说明”改成“产品优先、开发完整”的公开入口。
+把仓库首页从“面向开发者的目录和合同说明”改成“产品优先、开发完整”的中英文公开入口。
 
 README 首先让旅行者、生活方式主理人和潜在贡献者理解：`interactive-trip-planner` 能把个人品味、当地资料和现实约束组合成一份可信、舒服、可以继续修改的旅行计划；随后再提供安装、数据结构、贡献和验证信息。
 
@@ -17,11 +17,24 @@ README 首先让旅行者、生活方式主理人和潜在贡献者理解：`int
 
 README 不假设读者已经理解 Codex Skill、Regional Source Pack、JSON CLI 或 contract。专业名词第一次出现时先用产品语言解释，再给出技术名称。
 
+## 语言结构
+
+- `README.md` 是默认中文首页。
+- `README.en.md` 是英文产品页。
+- 中文页顶部显示 `**中文** | [English](README.en.md)`。
+- 英文页顶部显示 `[中文](README.md) | **English**`。
+- 两个版本共用同一张公开西班牙截图，保持相同的章节顺序、能力事实、0.1 边界、安装方式和贡献入口。
+- 英文版使用自然的产品英语表达，不逐句机械翻译中文；任何产品承诺不得比中文版更强。
+
 ## 核心产品承诺
 
 主标题采用：
 
 > Interactive Trip Planner — 把你的生活品味带到陌生城市
+
+英文页采用：
+
+> Interactive Trip Planner — Bring your taste in everyday life to a city you've never visited
 
 首屏说明采用结果导向表达：
 
@@ -35,6 +48,8 @@ README 不假设读者已经理解 Codex Skill、Regional Source Pack、JSON CLI
 - 最终交付是可增删、改顺序、按日期浏览的交互地图，而不是一次性文字清单。
 
 ## README 信息架构
+
+以下结构同时适用于 `README.md` 和 `README.en.md`。
 
 ### 1. Hero
 
@@ -133,7 +148,7 @@ README 不假设读者已经理解 Codex Skill、Regional Source Pack、JSON CLI
 
 本次 GitHub 更新包括：
 
-- 重写根目录 `README.md`。
+- 重写根目录 `README.md`，并新增同结构的 `README.en.md`。
 - 增加一张脱敏的西班牙 Market Roof 产品截图。
 - 保留并重新生成 `releases/redskill-0.1.0/`。
 - 提交当前 0.1 功能分支以及已验收的主题完善改动。
@@ -153,8 +168,9 @@ README 不假设读者已经理解 Codex Skill、Regional Source Pack、JSON CLI
 - 第一屏不出现目录结构、CLI 或 contract 术语。
 - 读者在前两个章节内能回答“产品解决什么问题、与普通攻略有什么不同、最终得到什么”。
 - 安装、贡献、0.1 边界、数据源策略和技术验证均有明确入口。
-- README 中的版本、目录和命令与当前代码一致。
-- 所有相对链接和图片路径有效。
+- 两份 README 中的版本、目录、命令和产品事实与当前代码一致。
+- `README.md` 与 `README.en.md` 顶部可以互相切换，并保持相同章节顺序。
+- 两份 README 的所有相对链接和图片路径有效。
 
 ### Skill 与发布包
 

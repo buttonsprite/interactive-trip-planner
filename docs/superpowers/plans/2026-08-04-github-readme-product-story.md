@@ -249,18 +249,40 @@ git commit -m "docs: make README product-first"
 ### Task 3: Finalize the Market Roof theme and regenerate REDSkill 0.1.0
 
 **Files:**
+- Modify: `skill/assets/guide-template-europe-public/maps/itinerary-map.html`
 - Modify: `skill/assets/themes/architectural-collage/presets/market-roof-spain.json`
 - Modify: `skill/assets/themes/architectural-collage/theme.css`
 - Modify: `skill/assets/themes/architectural-collage/theme.json`
 - Modify: `skill/references/design-language.md`
+- Modify: `skill/scripts/test-europe-public-template.js`
 - Modify: `skill/scripts/test-ui-theme-contract.js`
+- Modify: `skill/scripts/test-redskill-release.js`
 - Generate: `releases/redskill-0.1.0/`
 
 **Interfaces:**
 - Consumes: the existing uncommitted theme refinements and source-of-truth `skill/`
-- Produces: the final 0.1 theme contract and platform-compatible REDSkill package
+- Produces: an executable reusable marker contract in the public Core, the final 0.1 theme contract, and a platform-compatible REDSkill package
 
-- [ ] **Step 1: Inspect the existing theme diff without rewriting it**
+- [ ] **Step 1: Write executable Core contract tests and observe RED**
+
+Add tests that execute the public map's marker variant and renderer logic instead of only searching CSS text. The tests must prove:
+
+- identical POI ids always produce the same `marker-shape-*` and `marker-tone-*` classes;
+- the renderer emits one of five shape classes, one of five tone classes, and a `.poi-marker-surface` for both scheduled and unscheduled markers;
+- the unthemed public Core keeps its existing circular marker layout;
+- event and selected/warning semantics override decorative tones when the Market Roof theme is active.
+
+Run the focused tests before implementation and record the expected failure.
+
+- [ ] **Step 2: Implement the reusable Core marker contract**
+
+In the public Europe map Core, add a deterministic POI-id variant helper and render the variant classes plus a dedicated marker surface. Keep label, priority, and schedule-category badges outside the clipped surface. Add a no-theme default for the surface so current Core behavior is unchanged.
+
+- [ ] **Step 3: Preserve semantic marker states in the theme**
+
+Keep decorative tones as the default, but give `event`, selected, and warning/pending states explicit higher-priority visual treatment so color is not allowed to imply the wrong status.
+
+- [ ] **Step 4: Inspect the existing theme diff without rewriting it**
 
 Run:
 
@@ -275,15 +297,16 @@ git diff -- \
 
 Confirm that the changes implement marker color sequences, irregular marker silhouettes, compact candidate rows, dotted content sequences, and the corresponding contract tests. Do not discard or restyle them.
 
-- [ ] **Step 2: Run the focused theme contract**
+- [ ] **Step 5: Run the focused Core and theme contracts**
 
 ```bash
+node skill/scripts/test-europe-public-template.js
 node skill/scripts/test-ui-theme-contract.js
 ```
 
-Expected: `UI theme contract passed: 1 theme, 1 preset`.
+Expected: both public Core and UI theme contracts pass, including executable marker rendering assertions.
 
-- [ ] **Step 3: Regenerate the REDSkill release**
+- [ ] **Step 6: Regenerate the REDSkill release**
 
 ```bash
 npm run build:redskill
@@ -291,7 +314,7 @@ npm run build:redskill
 
 Expected: `releases/redskill-0.1.0/interactive-trip-planner/SKILL.md` exists and the release is rebuilt from `skill/`.
 
-- [ ] **Step 4: Verify the platform-format boundary**
+- [ ] **Step 7: Verify the exact platform-format boundary**
 
 ```bash
 test -f releases/redskill-0.1.0/interactive-trip-planner/SKILL.md
@@ -305,17 +328,22 @@ node skill/scripts/test-redskill-release.js releases/redskill-0.1.0 0.1.0
 
 Expected: no unsupported path is printed and the REDSkill release contract passes.
 
-- [ ] **Step 5: Commit theme and generated release explicitly**
+The validator itself must allow only Markdown, HTML, CSS, JavaScript, and JSON files. It must reject a synthetic unsupported extension so the five-format boundary cannot silently drift.
+
+- [ ] **Step 8: Commit Core, theme, tests, and generated release explicitly**
 
 ```bash
 git add \
+  skill/assets/guide-template-europe-public/maps/itinerary-map.html \
   skill/assets/themes/architectural-collage/presets/market-roof-spain.json \
   skill/assets/themes/architectural-collage/theme.css \
   skill/assets/themes/architectural-collage/theme.json \
   skill/references/design-language.md \
+  skill/scripts/test-europe-public-template.js \
   skill/scripts/test-ui-theme-contract.js \
+  skill/scripts/test-redskill-release.js \
   releases/redskill-0.1.0
-git commit -m "feat: finalize Market Roof 0.1 theme"
+git commit -m "fix: make Market Roof reusable with public Core"
 ```
 
 ---
@@ -323,17 +351,31 @@ git commit -m "feat: finalize Market Roof 0.1 theme"
 ### Task 4: Run release verification and review the complete diff
 
 **Files:**
+- Modify: `README.en.md`
+- Modify: `skill/assets/guide-template-europe-public/docs/online-logic/map.md`
+- Modify: `skill/scripts/test-skill-contract.js`
+- Modify: `skill/scripts/test-europe-public-template.js`
+- Modify: `skill/scripts/test-contribution-extensibility.js`
+- Modify: `skill/assets/guide-template-europe-public/docs/privacy.md`
+- Generate: `releases/redskill-0.1.0/`
 - Verify: `README.md`
-- Verify: `README.en.md`
 - Verify: `skill/`
-- Verify: `releases/redskill-0.1.0/`
 - Verify: `docs/assets/readme/spain-market-roof-map.png`
 
 **Interfaces:**
 - Consumes: all committed 0.1 branch changes
 - Produces: fresh evidence that the branch is releasable and contains no unintended files
 
-- [ ] **Step 1: Run the full repository test suite**
+- [ ] **Step 1: Close the known cross-task release gaps**
+
+- Update the repository README contract to assert the current product-first `developer preview` and measurable `Public V1` boundary instead of requiring the removed internal phrase `developer-preview contract slice`.
+- Label `INSTALL.zh-CN.md` as a Chinese-language REDSkill installation guide in the English README; do not imply that an English installation document exists.
+- Document the shipped marker runtime in the Europe public online-logic document: stable POI-id shape/tone variants, inner surface, outside badges/labels, no-theme circular compatibility, theme semantic precedence, and dirty-day `pending-reroute` warning state.
+- Extend the public-template contract so the online-logic document cannot drift from this shipped behavior.
+- Regenerate REDSkill only through `npm run build:redskill`.
+- Keep the privacy scan strict: remove literal macOS home-directory examples from shipped source. The extensibility test must still exercise a private absolute path by constructing the fixture at runtime, and the privacy document must describe the forbidden class without embedding a path-shaped example.
+
+- [ ] **Step 2: Run the full repository test suite**
 
 ```bash
 npm test
@@ -341,7 +383,7 @@ npm test
 
 Expected: all Skill, theme, source-pack, CLI, event, map, REDSkill, privacy, and contract tests pass.
 
-- [ ] **Step 2: Run privacy and path scans**
+- [ ] **Step 3: Run privacy and path scans**
 
 ```bash
 if rg -n '/Users/|/private/tmp|/var/folders|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY' \
@@ -352,7 +394,7 @@ fi
 
 Expected: no matches.
 
-- [ ] **Step 3: Review branch scope and whitespace**
+- [ ] **Step 4: Review branch scope and whitespace**
 
 ```bash
 git diff --check main...HEAD
@@ -363,7 +405,7 @@ git diff --name-only main...HEAD | rg '^(\.superpowers/|experiments/|guides/)' &
 
 Expected: no whitespace errors; the worktree is clean; no forbidden path is in the branch diff.
 
-- [ ] **Step 4: Review the user-facing GitHub diff**
+- [ ] **Step 5: Review the user-facing GitHub diff**
 
 ```bash
 git diff main...HEAD -- README.md \

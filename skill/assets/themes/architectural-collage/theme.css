@@ -171,7 +171,11 @@ select {
 .poi-marker.scheduled { width: 28px; height: 32px; }
 .poi-marker.scheduled.current-day { width: 32px; height: 36px; }
 .poi-marker.candidate { width: 28px; height: 32px; }
-.poi-marker.selected { width: 38px; height: 42px; }
+.poi-marker.selected {
+  --marker-semantic-color: var(--trip-accent);
+  width: 38px;
+  height: 42px;
+}
 
 .poi-marker.marker-shape-0 { --marker-shape: polygon(50% 0%, 92% 18%, 100% 58%, 70% 100%, 16% 88%, 0% 38%, 22% 8%); }
 .poi-marker.marker-shape-1 { --marker-shape: polygon(0% 24%, 24% 0%, 100% 18%, 84% 74%, 56% 100%, 8% 82%); }
@@ -185,26 +189,33 @@ select {
 .poi-marker.marker-tone-3 { --marker-variant-color: var(--trip-category-sight); }
 .poi-marker.marker-tone-4 { --marker-variant-color: var(--trip-category-sweet); }
 
+.poi-marker.event {
+  --marker-semantic-color: var(--trip-category-event);
+}
+
+.poi-marker.event-status-program-pending {
+  --marker-semantic-color: var(--trip-warning);
+}
+
 .poi-marker-surface {
   position: absolute;
   inset: 0;
   box-sizing: border-box;
-  background: var(--marker-variant-color);
+  background: var(--marker-semantic-color, var(--marker-variant-color));
   border: 2px solid var(--trip-bg);
   clip-path: var(--marker-shape);
   pointer-events: none;
 }
 
 .poi-marker-main,
-.poi-marker .schedule-main,
-.poi-marker .priority-badge {
+.poi-marker .schedule-main {
   position: relative;
   z-index: 1;
 }
 
 .poi-marker.candidate .poi-marker-surface {
   background: var(--trip-bg);
-  border-color: var(--marker-variant-color);
+  border-color: var(--marker-semantic-color, var(--marker-variant-color));
 }
 
 .poi-marker.candidate {
@@ -214,7 +225,7 @@ select {
 }
 
 .poi-marker.selected .poi-marker-surface {
-  background-color: var(--marker-variant-color);
+  background-color: var(--marker-semantic-color, var(--marker-variant-color));
   background-image: var(--trip-divider-image);
   background-position: center;
   background-size: auto 100%;

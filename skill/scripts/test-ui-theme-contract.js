@@ -71,6 +71,10 @@ for (const entry of registry.themes) {
   assert.match(css, /\.poi-marker\s*\{[\s\S]*?clip-path:\s*none;/);
   assert.match(css, /\.poi-marker-surface\s*\{[\s\S]*?clip-path:\s*var\(--marker-shape\);/);
   assert.match(css, /\.poi-marker\.candidate\s+\.poi-marker-surface\s*\{/);
+  assert.match(css, /\.poi-marker\.event\s*\{[\s\S]*?--marker-semantic-color:\s*var\(--trip-category-event\)/);
+  assert.match(css, /\.poi-marker\.event-status-program-pending\s*\{[\s\S]*?--marker-semantic-color:\s*var\(--trip-warning\)/);
+  assert.match(css, /\.poi-marker\.selected\s*\{[\s\S]*?--marker-semantic-color:\s*var\(--trip-accent\)/);
+  assert.match(css, /\.poi-marker-surface\s*\{[\s\S]*?background:\s*var\(--marker-semantic-color,\s*var\(--marker-variant-color\)\)/);
   assert.match(css, /\.poi-marker\.selected\s+\.poi-marker-surface\s*\{[\s\S]*?background-image:\s*var\(--trip-divider-image\)/);
   assert.match(css, /\.poi-detail-section\s*\{[\s\S]*?padding:\s*0\s+0\s+12px;[\s\S]*?border-bottom:\s*0;/);
   assert.match(css, /\.poi-detail-section:first-of-type\s*\{[\s\S]*?padding-top:\s*16px;/);

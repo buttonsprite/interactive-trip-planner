@@ -2,6 +2,7 @@
 
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import vm from "node:vm";
 import { spawnSync } from "node:child_process";
@@ -27,9 +28,7 @@ function walkFiles(root) {
 }
 
 const allowedExtensions = new Set([
-  ".txt", ".md", ".markdown", ".html", ".htm", ".css", ".js", ".py", ".java",
-  ".cpp", ".c", ".h", ".php", ".sh", ".bat", ".ps1", ".json", ".xml", ".sql",
-  ".db", ".sqlite", ".sqlite3", ".mdb", ".accdb", ".sys", ".ini", ".cfg", ".log",
+  ".md", ".html", ".css", ".js", ".json",
 ]);
 const packageFiles = walkFiles(packageRoot);
 const unsupported = packageFiles
@@ -130,6 +129,23 @@ for (const testFile of [
 ]) {
   const result = spawnSync(process.execPath, [path.join(skillRoot, "scripts", testFile)], { encoding: "utf8" });
   assert.equal(result.status, 0, `${testFile} failed:\n${result.stdout}${result.stderr}`);
+}
+
+const unsupportedFixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "redskill-format-boundary-"));
+try {
+  fs.writeFileSync(path.join(unsupportedFixtureRoot, "SKILL.md"), "# Synthetic release\n");
+  fs.writeFileSync(path.join(unsupportedFixtureRoot, "unsupported.txt"), "unsupported\n");
+  const unsupportedResult = spawnSync(process.execPath, [fileURLToPath(import.meta.url), unsupportedFixtureRoot], {
+    encoding: "utf8",
+  });
+  assert.notEqual(unsupportedResult.status, 0, "the REDSkill validator must reject an unsupported extension");
+  assert.match(
+    `${unsupportedResult.stdout}${unsupportedResult.stderr}`,
+    /unsupported REDSkill files:.*unsupported\.txt/i,
+    "the REDSkill validator must reject .txt at the exact five-format boundary",
+  );
+} finally {
+  fs.rmSync(unsupportedFixtureRoot, { recursive: true, force: true });
 }
 
 console.log(`REDSkill ${packageJson.version} release contract passed: ${packageFiles.length} supported files, 2 standalone maps`);

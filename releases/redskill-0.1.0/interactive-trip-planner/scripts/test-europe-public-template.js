@@ -89,6 +89,93 @@ assert.deepEqual(
 
 const eventRuntimeMatch = html.match(/\/\* EVENT_RUNTIME_PURE_START \*\/([\s\S]*?)\/\* EVENT_RUNTIME_PURE_END \*\//);
 assert.ok(eventRuntimeMatch, "public map must expose the shipped pure event runtime for executable contract tests");
+const markerRuntimeMatch = html.match(/\/\* POI_MARKER_RUNTIME_PURE_START \*\/([\s\S]*?)\/\* POI_MARKER_RUNTIME_PURE_END \*\//);
+assert.ok(markerRuntimeMatch, "public map must expose the shipped pure marker runtime for executable contract tests");
+const markerRuntimeSandbox = {};
+vm.runInNewContext(
+  `${markerRuntimeMatch[1]}\nthis.markerRuntime = { getPoiMarkerVariant, renderPoiMarkerMarkup };`,
+  markerRuntimeSandbox,
+);
+const markerRuntime = markerRuntimeSandbox.markerRuntime;
+const stableVariant = markerRuntime.getPoiMarkerVariant("barcelona-mercat-de-sant-antoni");
+assert.deepEqual(
+  JSON.parse(JSON.stringify(markerRuntime.getPoiMarkerVariant("barcelona-mercat-de-sant-antoni"))),
+  JSON.parse(JSON.stringify(stableVariant)),
+  "the same POI id must always map to the same marker variants",
+);
+assert.match(stableVariant.shapeClass, /^marker-shape-[0-4]$/);
+assert.match(stableVariant.toneClass, /^marker-tone-[0-4]$/);
+const exercisedVariants = new Set([
+  "barcelona-mercat-de-sant-antoni",
+  "paris-musee-dorsay",
+  "madrid-museo-del-prado",
+  "seville-real-alcazar",
+  "porto-mercado-do-bolhao",
+].map((id) => {
+  const variant = markerRuntime.getPoiMarkerVariant(id);
+  return `${variant.shapeClass}/${variant.toneClass}`;
+}));
+assert.ok(exercisedVariants.size > 1, "different POI ids must exercise more than one marker variant");
+
+const scheduledMarkerHtml = markerRuntime.renderPoiMarkerMarkup({
+  item: { id: "event:confirmed.event-1", category: "event", eventStatus: "confirmed" },
+  scheduled: true,
+  currentDay: true,
+  selected: true,
+  mainHtml: '<span class="schedule-main">2</span>',
+  scheduleCategoryHtml: '<span class="schedule-category">E</span>',
+  priorityBadgeHtml: '<span class="priority-badge">S</span>',
+  selectedLabelHtml: '<span class="poi-marker-label">确认活动</span>',
+  title: "确认活动",
+});
+const candidateMarkerHtml = markerRuntime.renderPoiMarkerMarkup({
+  item: { id: "event:pending-event", category: "event", eventStatus: "program-pending", priority: "pending" },
+  candidate: true,
+  mainHtml: '<span class="poi-marker-main">E</span>',
+  title: "等待具体节目",
+});
+for (const [label, rendered] of [["scheduled", scheduledMarkerHtml], ["unscheduled", candidateMarkerHtml]]) {
+  assert.equal((rendered.match(/marker-shape-[0-4]/g) || []).length, 1, `${label} marker must contain one shape class`);
+  assert.equal((rendered.match(/marker-tone-[0-4]/g) || []).length, 1, `${label} marker must contain one tone class`);
+  assert.equal((rendered.match(/class="poi-marker-surface"/g) || []).length, 1, `${label} marker must contain one visual surface`);
+}
+assert.match(scheduledMarkerHtml, /class="poi-marker[^"']* event [^"']*selected/);
+assert.match(candidateMarkerHtml, /class="poi-marker[^"']* event [^"']*event-status-program-pending/);
+assert.match(
+  scheduledMarkerHtml,
+  /<span class="poi-marker-surface"><span class="schedule-main">2<\/span><\/span><span class="schedule-category">/,
+  "scheduled marker main content must close the clipped surface before rendering badges",
+);
+const scheduledSurfaceEnd = scheduledMarkerHtml.indexOf("</span></span>") + "</span></span>".length;
+for (const externalClass of ["schedule-category", "priority-badge", "poi-marker-label"]) {
+  assert.ok(
+    scheduledMarkerHtml.indexOf(`class="${externalClass}"`) > scheduledSurfaceEnd,
+    `${externalClass} must remain outside the clipped marker surface`,
+  );
+}
+assert.match(
+  html,
+  /\.poi-marker-surface\s*\{[\s\S]*?border-radius:\s*50%;[\s\S]*?box-shadow:\s*0 2px 9px/,
+  "the unthemed Core marker surface must retain the existing circular presentation",
+);
+for (const [category, color] of Object.entries({
+  top50: "#111827",
+  wine: "#7b2f6a",
+  sweet: "#cf4d7f",
+  coffee: "#8b5e3c",
+  food: "#256f73",
+  hotel: "#5467a6",
+  art: "#2f7fb9",
+  "local-life": "#6f8f37",
+  sight: "#c58a1f",
+  event: "#d97706",
+})) {
+  assert.match(
+    html,
+    new RegExp(`\\.poi-marker\\.${category.replace("-", "\\-")}\\s*\\{[^}]*--poi-marker-color:\\s*${color}`, "i"),
+    `the unthemed Core must retain the ${category} marker color`,
+  );
+}
 const publicUrlRuntimeMatch = html.match(/\/\* PUBLIC_URL_RUNTIME_START \*\/([\s\S]*?)\/\* PUBLIC_URL_RUNTIME_END \*\//);
 assert.ok(publicUrlRuntimeMatch, "public map must expose the shared public URL runtime contract");
 const eventRuntimeNames = [

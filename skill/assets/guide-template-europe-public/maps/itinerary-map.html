@@ -1549,16 +1549,26 @@
     }
 
     .poi-marker {
+      --poi-marker-color: #17212b;
       position: relative;
-      display: grid;
-      place-items: center;
       width: 24px;
       height: 24px;
       color: #fff;
+      font: 700 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .poi-marker-surface {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      box-sizing: border-box;
+      overflow: hidden;
+      color: inherit;
+      background: var(--poi-marker-color);
       border: 2px solid #fff;
       border-radius: 50%;
       box-shadow: 0 2px 9px rgba(22, 32, 42, 0.28);
-      font: 700 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     .poi-marker.candidate {
@@ -1595,9 +1605,11 @@
       width: 26px;
       height: 26px;
       padding: 0;
-      border-radius: 50%;
       font-weight: 900;
       line-height: 1;
+    }
+
+    .poi-marker.scheduled .poi-marker-surface {
       box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 2px 9px rgba(22, 32, 42, 0.32);
     }
 
@@ -1627,50 +1639,56 @@
       width: 28px;
       height: 28px;
       font-size: 11px;
+    }
+
+    .poi-marker.scheduled.current-day .poi-marker-surface {
       box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), 0 2px 10px rgba(22, 32, 42, 0.38);
     }
 
     .poi-marker.top50 {
       width: 28px;
       height: 28px;
+      --poi-marker-color: #111827;
       color: #fff;
-      background: #111827;
     }
 
     .poi-marker.wine {
-      background: #7b2f6a;
+      --poi-marker-color: #7b2f6a;
     }
 
     .poi-marker.sweet {
-      background: #cf4d7f;
+      --poi-marker-color: #cf4d7f;
     }
 
     .poi-marker.coffee {
-      background: #8b5e3c;
+      --poi-marker-color: #8b5e3c;
     }
 
     .poi-marker.food {
-      background: #256f73;
+      --poi-marker-color: #256f73;
     }
 
     .poi-marker.hotel {
-      background: #5467a6;
+      --poi-marker-color: #5467a6;
     }
 
     .poi-marker.art {
-      background: #2f7fb9;
+      --poi-marker-color: #2f7fb9;
     }
 
     .poi-marker.local-life {
-      background: #6f8f37;
+      --poi-marker-color: #6f8f37;
     }
 
     .poi-marker.sight {
-      background: #c58a1f;
+      --poi-marker-color: #c58a1f;
     }
 
     .poi-marker.event {
-      background: #d97706;
+      --poi-marker-color: #d97706;
+    }
+
+    .poi-marker.event .poi-marker-surface {
       box-shadow: 0 0 0 2px rgba(255, 248, 232, 0.95), 0 2px 9px rgba(22, 32, 42, 0.3);
     }
 
@@ -11168,6 +11186,62 @@
       return day?.short || assignment.dayId;
     };
 
+    /* POI_MARKER_RUNTIME_PURE_START */
+    function getPoiMarkerVariant(poiId) {
+      const value = String(poiId || "");
+      let hash = 2166136261;
+      for (let index = 0; index < value.length; index += 1) {
+        hash ^= value.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      const unsignedHash = hash >>> 0;
+      return {
+        shapeClass: `marker-shape-${unsignedHash % 5}`,
+        toneClass: `marker-tone-${Math.floor(unsignedHash / 5) % 5}`,
+      };
+    }
+
+    function escapePoiMarkerAttribute(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function renderPoiMarkerMarkup({
+      item,
+      scheduled = false,
+      currentDay = false,
+      candidate = false,
+      selected = false,
+      mainHtml = "",
+      scheduleCategoryHtml = "",
+      priorityBadgeHtml = "",
+      selectedLabelHtml = "",
+      title = "",
+    }) {
+      const variant = getPoiMarkerVariant(item?.id);
+      const eventStatusClass = item?.category === "event"
+        && ["confirmed", "announced", "program-pending"].includes(item?.eventStatus)
+        ? `event-status-${item.eventStatus}`
+        : "";
+      const classes = [
+        "poi-marker",
+        scheduled ? "scheduled" : "",
+        currentDay ? "current-day" : "",
+        item?.category || "",
+        candidate ? "candidate" : "",
+        selected ? "selected" : "",
+        eventStatusClass,
+        variant.shapeClass,
+        variant.toneClass,
+      ].filter(Boolean).join(" ");
+      return `<div class="${classes}" data-poi-marker-id="${escapePoiMarkerAttribute(item?.id)}" title="${escapePoiMarkerAttribute(title)}"><span class="poi-marker-surface">${mainHtml}</span>${scheduleCategoryHtml}${priorityBadgeHtml}${selectedLabelHtml}</div>`;
+    }
+    /* POI_MARKER_RUNTIME_PURE_END */
+
     const map = L.map("map", {
       zoomControl: true,
       scrollWheelZoom: true
@@ -11213,14 +11287,17 @@
           : "";
         return L.divIcon({
           className: "",
-          html: `
-            <div class="poi-marker scheduled ${isCurrentDay ? "current-day" : ""} ${item.category} ${isSelected ? "selected" : ""}" data-poi-marker-id="${item.id}" title="${escapeHtml(zhName)} · ${escapeHtml(getPoiPlanLabel(item))} · ${escapeHtml(poiCategories[item.category].label)}">
-              <span class="schedule-main">${escapeHtml(scheduledMainLabel)}</span>
-              ${scheduledCategoryBadge}
-              ${priorityBadge}
-              ${selectedLabel}
-            </div>
-          `,
+          html: renderPoiMarkerMarkup({
+            item,
+            scheduled: true,
+            currentDay: isCurrentDay,
+            selected: isSelected,
+            mainHtml: `<span class="schedule-main">${escapeHtml(scheduledMainLabel)}</span>`,
+            scheduleCategoryHtml: scheduledCategoryBadge,
+            priorityBadgeHtml: priorityBadge,
+            selectedLabelHtml: selectedLabel,
+            title: `${zhName} · ${getPoiPlanLabel(item)} · ${poiCategories[item.category].label}`,
+          }),
           iconSize: isCurrentDay ? [28, 28] : [26, 26],
           iconAnchor: isCurrentDay ? [14, 14] : [13, 13],
           popupAnchor: [0, isCurrentDay ? -14 : -13]
@@ -11229,7 +11306,15 @@
 
       return L.divIcon({
         className: "",
-        html: `<div class="poi-marker ${item.category} ${isCandidate ? "candidate" : ""} ${isSelected ? "selected" : ""}" data-poi-marker-id="${item.id}" title="${escapeHtml(zhName)} · ${escapeHtml(meta.label)}">${meta.short}${priorityBadge}${selectedLabel}</div>`,
+        html: renderPoiMarkerMarkup({
+          item,
+          candidate: isCandidate,
+          selected: isSelected,
+          mainHtml: `<span class="poi-marker-main">${escapeHtml(meta.short)}</span>`,
+          priorityBadgeHtml: priorityBadge,
+          selectedLabelHtml: selectedLabel,
+          title: `${zhName} · ${meta.label}`,
+        }),
         iconSize: item.category === "top50" ? [28, 28] : [24, 24],
         iconAnchor: item.category === "top50" ? [14, 14] : [12, 12],
         popupAnchor: [0, item.category === "top50" ? -14 : -12]

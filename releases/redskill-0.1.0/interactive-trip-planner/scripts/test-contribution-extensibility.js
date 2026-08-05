@@ -261,8 +261,8 @@ try {
   writeJson(curatorModelPath, curatorModel);
 
   const privateExampleNote = path.join(curatorExampleRoot, "docs", "private-owner-note.md");
-  const privateMacHomePath = path.join(
-    path.parse(process.cwd()).root,
+  const privateMacHomePath = path.posix.join(
+    path.posix.sep,
     "Users",
     "fixture-curator",
     "private-trip",

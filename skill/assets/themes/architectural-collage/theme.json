@@ -51,6 +51,9 @@
     "map": {
       "renderer": "leaflet-raster",
       "markerShape": "irregular polygon",
+      "markerVariantStrategy": "stable-poi-id-hash",
+      "markerShapeVariantCount": 5,
+      "markerToneVariantCount": 5,
       "routeLine": "two-pixel dashed sequence reference",
       "tileTreatment": "warm low-saturation CSS filter on tile pane only"
     }

@@ -33,7 +33,10 @@
       "8px"
     ],
     "markerPolygon": "50% 0%, 88% 12%, 100% 48%, 82% 88%, 48% 100%, 10% 82%, 0% 38%, 18% 8%",
-    "markerWedgeRatio": "20%"
+    "markerWedgeRatio": "20%",
+    "markerVariantStrategy": "stable-poi-id-hash",
+    "markerShapeVariantCount": 5,
+    "markerToneVariantCount": 5
   },
   "map": {
     "tileProvider": "openstreetmap-raster",

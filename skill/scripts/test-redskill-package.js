@@ -26,6 +26,51 @@ const packageJsonPath = path.join(skillRoot, "package.json");
 assert.ok(fs.existsSync(packageJsonPath), "Missing package.json required for ESM .js scripts");
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 assert.equal(packageJson.type, "module", 'package.json must declare "type": "module"');
+assert.equal(packageJson.version, "0.2.0", "Skill package must identify the 0.2.0 release");
+
+const requiredDiscoveryRuntimeFiles = [
+  "scripts/test-first-visit-balance.js",
+  "scripts/cli-json-input.js",
+  "scripts/recommend-taste-models.js",
+  "scripts/build-source-query-matrix.js",
+  "scripts/test-discovery-cli.js",
+  "scripts/probe-source-access.js",
+  "scripts/test-source-access-probe.js",
+  "assets/source-packs/local-language-lexicons/es.json",
+  "assets/source-packs/local-language-lexicons/ca.json",
+];
+const missingDiscoveryRuntimeFiles = requiredDiscoveryRuntimeFiles.filter(
+  (relativePath) => !fs.existsSync(path.join(skillRoot, relativePath)),
+);
+assert.deepEqual(
+  missingDiscoveryRuntimeFiles,
+  [],
+  `REDSkill release is missing discovery runtime files: ${missingDiscoveryRuntimeFiles.join(", ")}`,
+);
+
+const requiredXiaohongshuFiles = [
+  "scripts/xhs-import-runtime.js",
+  "scripts/fetch-xhs-public.js",
+  "scripts/xhs-library-runtime.js",
+  "scripts/import-xhs-library.js",
+  "scripts/validate-xhs-library.js",
+  "scripts/summarize-xhs-import.js",
+  "scripts/test-xhs-import-runtime.js",
+  "scripts/test-xhs-public-fetch.js",
+  "scripts/test-xhs-library.js",
+  "scripts/test-xhs-import-cli.js",
+  "references/xiaohongshu-import.md",
+  "assets/xiaohongshu-library-template/README.md",
+  "assets/xiaohongshu-library-template/library.json",
+];
+const missingXiaohongshuFiles = requiredXiaohongshuFiles.filter(
+  (relativePath) => !fs.existsSync(path.join(skillRoot, relativePath)),
+);
+assert.deepEqual(
+  missingXiaohongshuFiles,
+  [],
+  `REDSkill release is missing Xiaohongshu import files: ${missingXiaohongshuFiles.join(", ")}`,
+);
 
 const scriptFiles = walkFiles(scriptsDir);
 const unsupportedScripts = scriptFiles

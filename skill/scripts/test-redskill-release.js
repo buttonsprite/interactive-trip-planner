@@ -2,6 +2,7 @@
 
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import vm from "node:vm";
 import { spawnSync } from "node:child_process";
@@ -27,15 +28,17 @@ function walkFiles(root) {
 }
 
 const allowedExtensions = new Set([
-  ".txt", ".md", ".markdown", ".html", ".htm", ".css", ".js", ".py", ".java",
-  ".cpp", ".c", ".h", ".php", ".sh", ".bat", ".ps1", ".json", ".xml", ".sql",
-  ".db", ".sqlite", ".sqlite3", ".mdb", ".accdb", ".sys", ".ini", ".cfg", ".log",
+  ".md", ".html", ".css", ".js", ".json",
 ]);
 const packageFiles = walkFiles(packageRoot);
 const unsupported = packageFiles
   .filter((file) => !allowedExtensions.has(path.extname(file).toLowerCase()))
   .map((file) => path.relative(packageRoot, file));
 assert.deepEqual(unsupported, [], `unsupported REDSkill files: ${unsupported.join(", ")}`);
+const forbiddenReleaseExtensions = packageFiles
+  .filter((file) => [".yaml", ".yml", ".jsonl"].includes(path.extname(file).toLowerCase()))
+  .map((file) => path.relative(packageRoot, file));
+assert.deepEqual(forbiddenReleaseExtensions, [], `forbidden REDSkill files: ${forbiddenReleaseExtensions.join(", ")}`);
 assert.ok(!packageFiles.some((file) => /(^|\/)agents\/openai\.ya?ml$/i.test(file)), "Codex-only openai.yaml must be omitted");
 assert.ok(!packageFiles.some((file) => path.basename(file) === ".DS_Store"), ".DS_Store must be omitted");
 
@@ -46,6 +49,24 @@ if (expectedVersion) {
   assert.equal(packageJson.version, expectedVersion, `release package must identify version ${expectedVersion}`);
 }
 assert.equal(packageJson.type, "module", "release scripts require ESM mode");
+
+for (const relativePath of [
+  "scripts/xhs-import-runtime.js",
+  "scripts/fetch-xhs-public.js",
+  "scripts/xhs-library-runtime.js",
+  "scripts/import-xhs-library.js",
+  "scripts/validate-xhs-library.js",
+  "scripts/summarize-xhs-import.js",
+  "references/xiaohongshu-import.md",
+  "assets/xiaohongshu-library-template/README.md",
+  "assets/xiaohongshu-library-template/library.json",
+]) {
+  assert.ok(fs.existsSync(path.join(skillRoot, relativePath)), `missing 0.2 release file: ${relativePath}`);
+}
+assert.ok(
+  !packageFiles.some((file) => path.relative(skillRoot, file).startsWith(`travel-library${path.sep}`)),
+  "private travel-library data must not ship in REDSkill",
+);
 
 const lightTemplateReadme = fs.readFileSync(path.join(skillRoot, "assets", "guide-template", "README.md"), "utf8");
 assert.match(lightTemplateReadme, /单个 HTML|内联/, "release template instructions should describe the standalone HTML");
@@ -75,6 +96,18 @@ for (const mapPath of mapPaths) {
   }
 }
 
+const publicTravelerFiles = [
+  path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "itinerary-map.html"),
+  path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "assets", "trip-data.js"),
+];
+for (const travelerFile of publicTravelerFiles) {
+  assert.doesNotMatch(
+    fs.readFileSync(travelerFile, "utf8"),
+    /"sourceIds"\s*:/,
+    `${path.relative(skillRoot, travelerFile)} must omit internal event sourceIds`,
+  );
+}
+
 for (const vendorPath of [
   path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "vendor", "leaflet"),
   path.join(skillRoot, "assets", "guide-template", "maps", "vendor", "leaflet"),
@@ -91,17 +124,52 @@ const publicText = packageFiles
 for (const pattern of [
   /\/Users\/cyx/i,
   /file:\/\//i,
+  /\b(?:AMAP_KEY|AMAP_SECURITY_KEY)\s*[:=]\s*\S+/i,
+  /\bAIza[0-9A-Za-z_-]{20,}\b/,
   /Airbnb/i,
   /51240589/,
   /\bAF\d{3,4}\b/,
   /europe-2026-itinerary-/,
+  /[?&](?:xsec_token|share_id|appuid)=[^&\s"']+/i,
+  /(?:cookie|authorization)\s*[:=]\s*(?:bearer\s+)?(?:secret|fixture|test)[-_a-z0-9]*/i,
 ]) {
   assert.doesNotMatch(publicText, pattern, `privacy scan found ${pattern}`);
 }
 
-for (const testFile of ["test-redskill-package.js", "test-skill-contract.js"]) {
+for (const testFile of [
+  "test-redskill-package.js",
+  "test-hybrid-taste-models.js",
+  "test-regional-source-packs.js",
+  "test-amap-cli.js",
+  "test-contribution-extensibility.js",
+  "test-first-visit-balance.js",
+  "test-discovery-cli.js",
+  "test-source-access-probe.js",
+  "test-xhs-import-runtime.js",
+  "test-xhs-public-fetch.js",
+  "test-xhs-library.js",
+  "test-xhs-import-cli.js",
+  "test-skill-contract.js",
+]) {
   const result = spawnSync(process.execPath, [path.join(skillRoot, "scripts", testFile)], { encoding: "utf8" });
   assert.equal(result.status, 0, `${testFile} failed:\n${result.stdout}${result.stderr}`);
+}
+
+const unsupportedFixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "redskill-format-boundary-"));
+try {
+  fs.writeFileSync(path.join(unsupportedFixtureRoot, "SKILL.md"), "# Synthetic release\n");
+  fs.writeFileSync(path.join(unsupportedFixtureRoot, "unsupported.txt"), "unsupported\n");
+  const unsupportedResult = spawnSync(process.execPath, [fileURLToPath(import.meta.url), unsupportedFixtureRoot], {
+    encoding: "utf8",
+  });
+  assert.notEqual(unsupportedResult.status, 0, "the REDSkill validator must reject an unsupported extension");
+  assert.match(
+    `${unsupportedResult.stdout}${unsupportedResult.stderr}`,
+    /unsupported REDSkill files:.*unsupported\.txt/i,
+    "the REDSkill validator must reject .txt at the exact five-format boundary",
+  );
+} finally {
+  fs.rmSync(unsupportedFixtureRoot, { recursive: true, force: true });
 }
 
 console.log(`REDSkill ${packageJson.version} release contract passed: ${packageFiles.length} supported files, 2 standalone maps`);

@@ -5,6 +5,7 @@
 ## 目录
 
 - 搜索前建立任务单
+- 选择地区来源包
 - 六层搜索顺序
 - 查询词怎么写
 - 来源矩阵
@@ -17,6 +18,22 @@
 - 给用户的表达
 - 常见错误
 
+## 选择地区来源包
+
+0.1.0 开始，完整规划先读取 references/regional-source-packs.md，并从 assets/source-packs/index.json 选择 Global Base 与一个匹配的地区包。Global、中国大陆、日本、法语区（法国与比利时）是首发 required subset；registry 可以加入通过通用 validator 的新地区包。其他尚无有效 pack 的目的地使用 Global Base、目的地官方入口与三语动态搜索，不能把尚未维护的地区写成已覆盖。
+
+每条来源先按 A/B/C 可访问性探测，再进入搜索漏斗。B/C 级入口不是默认自动成功；失败时执行记录内的 fallback。编辑发现必须使用具名本地编辑源，并声明 city-life-culture、food-drink、events-listing、local-news 或 industry-specialist subtype，不保存模糊的“当地媒体”记录。
+
+十类查询意图、三语 query、来源字段、搜索漏斗和中国大陆 amap-gui 降级见 references/regional-source-packs.md。能力探测不能替代实际搜索，地图坐标也不能替代真实路线。
+
+### 安全来源访问探测
+
+当需要先判断某个已选来源当前是否可访问时，可把**明确请求的**来源交给 `node skill/scripts/probe-source-access.js --context <sources.json>`，或使用 `--stdin`。输入是 `{ "sources": [{ "id": "...", "url": "...", "fallback": "..." }], "timeoutMs": ..., "concurrency": ... }`，也可直接传入已验证的 pack source（其 fallback 在 `source.access.fallback` 字符串数组中）；只允许无内嵌用户名或密码的 `http`/`https` URL，`concurrency` 最大为 4。请求保留原 URL 的 query/fragment，输出才会移除它们，避免展示脱敏改变实际访问的资源。
+
+Probe 先以不跟随跳转的 HEAD 检查；只有 405/501 才以 `Range: bytes=0-1023` 的 GET 降级，且不会读取响应正文。结果只描述 `reachable`、`redirected`、`rate-limited`、`access-blocked`、`server-error`、`not-found` 或 `network-error` 等访问状态，并给出 `httpStatus`（网络失败为 `null`）；401/407 与其他非 404/429 的 4xx 归为 `access-blocked`，只有 5xx 归为 `server-error`。不输出 headers、cookie、authorization、正文、凭据或原始 query。顶层 URL fallback 仅输出安全化 URL；`source.access.fallback` 只输出 availability 与 option count，不回显原文。Probe 不会自动访问任何 fallback；主访问为 `reachable` 时标记 `available`，其他状态标记 `fallback-required`。
+
+这是 access-only 信号，不能证明 POI、场馆或餐厅真实存在、仍在营业、可订、适合用户、路线可行或安全。访问成功后仍必须回到官网、经营方、主办方、票务或交通方复核具体事实；失败也不等于来源内容错误。
+
 ## 搜索前建立任务单
 
 开始搜索前先写一份内部搜索任务单，不需要让用户填写问卷。至少包含：
@@ -26,6 +43,7 @@
 | 时间 | 旅行日期、星期、季节、公共假日、抵达和离开时间 |
 | 空间 | 国家、城市、街区、周边地区和跨城关系 |
 | 用户 | 同行人、体力、兴趣、饮食、安全、预算和交通偏好 |
+| visitor mode | `first-visit`、`return-visit`、`landmark-light`、`local-only` 或 `balanced-visitor`；第一次使用 Skill、第一次咨询或第一次规划不能代替到访历史，未知时记录“到访史未知”和 `balanced-visitor` |
 | 旅行主线 | 已确认的主题、行程段和明确取舍 |
 | 地点角色 | 主锚点、当地生活、酒店、用餐、夜间、交通、休息和替代方案 |
 | 易变化事实 | 营业、闭馆、活动、票务、价格、时刻、天气、海况、签证和安全 |
@@ -66,6 +84,8 @@
 - 风险替代：下雨、闭馆、预约失败、晕船、体力不足时可替换的地点。
 
 这一层可以使用官方专题、当地文化媒体、专业榜单、地图平台和近期社区内容发现名称，但只把它们当作候选线索。
+
+每座有至少两个完整旅行日的城市先至少评估 3 个代表性景点，并记录每项采用或舍弃理由；`first-visit` 或到访史未知的 `balanced-visitor` 通常在该城市停留段内保留 2–4 个代表性主锚点，并为每个锚点检索同方向当地生活角色：市场、居民广场、社区空间、街区咖啡、社区饭馆、传统商业或短半径夜间体验。著名景点不能只因为游客多就被排除；只有明确 `return-visit`、`landmark-light`、`local-only`、预约失败或过度绕路时才可不采用，并记录理由。
 
 ### 第三层：扫描同期活动和在地元素
 
@@ -115,6 +135,10 @@
 
 这些内容是体验线索，不单独证明营业时间、票务、法规、安全结论或活动是否存在。出现重要线索后回到官方或运营方复核。
 
+用户提供的小红书收藏夹或单篇笔记先按 `xiaohongshu-import.md` 保存到私人本地资料库。只有用户明确允许公开引用时，攻略 `data/sources.json` 才写入规范化公开 URL、标题、检查日期和简短 `supports`，不复制正文、收藏夹关系或私人状态。
+
+这类社媒资料的 `role` 只能是 `discovery`、`recommendation` 或 `experience`：用于发现地点与当地用词、解释为什么进入候选、补充排队/入口/点单/现场感。营业时间、价格、菜单库存、预约、票务、交通、安全和当前活动必须回到官方、运营方、地图、票务或主办方复核，不能因为多篇笔记重复提到就升级为 `fact`。
+
 ## 查询词怎么写
 
 ### 使用三种语言
@@ -156,6 +180,10 @@ Semporna diving October visibility official marine weather
 ```
 
 搜索未来活动时同时搜索“月份 + 年份”和“具体日期”；如果节目尚未发布，查上一届发布时间，用于判断何时重新复核，但不能把上一届安排写成本届事实。
+
+### 活动从发现线索到当前活动
+
+把发现与推广分开记录在 `data/events.json`。历史届次不是当前活动：过去节目、旧届页面和二手推荐只能保留为 `historical-lead`，用于发现名称、主办方和通常发布时间，不能展示为旅行日期的活动。只有主办方、场地方、城市日历或官方票务支持当期窗口时，才可升为 `announced` 或 `program-pending`；前者已有可考虑的官方日期窗口，后者只有官方窗口、节目尚待发布。官方同时确认具体场次、时间和场地后才升为 `confirmed`。每次推广都记录当期官方 URL、`sourceIds` 和需要再次检查的时间；范围、状态和路线引用遵循 `references/event-schema.md`。
 
 ### 分批查询
 
@@ -323,9 +351,25 @@ Semporna diving October visibility official marine weather
 4. 引用支持具体结论的页面，不只记录网站首页。
 5. 记录实际检查日期。旅行临近时，对营业、票务、交通、天气和安全重新检查。
 6. 多个来源冲突时，写清冲突内容、采用哪个来源和原因；不能静默挑选更方便的答案。
-7. 过去一届活动、旧菜单、旧票价只能帮助判断搜索方向，不能直接当作旅行日期的事实。
+7. 过去一届活动、旧菜单、旧票价只能帮助判断搜索方向，不能直接当作旅行日期的事实；历史届次不等于当前活动。
 
 ## 资料记录格式
+
+### 正式路线的证据边界
+
+来源 `role` 要明确区分事实（`fact`）、推荐/发现（`recommendation` 或 `discovery`）和体验（`experience`）：事实来源支持地址、开放、菜单、场次等可核实结论；推荐来源支持“为什么进入候选”和值得点的品类，但不能自动证明营业或库存；体验来源补充排队、服务节奏、入口和现场感，不能单独支持法规、安全或当前活动。
+
+每条正式路线地点在内部数据中保存非空 `sourceIds`。被引用的来源必须包含非空 `id`、`title`、`type`、`role`、`language`、`checkedAt`、`status`、非空 `supports`，以及安全公开 URL：只允许 `http:` / `https:`、非空 hostname 与空 username/password。构建器以 `new URL(...).href` 规范化后才公开序列化；活动 `officialUrl` 使用同一边界。`supports` 只列这张页面真实支持的结论；来源角色不同不代表可信度高低，而是限制它能证明什么。
+
+生成公开地图时，构建器按 `sourceIds` 顺序解析并只输出 `{title,url,type,role,language,supports,checkedAt,status}` 八字段 `evidenceSources`；公开数据不得保留 raw `sourceIds`。地图把这些资料放在可展开的“资料依据”中，而不是给每个地点增加常驻置信度徽章。
+
+`validate-trip-data.js --sources <sources.json>` 会检查来源注册表的 id、必填字段、`supports` 和 HTTP(S) URL，但不会自动把路线升级为正式证据合同；只有同时使用 `--require-route-evidence`，才会检查 canonical `routeStops` 和公开母版的正序 `defaultAssignments`。新攻略最终运行：
+
+```bash
+node scripts/validate-trip-data.js --pois <pois.json> --itinerary <itinerary.json> --sources <sources.json> --require-route-evidence --strict-routes
+```
+
+不带 `--require-route-evidence` 的 legacy 成功只表示旧数据仍兼容，不是正式路线的证据认证。
 
 在 `data/sources.json` 保存结构化来源：
 
@@ -335,6 +379,8 @@ Semporna diving October visibility official marine weather
   "title": "Sagrada Familia official opening hours",
   "url": "https://...",
   "type": "official",
+  "role": "fact",
+  "language": "es",
   "checkedAt": "2026-07-18",
   "supports": ["opening-hours", "tickets", "entry-rules"],
   "recheckBefore": "2026-10-15",

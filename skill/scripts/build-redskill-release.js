@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const sourceSkillRoot = path.resolve(scriptDir, "..");
 const outputRootArg = process.argv[2];
-const version = process.argv[3] || "0.0.4";
+const version = process.argv[3] || "0.1.0";
 
 if (!outputRootArg) {
   console.error("Usage: node scripts/build-redskill-release.js <release-directory> [version]");

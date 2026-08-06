@@ -4,13 +4,81 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(scriptDir, "..", "assets", "guide-template-europe-public");
+const defaultRoot = path.resolve(scriptDir, "..", "assets", "guide-template-europe-public");
+
+function parseTemplateRoot(args) {
+  if (!args.length) return defaultRoot;
+  if (args.length === 2 && args[0] === "--template-root") return path.resolve(args[1]);
+  throw new Error("usage: build-europe-public-template.js [--template-root <template-directory>]");
+}
+
+const root = parseTemplateRoot(process.argv.slice(2));
 const sourcePois = JSON.parse(fs.readFileSync(path.join(root, "data", "pois.json"), "utf8"));
 const sourceItinerary = JSON.parse(fs.readFileSync(path.join(root, "data", "itinerary.json"), "utf8"));
+const sourceEvents = JSON.parse(fs.readFileSync(path.join(root, "data", "events.json"), "utf8"));
+const sourceSources = JSON.parse(fs.readFileSync(path.join(root, "data", "sources.json"), "utf8"));
 
-if (!Array.isArray(sourcePois) || !Array.isArray(sourceItinerary.days) || !Array.isArray(sourceItinerary.defaultAssignments)) {
+function normalizePublicUrl(value, errorMessage) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(errorMessage);
+  }
+  if (!["http:", "https:"].includes(url.protocol) || !url.hostname || url.username || url.password) {
+    throw new Error(errorMessage);
+  }
+  return url.href;
+}
+
+const travelerEvents = sourceEvents.map(({ sourceIds: _sourceIds, ...event }) => ({
+  ...event,
+  officialUrl: normalizePublicUrl(event.officialUrl, `Event ${event.id || event.name || "<missing>"} has unsafe officialUrl`),
+}));
+
+const INLINE_SCRIPT_ESCAPES = {
+  "<": "\\u003C",
+  ">": "\\u003E",
+  "&": "\\u0026",
+  "\u2028": "\\u2028",
+  "\u2029": "\\u2029",
+};
+
+export function serializeForInlineScript(value, spacing = 0) {
+  return JSON.stringify(value, null, spacing).replace(/[<>&\u2028\u2029]/g, (character) => INLINE_SCRIPT_ESCAPES[character]);
+}
+
+if (!Array.isArray(sourcePois) || !Array.isArray(sourceEvents) || !Array.isArray(sourceSources) || !Array.isArray(sourceItinerary.days) || !Array.isArray(sourceItinerary.defaultAssignments)) {
   throw new Error("public sample data must use the europe-autumn-2026-sample schema");
 }
+
+const sourceById = new Map();
+for (const source of sourceSources) {
+  if (sourceById.has(source.id)) throw new Error(`duplicate source id: ${source.id}`);
+  sourceById.set(source.id, { ...source, url: normalizePublicUrl(source.url, `Source ${source.id} has unsafe URL`) });
+}
+
+function publicEvidenceForPoi(poi) {
+  return (poi.sourceIds || []).map((sourceId) => {
+    const source = sourceById.get(sourceId);
+    if (!source) throw new Error(`POI ${poi.id || poi.name} references missing source ${sourceId}`);
+    return {
+      title: source.title,
+      url: source.url,
+      type: source.type,
+      role: source.role,
+      language: source.language,
+      supports: source.supports,
+      checkedAt: source.checkedAt,
+      status: source.status,
+    };
+  });
+}
+
+const travelerPois = sourcePois.map(({ sourceIds: _sourceIds, ...poi }) => ({
+  ...poi,
+  evidenceSources: publicEvidenceForPoi({ ...poi, sourceIds: _sourceIds }),
+}));
 
 const categoryLabels = {
   hotel: "住宿片区",
@@ -22,6 +90,7 @@ const categoryLabels = {
   art: "艺术",
   "local-life": "本地生活",
   sight: "著名景区",
+  event: "同期活动",
 };
 
 const cityLabels = {
@@ -56,7 +125,7 @@ function slugify(value) {
 }
 
 const assignmentNames = new Set(sourceItinerary.defaultAssignments.map((rule) => rule.name));
-const pois = sourcePois.map((poi) => ({
+const pois = travelerPois.map((poi) => ({
   id: slugify(`${poi.city}-${poi.name}`),
   name: poi.name,
   name_zh: poi.zh || poi.name,
@@ -67,27 +136,144 @@ const pois = sourcePois.map((poi) => ({
   recurring: selectedHotelByCity[poi.city] === poi.name,
   coords: poi.coords,
   note: poi.note,
+  contentTier: poi.contentTier,
+  whyWorthIt: poi.whyWorthIt,
+  detailSections: poi.detailSections,
   plan: poi.plan,
   tip: poi.tip,
   source: poi.source,
+  evidenceSources: poi.evidenceSources,
   mapUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${poi.name} ${poi.city}`)}`,
   experienceUrl: `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(`${poi.zh || poi.name} ${cityLabels[poi.city] || poi.city}`)}`,
   imageQuery: `${poi.name} ${poi.city}`,
 }));
 
-const poiByName = new Map(pois.map((poi) => [poi.name, poi]));
-const assignmentsByDay = new Map(sourceItinerary.days.map((day) => [day.id, []]));
-for (const rule of sourceItinerary.defaultAssignments) {
-  const poi = poiByName.get(rule.name);
-  if (!poi || !assignmentsByDay.has(rule.dayId)) {
-    throw new Error(`invalid public sample assignment: ${rule.name} -> ${rule.dayId}`);
+function groupBy(values, getKey) {
+  const grouped = new Map();
+  for (const value of values) {
+    const key = getKey(value);
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(value);
   }
-  assignmentsByDay.get(rule.dayId).push({ poi, order: Number(rule.order) });
+  return grouped;
 }
 
-function isoDate(shortDate) {
-  const [month, day] = shortDate.split("/").map(Number);
-  return `2026-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+function normalizedCalendarDate(year, month, day) {
+  const yearNumber = Number(year);
+  const monthNumber = Number(month);
+  const dayNumber = Number(day);
+  if (!Number.isInteger(yearNumber) || !Number.isInteger(monthNumber) || !Number.isInteger(dayNumber)) return "";
+  const date = new Date(Date.UTC(yearNumber, monthNumber - 1, dayNumber));
+  if (
+    date.getUTCFullYear() !== yearNumber
+    || date.getUTCMonth() !== monthNumber - 1
+    || date.getUTCDate() !== dayNumber
+  ) return "";
+  return `${String(yearNumber).padStart(4, "0")}-${String(monthNumber).padStart(2, "0")}-${String(dayNumber).padStart(2, "0")}`;
+}
+
+function getDayIsoDate(day, tripStartDate) {
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})(?:\D|$)/.exec(day?.date || "");
+  if (isoMatch) return normalizedCalendarDate(isoMatch[1], isoMatch[2], isoMatch[3]);
+  const startMatch = /^(\d{4})-(\d{2})-(\d{2})(?:\D|$)/.exec(tripStartDate || "");
+  if (!startMatch || !normalizedCalendarDate(startMatch[1], startMatch[2], startMatch[3])) return "";
+  for (const value of [day?.short, day?.date]) {
+    const shortMatch = /^(\d{1,2})[/-](\d{1,2})(?:\D|$)/.exec(value || "");
+    if (shortMatch) return normalizedCalendarDate(startMatch[1], shortMatch[1], shortMatch[2]);
+  }
+  return "";
+}
+
+function requireDayIsoDate(day) {
+  const value = getDayIsoDate(day, sourceItinerary.trip?.startDate);
+  if (!value) throw new Error(`invalid public sample day date: ${day?.id || "<missing>"}`);
+  return value;
+}
+
+function isUsableCoords(coords) {
+  return Array.isArray(coords)
+    && coords.length === 2
+    && coords.every((value) => typeof value === "number" && Number.isFinite(value))
+    && coords[0] >= -90
+    && coords[0] <= 90
+    && coords[1] >= -180
+    && coords[1] <= 180;
+}
+
+const poiByName = new Map(pois.map((poi) => [poi.name, poi]));
+const poisByName = groupBy(pois, (poi) => poi.name);
+const poisById = groupBy(pois, (poi) => poi.id);
+const eventsByName = groupBy(sourceEvents, (event) => event.name);
+const eventsById = groupBy(sourceEvents, (event) => event.id);
+const dayById = new Map(sourceItinerary.days.map((day) => [day.id, day]));
+
+function eventAssignmentPoi(event, day) {
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(event.id || "")) {
+    throw new Error(`invalid public sample event assignment id: ${event.id || "<missing>"}`);
+  }
+  if (event.status !== "confirmed" || event.scope !== "venue") {
+    throw new Error(`public sample event assignment must be confirmed + venue: ${event.name}`);
+  }
+  const dayDate = requireDayIsoDate(day);
+  const startsOnMatch = /^(\d{4})-(\d{2})-(\d{2})(?:\D|$)/.exec(event.startsAt || "");
+  const endsOnMatch = /^(\d{4})-(\d{2})-(\d{2})(?:\D|$)/.exec(event.endsAt || "");
+  const startsOn = startsOnMatch ? normalizedCalendarDate(startsOnMatch[1], startsOnMatch[2], startsOnMatch[3]) : "";
+  const endsOn = endsOnMatch ? normalizedCalendarDate(endsOnMatch[1], endsOnMatch[2], endsOnMatch[3]) : "";
+  const dayCity = String(day.city || "").trim().toLocaleLowerCase("en-US");
+  const eventCities = [event.city, ...(Array.isArray(event.affectedCities) ? event.affectedCities : [])]
+    .filter((city) => typeof city === "string")
+    .map((city) => city.trim().toLocaleLowerCase("en-US"));
+  if (!startsOn || !endsOn || day.city === "Transit" || !eventCities.includes(dayCity) || dayDate < startsOn || dayDate > endsOn) {
+    throw new Error(`public sample event assignment is outside its eligible day: ${event.name} -> ${day.id}`);
+  }
+  const venueMatches = typeof event.venuePoiId === "string" ? (poisById.get(event.venuePoiId) || []) : [];
+  if (typeof event.venuePoiId === "string" && venueMatches.length === 0) {
+    throw new Error(`public sample event assignment references missing venue POI: ${event.venuePoiId}`);
+  }
+  if (venueMatches.length > 1) {
+    throw new Error(`public sample event assignment references ambiguous venue POI: ${event.venuePoiId}`);
+  }
+  const venue = venueMatches[0];
+  const coords = isUsableCoords(event.coords) ? event.coords : venue?.coords;
+  if (!isUsableCoords(coords)) {
+    throw new Error(`public sample event assignment has no usable location: ${event.name}`);
+  }
+  return {
+    id: `event:${event.id}`,
+    name: event.name,
+    name_zh: event.name_zh || event.name,
+    city: event.city,
+    area: event.area || venue?.area || event.city,
+    category: "event",
+    priority: "preferred",
+    coords,
+  };
+}
+
+function resolveAssignmentItem(rule, day) {
+  let poiMatches = [];
+  let eventMatches = [];
+  if (typeof rule.poiId === "string" && rule.poiId.startsWith("event:")) {
+    eventMatches = eventsById.get(rule.poiId.slice("event:".length)) || [];
+  } else if (typeof rule.poiId === "string") {
+    poiMatches = poisById.get(rule.poiId) || [];
+  } else if (typeof rule.name === "string") {
+    poiMatches = poisByName.get(rule.name) || [];
+    eventMatches = eventsByName.get(rule.name) || [];
+  }
+  const matchCount = poiMatches.length + eventMatches.length;
+  const label = rule.name || rule.poiId || "<missing>";
+  if (matchCount > 1) throw new Error(`ambiguous public sample assignment name: ${label} (${matchCount} matches)`);
+  if (matchCount === 0) throw new Error(`invalid public sample assignment: ${label} -> ${rule.dayId}`);
+  return eventMatches.length ? eventAssignmentPoi(eventMatches[0], day) : poiMatches[0];
+}
+
+const assignmentsByDay = new Map(sourceItinerary.days.map((day) => [day.id, []]));
+for (const rule of sourceItinerary.defaultAssignments) {
+  const day = dayById.get(rule.dayId);
+  if (!day) throw new Error(`invalid public sample assignment day: ${rule.dayId || "<missing>"}`);
+  const poi = resolveAssignmentItem(rule, day);
+  assignmentsByDay.get(rule.dayId).push({ poi, order: Number(rule.order) });
 }
 
 function distanceSquared(a, b) {
@@ -98,7 +284,7 @@ function distanceSquared(a, b) {
 }
 
 const assignedIds = new Set(
-  sourceItinerary.defaultAssignments.map((rule) => poiByName.get(rule.name)?.id).filter(Boolean),
+  [...assignmentsByDay.values()].flatMap((entries) => entries.map((entry) => entry.poi.id)),
 );
 
 const days = sourceItinerary.days.map((day) => {
@@ -130,7 +316,7 @@ const days = sourceItinerary.days.map((day) => {
 
   return {
     id: day.id,
-    date: isoDate(day.short),
+    date: requireDayIsoDate(day),
     title: day.title,
     city: day.city,
     summary: day.summary,
@@ -160,10 +346,10 @@ const trip = {
   },
   pois,
   days,
+  events: travelerEvents,
 };
 
 const output = `// Generated from the public europe-autumn-2026-sample data.\nwindow.TRIP_DATA = ${JSON.stringify(trip, null, 2)};\n`;
-fs.writeFileSync(path.join(root, "maps", "assets", "trip-data.js"), output);
 
 const directTrip = {
   trip: sourceItinerary.trip,
@@ -171,15 +357,29 @@ const directTrip = {
   localStops: sourceItinerary.localStops,
   itineraryDays: sourceItinerary.days,
   transitSegmentsByDay: sourceItinerary.transitSegmentsByDay,
-  pois: sourcePois,
+  pois: travelerPois,
   defaultAssignments: sourceItinerary.defaultAssignments,
+  events: travelerEvents,
 };
 const htmlPath = path.join(root, "maps", "itinerary-map.html");
 const html = fs.readFileSync(htmlPath, "utf8");
-const dataStart = html.indexOf("const PUBLIC_TRIP_DATA = ");
-const aliasStart = html.indexOf("    const stops = PUBLIC_TRIP_DATA.stops;", dataStart);
+const declaration = "const PUBLIC_TRIP_DATA = ";
+const aliasMarker = "    const stops = PUBLIC_TRIP_DATA.stops;";
+const declarationCount = (html.match(/const PUBLIC_TRIP_DATA = /g) || []).length;
+const aliasCount = html.split(aliasMarker).length - 1;
+if (declarationCount !== 1) {
+  throw new Error(`canonical HTML must contain exactly one PUBLIC_TRIP_DATA block; found ${declarationCount}`);
+}
+if (aliasCount !== 1) {
+  throw new Error(`canonical HTML must contain exactly one PUBLIC_TRIP_DATA alias boundary; found ${aliasCount}`);
+}
+const dataStart = html.indexOf(declaration);
+const aliasStart = html.indexOf(aliasMarker, dataStart);
 if (dataStart < 0 || aliasStart < 0) throw new Error("canonical HTML is missing the PUBLIC_TRIP_DATA boundary");
-const nextHtml = `${html.slice(0, dataStart)}const PUBLIC_TRIP_DATA = ${JSON.stringify(directTrip, null, 2)};\n\n${html.slice(aliasStart)}`;
+const nextHtml = `${html.slice(0, dataStart)}const PUBLIC_TRIP_DATA = ${serializeForInlineScript(directTrip, 2)};\n\n${html.slice(aliasStart)}`;
+
+// Complete both outputs and all foreseeable validation before the first real write.
+fs.writeFileSync(path.join(root, "maps", "assets", "trip-data.js"), output);
 fs.writeFileSync(htmlPath, nextHtml);
 
-console.log(`built Europe direct-copy public sample: ${sourcePois.length} places, ${sourceItinerary.days.length} days`);
+console.log(`built Europe direct-copy public sample: ${sourcePois.length} places, ${sourceItinerary.days.length} days, ${sourceEvents.length} events`);

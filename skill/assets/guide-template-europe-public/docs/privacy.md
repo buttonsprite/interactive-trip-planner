@@ -18,9 +18,9 @@
 
 每次更新后运行 `node scripts/test-europe-public-template.js`。测试会检查独立存储名称、日期数量、关键交互和常见私人信息模式。
 
-公开包检查范围包括单文件 HTML、Leaflet vendor、公开 JSON、来源和线上逻辑文档；privacy 文档本身因需要描述禁用模式而单独排除。发布文件不得出现：
+公开包检查范围包括单文件 HTML、Leaflet vendor、公开 JSON、来源、线上逻辑文档和 privacy 文档本身；禁用模式在文档中按语义类别描述，不嵌入会被误认成真实泄漏的绝对路径字面量。发布文件不得出现：
 
-- `file://` 或 `/Users/` 等本机路径。
+- `file://` URL、macOS 用户主目录下的绝对路径或其他设备专属目录。
 - 私人攻略的 storage key、旧 trip slug 或数据版本。
 - 航班/订单/房源标识、个人地址和仅存在于原攻略的自由文本。
 

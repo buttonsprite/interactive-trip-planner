@@ -410,7 +410,7 @@ git commit -m "release: prepare interactive trip planner 0.2.0"
 **Interfaces:**
 - Produces evidence that source, Skill, release, storage, and privacy contracts agree.
 
-- [ ] **Step 1: Run the complete automated suite from a clean source tree**
+- [x] **Step 1: Run the complete automated suite from a clean source tree**
 
 Run:
 
@@ -426,18 +426,28 @@ node skill/scripts/validate-xhs-library.js --library "$XHS_VERIFY_WORKSPACE/trav
 
 Expected: all commands pass, and validation reports no errors.
 
-- [ ] **Step 2: Inspect the generated release and storage tree**
+Result (2026-08-05): `npm test` exited 0; source and generated REDSkill contracts passed. A synthetic import created one note and one trip selection, and `validate-xhs-library.js` returned `valid` with no errors.
+
+- [x] **Step 2: Inspect the generated release and storage tree**
 
 Run bounded file/type and privacy scans; confirm no `travel-library/`, real note data, tokenized URLs, account identifiers, YAML/JSONL, or unsupported extension appears in `releases/redskill-0.2.0/`. Open the synthetic `INDEX.md`, one collection view, one note view, one import summary, and one trip selection to verify all relative links resolve.
 
-- [ ] **Step 3: Run an anonymous public smoke test only if the platform is reachable**
+Result (2026-08-05): release validation reported 136 supported files and two standalone maps. Manual synthetic acceptance opened the root index, board view, note view, import summaries, and trip selection; relative links used the documented layout, and `.gitignore` contained `travel-library/`.
+
+- [x] **Step 3: Run an anonymous public smoke test only if the platform is reachable**
 
 Use a user-provided public single-note share link or a disposable public fixture. Do not use a logged-in browser. Record success as a current best-effort compatibility check; record structured failure as a supported degradation, not as test-suite failure.
 
-- [ ] **Step 4: Keep authenticated browser verification as an explicit user-controlled gate**
+Result (2026-08-05): a sanitized user-provided public board URL was requested without cookies or authorization. The current page returned structured `invalid-board-state`; the fetcher stopped without upgrading to a browser or logged-in session.
+
+- [x] **Step 4: Keep authenticated browser verification as an explicit user-controlled gate**
 
 Do not access a logged-in page automatically. When the user later chooses a board and confirms the displayed risk text for that import, verify only link enumeration, stop at CAPTCHA/risk/50-item batch boundary, and do not open note details in the logged-in tab.
 
-- [ ] **Step 5: Review critical diffs and commit final corrections**
+Result (2026-08-05): no authenticated browser was accessed during implementation or acceptance. The remaining live logged-in verification is intentionally deferred until a future import receives the required board-specific confirmation.
+
+- [x] **Step 5: Review critical diffs and commit final corrections**
 
 Read all new runtimes, privacy-sensitive tests, `SKILL.md`, `xiaohongshu-import.md`, README changes, version files, and release manifest. If corrections are required, add a failing regression test first, fix, rerun `npm test`, then commit with a scope-specific message.
+
+Result (2026-08-05): reviewed runtime, CLI, storage, privacy, Skill, bilingual README, version, and generated release changes. Corrected the 0.2 Skill/version wording and aligned fail-closed material behavior across specification and user documentation.

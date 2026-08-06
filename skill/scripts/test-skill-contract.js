@@ -92,7 +92,8 @@ for (const stage of [
 ]) {
   assert.match(skill, new RegExp(stage));
 }
-assert.match(planning, /第一轮最多询问 3-5 组/);
+assert.match(planning, /第一轮最多询问 1[–-]3 组/);
+assert.doesNotMatch(planning, /第一轮最多询问 3[–-]5 组/);
 assert.match(planning, /日内动线验收/);
 assert.match(planning, /有 4 个以上正式停靠点/);
 assert.match(planning, /有意折返/);

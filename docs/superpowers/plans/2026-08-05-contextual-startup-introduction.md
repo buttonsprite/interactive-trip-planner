@@ -30,7 +30,7 @@
 - Consumes: `docs/superpowers/specs/20260805-contextual-startup-introduction-design.md`.
 - Produces: tested Skill instructions for ordering, list limits, paste-link wording, missing-information limits, and repeat suppression.
 
-- [ ] **Step 1: Write failing Skill contract assertions**
+- [x] **Step 1: Write failing Skill contract assertions**
 
 Add these assertions near the existing top-level Skill behavior assertions:
 
@@ -43,13 +43,13 @@ assert.match(skill, /局部修改.*不重复.*启动介绍/);
 assert.doesNotMatch(skill, /消化/);
 ```
 
-- [ ] **Step 2: Run the focused test and verify RED**
+- [x] **Step 2: Run the focused test and verify RED**
 
 Run `node skill/scripts/test-skill-contract.js`.
 
 Expected: FAIL on `先回应用户已经提供的内容`; the current startup block uses a fixed process paragraph and still contains “消化”.
 
-- [ ] **Step 3: Implement the minimal Skill behavior**
+- [x] **Step 3: Implement the minimal Skill behavior**
 
 Change the Skill description to “根据小红书收藏夹或单篇笔记整理地点与路线”. Replace `## 开始时向用户说明` with `## 情境化启动介绍` and these rules:
 
@@ -70,7 +70,7 @@ Change the Skill description to “根据小红书收藏夹或单篇笔记整理
 
 Keep the existing signed-in risk gate, replacing only its remaining “消化” wording.
 
-- [ ] **Step 4: Verify GREEN and commit**
+- [x] **Step 4: Verify GREEN and commit**
 
 Run `node skill/scripts/test-skill-contract.js`.
 
@@ -93,7 +93,7 @@ git commit -m "feat: add contextual startup introduction"
 - Consumes: Task 1 behavior.
 - Produces: launch copy without “消化”, current online behavior documentation, and a regenerated REDSkill containing the updated Skill.
 
-- [ ] **Step 1: Add failing metadata and online-logic assertions**
+- [x] **Step 1: Add failing metadata and online-logic assertions**
 
 ```js
 const openaiYaml = read("agents/openai.yaml");
@@ -105,13 +105,13 @@ assert.match(tasteSourceOnlineLogic, /情境化启动介绍/);
 assert.match(tasteSourceOnlineLogic, /先回应.*2[–-]4 项.*1[–-]3 组/);
 ```
 
-- [ ] **Step 2: Run the focused test and verify RED**
+- [x] **Step 2: Run the focused test and verify RED**
 
 Run `node skill/scripts/test-skill-contract.js`.
 
 Expected: FAIL because the launch prompt still says “消化” and online logic has no contextual-startup section.
 
-- [ ] **Step 3: Update launch copy and current online logic**
+- [x] **Step 3: Update launch copy and current online logic**
 
 Set the metadata to:
 
@@ -126,7 +126,7 @@ policy:
 
 Add `### 情境化启动介绍` under `## 当前已实现（0.2.0）`. Record: answer existing information first; list 2–4 relevant capabilities; ask only 1–3 missing route-shaping groups; direct pasted links into import; do not repeat onboarding for local edits; keep the signed-in risk gate deferred.
 
-- [ ] **Step 4: Verify source and generated release**
+- [x] **Step 4: Verify source and generated release**
 
 ```bash
 node skill/scripts/test-skill-contract.js
@@ -136,7 +136,7 @@ npm run test:redskill
 
 Expected: source contract passes and REDSkill reports only supported files. `agents/openai.yaml` remains excluded from REDSkill by design.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add skill/agents/openai.yaml skill/references/taste-and-source-online-logic.md skill/scripts/test-skill-contract.js releases/redskill-0.2.0
@@ -153,7 +153,7 @@ git commit -m "docs: align startup metadata and online logic"
 - Consumes: updated source, metadata, contract, online logic, and release.
 - Produces: fresh evidence that startup behavior and existing package/privacy contracts agree.
 
-- [ ] **Step 1: Run the complete suite**
+- [x] **Step 1: Run the complete suite**
 
 ```bash
 npm test
@@ -162,7 +162,7 @@ git diff --check
 
 Expected: all Skill, map, import, source, theme, and REDSkill tests pass with no whitespace errors.
 
-- [ ] **Step 2: Inspect critical user-facing copy**
+- [x] **Step 2: Inspect critical user-facing copy**
 
 ```bash
 rg -n "情境化启动介绍|小红书收藏夹链接|单篇笔记链接|1[–-]3 组|2[–-]4 项|消化" skill/SKILL.md skill/agents/openai.yaml skill/references/taste-and-source-online-logic.md releases/redskill-0.2.0/interactive-trip-planner/SKILL.md
@@ -170,13 +170,13 @@ rg -n "情境化启动介绍|小红书收藏夹链接|单篇笔记链接|1[–-]
 
 Expected: source and release contain the approved list and limits; user-facing files contain no “消化”; REDSkill matches the source Skill.
 
-- [ ] **Step 3: Review scope**
+- [x] **Step 3: Review scope**
 
 Run `git status --short` and `git log -4 --oneline`.
 
 Expected: only pre-existing untracked `.superpowers/` and `package-lock.json` remain; no unrelated file is staged or modified.
 
-- [ ] **Step 4: Record results and commit the plan**
+- [x] **Step 4: Record results and commit the plan**
 
 Mark completed steps, append actual command results, then:
 
@@ -184,3 +184,10 @@ Mark completed steps, append actual command results, then:
 git add docs/superpowers/plans/2026-08-05-contextual-startup-introduction.md
 git commit -m "docs: record contextual startup verification"
 ```
+
+#### Actual verification results (2026-08-05)
+
+- `npm test` exited 0. It rebuilt the Europe public sample (379 places, 18 days, 3 events), passed all listed Skill/map/import/source/theme contracts, rebuilt REDSkill 0.2.0, and passed the release contract (136 supported files, 2 standalone maps).
+- `git diff --check` exited 0 with no output.
+- The required `rg -n` inspection found the contextual-startup heading, Xiaohongshu board/single-note link copy, and the 2–4 capability / 1–3 route-shaping-group limits in source and generated `SKILL.md`. A follow-up `rg -n "消化"` across all listed user-facing source and generated published files returned no matches.
+- `git status --short` reported only pre-existing untracked `.superpowers/` and `package-lock.json`; `git log -6 --oneline` showed the Task 1–2 implementation commits through `3ec32ad` and no unexpected tracked modifications.

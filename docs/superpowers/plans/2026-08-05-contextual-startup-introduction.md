@@ -32,7 +32,7 @@
 
 - [ ] **Step 1: Write failing Skill contract assertions**
 
-Add `const openaiYaml = read("agents/openai.yaml");` beside the existing document reads, then add:
+Add these assertions near the existing top-level Skill behavior assertions:
 
 ```js
 assert.match(skill, /先回应用户已经提供的内容/);
@@ -41,7 +41,6 @@ assert.match(skill, /小红书收藏夹链接.*单篇笔记链接.*粘贴到这�
 assert.match(skill, /只询问.*1[–-]3 组.*改变路线骨架/);
 assert.match(skill, /局部修改.*不重复.*启动介绍/);
 assert.doesNotMatch(skill, /消化/);
-assert.doesNotMatch(openaiYaml, /消化/);
 ```
 
 - [ ] **Step 2: Run the focused test and verify RED**
@@ -97,6 +96,9 @@ git commit -m "feat: add contextual startup introduction"
 - [ ] **Step 1: Add failing metadata and online-logic assertions**
 
 ```js
+const openaiYaml = read("agents/openai.yaml");
+
+assert.doesNotMatch(openaiYaml, /消化/);
 assert.match(openaiYaml, /default_prompt:.*小红书收藏夹链接.*单篇笔记链接/);
 assert.match(openaiYaml, /default_prompt:.*只追问.*影响行程/);
 assert.match(tasteSourceOnlineLogic, /情境化启动介绍/);

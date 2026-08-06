@@ -38,6 +38,12 @@ const repositoryEnglishReadme = fs.existsSync(repositoryEnglishReadmePath)
   : null;
 
 assert.match(skill, /面向旅行者的语言/);
+assert.match(skill, /先回应用户已经提供的内容/);
+assert.match(skill, /能力.*list.*2[–-]4 项/i);
+assert.match(skill, /小红书收藏夹链接.*单篇笔记链接.*粘贴到这里/);
+assert.match(skill, /只询问.*1[–-]3 组.*改变路线骨架/);
+assert.match(skill, /局部修改.*不重复.*启动介绍/);
+assert.doesNotMatch(skill, /消化/);
 assert.match(skill, /一次旅行设计提案/);
 assert.match(skill, /请 Codex 重新安排/);
 assert.match(skill, /全程总览、某一天和统一地点详情/);

@@ -12,6 +12,16 @@ const repositoryRoot = path.resolve(skillRoot, "..");
 
 const read = (relativePath) => fs.readFileSync(path.join(skillRoot, relativePath), "utf8");
 
+function findMarkdownFiles(root) {
+  const files = [];
+  for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+    const absolutePath = path.join(root, entry.name);
+    if (entry.isDirectory()) files.push(...findMarkdownFiles(absolutePath));
+    if (entry.isFile() && path.extname(entry.name).toLowerCase() === ".md") files.push(absolutePath);
+  }
+  return files;
+}
+
 const skill = read("SKILL.md");
 const planning = read("references/planning-workflow.md");
 const sources = read("references/source-verification.md");
@@ -59,6 +69,14 @@ assert.match(
 );
 assert.match(skill, /局部修改.*不重复.*启动介绍/);
 assert.doesNotMatch(skill, /消化/);
+assert.doesNotMatch(xiaohongshuImport, /消化/);
+for (const markdownFile of findMarkdownFiles(skillRoot)) {
+  assert.doesNotMatch(
+    fs.readFileSync(markdownFile, "utf8"),
+    /消化/,
+    `${path.relative(skillRoot, markdownFile)} must not contain deprecated launch copy`,
+  );
+}
 assert.match(skill, /一次旅行设计提案/);
 assert.match(skill, /请 Codex 重新安排/);
 assert.match(skill, /全程总览、某一天和统一地点详情/);

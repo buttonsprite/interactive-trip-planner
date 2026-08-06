@@ -42,6 +42,11 @@ assert.match(skill, /先回应用户已经提供的内容/);
 assert.match(skill, /能力.*list.*2[–-]4 项/i);
 assert.match(skill, /小红书收藏夹链接.*单篇笔记链接.*粘贴到这里/);
 assert.match(skill, /只询问.*1[–-]3 组.*改变路线骨架/);
+assert.doesNotMatch(skill, /第一轮最多询问 3[–-]5 组/);
+assert.match(
+  skill,
+  /首次完整规划且用户尚未提供小红书资料时，能力 list 必须包含：[\s\S]*?小红书收藏夹链接或单篇笔记链接.*粘贴到这里/,
+);
 assert.match(skill, /局部修改.*不重复.*启动介绍/);
 assert.doesNotMatch(skill, /消化/);
 assert.match(skill, /一次旅行设计提案/);

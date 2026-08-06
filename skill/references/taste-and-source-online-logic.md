@@ -2,9 +2,19 @@
 
 ## 产品验收边界
 
-0.1.0 是尚未发布的 **developer-preview contract slice**，不等于 **PRD V1 public acceptance**。它只描述下方已有测试与 runtime 支撑的子集。Public V1 仍需 8 个海外 Regional Source Pack、每个 taste model 至少 3 个 unseen cities 的评估，以及更强的 representative evidence；三项未全部满足前，任何运行或发布说明都不得宣称 public V1 ready。
+0.2.0 是尚未发布的 **developer-preview contract slice**，不等于 **PRD V1 public acceptance**。它在 0.1.0 的 taste/source 能力上增加用户主动提供的小红书收藏资料输入，但 Public V1 仍需 8 个海外 Regional Source Pack、每个 taste model 至少 3 个 unseen cities 的评估，以及更强的 representative evidence；三项未全部满足前，任何运行或发布说明都不得宣称 public V1 ready。
 
-## 当前已实现（0.1.0）
+## 当前已实现（0.2.0）
+
+- 用户提供小红书收藏夹、单篇长链、分享短链或多条单篇链接时，Skill 会先读取 `xiaohongshu-import.md`。收藏夹先匿名读取首批与声明总数；匿名不完整时提供登录态补齐链接、只导入匿名部分、改贴单篇链接三个选择。
+- 登录态补齐必须展示账号风控或封禁风险并获得本次明确确认。宿主浏览器只读取收藏夹已渲染的链接清单，每批最多 50 篇；不会读取或保存 Cookie，也不在登录标签页逐篇打开、互动、下载或绕过验证码。
+- `fetch-xhs-public.js` 只执行匿名公开请求，限制域名、3 次重定向、30 秒超时与 5 MiB 页面；不发送 Cookie/Authorization，输出前移除分享参数、fragment 和 signed token。登录页、风控页、异常内容类型、超限和页面结构变化返回固定失败状态，不伪造成功。
+- `import-xhs-library.js` 将规范化笔记写入工作区 `travel-library/xiaohongshu/`。`record.json` 是唯一机器记录；`INDEX.md`、收藏夹页、`note.md`、导入摘要和旅行选集是自动生成的相对链接视图，可随整库迁移。
+- 素材默认不下载。显式 staging 只接受经过文件签名验证的 JPEG、PNG、WebP 和 UTF-8 文本，限制 15 MiB/文件、200 MiB/导入，并拒绝路径穿越、symlink 和 Skill/release 内资料库。
+- `validate-xhs-library.js` 检查 schema、引用、规范化 URL、敏感字段、素材 manifest 和 symlink；`summarize-xhs-import.js` 输出不含正文的导入摘要。真实用户资料不进入 Git、REDSkill、公开地图或测试 fixture。
+- 小红书笔记只能产生 `discovery`、`recommendation`、`experience` 线索；营业、票务、交通、安全和当期活动仍需官方复核。
+
+### 继承的 0.1.0 能力
 
 - 阶段一可根据目的地、玩法、节奏、同行人与兴趣推荐最多 3 个生活品味模板；用户可单选、不选或选择一主一辅。
 - Agent 可运行 `node skill/scripts/recommend-taste-models.js --context <context.json>` 或把同一 JSON 传给 `--stdin`。至少一个已知词命中时，结果包含推荐、inputVocabulary 与 unknownTerms；没有 known match 或没有有效偏好时返回 `mode: needs-clarification`、空 recommendations 和 explanation，不会按 registry 顺序推荐第一项。

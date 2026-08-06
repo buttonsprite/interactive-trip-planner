@@ -1,6 +1,6 @@
 ---
 name: interactive-trip-planner
-description: Use when 用户想规划旅行、制作旅游攻略、寻找适合自己的地点、设计每日路线、复核酒店/餐厅/景点/交通/节庆、生成可点击动态地图、让地图内容跟随对话语言，或希望在地图中调整地点并让 Codex 重新安排行程。
+description: Use when 用户想规划旅行、制作旅游攻略、寻找适合自己的地点、消化小红书收藏夹或单篇笔记、设计每日路线、复核酒店/餐厅/景点/交通/节庆、生成可点击动态地图、让地图内容跟随对话语言，或希望在地图中调整地点并让 Codex 重新安排行程。
 ---
 
 # Interactive Trip Planner
@@ -20,6 +20,14 @@ description: Use when 用户想规划旅行、制作旅游攻略、寻找适合�
 ```
 
 先读取当前目录或上级 `AGENTS.md`。没有旅行工作区规则时，按 `references/workspace-bootstrap.md` 建立。用户提供了旧攻略、参考地图或历史文件时，先读当前产物和线上逻辑，不能用聊天印象代替当前事实。
+
+## 用户带来小红书资料时
+
+用户粘贴 `xiaohongshu.com/board/` 收藏夹、`xiaohongshu.com/explore/` 单篇笔记、`xhslink.com` 分享链接或一组单篇链接时，先读取 `references/xiaohongshu-import.md`，消化用户主动提供的资料，再进入六阶段规划。
+
+先匿名读取。收藏夹匿名结果不完整时，向用户说明总数和已读取数量，并提供“登录态只补齐链接清单”“只导入匿名部分”“改贴单篇链接”三个选择。只有用户看过风险说明并对本次收藏夹明确确认后，才使用用户主动选择的已登录标签页；不得静默调用当前 Chrome、读取 Cookie 或在登录态逐篇打开详情。
+
+整理结果默认写入当前工作区 `travel-library/xiaohongshu/`，用 `INDEX.md`、收藏夹页、笔记阅读页、导入摘要和旅行选集供用户查看。私人资料库不进入 Git、REDSkill、公开地图或 Taste Model 贡献包。小红书资料只作为发现、推荐与体验线索，营业、活动、交通和安全等事实继续按阶段二复核。
 
 ## 六阶段完整流程
 
@@ -224,6 +232,7 @@ guides/<trip-slug>/
 - 阶段四和五：`references/map-standards.md`、`references/core-interaction-contract.md`、`references/map-feature-contract.md`
 - 视觉深化：`references/design-language.md`
 - 所有阶段：`references/user-facing-language.md`
+- 用户提供小红书收藏夹或单篇链接时：`references/xiaohongshu-import.md`
 - 没有旅行工作区规则时：`references/workspace-bootstrap.md`
 
 按任务读取需要的参考，不要一次加载全部文件。

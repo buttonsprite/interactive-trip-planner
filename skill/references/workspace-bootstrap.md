@@ -43,6 +43,15 @@
 
 不要把这些本地内容反向复制进公开 skill 模板。
 
+## 私人旅行资料库
+
+用户导入小红书收藏夹或单篇笔记时，默认在工作区创建 `travel-library/xiaohongshu/`，并按 `xiaohongshu-import.md` 生成 `INDEX.md`、收藏夹、笔记、导入批次和旅行选集视图。
+
+- Git 工作区把 `travel-library/` 写入根 `.gitignore`；不把真实笔记或素材放进攻略、Skill 或 release。
+- 非 Git 工作区不擅自初始化 Git，只在资料库 README 说明私人边界。
+- 用户另选存储目录时使用明确的 `--library` 路径；不得放在已安装 Skill、REDSkill 发布包或公开地图目录。
+- 素材默认不下载，不能把临时 OCR、带签名媒体 URL 或浏览器数据散落在工作区根目录。
+
 ## 避免
 
 - 没有规则文件时直接生成孤立 HTML。
@@ -50,3 +59,4 @@
 - 用通用模板覆盖用户已有规则。
 - 把完整 skill 文档复制进 `AGENTS.md`，造成重复和后续漂移。
 - 把工作区规则只留在聊天里。
+- 把私人收藏资料直接写入 `guides/<trip-slug>/data/` 或提交到 Git。

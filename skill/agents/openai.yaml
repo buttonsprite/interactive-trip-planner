@@ -1,6 +1,6 @@
 interface:
   display_name: "Interactive Trip Planner"
-  short_description: "用生活品味模板与地区来源规划可调整、可重新安排的旅行地图"
-  default_prompt: "请用 $interactive-trip-planner 帮我规划这趟旅行：先理解并确认旅行方向，根据目的地、玩法、节奏、同行人与兴趣推荐可选的生活品味模板，再用匹配的地区来源寻找和复核地点、规划每日路线并制作动态地图；地图内容请跟随我的对话语言，交付后继续根据我在地图里的选择重新安排。"
+  short_description: "消化收藏资料，用生活品味与地区来源规划可调整的旅行地图"
+  default_prompt: "请用 $interactive-trip-planner 消化我提供的旅行收藏和偏好，规划一趟有事实依据、路线合理、可以在地图里继续调整的旅行。"
 policy:
   allow_implicit_invocation: true

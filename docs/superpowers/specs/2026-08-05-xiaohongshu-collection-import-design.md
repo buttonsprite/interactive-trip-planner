@@ -130,13 +130,39 @@ Skill 识别两类输入：
 
 ```text
 travel-library/xiaohongshu/
-  library.json
-  notes/<note-id>.json
-  imports/<import-id>.json
   README.md
+  INDEX.md
+  library.json
+  collections/<board-id>/
+    collection.md
+    collection.json
+  notes/<note-id>/
+    note.md
+    record.json
+    media/
+      manifest.json
+      original/
+      derived/
+  imports/<yyyy-mm-dd>-<import-id>/
+    summary.md
+    manifest.json
+  trips/<trip-slug>/
+    selection.md
+    selection.json
 ```
 
-这是跨该工作区不同旅行复用的私人资料库。每次攻略只保存相关笔记 ID 的引用，不复制整库。
+这是跨该工作区不同旅行复用的私人资料库。不得把资料库创建在已安装 Skill 或 REDSkill 发布目录里。资料库根目录必须写入 `.gitignore`；如果当前工作区没有 Git，只创建同样的边界说明，不擅自初始化仓库。
+
+### 用户查找与查看
+
+- `README.md`：解释目录用途、隐私边界、哪些文件可手工阅读，以及如何迁移或备份整库。
+- `INDEX.md`：自动生成的总入口，按最近导入、收藏夹、目的地、街区和主题列出相对链接。
+- `collections/<board-id>/collection.md`：显示收藏夹名称、导入进度、成功/失败数量和其中每篇笔记的链接。
+- `notes/<note-id>/note.md`：显示标题、作者显示名、规范化来源、正文、标签、识别出的地点/品类/体验理由、待核实事项和相关旅行。它是从 `record.json` 生成的阅读视图，不作为第二份手工编辑数据源。
+- `imports/<yyyy-mm-dd>-<import-id>/summary.md`：保留一次导入发生了什么，方便用户找到失败项并续传。
+- `trips/<trip-slug>/selection.md`：显示某次旅行采用、候选、忽略和待复核的笔记，不复制笔记正文。
+
+所有 Markdown 使用相对链接，整个 `travel-library/` 移动到其他磁盘后仍可浏览。索引按稳定 ID 关联，不依赖标题作为文件名；标题变化不会产生重复目录。
 
 ### `library.json`
 
@@ -149,7 +175,7 @@ travel-library/xiaohongshu/
 
 不保存 Cookie、浏览器配置、账号 ID、访问 token、请求 header 或原始收藏夹跟踪参数。
 
-### `notes/<note-id>.json`
+### `notes/<note-id>/record.json` 与 `note.md`
 
 保存：
 
@@ -161,7 +187,20 @@ travel-library/xiaohongshu/
 
 完整正文仅供私人本地整理。写入攻略 `data/sources.json` 时只保留来源标题、规范化 URL、简短支持范围和检查日期；公开地图不复制笔记全文或媒体。
 
-### `imports/<import-id>.json`
+`record.json` 是唯一机器可写事实记录，`note.md` 每次导入后从它重新生成。用户想补个人判断时写入结构化的 `userState` 与 `userNotes`，再重新生成视图，避免直接编辑 Markdown 后被覆盖。
+
+### 素材目录
+
+- 默认 `media/manifest.json` 只记录媒体类型与数量，`original/` 和 `derived/` 可以为空。
+- 只有用户明确要求保存素材，或地点识别确实需要 OCR 时，才下载公开可访问图片；默认不下载视频、Live Photo、评论附件或作者头像。
+- `original/` 保存用户同意保留的原始图片，文件名按页面顺序使用 `01-cover.<ext>`、`02-image.<ext>`，不使用标题和作者名作为文件名。
+- `derived/` 只保存明确需要长期保留的缩略图、OCR 文本或裁切结果；临时 OCR 文件完成后删除。
+- `manifest.json` 对每个本地素材记录相对路径、媒体类型、字节数、SHA-256、原笔记中的顺序、用途和保存时间，不记录带签名或追踪参数的远程直链。
+- 只接受经过 MIME 与文件签名校验的 JPEG、PNG、WebP 和纯文本派生物；单文件默认不超过 15 MiB，单次导入累计不超过 200 MiB。超限时跳过并在导入摘要中说明，不自动提高上限。
+
+资料库迁移以整个 `travel-library/xiaohongshu/` 为最小单位；不生成指向资料库外的绝对路径或 symlink。导入器必须拒绝 `..` 路径穿越、资料库外写入和符号链接目标。
+
+### `imports/<yyyy-mm-dd>-<import-id>/manifest.json`
 
 保存一次导入的审计摘要：
 
@@ -169,6 +208,14 @@ travel-library/xiaohongshu/
 - 是否展示风险说明、用户是否确认本次登录读取。
 - 成功、重复、失败和停止原因。
 - 不保存 Cookie、token、浏览器身份或完整请求日志。
+
+同目录的 `summary.md` 是面向用户的可读摘要，不包含笔记全文、账号标识或敏感 URL 参数。
+
+### 旅行引用
+
+- 私人关联默认写入资料库内的 `trips/<trip-slug>/selection.json`，而不是写入可能公开提交的攻略目录。
+- `selection.json` 只保存笔记 ID、旅行角色、采用状态、相关地点 ID 和最近判断日期；`selection.md` 提供可读视图。
+- 只有用户明确允许把某条笔记作为公开来源时，才将规范化公开 URL 和简短支持范围写入攻略 `data/sources.json`；仍不复制正文、收藏夹关系或私人状态。
 
 ### Git 与发布边界
 

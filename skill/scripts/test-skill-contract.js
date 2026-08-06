@@ -23,6 +23,8 @@ const coreContractPath = path.join(skillRoot, "references", "core-interaction-co
 const tasteReference = read("references/hybrid-taste-models.md");
 const sourcePackReference = read("references/regional-source-packs.md");
 const tasteSourceOnlineLogic = read("references/taste-and-source-online-logic.md");
+const openaiYamlPath = path.join(skillRoot, "agents", "openai.yaml");
+const openaiYaml = fs.existsSync(openaiYamlPath) ? fs.readFileSync(openaiYamlPath, "utf8") : null;
 const poiSchema = read("references/poi-schema.md");
 const mapFeatureContract = read("references/map-feature-contract.md");
 const mapStandards = read("references/map-standards.md");
@@ -36,6 +38,14 @@ const repositoryEnglishReadmePath = path.join(repositoryRoot, "README.en.md");
 const repositoryEnglishReadme = fs.existsSync(repositoryEnglishReadmePath)
   ? fs.readFileSync(repositoryEnglishReadmePath, "utf8")
   : null;
+
+if (openaiYaml !== null) {
+  assert.doesNotMatch(openaiYaml, /消化/);
+  assert.match(openaiYaml, /default_prompt:.*小红书收藏夹链接.*单篇笔记链接/);
+  assert.match(openaiYaml, /default_prompt:.*只追问.*影响行程/);
+}
+assert.match(tasteSourceOnlineLogic, /情境化启动介绍/);
+assert.match(tasteSourceOnlineLogic, /先回应.*2[–-]4 项.*1[–-]3 组/);
 
 assert.match(skill, /面向旅行者的语言/);
 assert.match(skill, /先回应用户已经提供的内容/);

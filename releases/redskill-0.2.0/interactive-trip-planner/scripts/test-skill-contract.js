@@ -23,6 +23,8 @@ const coreContractPath = path.join(skillRoot, "references", "core-interaction-co
 const tasteReference = read("references/hybrid-taste-models.md");
 const sourcePackReference = read("references/regional-source-packs.md");
 const tasteSourceOnlineLogic = read("references/taste-and-source-online-logic.md");
+const openaiYamlPath = path.join(skillRoot, "agents", "openai.yaml");
+const openaiYaml = fs.existsSync(openaiYamlPath) ? fs.readFileSync(openaiYamlPath, "utf8") : null;
 const poiSchema = read("references/poi-schema.md");
 const mapFeatureContract = read("references/map-feature-contract.md");
 const mapStandards = read("references/map-standards.md");
@@ -37,7 +39,26 @@ const repositoryEnglishReadme = fs.existsSync(repositoryEnglishReadmePath)
   ? fs.readFileSync(repositoryEnglishReadmePath, "utf8")
   : null;
 
+if (openaiYaml !== null) {
+  assert.doesNotMatch(openaiYaml, /消化/);
+  assert.match(openaiYaml, /default_prompt:.*小红书收藏夹链接.*单篇笔记链接/);
+  assert.match(openaiYaml, /default_prompt:.*只追问.*影响行程/);
+}
+assert.match(tasteSourceOnlineLogic, /情境化启动介绍/);
+assert.match(tasteSourceOnlineLogic, /先回应.*2[–-]4 项.*1[–-]3 组/);
+
 assert.match(skill, /面向旅行者的语言/);
+assert.match(skill, /先回应用户已经提供的内容/);
+assert.match(skill, /能力.*list.*2[–-]4 项/i);
+assert.match(skill, /小红书收藏夹链接.*单篇笔记链接.*粘贴到这里/);
+assert.match(skill, /只询问.*1[–-]3 组.*改变路线骨架/);
+assert.doesNotMatch(skill, /第一轮最多询问 3[–-]5 组/);
+assert.match(
+  skill,
+  /首次完整规划且用户尚未提供小红书资料时，能力 list 必须包含：[\s\S]*?小红书收藏夹链接或单篇笔记链接.*粘贴到这里/,
+);
+assert.match(skill, /局部修改.*不重复.*启动介绍/);
+assert.doesNotMatch(skill, /消化/);
 assert.match(skill, /一次旅行设计提案/);
 assert.match(skill, /请 Codex 重新安排/);
 assert.match(skill, /全程总览、某一天和统一地点详情/);
@@ -81,7 +102,8 @@ for (const stage of [
 ]) {
   assert.match(skill, new RegExp(stage));
 }
-assert.match(planning, /第一轮最多询问 3-5 组/);
+assert.match(planning, /第一轮最多询问 1[–-]3 组/);
+assert.doesNotMatch(planning, /第一轮最多询问 3[–-]5 组/);
 assert.match(planning, /日内动线验收/);
 assert.match(planning, /有 4 个以上正式停靠点/);
 assert.match(planning, /有意折返/);

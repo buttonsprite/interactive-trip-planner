@@ -24,4 +24,3 @@ try {
   process.stderr.write(`${error?.message || "Xiaohongshu library validation failed."}\n`);
   process.exitCode = 2;
 }
-

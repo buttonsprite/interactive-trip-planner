@@ -9,7 +9,7 @@ description: Use when 用户想规划旅行、制作旅游攻略、寻找适合�
 
 核心原则：先理解用户想怎样旅行，再寻找地点和规划路线；地图是主要使用界面，交付不是终点。所有给旅行者看的内容使用自然语言，并尽量跟随用户当前主要对话语言；内部数据和开发术语不出现在聊天和地图界面。
 
-0.1.0 是尚未发布的 developer-preview contract slice，只表示本 Skill 当前实现的可验证子集，不等于 PRD V1 public acceptance。在 8 个海外 Regional Source Pack、每个 taste model 至少 3 个 unseen cities 评估与更强 representative evidence 全部满足前，不得宣称 public V1 ready。
+0.2.0 是 developer-preview contract slice，只表示本 Skill 当前实现的可验证子集，不等于 PRD V1 public acceptance。在 8 个海外 Regional Source Pack、每个 taste model 至少 3 个 unseen cities 评估与更强 representative evidence 全部满足前，不得宣称 public V1 ready。
 
 ## 开始时向用户说明
 
@@ -65,7 +65,7 @@ description: Use when 用户想规划旅行、制作旅游攻略、寻找适合�
 
 目标不是复制热门榜单，而是建立一组能服务旅行主题、路线、吃住和风险替代的地点候选。
 
-执行前读取 `references/source-verification.md` 和 `references/regional-source-packs.md`。0.1.0 内置 Global、中国大陆、日本、法语区四个 Regional Source Pack；其他目的地使用 Global Base 与三语动态搜索。按照“先发现、后核实”的顺序搜索：
+执行前读取 `references/source-verification.md` 和 `references/regional-source-packs.md`。0.2.0 继承 Global、中国大陆、日本、法语区四个 Regional Source Pack；其他目的地使用 Global Base 与三语动态搜索。按照“先发现、后核实”的顺序搜索：
 
 1. 建立搜索任务单：明确日期、区域、主题、用户偏好、选中的生活品味、必须覆盖的地点角色和需要实时复核的事实。
 2. 选择 Global Base 与一个匹配的地区包，按 A/B/C 可访问性先探测来源；B/C 失败时执行明确 fallback。中国大陆先运行 `scripts/check-amap-cli.js` 探测可选增强，不读取或输出密钥；CLI 不可用时明确未完成高德路网复核，不伪造路线。
@@ -242,7 +242,7 @@ guides/<trip-slug>/
 发布到只接受文本与代码格式的 REDSkill 平台时，使用专用构建脚本生成发布目录，不直接上传 Codex 本地 skill 原目录：
 
 ```bash
-node scripts/build-redskill-release.js <release-directory> 0.1.0
+node scripts/build-redskill-release.js <release-directory> 0.2.0
 node scripts/test-redskill-release.js <release-directory>
 ```
 

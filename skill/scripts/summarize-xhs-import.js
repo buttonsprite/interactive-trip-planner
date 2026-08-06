@@ -67,4 +67,3 @@ try {
   process.stderr.write(`${error?.message || "Xiaohongshu import summary failed."}\n`);
   process.exitCode = 2;
 }
-

@@ -178,9 +178,12 @@ assert.match(skill, /venue[^\n]*hosted[^\n]*citywide/);
 assert.match(skill, /confirmed[^\n]*program-pending/);
 assert.match(skill, /当地食材结构[^\n]*居民[^\n]*季节/);
 assert.match(sources, /历史届次[^\n]*不[^\n]*当前活动/);
+assert.match(skill, /0\.2\.0[^\n]*developer-preview/i);
+assert.match(skill, /build-redskill-release\.js <release-directory> 0\.2\.0/);
+assert.match(skill, /references\/xiaohongshu-import\.md/);
 
 if (repositoryReadme !== null) {
-  assert.match(repositoryReadme, /0\.1\.0[^\n]*developer preview/i);
+  assert.match(repositoryReadme, /0\.2\.0[^\n]*developer preview/i);
   assert.match(repositoryReadme, /不等于 Public V1/i);
   assert.match(repositoryReadme, /8 个海外 Regional Source Pack/i);
   assert.match(repositoryReadme, /每个 Taste Model 至少 3 个 unseen cities/i);
@@ -208,7 +211,7 @@ if (repositoryReadme !== null) {
 if (repositoryEnglishReadme !== null) {
   assert.match(
     repositoryEnglishReadme,
-    /\[Chinese REDSkill installation guide\]\(releases\/redskill-0\.1\.0\/INSTALL\.zh-CN\.md\)/,
+    /\[Chinese REDSkill installation guide\]\(releases\/redskill-0\.2\.0\/INSTALL\.zh-CN\.md\)/,
   );
 }
 

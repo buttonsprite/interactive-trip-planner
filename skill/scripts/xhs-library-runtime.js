@@ -788,4 +788,3 @@ export function validateLibrary({ libraryRoot } = {}) {
   }
   return { status: errors.length ? "invalid" : "valid", errors, counts };
 }
-

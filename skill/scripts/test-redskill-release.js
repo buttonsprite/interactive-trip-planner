@@ -50,6 +50,24 @@ if (expectedVersion) {
 }
 assert.equal(packageJson.type, "module", "release scripts require ESM mode");
 
+for (const relativePath of [
+  "scripts/xhs-import-runtime.js",
+  "scripts/fetch-xhs-public.js",
+  "scripts/xhs-library-runtime.js",
+  "scripts/import-xhs-library.js",
+  "scripts/validate-xhs-library.js",
+  "scripts/summarize-xhs-import.js",
+  "references/xiaohongshu-import.md",
+  "assets/xiaohongshu-library-template/README.md",
+  "assets/xiaohongshu-library-template/library.json",
+]) {
+  assert.ok(fs.existsSync(path.join(skillRoot, relativePath)), `missing 0.2 release file: ${relativePath}`);
+}
+assert.ok(
+  !packageFiles.some((file) => path.relative(skillRoot, file).startsWith(`travel-library${path.sep}`)),
+  "private travel-library data must not ship in REDSkill",
+);
+
 const lightTemplateReadme = fs.readFileSync(path.join(skillRoot, "assets", "guide-template", "README.md"), "utf8");
 assert.match(lightTemplateReadme, /单个 HTML|内联/, "release template instructions should describe the standalone HTML");
 assert.doesNotMatch(lightTemplateReadme, /maps\/vendor\/leaflet/, "release template instructions must not require a removed vendor directory");
@@ -112,6 +130,8 @@ for (const pattern of [
   /51240589/,
   /\bAF\d{3,4}\b/,
   /europe-2026-itinerary-/,
+  /[?&](?:xsec_token|share_id|appuid)=[^&\s"']+/i,
+  /(?:cookie|authorization)\s*[:=]\s*(?:bearer\s+)?(?:secret|fixture|test)[-_a-z0-9]*/i,
 ]) {
   assert.doesNotMatch(publicText, pattern, `privacy scan found ${pattern}`);
 }
@@ -125,6 +145,10 @@ for (const testFile of [
   "test-first-visit-balance.js",
   "test-discovery-cli.js",
   "test-source-access-probe.js",
+  "test-xhs-import-runtime.js",
+  "test-xhs-public-fetch.js",
+  "test-xhs-library.js",
+  "test-xhs-import-cli.js",
   "test-skill-contract.js",
 ]) {
   const result = spawnSync(process.execPath, [path.join(skillRoot, "scripts", testFile)], { encoding: "utf8" });

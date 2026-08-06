@@ -12,6 +12,14 @@ const repositoryRoot = path.resolve(skillRoot, "..");
 
 const read = (relativePath) => fs.readFileSync(path.join(skillRoot, relativePath), "utf8");
 
+function markdownSection(markdown, heading) {
+  const match = markdown.match(
+    new RegExp(`^## ${heading}\\n([\\s\\S]*?)(?=^## |\\z)`, "m"),
+  );
+  assert.ok(match, `missing ## ${heading} section`);
+  return match[1];
+}
+
 function findMarkdownFiles(root) {
   const files = [];
   for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
@@ -48,6 +56,8 @@ const repositoryEnglishReadmePath = path.join(repositoryRoot, "README.en.md");
 const repositoryEnglishReadme = fs.existsSync(repositoryEnglishReadmePath)
   ? fs.readFileSync(repositoryEnglishReadmePath, "utf8")
   : null;
+const startupIntroduction = markdownSection(skill, "情境化启动介绍");
+const planningStartup = markdownSection(planning, "启动说明");
 
 if (openaiYaml !== null) {
   assert.doesNotMatch(openaiYaml, /消化/);
@@ -56,17 +66,30 @@ if (openaiYaml !== null) {
 }
 assert.match(tasteSourceOnlineLogic, /情境化启动介绍/);
 assert.match(tasteSourceOnlineLogic, /先回应.*2[–-]4 项.*1[–-]3 组/);
+assert.match(tasteSourceOnlineLogic, /用户粘贴.*时，直接进入.*导入流程/);
+assert.match(tasteSourceOnlineLogic, /局部编辑时，不重复启动介绍/);
+assert.match(tasteSourceOnlineLogic, /只有匿名读取不完整且用户选择登录态补齐时才展示/);
 
 assert.match(skill, /面向旅行者的语言/);
-assert.match(skill, /先回应用户已经提供的内容/);
-assert.match(skill, /能力.*list.*2[–-]4 项/i);
-assert.match(skill, /小红书收藏夹链接.*单篇笔记链接.*粘贴到这里/);
-assert.match(skill, /只询问.*1[–-]3 组.*改变路线骨架/);
+assert.match(startupIntroduction, /先回应用户已经提供的内容/);
+assert.match(startupIntroduction, /Markdown list.*2[–-]4 项/i);
+assert.match(startupIntroduction, /只询问.*1[–-]3 组.*改变路线骨架/);
+assert.ok(
+  startupIntroduction.indexOf("先回应用户已经提供的内容")
+    < startupIntroduction.indexOf("Markdown list"),
+  "startup introduction must respond to supplied context before listing capabilities",
+);
+assert.ok(
+  startupIntroduction.indexOf("Markdown list")
+    < startupIntroduction.indexOf("只询问当前缺少的 1–3 组"),
+  "startup introduction must list capabilities before asking route-shaping questions",
+);
 assert.doesNotMatch(skill, /第一轮最多询问 3[–-]5 组/);
 assert.match(
-  skill,
-  /首次完整规划且用户尚未提供小红书资料时，能力 list 必须包含：[\s\S]*?小红书收藏夹链接或单篇笔记链接.*粘贴到这里/,
+  startupIntroduction,
+  /首次完整规划且用户尚未提供小红书资料时[\s\S]*?必须包含[\s\S]*?小红书收藏夹链接或单篇笔记链接.*粘贴到这里/,
 );
+assert.match(startupIntroduction, /其余 1[–-]3 项.*从下列示例中按当前请求选择.*不要求全部出现/);
 assert.match(skill, /局部修改.*不重复.*启动介绍/);
 assert.doesNotMatch(skill, /消化/);
 assert.doesNotMatch(xiaohongshuImport, /消化/);
@@ -122,6 +145,19 @@ for (const stage of [
 }
 assert.match(planning, /第一轮最多询问 1[–-]3 组/);
 assert.doesNotMatch(planning, /第一轮最多询问 3[–-]5 组/);
+assert.match(planningStartup, /先回应用户已经提供的内容/);
+assert.match(planningStartup, /Markdown list.*2[–-]4 项/i);
+assert.match(planningStartup, /只询问.*1[–-]3 组.*改变路线骨架/);
+assert.match(planningStartup, /其余 1[–-]3 项.*从下列示例中按当前请求选择.*不要求全部出现/);
+assert.ok(
+  planningStartup.indexOf("先回应用户已经提供的内容")
+    < planningStartup.indexOf("Markdown list")
+    && planningStartup.indexOf("Markdown list")
+      < planningStartup.indexOf("只询问当前缺少的 1–3 组"),
+  "planning workflow must keep the contextual startup order",
+);
+assert.doesNotMatch(planningStartup, /开始完整攻略前，用 2-3 句话向用户说明/);
+assert.doesNotMatch(planningStartup, /我会先确认会影响路线的关键信息/);
 assert.match(planning, /日内动线验收/);
 assert.match(planning, /有 4 个以上正式停靠点/);
 assert.match(planning, /有意折返/);

@@ -114,6 +114,7 @@ const sevenDay = deepFreeze({
     routeStatus: index < 2 ? "verified" : "unverified",
     routeProvider: index < 2 ? "amap" : undefined,
     routeReviewedAt: index < 2 ? "2026-08-06" : undefined,
+    distanceMeters: index < 2 ? 650 + index * 100 : undefined,
   })),
 });
 const daySnapshot = structuredClone({ sevenPois, sevenDay });
@@ -162,8 +163,8 @@ const drivingDay = deepFreeze({
   routeReview: { status: "verified" },
   routeStops: drivingPois.map((poi, index) => ({ poiId: poi.id, order: index })),
   transitSegments: [
-    { fromPoiId: drivingPois[0].id, toPoiId: drivingPois[1].id, mode: "driving", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
-    { fromPoiId: drivingPois[1].id, toPoiId: drivingPois[2].id, mode: "driving", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
+    { fromPoiId: drivingPois[0].id, toPoiId: drivingPois[1].id, mode: "driving", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06", distanceMeters: 1200 },
+    { fromPoiId: drivingPois[1].id, toPoiId: drivingPois[2].id, mode: "driving", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06", distanceMeters: 1800 },
   ],
 });
 const drivingHandoffs = TripMapDelivery.buildDayHandoffs(drivingDay, drivingPois, {
@@ -210,9 +211,9 @@ const mixedDay = deepFreeze({
   routeReview: { status: "verified" },
   routeStops: mixedPois.map((poi, index) => ({ poiId: poi.id, order: index })),
   transitSegments: [
-    { fromPoiId: mixedPois[0].id, toPoiId: mixedPois[1].id, mode: "walking", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
-    { fromPoiId: mixedPois[1].id, toPoiId: mixedPois[2].id, mode: "driving", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
-    { fromPoiId: mixedPois[2].id, toPoiId: mixedPois[3].id, mode: "driving", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
+    { fromPoiId: mixedPois[0].id, toPoiId: mixedPois[1].id, mode: "walking", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06", distanceMeters: 700 },
+    { fromPoiId: mixedPois[1].id, toPoiId: mixedPois[2].id, mode: "driving", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06", distanceMeters: 1400 },
+    { fromPoiId: mixedPois[2].id, toPoiId: mixedPois[3].id, mode: "driving", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06", distanceMeters: 1600 },
   ],
 });
 const mixedHandoffs = TripMapDelivery.buildDayHandoffs(mixedDay, mixedPois, {
@@ -236,8 +237,8 @@ const verifiedStatusDay = deepFreeze({
   routeReview: { status: "verified" },
   routeStops: statusPois.map((poi, index) => ({ poiId: poi.id, order: index })),
   transitSegments: [
-    { fromPoiId: statusPois[0].id, toPoiId: statusPois[1].id, mode: "walking", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
-    { fromPoiId: statusPois[1].id, toPoiId: statusPois[2].id, mode: "walking", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
+    { fromPoiId: statusPois[0].id, toPoiId: statusPois[1].id, mode: "walking", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06", distanceMeters: 800 },
+    { fromPoiId: statusPois[1].id, toPoiId: statusPois[2].id, mode: "walking", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06", distanceMeters: 900 },
   ],
 });
 assert.equal(
@@ -270,6 +271,33 @@ assert.equal(
   "unverified",
   "evidence cannot upgrade a declared unverified day",
 );
+for (const [label, routeStatus, routeReviewStatus, expected] of [
+  ["routeStatus verified conflicts with routeReview unverified", "verified", "unverified", "unverified"],
+  ["routeStatus unverified conflicts with routeReview verified", "unverified", "verified", "unverified"],
+  ["routeStatus verified conflicts with routeReview partial", "verified", "partial", "partial"],
+  ["routeStatus partial conflicts with routeReview verified", "partial", "verified", "partial"],
+]) {
+  const result = TripMapDelivery.buildDayHandoffs({
+    ...verifiedStatusDay,
+    routeStatus,
+    routeReview: { status: routeReviewStatus },
+  }, statusPois, {});
+  assert.equal(result.routeStatus, expected, label);
+}
+for (const [label, distanceMeters] of [
+  ["missing distance", undefined],
+  ["zero distance", 0],
+  ["negative distance", -1],
+]) {
+  const result = TripMapDelivery.buildDayHandoffs({
+    ...verifiedStatusDay,
+    transitSegments: [
+      { ...verifiedStatusDay.transitSegments[0], distanceMeters },
+      verifiedStatusDay.transitSegments[1],
+    ],
+  }, statusPois, {});
+  assert.equal(result.routeStatus, "partial", `${label} cannot count as a verified edge`);
+}
 assert.equal(
   TripMapDelivery.buildDayHandoffs(verifiedStatusDay, statusPois, { dirty: true }).routeStatus,
   "unverified",

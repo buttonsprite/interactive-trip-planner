@@ -349,6 +349,8 @@
         segment?.routeStatus === "verified"
         && cleanText(segment.routeProvider)
         && cleanText(segment.routeReviewedAt)
+        && Number.isFinite(segment.distanceMeters)
+        && segment.distanceMeters > 0
       ) {
         verifiedEdges += 1;
       }
@@ -359,16 +361,22 @@
 
   function dayRouteStatus(day, options) {
     if (options?.dirty || day?.dirty) return "unverified";
-    const declared = cleanText(day?.routeStatus || day?.routeReview?.status);
-    if (!routeStatuses.has(declared) || declared === "unverified") return "unverified";
+    const statusRank = { unverified: 0, partial: 1, verified: 2 };
+    const declarations = [day?.routeStatus, day?.routeReview?.status]
+      .map(cleanText)
+      .filter((status) => routeStatuses.has(status));
+    const declared = declarations.reduce(
+      (least, status) => statusRank[status] < statusRank[least] ? status : least,
+      "verified",
+    );
+    if (!declarations.length || declared === "unverified") return "unverified";
     const fallbackOrder = Array.isArray(day?.orderedPoiIds)
       ? day.orderedPoiIds
       : [...(day?.routeStops || [])]
         .sort((left, right) => Number(left.order || 0) - Number(right.order || 0))
         .map((stop) => stop.poiId);
     const evidence = routeEvidenceStatus(day, options?.orderedPoiIds || fallbackOrder);
-    if (declared === "partial" && evidence === "verified") return "partial";
-    return evidence;
+    return statusRank[evidence] < statusRank[declared] ? evidence : declared;
   }
 
   function buildDayHandoffs(day, pois, options) {

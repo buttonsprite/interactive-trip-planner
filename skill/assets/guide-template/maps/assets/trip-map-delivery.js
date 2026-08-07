@@ -471,9 +471,215 @@
     };
   }
 
+  const MY_MAPS_COLUMNS = [
+    "name",
+    "local_name",
+    "city",
+    "area",
+    "address",
+    "latitude",
+    "longitude",
+    "date",
+    "day_order",
+    "trip_role",
+    "category",
+    "priority",
+    "plan_status",
+    "why_worth_it",
+    "tip",
+    "map_url",
+  ];
+
+  const MY_MAPS_LABELS = {
+    "zh-CN": {
+      formal: "正式路线",
+      candidate: "候选地点",
+      unassigned: "尚未安排行程",
+      reroute: "需要重新安排",
+      verified: "路线已复核",
+      partial: "路线部分复核",
+      unverified: "路线待复核",
+      candidateFolder: "候选地点",
+      priorities: {
+        must: "必须去",
+        preferred: "优先去",
+        nearby: "顺路可去",
+        archive: "留档",
+        pending: "待复核",
+        booked: "已预约",
+        S: "必须去",
+        A: "优先去",
+        B: "顺路可去",
+        C: "留档",
+      },
+    },
+    en: {
+      formal: "Formal route",
+      candidate: "Candidate",
+      unassigned: "Unassigned",
+      reroute: "Needs rerouting",
+      verified: "Route verified",
+      partial: "Route partially verified",
+      unverified: "Route review pending",
+      candidateFolder: "Candidates",
+      priorities: {
+        must: "Must",
+        preferred: "Preferred",
+        nearby: "Nearby",
+        archive: "Archive",
+        pending: "Pending review",
+        booked: "Booked",
+        S: "Must",
+        A: "Preferred",
+        B: "Nearby",
+        C: "Archive",
+      },
+    },
+  };
+
+  function csvCell(value) {
+    return `"${String(value ?? "").replace(/"/g, '""')}"`;
+  }
+
+  function xmlText(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&apos;",
+    })[character]);
+  }
+
+  function localizedName(poi, locale) {
+    if (locale === "zh-CN") {
+      return cleanText(poi?.name_zh) || cleanText(poi?.zh) || displayName(poi);
+    }
+    return cleanText(poi?.name) || cleanText(poi?.name_zh) || cleanText(poi?.zh) || cleanText(poi?.id) || "Unnamed place";
+  }
+
+  function localName(poi) {
+    return cleanText(poi?.name) || cleanText(poi?.name_zh) || cleanText(poi?.zh) || cleanText(poi?.id);
+  }
+
+  function candidatePoiIds(days) {
+    const ids = new Set();
+    for (const day of days) {
+      for (const item of Array.isArray(day?.candidates) ? day.candidates : []) {
+        const poiId = typeof item === "string" ? item : cleanText(item?.poiId || item?.id);
+        if (poiId) ids.add(poiId);
+      }
+    }
+    return ids;
+  }
+
+  function myMapsEntries(trip, state, locale) {
+    const current = currentTripView(trip, state);
+    const labels = MY_MAPS_LABELS[locale];
+    const daysById = new Map(current.days.map((day) => [day.id, day]));
+    const candidates = candidatePoiIds(current.days);
+    return current.pois.map((poi) => {
+      const dayId = cleanText(current.assignments?.[poi.id]);
+      const day = daysById.get(dayId) || null;
+      const orderIndex = day ? (current.orders?.[day.id] || []).indexOf(poi.id) : -1;
+      const role = day ? "formal" : (candidates.has(poi.id) ? "candidate" : "unassigned");
+      const coords = validCoords(poi.coords) ? [Number(poi.coords[0]), Number(poi.coords[1])] : null;
+      const priority = cleanText(current.priorities?.[poi.id] ?? poi.priority);
+      const routeStatus = day?.dirty ? "reroute" : cleanText(day?.routeStatus);
+      const fallbackMapUrl = googlePlaceLink(poi, { source: "interactive-trip-planner" })?.url || "";
+      return {
+        poi,
+        day,
+        coords,
+        role,
+        csv: {
+          name: localizedName(poi, locale),
+          local_name: localName(poi),
+          city: cleanText(poi.city),
+          area: cleanText(poi.area),
+          address: displayAddress(poi),
+          latitude: coords ? coords[0] : "",
+          longitude: coords ? coords[1] : "",
+          date: day ? cleanText(day.date) : "",
+          day_order: orderIndex >= 0 ? orderIndex + 1 : "",
+          trip_role: labels[role],
+          category: cleanText(poi.category),
+          priority: labels.priorities[priority] || priority,
+          plan_status: day ? (labels[routeStatus] || labels.unverified) : "",
+          why_worth_it: cleanText(poi.whyWorthIt) || cleanText(poi.note),
+          tip: cleanText(poi.tip),
+          map_url: cleanText(poi.mapUrl) || fallbackMapUrl,
+        },
+      };
+    });
+  }
+
+  function buildMyMapsCsv(entries) {
+    const rows = entries.map((entry) => MY_MAPS_COLUMNS.map((column) => csvCell(entry.csv[column])).join(","));
+    return `${MY_MAPS_COLUMNS.join(",")}\n${rows.join("\n")}\n`;
+  }
+
+  function kmlPlacemark(entry) {
+    const description = [
+      entry.csv.trip_role,
+      entry.csv.category,
+      entry.csv.why_worth_it,
+      entry.csv.tip,
+    ].filter(Boolean).join(" · ");
+    return [
+      "<Placemark>",
+      `<name>${xmlText(entry.csv.name)}</name>`,
+      `<description>${xmlText(description)}</description>`,
+      `<Point><coordinates>${entry.coords[1]},${entry.coords[0]},0</coordinates></Point>`,
+      "</Placemark>",
+    ].join("");
+  }
+
+  function buildMyMapsKml(entries, days, locale) {
+    const folders = [];
+    for (const day of days) {
+      const placemarks = entries
+        .filter((entry) => entry.day?.id === day.id && entry.coords)
+        .sort((left, right) => Number(left.csv.day_order || 0) - Number(right.csv.day_order || 0))
+        .map(kmlPlacemark)
+        .join("");
+      folders.push(`<Folder><name>${xmlText([cleanText(day.date), cleanText(day.title)].filter(Boolean).join(" · "))}</name>${placemarks}</Folder>`);
+    }
+    const candidates = entries
+      .filter((entry) => !entry.day && entry.coords)
+      .map(kmlPlacemark)
+      .join("");
+    folders.push(`<Folder><name>${xmlText(MY_MAPS_LABELS[locale].candidateFolder)}</name>${candidates}</Folder>`);
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document>${folders.join("")}</Document></kml>\n`;
+  }
+
+  function buildMyMapsReadme(entries, locale) {
+    const manualCount = entries.filter((entry) => !entry.coords).length;
+    if (locale === "en") {
+      return `# Google My Maps import\n\n- Import \`places.csv\` to create and style all place markers.\n- Import \`itinerary.kml\` to add folders grouped by day plus a candidate folder.\n- Manual location required: ${manualCount} place(s). These rows stay in CSV by name and address, but GCJ-02-only coordinates are never written to KML.\n- Google My Maps is different from Google Maps Saved Lists; this export does not modify a personal Saved List.\n- Open route links from the trip map when navigating. Google Maps recalculates directions after opening them.\n`;
+    }
+    return `# Google My Maps 导入说明\n\n- 在 Google My Maps 中导入 \`places.csv\`，建立并按字段整理全部地点标记。\n- 再导入 \`itinerary.kml\`，加入按日期分组的正式路线地点和候选地点文件夹。\n- 需要手动定位：${manualCount} 个地点。这些地点会按名称和地址保留在 CSV 中，但仅有 GCJ-02 坐标时绝不写入 KML。\n- Google My Maps 与 Google Maps 的“已保存地点”不同；此导出不会修改个人 Saved List。\n- 实际导航时请从旅行地图打开路线链接；Google Maps 会在打开后重新计算路线。\n`;
+  }
+
+  function buildMyMapsFiles(options) {
+    const locale = cleanText(options?.locale) || "zh-CN";
+    if (!MY_MAPS_LABELS[locale]) throw new Error("locale must be zh-CN or en");
+    const trip = options?.trip;
+    if (!trip || typeof trip !== "object" || !Array.isArray(trip.pois) || !Array.isArray(trip.days)) {
+      throw new Error("trip must contain pois and days arrays");
+    }
+    const entries = myMapsEntries(trip, options?.state, locale);
+    return {
+      "README.md": buildMyMapsReadme(entries, locale),
+      "places.csv": buildMyMapsCsv(entries),
+      "itinerary.kml": buildMyMapsKml(entries, currentTripView(trip, options?.state).days, locale),
+    };
+  }
+
   root.TripMapDelivery = Object.freeze({
     buildPlaceLinks,
     buildDayHandoffs,
     currentTripView,
+    buildMyMapsFiles,
   });
 })(typeof globalThis !== "undefined" ? globalThis : window);

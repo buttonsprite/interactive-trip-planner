@@ -80,6 +80,35 @@ function assertIncludesAll(label, document, phrases) {
   }
 }
 
+function assertLosslessAmapOverviewGuidance(label, document) {
+  assert.match(document, /全部(?:具有安全高德定位的|安全) marker/, `${label} must preserve every safely located marker`);
+  assert.match(document, /按当前顺序/, `${label} must preserve marker order`);
+  assert.match(document, /(?:连续拆分|拆成多张|分成多张)/, `${label} must describe ordered overview chunks`);
+  assert.match(document, /每(?:张|块)最多 10 个/, `${label} must keep every overview chunk within ten markers`);
+  assert.ok(
+    /路线(?:入口|链接)与地点总览(?:独立构建|分开处理|是不同能力)/.test(document)
+      || (/全部地点总览/.test(document) && /路线分段/.test(document) && /Google 当天路线/.test(document)),
+    `${label} must keep route chunks distinct from overview chunks`,
+  );
+
+  const activeGuidance = document.replace(/旧的“[^”]+”合同已经废弃[^。\n]*。?/g, "");
+  assert.doesNotMatch(
+    activeGuidance,
+    /地点总览[^。\n]*(?:只包含|仅包含)[^。\n]*前\s*10\s*个/,
+    `${label} must not truncate the overview to the first ten markers`,
+  );
+  assert.doesNotMatch(
+    activeGuidance,
+    /地点总览[^。\n]*不会自动拆分/,
+    `${label} must not retain no-split overview guidance`,
+  );
+  assert.doesNotMatch(
+    activeGuidance,
+    /第\s*11\s*个[^。\n]*(?:不进入|手动打开)/,
+    `${label} must not route safely located tail markers to a manual-only fallback`,
+  );
+}
+
 function assertNoUnsupportedProviderClaims(label, document) {
   const normalizedDocument = document.replace(/[*_`]/g, "");
   const clauses = normalizedDocument.split(/[。；.!?\n]+/).map((clause) => clause.trim()).filter(Boolean);
@@ -297,10 +326,6 @@ assertIncludesAll("SKILL.md", skill, [
   "check-amap-cli.js",
   "不会确认高德服务容器正在运行",
   "provider-error",
-  "前 10 个",
-  "不会自动拆分",
-  "第 11 个",
-  "手动",
   "places.csv",
   "itinerary.kml",
   ...routeStatusCopy,
@@ -312,10 +337,6 @@ assertIncludesAll("map-provider-delivery.md", mapProviderDelivery, [
   "不会确认高德服务容器正在运行",
   "进程会读取继承环境中的值",
   "provider-error",
-  "前 10 个",
-  "不会自动拆分",
-  "第 11 个",
-  "手动",
   "places.csv",
   "itinerary.kml",
   ...routeStatusCopy,
@@ -352,11 +373,16 @@ assertIncludesAll("user-facing-language.md", userLanguage, [
   "AMap road-network verification was not completed. Recheck in AMap before departure.",
 ]);
 assertIncludesAll("guide-template map online logic", templateMapOnlineLogic, [
-  "前 10 个",
-  "不会自动拆分",
-  "第 11 个",
   ...routeStatusCopy,
 ]);
+assertLosslessAmapOverviewGuidance("SKILL.md", skill);
+assertLosslessAmapOverviewGuidance("map-provider-delivery.md", mapProviderDelivery);
+assertLosslessAmapOverviewGuidance("guide-template map online logic", templateMapOnlineLogic);
+assert.doesNotMatch(
+  skill,
+  /(?:兼容字段[^。\n]*overview|overview[^。\n]*兼容字段)/i,
+  "SKILL.md should explain user-facing chunks without exposing the overview compatibility alias",
+);
 
 for (const [label, document] of [
   ["README.md", repositoryReadme],

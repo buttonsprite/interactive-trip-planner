@@ -150,7 +150,7 @@ node skill/scripts/probe-source-access.js --context <sources.json>
    旅行叙事主题、taste model 与 UI theme 是三个独立层次：前两者决定体验和选点，UI theme 只决定地图呈现。需要复用完整组件语言时读取 `assets/themes/index.json`，选择与 `europe-map-direct-v1` 兼容的主题与目的地 preset；选择结果仍需写回当前攻略自己的 design tokens、设计语言和单文件 HTML，不能让地图运行时依赖 theme registry。
 8. 轻量模板 `assets/guide-template/` 只用于用户明确要求的低保真原型、内部功能试验或三天以内且不需要完整修改闭环的简单地图；不能把它作为完整攻略交付后声称与欧洲版交互一致。
 9. 把地图当前实际行为写入 `docs/online-logic/map.md`，不把尚未实现的想法写成事实。
-10. 为地点详情和当天路线生成高德 URI / Google Maps URL 交接入口。Google Maps URLs 不需要 API Key，也不代表生成阶段已经用 Google 验证路线；不调用 Google Places API 或 Google Routes API。高德当天地点总览只包含当前顺序中前 10 个具有安全高德定位的 marker，**不会自动拆分**成多张总览；第 11 个起的已定位地点仍需手动打开单点入口或通过适用的路线分段处理。路线链接与地点总览是不同能力：高德路线和 Google 路线会按交通方式与 provider 限制拆分为短段。无法可靠定位或缺少交通方式的地点必须保留为手动查找项。
+10. 为地点详情和当天路线生成高德 URI / Google Maps URL 交接入口。Google Maps URLs 不需要 API Key，也不代表生成阶段已经用 Google 验证路线；不调用 Google Places API 或 Google Routes API。高德当天地点总览把全部具有安全高德定位的 marker 按当前顺序连续拆分成多张，每张最多 10 个，不截断或丢弃尾部地点。路线链接与地点总览独立构建：高德路线和 Google 路线会按交通方式与 provider 限制拆分为短段，不与地点总览分块混用。无法可靠定位或缺少交通方式的地点必须保留为手动查找项。
 11. 全程总览提供 Google My Maps 导出。浏览器中逐个下载 `places.csv`、`itinerary.kml` 和 `README.md`；命令行使用 `node scripts/export-google-my-maps.js --guide <guide-directory> --output <new-directory>`，可选 `--state <state.json>`、`--locale zh-CN|en` 与 `--replace`。仅有 GCJ-02 坐标的地点保留在 CSV 中按名称和地址人工定位，不写入 KML。导出不会自动写入普通 Google Maps 收藏夹，也不会自动导入高德收藏夹。
 12. 只有用户明确要求改变交互时，才建立独立的 **interaction fork**：先写差异规格、验证新状态语义和回退边界，再复制并改 Core。视觉方向、配色和装饰变化不构成 interaction fork。
 

@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(process.argv[2] || path.join(scriptDir, ".."));
 const scriptsDir = path.join(skillRoot, "scripts");
+const mapProviderDeliveryPath = path.join(skillRoot, "references", "map-provider-delivery.md");
 
 function walkFiles(root) {
   const files = [];
@@ -21,12 +22,13 @@ function walkFiles(root) {
 
 assert.ok(fs.existsSync(path.join(skillRoot, "SKILL.md")), `Missing SKILL.md: ${skillRoot}`);
 assert.ok(fs.existsSync(scriptsDir), `Missing scripts directory: ${scriptsDir}`);
+assert.ok(fs.existsSync(mapProviderDeliveryPath), "Missing map provider delivery online logic");
 
 const packageJsonPath = path.join(skillRoot, "package.json");
 assert.ok(fs.existsSync(packageJsonPath), "Missing package.json required for ESM .js scripts");
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 assert.equal(packageJson.type, "module", 'package.json must declare "type": "module"');
-assert.equal(packageJson.version, "0.2.0", "Skill package must identify the 0.2.0 release");
+assert.match(packageJson.version, /^\d+\.\d+\.\d+$/, "Skill package must identify a semantic release version");
 
 const publicMapPath = path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "itinerary-map.html");
 const publicDeliveryPath = path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "assets", "trip-map-delivery.js");
@@ -72,6 +74,45 @@ assert.deepEqual(
   [],
   `REDSkill release is missing discovery runtime files: ${missingDiscoveryRuntimeFiles.join(", ")}`,
 );
+
+const requiredMapDeliveryFiles = [
+  "scripts/amap-cli.js",
+  "scripts/amap-cli-runtime.js",
+  "scripts/check-amap-cli.js",
+  "scripts/export-google-my-maps.js",
+  "references/map-provider-delivery.md",
+];
+assert.deepEqual(
+  requiredMapDeliveryFiles.filter((relativePath) => !fs.existsSync(path.join(skillRoot, relativePath))),
+  [],
+  "REDSkill release is missing map provider delivery files",
+);
+
+const mapDeliveryDocs = [
+  fs.readFileSync(path.join(skillRoot, "SKILL.md"), "utf8"),
+  fs.readFileSync(mapProviderDeliveryPath, "utf8"),
+  fs.readFileSync(path.join(skillRoot, "references", "user-facing-language.md"), "utf8"),
+  fs.readFileSync(path.join(skillRoot, "assets", "guide-template", "docs", "online-logic", "map.md"), "utf8"),
+].join("\n");
+for (const phrase of [
+  "amap-cli.js",
+  "AMAP_KEY",
+  "AMAP_SECURITY_KEY",
+  "未完成高德路网复核",
+  "AMap road-network verification was not completed",
+  "Google Maps URLs 不需要 API Key",
+  "Google Maps URLs do not require an API key",
+  "places.csv",
+  "itinerary.kml",
+  "不会自动写入普通 Google Maps 收藏夹",
+  "not automatically added to regular Google Maps saved lists",
+]) {
+  assert.ok(mapDeliveryDocs.includes(phrase), `Map delivery docs are missing: ${phrase}`);
+}
+assert.match(mapDeliveryDocs, /不调用 Google Places API/);
+assert.match(mapDeliveryDocs, /不调用 Google Routes API/);
+assert.match(mapDeliveryDocs, /does not call Google Places API/);
+assert.match(mapDeliveryDocs, /does not call Google Routes API/);
 
 const requiredXiaohongshuFiles = [
   "scripts/xhs-import-runtime.js",

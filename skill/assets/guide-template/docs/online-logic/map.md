@@ -2,6 +2,8 @@
 
 本文记录 Core 模板当前代码的实际行为。
 
+地图服务执行、URI/URL 限制、坐标边界和 CLI 导出的共享事实见 `../../../../references/map-provider-delivery.md`；本文只记录轻量模板如何消费这些能力。
+
 ## 数据和启动
 
 - `maps/itinerary-map.html` 内嵌 `TRIP_DATA`，因此直接打开文件或通过本地服务打开都能读取旅行数据。
@@ -34,6 +36,8 @@
 - 每日摘要下通过 `buildDayHandoffs` 显示路线复核状态、可直接打开的路线分段和需要手动查找的地点。拆分后的每一段保留 runtime 返回的序号和 provider，不会因为部分地点缺少 provider 定位而隐藏 `manualItems`。
 - 当天顺序或归类被用户修改后，界面无条件显示“路线待重新复核”，即使原路线曾标记为已复核；外部路线链接只使用当前 `orders` 生成，打开后仍由对应地图重新计算。
 - 地点和路线链接都是浏览器 handoff，不调用付费 API、不携带 API key，也不会把静态地图中的修改写回高德或 Google 账号。
+- 中国大陆行程向旅行者解释 provider 状态时使用固定三档：已用高德复核 / Verified with AMap；部分移动段已复核 / Partially verified；未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure. 模板中的短标签“路线已复核 / 路线部分复核 / 路线待复核”只是同一状态的紧凑显示，不会单独证明 provider。
+- Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key。当前 runtime 不调用 Google Places API / does not call Google Places API，也不调用 Google Routes API / does not call Google Routes API；Google 路线在打开后由 Google Maps 重新计算。
 
 ## Google My Maps 导出
 
@@ -41,6 +45,8 @@
 - `places.csv`、`itinerary.kml` 和 `README.md` 必须逐个下载。每次点击都即时用 `buildMyMapsFiles({ trip, state, locale })` 读取当前保存的 `assignments`、`orders`、`priorities` 和 `dirtyDays`，不会导出页面初始顺序或另存一份状态。
 - 浏览器每次只创建一个 Blob URL，触发单个文件下载后立即撤销；失败时在 dialog 内显示可见错误，不影响继续浏览和修改地图。
 - 导出文件用于手动导入 Google My Maps，不等于 Google Maps Saved Lists，也不会自动更新个人地图。
+- `itinerary.kml` 只写入有效 WGS84 坐标并按日期加候选文件夹；仅有 GCJ-02 或缺少可靠坐标的地点仍保留在 `places.csv`，由 `README.md` 报告需要人工定位的数量。导出不会自动写入普通 Google Maps 收藏夹 / not automatically added to regular Google Maps saved lists，也不会自动导入高德收藏夹。
+- 命令行导出使用 `node scripts/export-google-my-maps.js --guide <guide-directory> --output <new-directory>`，可选 `--state <state.json>`、`--locale zh-CN|en` 与 `--replace`。它只读取指定攻略的 `data/pois.json`、`data/itinerary.json` 和可选 state；输出目录不能等于文件系统根、用户主目录、仓库根、Skill 根或攻略根。默认拒绝覆盖；`--replace` 只替换三个已知导出文件并保留无关文件，整个提交可回滚。成功 stdout 只包含文件名与计数，失败 stderr 只有固定错误，不回显路径、旅行正文或密钥。
 
 ## 修改和确认
 

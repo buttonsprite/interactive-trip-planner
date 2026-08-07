@@ -2,9 +2,9 @@
 
 ## 产品验收边界
 
-0.2.0 是尚未发布的 **developer-preview contract slice**，不等于 **PRD V1 public acceptance**。它在 0.1.0 的 taste/source 能力上增加用户主动提供的小红书收藏资料输入，但 Public V1 仍需 8 个海外 Regional Source Pack、每个 taste model 至少 3 个 unseen cities 的评估，以及更强的 representative evidence；三项未全部满足前，任何运行或发布说明都不得宣称 public V1 ready。
+当前源码是 **developer-preview contract slice**，不等于 **PRD V1 public acceptance**。它在早期 taste/source 能力上增加用户主动提供的小红书收藏资料输入、地图服务交接和可移植导出，但 Public V1 仍需 8 个海外 Regional Source Pack、每个 taste model 至少 3 个 unseen cities 的评估，以及更强的 representative evidence；三项未全部满足前，任何运行或发布说明都不得宣称 public V1 ready。
 
-## 当前已实现（0.2.0）
+## 当前已实现
 
 ### 情境化启动介绍
 
@@ -40,6 +40,14 @@
 - Probe 的状态只表示当时的有限网络访问结果：`reachable`、`redirected`、`rate-limited`、`access-blocked`、`server-error`、`not-found` 或 `network-error`。它不能证明 POI 或商家存在、营业、可订、符合行程或安全，且不能取代各来源的事实复核。
 - 中国大陆可运行 check-amap-cli.js 探测可选增强；两个凭据变量必须是 trim 后非空字符串。探测不输出密钥、不执行路线，缺变量、空字符串、全空白、CLI 缺失时均返回结构化降级。
 - 地点说明使用“为什么符合这个模板”和“为什么安排在这里”；只在真实异常时显示“需要临近复核”，不增加常驻来源 badge。
+
+### 地图服务交接与导出
+
+- 中国大陆只有在 POI 定位或路线复核阶段才探测 `amap-gui`、`AMAP_KEY` 与 `AMAP_SECURITY_KEY`。能力 `available` 后，`amap-cli.js` 才真实执行城市关键词、锚点周边、同名消歧或路线请求；探测成功、搜索成功、URI 存在都不能冒充路线已复核。
+- 高德请求结果先归一化为 allowlist 事实。CLI 不输出凭据、provider stderr、raw polyline、照片、header 或任意原始字段；失败返回可继续规划的固定降级。完整边界见 `map-provider-delivery.md`。
+- 路线状态只使用三档：已用高德复核 / Verified with AMap；部分移动段已复核 / Partially verified；未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure. 用户改变日期归类或同日顺序后，受影响日期无条件回到未复核，直到新的相邻关系再次完成真实路网查询。
+- 地图生成高德 URI 和 Google Maps URL。Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key；不调用 Google Places API / does not call Google Places API，也不调用 Google Routes API / does not call Google Routes API。链接只负责打开地点或路线，Google Maps 会在打开后重新计算。
+- Google My Maps 导出包含 `places.csv`、`itinerary.kml` 与 `README.md`。仅有 GCJ-02 的地点不会作为 WGS84 写入 KML，而是在 CSV 与导出说明中保留为人工定位项。导出不会自动写入普通 Google Maps 收藏夹 / not automatically added to regular Google Maps saved lists，也不会自动写入高德收藏夹。
 
 ## 保持不变
 

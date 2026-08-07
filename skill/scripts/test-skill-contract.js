@@ -46,6 +46,11 @@ const openaiYaml = fs.existsSync(openaiYamlPath) ? fs.readFileSync(openaiYamlPat
 const poiSchema = read("references/poi-schema.md");
 const mapFeatureContract = read("references/map-feature-contract.md");
 const mapStandards = read("references/map-standards.md");
+const mapProviderDeliveryPath = path.join(skillRoot, "references", "map-provider-delivery.md");
+const mapProviderDelivery = fs.existsSync(mapProviderDeliveryPath)
+  ? fs.readFileSync(mapProviderDeliveryPath, "utf8")
+  : "";
+const templateMapOnlineLogic = read("assets/guide-template/docs/online-logic/map.md");
 const template = read("assets/guide-template/maps/itinerary-map.html");
 const goldenDataRoot = path.join(skillRoot, "assets", "samples", "golden");
 const repositoryReadmePath = path.join(repositoryRoot, "README.md");
@@ -58,6 +63,61 @@ const repositoryEnglishReadme = fs.existsSync(repositoryEnglishReadmePath)
   : null;
 const startupIntroduction = markdownSection(skill, "情境化启动介绍");
 const planningStartup = markdownSection(planning, "启动说明");
+
+assert.ok(fs.existsSync(mapProviderDeliveryPath), "missing map provider delivery online logic");
+
+for (const [label, document] of [
+  ["SKILL.md", skill],
+  ["map-provider-delivery.md", mapProviderDelivery],
+]) {
+  assert.match(document, /amap-cli\.js/, `${label} must name the executable AMap wrapper`);
+  assert.match(document, /AMAP_KEY/, `${label} must name AMAP_KEY without exposing a value`);
+  assert.match(document, /AMAP_SECURITY_KEY/, `${label} must name AMAP_SECURITY_KEY without exposing a value`);
+  assert.match(document, /places\.csv/, `${label} must document the My Maps CSV`);
+  assert.match(document, /itinerary\.kml/, `${label} must document the My Maps KML`);
+}
+
+for (const [label, document, expectations] of [
+  ["README.md", repositoryReadme || "", [
+    /未完成高德路网复核/,
+    /Google Maps URLs 不需要 API Key/,
+    /不会自动写入普通 Google Maps 收藏夹/,
+  ]],
+  ["README.en.md", repositoryEnglishReadme || "", [
+    /AMap road-network verification was not completed/,
+    /Google Maps URLs do not require an API key/,
+    /not automatically added to regular Google Maps saved lists/,
+  ]],
+]) {
+  for (const expectation of expectations) {
+    assert.match(document, expectation, `${label} is missing map-delivery copy: ${expectation}`);
+  }
+  assert.match(document, /amap-cli\.js/, `${label} must name the executable AMap wrapper`);
+  assert.match(document, /AMAP_KEY/, `${label} must name AMAP_KEY without exposing a value`);
+  assert.match(document, /AMAP_SECURITY_KEY/, `${label} must name AMAP_SECURITY_KEY without exposing a value`);
+  assert.match(document, /places\.csv/, `${label} must document the My Maps CSV`);
+  assert.match(document, /itinerary\.kml/, `${label} must document the My Maps KML`);
+}
+
+const mapDeliveryDocuments = [
+  skill,
+  planning,
+  sourcePackReference,
+  tasteSourceOnlineLogic,
+  userLanguage,
+  templateMapOnlineLogic,
+  mapProviderDelivery,
+  repositoryReadme || "",
+  repositoryEnglishReadme || "",
+].join("\n");
+assert.match(mapDeliveryDocuments, /不调用 Google Places API/);
+assert.match(mapDeliveryDocuments, /不调用 Google Routes API/);
+assert.match(mapDeliveryDocuments, /does not call Google Places API/);
+assert.match(mapDeliveryDocuments, /does not call Google Routes API/);
+assert.doesNotMatch(mapDeliveryDocuments, /(?<!不)(?:会|将)自动(?:导入|写入|同步)[^\n]{0,30}高德收藏夹/);
+assert.doesNotMatch(mapDeliveryDocuments, /(?<!不)(?:会|将)自动(?:导入|写入|同步)[^\n]{0,30}Google Maps (?:收藏夹|Saved List)/i);
+assert.doesNotMatch(mapDeliveryDocuments, /automatically (?:imports?|writes?|syncs?)[^\n]{0,40}AMap favorites/i);
+assert.doesNotMatch(mapDeliveryDocuments, /automatically (?:imports?|writes?|syncs?)[^\n]{0,40}Google Maps (?:Saved Lists?|saved lists?)/i);
 
 if (openaiYaml !== null) {
   assert.doesNotMatch(openaiYaml, /消化/);
@@ -202,7 +262,7 @@ assert.match(xiaohongshuImport, /营业时间[^\n]*官方/);
 assert.match(workspaceBootstrap, /travel-library\/xiaohongshu/);
 assert.match(workspaceTemplate, /travel-library\//);
 assert.match(sources, /用户提供[^\n]*小红书/);
-assert.match(tasteSourceOnlineLogic, /0\.2\.0/);
+assert.match(tasteSourceOnlineLogic, /当前源码[^\n]*developer-preview contract slice/);
 assert.match(tasteSourceOnlineLogic, /小红书收藏夹/);
 assert.match(sources, /搜索任务单/);
 assert.match(sources, /当地语言/);
@@ -254,12 +314,12 @@ assert.match(skill, /venue[^\n]*hosted[^\n]*citywide/);
 assert.match(skill, /confirmed[^\n]*program-pending/);
 assert.match(skill, /当地食材结构[^\n]*居民[^\n]*季节/);
 assert.match(sources, /历史届次[^\n]*不[^\n]*当前活动/);
-assert.match(skill, /0\.2\.0[^\n]*developer-preview/i);
-assert.match(skill, /build-redskill-release\.js <release-directory> 0\.2\.0/);
+assert.match(skill, /当前源码[^\n]*developer-preview/i);
+assert.match(skill, /build-redskill-release\.js <release-directory> <version>/);
 assert.match(skill, /references\/xiaohongshu-import\.md/);
 
 if (repositoryReadme !== null) {
-  assert.match(repositoryReadme, /0\.2\.0[^\n]*developer preview/i);
+  assert.match(repositoryReadme, /当前源码[^\n]*developer preview/i);
   assert.match(repositoryReadme, /不等于 Public V1/i);
   assert.match(repositoryReadme, /8 个海外 Regional Source Pack/i);
   assert.match(repositoryReadme, /每个 Taste Model 至少 3 个 unseen cities/i);
@@ -287,7 +347,7 @@ if (repositoryReadme !== null) {
 if (repositoryEnglishReadme !== null) {
   assert.match(
     repositoryEnglishReadme,
-    /\[Chinese REDSkill installation guide\]\(releases\/redskill-0\.2\.0\/INSTALL\.zh-CN\.md\)/,
+    /Choose the newest version directory under \[`releases\/`\]\(releases\/\)/,
   );
 }
 

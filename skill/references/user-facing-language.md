@@ -146,6 +146,23 @@
 
 不要用“资源”“操作”“提交”“同步状态”等模糊系统词作为主要按钮。
 
+### 地图服务与路线状态
+
+地图服务状态要说明完成了哪一层事实，不能把能力探测、地点搜索或外部链接写成路线验证：
+
+| 场景 | 中文 | English |
+| --- | --- | --- |
+| 全部正式相邻段有有效高德路网结果 | 已用高德复核 | Verified with AMap |
+| 只有部分正式相邻段有有效结果 | 部分移动段已复核 | Partially verified |
+| 没有完成路网结果，或用户已改动路线 | 未完成高德路网复核；请在出发前打开高德确认。 | AMap road-network verification was not completed. Recheck in AMap before departure. |
+| Google 地点入口 | 在 Google Maps 打开 | Open in Google Maps |
+| Google 路线入口 | 在 Google Maps 打开今日路线 | Open today's route in Google Maps |
+| My Maps 导出 | 导出到 Google My Maps | Export for Google My Maps |
+
+中国大陆只有进入地点定位或路线复核时才介绍高德增强：“可使用你自己的高德 CLI 搜索地点并复核路线。需要本机安装并配置 `AMAP_KEY` 与 `AMAP_SECURITY_KEY`；密钥不会写入旅行文件。不安装也可以继续规划。”海外启动介绍不要求任何 Google Key，因为“Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key”。
+
+导出完成提示必须说清账号边界：“已生成 `places.csv`、`itinerary.kml` 和 `README.md`；不会自动写入普通 Google Maps 收藏夹。 / My Maps import files are ready; they are not automatically added to regular Google Maps saved lists.” 不使用“已同步”“已导入收藏夹”或“已保存到账号”。本 Skill 不调用 Google Places API / does not call Google Places API，不调用 Google Routes API / does not call Google Routes API，也不提供自动高德收藏夹导入。
+
 ## 修改反馈
 
 修改后不弹出技术提示。先让用户继续浏览，再用固定区域汇总：

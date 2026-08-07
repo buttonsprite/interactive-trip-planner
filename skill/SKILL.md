@@ -9,7 +9,7 @@ description: Use when 用户想规划旅行、制作旅游攻略、根据小红�
 
 核心原则：先理解用户想怎样旅行，再寻找地点和规划路线；地图是主要使用界面，交付不是终点。所有给旅行者看的内容使用自然语言，并尽量跟随用户当前主要对话语言；内部数据和开发术语不出现在聊天和地图界面。
 
-0.2.0 是 developer-preview contract slice，只表示本 Skill 当前实现的可验证子集，不等于 PRD V1 public acceptance。在 8 个海外 Regional Source Pack、每个 taste model 至少 3 个 unseen cities 评估与更强 representative evidence 全部满足前，不得宣称 public V1 ready。
+当前源码是 developer-preview contract slice，只表示本 Skill 当前实现的可验证子集，不等于 PRD V1 public acceptance。在 8 个海外 Regional Source Pack、每个 taste model 至少 3 个 unseen cities 评估与更强 representative evidence 全部满足前，不得宣称 public V1 ready。
 
 ## 情境化启动介绍
 
@@ -26,6 +26,8 @@ description: Use when 用户想规划旅行、制作旅游攻略、根据小红�
 - 我可以生成一张能继续加入、移除、排序和重新安排的交互地图。
 
 能力 list 后，只询问当前缺少的 1–3 组、并且会改变路线骨架的信息。用户只说“帮我规划旅行”时，优先询问目的地与日期或季节天数、进入离开方式、同行人与体力、喜欢或不喜欢、已定住宿与必去/不去；明确告诉用户不需要一次填完整。
+
+高德增强不是全局启动门。只有用户已经给出中国大陆目的地，并进入地点定位或正式路线复核时，才补充说明“可以使用你自己的高德 CLI；不安装也可以继续规划”。不要在海外行程或只有初步旅行想法时要求安装或配置地图工具。
 
 用户直接粘贴小红书、旧攻略或地图时，先根据资料整理地点与路线，再询问与本次旅行关联所需的最少信息。已有旅行中的 POI、顺序、地图或设计局部修改不重复展示启动介绍。
 
@@ -75,10 +77,10 @@ description: Use when 用户想规划旅行、制作旅游攻略、根据小红�
 
 目标不是复制热门榜单，而是建立一组能服务旅行主题、路线、吃住和风险替代的地点候选。
 
-执行前读取 `references/source-verification.md` 和 `references/regional-source-packs.md`。0.2.0 继承 Global、中国大陆、日本、法语区四个 Regional Source Pack；其他目的地使用 Global Base 与三语动态搜索。按照“先发现、后核实”的顺序搜索：
+执行前读取 `references/source-verification.md`、`references/regional-source-packs.md` 和 `references/map-provider-delivery.md`。当前源码继承 Global、中国大陆、日本、法语区四个 Regional Source Pack；其他目的地使用 Global Base 与三语动态搜索。按照“先发现、后核实”的顺序搜索：
 
 1. 建立搜索任务单：明确日期、区域、主题、用户偏好、选中的生活品味、必须覆盖的地点角色和需要实时复核的事实。
-2. 选择 Global Base 与一个匹配的地区包，按 A/B/C 可访问性先探测来源；B/C 失败时执行明确 fallback。中国大陆先运行 `scripts/check-amap-cli.js` 探测可选增强，不读取或输出密钥；CLI 不可用时明确未完成高德路网复核，不伪造路线。
+2. 选择 Global Base 与一个匹配的地区包，按 A/B/C 可访问性先探测来源；B/C 失败时执行明确 fallback。中国大陆进入地点定位时才运行 `node scripts/check-amap-cli.js` 探测可选增强；只有结果为 `available` 才调用 `node scripts/amap-cli.js --context <file>` 或 `--stdin`。先做城市关键词搜索，再用锚点的 GCJ-02 坐标与半径做周边搜索；同名分店、商场内店或名称变化使用更精确关键词重新查询。输入 action 是 `search-poi`，结果只用于召回、定位和消歧，不能证明营业或值得去。CLI 不可用、缺少 `AMAP_KEY` / `AMAP_SECURITY_KEY`、调用失败或没有可靠匹配时保留原候选，并明确“未完成高德定位”；不得虚构 provider 结果。
 3. 使用地区包的十类查询意图，至少组合中文、英文和目的地当地语言搜索。先从官方旅游、文化日历、地图和主题资料发现候选，再用地点官网、主办方、交通运营方和订位入口逐项核实。具名本地编辑源必须说明覆盖地区、beat、检索方法和事实边界，不能用模糊来源名称代替。活动扫描必须写入 `data/events.json`：`venue` 是可地图化活动地点，`hosted` 关联既有地点的特别项目，`citywide` 只影响城市或当天语境；字段与引用按 `references/event-schema.md`。
 4. 按体验角色补候选，而不是按类别凑数量：主题主锚点、代表性景点、当地生活、酒店基地、正式餐、地方经典、小吃、咖啡甜品、夜间体验、休息点、交通节点和天气/闭馆替代。城市有至少两个完整旅行日时，逐城至少评估 3 个代表性景点并写明采用或舍弃理由；在该城市停留段内保留的主锚点接到同方向当地生活角色：市场、居民广场、社区空间、街区咖啡、社区饭馆、传统商业或短半径夜间体验。
 5. 每个准备进入资料池的地点都要回答：为什么符合这个模板（未选模板时为什么符合用户偏好）、为什么安排在这里、与附近地点如何衔接、需要预约或复核什么。按地点在路线中的角色分配 `contentTier`：主锚点和必去地点用 `deep`，正式路线中的支撑地点用 `standard`，候选池与留档地点用 `compact`。正式路线地点使用“具体价值陈述 → 类型化现场动作 → 可解析证据”三层合同：`whyWorthIt` 说明这个地方独有的路线价值，`detailSections` 告诉旅行者到场做什么，`sourceIds` 必须解析到结构化来源。不同类型地点不强制写同样的四段；市场、博物馆、餐厅、咖啡/酒吧、街区、酒店/交通使用与现场体验相匹配的 `detailSections`。当来源同时支持当地食材结构、居民使用方式和行程月份季节时，市场详情必须连起来写；库存未核实时用“留意/询问”而非断言。只有可靠且能帮助现场理解的历史才写故事，不为凑结构编造，也不使用“感受当地生活”“随便逛逛”“值得一去”等没有地点特异性的占位表达。
@@ -121,6 +123,8 @@ node skill/scripts/probe-source-access.js --context <sources.json>
 8. 把一天拆成连续的时间线，午餐、咖啡休息、回酒店、取行李和晚餐前移动不能只藏在脑内。每两个相邻地点都要有交通方式和经过复核的移动说明。
 9. 有 4 个以上正式停靠点时，使用真实路网或公共交通规划比较至少两种可行顺序；固定预约、开门时间和回酒店休息优先于纯粹最短路。存在有意折返时，向用户说明原因。
 
+中国大陆且高德能力为 `available` 时，对正式路线的每一对相邻地点调用 `amap-cli.js` 的 `route` action；有 4 个以上正式停靠点时，用真实返回比较至少两种顺序或合理交通方式。只把 `status: "ok"`、`performed: true` 的结果作为 provider 事实，并把交通方式、距离、预计时间与 `reviewedAt` 写入相邻移动段；搜索成功不等于路线成功。当天全部相邻段有效时使用“已用高德复核 / Verified with AMap”，只有部分有效时使用“部分移动段已复核 / Partially verified”，没有有效路网结果时使用“未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure.”
+
 向用户说明每一天：今天在体验什么、为什么这样排序、1-3 个主锚点是什么、吃饭和休息在哪里、哪些是当天备选、出现变化时怎么替换。不能只返回时间表而不解释设计逻辑。
 
 进入下一阶段：每天的硬约束、主锚点、顺序、交通、用餐和备选彼此不冲突；所有相邻路段完整；移动强度与用户体力相符；路线引用的地点和来源完整。不能只看地图上的直线距离判断顺路。
@@ -146,7 +150,9 @@ node skill/scripts/probe-source-access.js --context <sources.json>
    旅行叙事主题、taste model 与 UI theme 是三个独立层次：前两者决定体验和选点，UI theme 只决定地图呈现。需要复用完整组件语言时读取 `assets/themes/index.json`，选择与 `europe-map-direct-v1` 兼容的主题与目的地 preset；选择结果仍需写回当前攻略自己的 design tokens、设计语言和单文件 HTML，不能让地图运行时依赖 theme registry。
 8. 轻量模板 `assets/guide-template/` 只用于用户明确要求的低保真原型、内部功能试验或三天以内且不需要完整修改闭环的简单地图；不能把它作为完整攻略交付后声称与欧洲版交互一致。
 9. 把地图当前实际行为写入 `docs/online-logic/map.md`，不把尚未实现的想法写成事实。
-10. 只有用户明确要求改变交互时，才建立独立的 **interaction fork**：先写差异规格、验证新状态语义和回退边界，再复制并改 Core。视觉方向、配色和装饰变化不构成 interaction fork。
+10. 为地点详情和当天路线生成高德 URI / Google Maps URL 交接入口。Google Maps URLs 不需要 API Key，也不代表生成阶段已经用 Google 验证路线；不调用 Google Places API 或 Google Routes API。高德多点总览与路线、Google 路线按 runtime 的安全限制自动拆分，无法可靠定位或缺少交通方式的地点必须保留为手动查找项。
+11. 全程总览提供 Google My Maps 导出。浏览器中逐个下载 `places.csv`、`itinerary.kml` 和 `README.md`；命令行使用 `node scripts/export-google-my-maps.js --guide <guide-directory> --output <new-directory>`，可选 `--state <state.json>`、`--locale zh-CN|en` 与 `--replace`。仅有 GCJ-02 坐标的地点保留在 CSV 中按名称和地址人工定位，不写入 KML。导出不会自动写入普通 Google Maps 收藏夹，也不会自动导入高德收藏夹。
+12. 只有用户明确要求改变交互时，才建立独立的 **interaction fork**：先写差异规格、验证新状态语义和回退边界，再复制并改 Core。视觉方向、配色和装饰变化不构成 interaction fork。
 
 完整地图的 Core 至少支持真实地图、全程总览、某一天和统一地点详情三级浏览，以及自然语言的优先级、路线归类和修改状态。详细合同见 `references/map-standards.md`、`references/core-interaction-contract.md` 和 `references/map-feature-contract.md`。
 
@@ -166,7 +172,7 @@ node skill/scripts/probe-source-access.js --context <sources.json>
 
 普通优先级修改、同城未满日期的加入和同日排序可以直接保存。住宿、已预约、固定时间、当前必去、跨城市或超容量等高影响修改必须先用自然语言解释影响，再由用户确认。
 
-地图中的修改代表用户选择，不代表正式路线已经自动合理。修改后弱化受影响的原路线并显示“需要重新安排”；在 Codex 完成复核前，不为新增地点绘制推测路线。
+地图中的修改代表用户选择，不代表正式路线已经自动合理。加入、移出、换日或调整同日顺序后，受影响日期无条件降为未复核，弱化原路线并显示“需要重新安排”；在 Codex 完成复核前，不为新增地点绘制推测路线，也不沿用旧的 verified 状态。外部地图入口可以按当前顺序重新生成，但入口存在不等于路网已复核。
 
 ### 阶段六：根据反馈重新安排
 
@@ -180,6 +186,8 @@ node skill/scripts/probe-source-access.js --context <sources.json>
 4. 向用户说明改了什么、为什么这样重排、哪些日期受到影响、是否产生新的取舍或待确认事项。
 5. 更新 `pois.json`、`itinerary.json`、资料记录、预约清单、地图和线上逻辑文档，再运行完整验证。
 6. 如果反馈暴露了新的兴趣或路线方向，回到阶段二补充地点；如果只是顺序和容量问题，回到阶段三重排。不要要求用户从第一阶段重新回答。
+
+中国大陆路线重新安排后，高德能力可用时必须对新的相邻关系重新执行真实 route 查询，再恢复“已用高德复核”或“部分移动段已复核”；能力不可用或调用失败时保持“未完成高德路网复核；请在出发前打开高德确认。”海外或未使用 provider 的行程保留未复核状态，并通过免 Key 的 Google Maps URL 让用户打开后由地图重新计算。
 
 交付新版后继续保留修改状态和版本边界。最终地图中的正式路线必须与最新文档和数据一致，不能只改界面文案。
 
@@ -237,8 +245,9 @@ guides/<trip-slug>/
 
 - 阶段一和三：`references/planning-workflow.md`
 - 阶段一：`references/theme-library.md`、`references/theme-narrative.md`、`references/hybrid-taste-models.md`
-- 阶段二：`references/source-verification.md`、`references/regional-source-packs.md`、`references/hotel-selection.md`
+- 阶段二：`references/source-verification.md`、`references/regional-source-packs.md`、`references/hotel-selection.md`、`references/map-provider-delivery.md`
 - 阶段二和三：`references/poi-schema.md`
+- 阶段三至六的地图服务交付：`references/map-provider-delivery.md`
 - 阶段四和五：`references/map-standards.md`、`references/core-interaction-contract.md`、`references/map-feature-contract.md`
 - 视觉深化：`references/design-language.md`
 - 所有阶段：`references/user-facing-language.md`
@@ -252,7 +261,7 @@ guides/<trip-slug>/
 发布到只接受文本与代码格式的 REDSkill 平台时，使用专用构建脚本生成发布目录，不直接上传 Codex 本地 skill 原目录：
 
 ```bash
-node scripts/build-redskill-release.js <release-directory> 0.2.0
+node scripts/build-redskill-release.js <release-directory> <version>
 node scripts/test-redskill-release.js <release-directory>
 ```
 

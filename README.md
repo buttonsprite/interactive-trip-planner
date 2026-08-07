@@ -29,6 +29,7 @@
 - 每天 1–3 个主要锚点，以及同街区的吃喝、休息和替换选项。
 - 对节庆、展览、闭馆、预约和易变化事实的复核提醒。
 - 一张保留全程总览、每日顺序和编辑状态的交互地图。
+- 可一键打开的高德 / Google Maps 地点与路线入口，以及可长期保存的 Google My Maps 文件。
 - 一个可用 Finder 或编辑器直接浏览、默认不下载素材的小红书旅行资料库。
 
 地图不是把所有候选都塞进路线。你可以按日期浏览，加入或移除地点，修改优先级和同日顺序，再把变化交给 Codex 复核并重新安排。
@@ -74,9 +75,27 @@ Hybrid Taste Model（混合生活品味模型）记录的是可以迁移到新�
 4. 对进入路线的候选回到近期、官方和可追溯资料逐项核实。
 5. 对仍有冲突或临近变化的内容标明检查日期和再次复核的时间。
 
-0.2 继续提供 Global Base、中国大陆、日本，以及法国/比利时法语区四套 Regional Source Pack（地区来源包）；它们描述当地的信息生态、检索方法和事实边界。西班牙语和加泰罗尼亚语词库只提供稳定检索词，不等于地区来源包。西班牙目前使用 Global Base 加这两套当地语言词条，尚未拥有独立的 Regional Source Pack。
+当前源码提供 Global Base、中国大陆、日本，以及法国/比利时法语区四套 Regional Source Pack（地区来源包）；它们描述当地的信息生态、检索方法和事实边界。西班牙语和加泰罗尼亚语词库只提供稳定检索词，不等于地区来源包。西班牙目前使用 Global Base 加这两套当地语言词条，尚未拥有独立的 Regional Source Pack。
 
 社媒、论坛和本地编辑来源用于发现与体验语境，不会单独证明营业时间、票务、交通或安全。详细规则见[地区来源包](skill/references/regional-source-packs.md)与[来源复核](skill/references/source-verification.md)。
+
+## 地图不是只看，还能带走
+
+中国大陆行程进入 POI 定位或路线复核时，可以选择使用你自己的高德 CLI。Skill 先运行能力探测；本机存在 `amap-gui`，并已在本地环境配置 `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 时，才通过 `amap-cli.js` 真实执行城市关键词、锚点周边、同名分店消歧和正式移动段路线查询。密钥不会写入旅行文件、错误详情、导出或发布包。不安装也可以继续规划，只是路线会明确显示：**未完成高德路网复核；请在出发前打开高德确认。**
+
+路线状态不会因为“搜索到了地点”或“生成了链接”而升级。全部正式相邻段得到有效结果时显示“已用高德复核”，只有部分完成时显示“部分移动段已复核”；你在地图里加入、移出、换日或调整顺序后，受影响日期会重新回到未复核，等待 Codex 重排和复查。
+
+海外行程继续使用普通 Web 搜索、当地语言资料和官方页面。**Google Maps URLs 不需要 API Key**，地点和路线会在点击后交给 Google Maps 打开并重新计算；当前源码不调用 Google Places API 或 Google Routes API，也不要求 Google Cloud Billing。
+
+需要长期保存时，可以逐个下载或用 CLI 生成：
+
+```text
+places.csv
+itinerary.kml
+README.md
+```
+
+这三个文件用于手动导入 Google My Maps。KML 只使用可靠 WGS84 坐标；只有高德 GCJ-02 坐标的地点保留在 CSV 中，按名称和地址人工定位。导出**不会自动写入普通 Google Maps 收藏夹**，也不会自动写入高德收藏夹。完整输入、状态、链接限制、文件安全与降级规则见[地图服务执行与交付](skill/references/map-provider-delivery.md)。
 
 ## 如何开始
 
@@ -94,9 +113,9 @@ Hybrid Taste Model（混合生活品味模型）记录的是可以迁移到新�
 
 确认方向后，它会建立事实底座和候选池，安排每日路线，生成可编辑地图，并在你修改后重新核实受影响的营业、预约、交通和容量。
 
-## 0.2 能做什么、还不能保证什么
+## 当前源码能做什么、还不能保证什么
 
-0.2.0 是 developer preview，可在有人监督的情况下用于真实旅行规划、当地语言研究、每日路线设计和交互地图生成。除 0.1 的路线、来源、Taste Model 与地图能力外，它新增了小红书收藏夹/单篇链接导入、登录态风险门禁、可浏览的本地资料库、可选素材保存和导入校验。
+当前源码是 developer preview，可在有人监督的情况下用于真实旅行规划、当地语言研究、每日路线设计和交互地图生成。它包括小红书收藏夹/单篇链接导入、登录态风险门禁、可浏览的本地资料库、可选素材保存和导入校验，以及高德真实查询、双地图 handoff 与 Google My Maps 导出。
 
 它还不能保证每个国家都有专属地区来源包，也不保证搜索结果天然正确或所有路线都经过真实路网复核。节庆、营业、价格、交通、预约、天气和安全信息仍需在出发前按提醒复核；社媒和论坛不能作为这些事实的唯一证据。
 
@@ -123,7 +142,7 @@ Hybrid Taste Model（混合生活品味模型）记录的是可以迁移到新�
 
 **小红书 REDSkill**
 
-使用 [`releases/redskill-0.2.0/interactive-trip-planner/`](releases/redskill-0.2.0/interactive-trip-planner/) 的完整内容；上传或安装步骤见 [REDSkill 安装说明](releases/redskill-0.2.0/INSTALL.zh-CN.md)。这个发布面排除了 Codex metadata 和私人资料库，只保留平台支持的文件格式。
+从 [`releases/`](releases/) 选择最新版本目录，使用其中 `interactive-trip-planner/` 的完整内容，并按同目录的 `INSTALL.zh-CN.md` 操作。这个发布面排除了 Codex metadata 和私人资料库，只保留平台支持的文件格式；不要把根目录源码与旧版本发布包混合上传。
 
 ## 开发与验证
 
@@ -142,13 +161,16 @@ npm test
 node skill/scripts/recommend-taste-models.js --context <context.json>
 node skill/scripts/build-source-query-matrix.js --context <context.json>
 node skill/scripts/probe-source-access.js --context <sources.json>
+node skill/scripts/check-amap-cli.js
+node skill/scripts/amap-cli.js --context <amap-request.json>
+node skill/scripts/export-google-my-maps.js --guide <guide-directory> --output <new-directory>
 node skill/scripts/fetch-xhs-public.js --context <xiaohongshu-link.json>
 node skill/scripts/import-xhs-library.js --workspace <travel-workspace> --context <normalized-import.json>
 node skill/scripts/validate-xhs-library.js --library <library-directory>
 node skill/scripts/summarize-xhs-import.js --library <library-directory> --import <import-id>
 ```
 
-导入类命令一次只接受 `--context <file>` 或 `--stdin`，并用固定结构输出，不回显 Cookie、token 或抓取页面正文。Query matrix 只生成检索任务，不访问网络；source probe 只报告有界的访问状态，不能证明地点存在、营业、可订、适合路线或安全。详细输入输出见[生活品味与地区来源线上逻辑](skill/references/taste-and-source-online-logic.md)与[小红书导入说明](skill/references/xiaohongshu-import.md)。
+导入类命令与 `amap-cli.js` 一次只接受 `--context <file>` 或 `--stdin`，并用固定结构输出，不回显 Cookie、token、地图凭据或抓取页面正文。Query matrix 只生成检索任务，不访问网络；source probe 只报告有界的访问状态，不能证明地点存在、营业、可订、适合路线或安全。My Maps CLI 默认拒绝覆盖，`--replace` 也只替换三个已知文件。详细输入输出见[生活品味与地区来源线上逻辑](skill/references/taste-and-source-online-logic.md)、[地图服务执行与交付](skill/references/map-provider-delivery.md)与[小红书导入说明](skill/references/xiaohongshu-import.md)。
 
 ## 仓库结构
 

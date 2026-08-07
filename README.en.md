@@ -29,6 +29,7 @@ It goes beyond generating a list of attractions. It learns how you want to trave
 - One to three daily anchors, plus nearby food, rest, and replacement options.
 - Reminders to recheck events, exhibitions, closures, reservations, and other changing facts.
 - An interactive map that keeps the trip overview, daily order, and editing state together.
+- One-click AMap / Google Maps place and route handoffs, plus portable Google My Maps files.
 - A Xiaohongshu travel library that is readable in Finder or an editor and does not download media by default.
 
 The map does not force every candidate into the itinerary. Browse by date, add or remove places, change priorities and same-day order, then ask Codex to review the consequences and rearrange the plan.
@@ -74,9 +75,27 @@ Place discovery follows a five-stage funnel:
 4. Recheck every shortlisted place against recent, official, and traceable sources before it enters the route.
 5. Record the check date and when to verify again wherever sources conflict or facts may change close to departure.
 
-Version 0.2 continues to provide Regional Source Packs for Global Base, China Mainland, Japan, and francophone France/Belgium. A source pack describes the region's information ecosystem, research methods, and fact boundaries. The current local-language lexicons cover Spanish and Catalan; they provide stable search terms but are not source packs. Spain currently uses Global Base with Spanish and Catalan terms and does not yet have a dedicated Regional Source Pack.
+The current source provides Regional Source Packs for Global Base, China Mainland, Japan, and francophone France/Belgium. A source pack describes the region's information ecosystem, research methods, and fact boundaries. The current local-language lexicons cover Spanish and Catalan; they provide stable search terms but are not source packs. Spain currently uses Global Base with Spanish and Catalan terms and does not yet have a dedicated Regional Source Pack.
 
 Social media, forums, and named local editorial sources are discovery and experience signals. They do not independently prove opening hours, tickets, transport, or safety. See [Regional Source Packs](skill/references/regional-source-packs.md) and [source verification](skill/references/source-verification.md) for the full rules.
+
+## A map you can use and take with you
+
+For a mainland-China trip, the AMap enhancement appears only when place resolution or route review begins. If `amap-gui` is present and `AMAP_KEY` plus `AMAP_SECURITY_KEY` are configured in the local environment, `amap-cli.js` can perform real city-keyword, anchor-radius, branch-disambiguation, and formal movement-segment queries. Credential values are never written to trip files, detailed errors, exports, or release packages. Planning still works without installation; the route is then labeled: **AMap road-network verification was not completed. Recheck in AMap before departure.**
+
+A search result or handoff link never upgrades route status. Every formal adjacent segment must have valid route evidence for “Verified with AMap”; a day with only some valid segments is “Partially verified.” Adding, removing, moving, or reordering a place makes the affected day unverified again until Codex replans and rechecks the new adjacency.
+
+Overseas research continues to use ordinary Web search, local-language material, and official pages. **Google Maps URLs do not require an API key.** A place or route URL opens Google Maps, which recalculates directions after opening. The current source does not call Google Places API and does not call Google Routes API; it does not require Google Cloud Billing.
+
+For portable, long-term storage, download individually or generate with the CLI:
+
+```text
+places.csv
+itinerary.kml
+README.md
+```
+
+These files are manually imported into Google My Maps. KML contains only reliable WGS84 coordinates; places with only AMap GCJ-02 coordinates stay in CSV for manual name-and-address resolution. The files are **not automatically added to regular Google Maps saved lists**, and they are not automatically added to AMap favorites. See [map provider execution and delivery](skill/references/map-provider-delivery.md) for inputs, statuses, link limits, filesystem safety, and fallbacks.
 
 ## Get started
 
@@ -94,9 +113,9 @@ Use $interactive-trip-planner to organize this Xiaohongshu board first. Do not d
 
 Once you confirm a direction, it builds the factual base and candidate pool, plans each day, creates an editable map, and rechecks affected opening, reservation, transport, and capacity constraints after your edits.
 
-## What 0.2 can do—and what it cannot guarantee
+## What the current source can do—and what it cannot guarantee
 
-Version 0.2.0 is a developer preview that can support real trip planning, local-language research, daily route design, and interactive map generation with human oversight. In addition to the 0.1 route, source, Taste Model, and map capabilities, it adds board and single-note imports, a signed-in risk gate, a browsable private library, optional media storage, and import validation.
+The current source is a developer preview that can support real trip planning, local-language research, daily route design, and interactive map generation with human oversight. It includes board and single-note imports, a signed-in risk gate, a browsable private library, optional media storage and import validation, real AMap queries, dual-map handoffs, and Google My Maps export.
 
 It cannot yet guarantee a dedicated Regional Source Pack for every country, that search results are inherently correct, or that every route has been checked against a real transport network. Events, hours, prices, transport, reservations, weather, and safety still need the indicated pre-departure checks; social and forum content cannot be their only evidence.
 
@@ -123,7 +142,7 @@ Free-form submissions and community signals do not become trusted facts by thems
 
 **REDSkill**
 
-Use the complete contents of [`releases/redskill-0.2.0/interactive-trip-planner/`](releases/redskill-0.2.0/interactive-trip-planner/); the [Chinese REDSkill installation guide](releases/redskill-0.2.0/INSTALL.zh-CN.md) provides upload and installation steps. This edition excludes Codex metadata and private travel libraries, and keeps only file formats supported by the platform.
+Choose the newest version directory under [`releases/`](releases/), use its complete `interactive-trip-planner/` folder, and follow the `INSTALL.zh-CN.md` in the same release directory. This edition excludes Codex metadata and private travel libraries, and keeps only file formats supported by the platform. Do not mix root source files with an older release package.
 
 ## Development and verification
 
@@ -142,13 +161,16 @@ The agent-facing JSON CLIs live in `skill/scripts/`:
 node skill/scripts/recommend-taste-models.js --context <context.json>
 node skill/scripts/build-source-query-matrix.js --context <context.json>
 node skill/scripts/probe-source-access.js --context <sources.json>
+node skill/scripts/check-amap-cli.js
+node skill/scripts/amap-cli.js --context <amap-request.json>
+node skill/scripts/export-google-my-maps.js --guide <guide-directory> --output <new-directory>
 node skill/scripts/fetch-xhs-public.js --context <xiaohongshu-link.json>
 node skill/scripts/import-xhs-library.js --workspace <travel-workspace> --context <normalized-import.json>
 node skill/scripts/validate-xhs-library.js --library <library-directory>
 node skill/scripts/summarize-xhs-import.js --library <library-directory> --import <import-id>
 ```
 
-Import commands accept exactly one of `--context <file>` or `--stdin` and return fixed-shape output without echoing cookies, tokens, or fetched page bodies. The query matrix only creates research tasks; it does not access the network. The source probe reports bounded access status only and cannot prove that a place exists, is open, can be booked, fits the itinerary, or is safe. See the [taste and source online logic](skill/references/taste-and-source-online-logic.md) and [Xiaohongshu import guide](skill/references/xiaohongshu-import.md) for detailed inputs and outputs.
+Import commands and `amap-cli.js` accept exactly one of `--context <file>` or `--stdin` and return fixed-shape output without echoing cookies, tokens, map credentials, or fetched page bodies. The query matrix only creates research tasks; it does not access the network. The source probe reports bounded access status only and cannot prove that a place exists, is open, can be booked, fits the itinerary, or is safe. The My Maps CLI refuses overwrite by default; `--replace` still replaces only the three known files. See the [taste and source online logic](skill/references/taste-and-source-online-logic.md), [map provider execution and delivery](skill/references/map-provider-delivery.md), and [Xiaohongshu import guide](skill/references/xiaohongshu-import.md) for detailed inputs and outputs.
 
 ## Repository structure
 

@@ -60,6 +60,17 @@ Global Base 的当地语言 query 使用 `{local:<token>}`，由 `assets/source-
 
 ## 中国大陆地图增强
 
-运行 check-amap-cli.js 只探测命令是否存在，并确认两个凭据变量是 trim 后非空的字符串；不输出值，也不执行路线。空字符串或全空白字符串视为缺少凭据。只有 CLI 与非空环境配置都存在时才表示路线能力可调用；它仍不代表某条路线已经核实。
+只有进入中国大陆 POI 定位或正式路线复核时才介绍并探测高德增强，不在全局启动时要求安装。安装与 Key 申请遵循[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)；本 Skill 不猜测或维护第三方安装命令。
 
-未安装、缺少环境配置或调用失败时，降级到高德公开网页或 URI 与其他公开地图，并明确“未完成 amap-gui 路网复核”。不得用坐标直线、估算速度或虚构输出替代 CLI 路线。
+运行 `node scripts/check-amap-cli.js` 只探测 `amap-gui` 是否存在，并确认 `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 是 trim 后非空的字符串；不输出值，也不执行搜索或路线。空字符串或全空白字符串视为缺少凭据。只有探测结果为 `available` 才表示真实请求可以开始；它仍不代表任何地点或路线已经核实。
+
+能力可用时，使用 `node scripts/amap-cli.js --context <file>` 或 `--stdin` 传入一个 JSON object：
+
+- 城市关键词：`action: "search-poi"` + `keyword` + `city`。
+- 锚点周边：在搜索输入中增加 GCJ-02 `center: { lng, lat }` 和正整数 `radiusMeters`。
+- 同名消歧：使用包含区域、商场、分店或完整名称的更精确 `keyword` 再查，不把第一条结果自动视为目标地点。
+- 路线复核：`action: "route"`，提供带名称和 GCJ-02 position 的 `origin`、`destination`，以及 `driving | walking | riding | transit` 模式；公交必须提供 `city`，途经点只支持 driving 且最多 16 个。
+
+CLI 只返回 allowlist 后的地点标识、名称、地址、行政区、距离、GCJ-02 position，或路线的方式、距离、时间、费用、步骤与 `reviewedAt`。`status: "ok"` 且 `performed: true` 才是本次 provider 事实；照片、raw polyline、header、stderr 与任意 provider 字段不进入旅行资料。搜索结果用于召回、定位和消歧，不能证明营业、票务、菜单、体验质量或安全。
+
+未安装、缺少环境配置或调用失败时，降级到高德公开网页或 URI 与其他公开地图，并明确“未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure.” 不得用坐标直线、估算速度或虚构输出替代 CLI 路线。完整执行、交接和导出边界见 `map-provider-delivery.md`。

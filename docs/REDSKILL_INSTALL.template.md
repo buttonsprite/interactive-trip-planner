@@ -41,6 +41,14 @@ Skill 会先尝试不带 Cookie 的公开读取。完整收藏夹若必须使用
 
 建议同时提供已经确定的信息，例如日期、出发地、目的地、同行人、体力、交通偏好、预算范围、已订酒店，以及必去或明确不想去的地点。信息不足时，skill 会先询问真正影响路线的关键问题。
 
+## 可选地图增强与导出
+
+高德增强只在规划中国大陆地点和路线时出现，不是安装后的全局启动门。需要时先按[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)安装并配置本地 `amap-gui`，再由用户自己的环境提供 `AMAP_KEY` 与 `AMAP_SECURITY_KEY`。Skill 不会读取或回显密钥值，也不会把它们写入旅行文件、导出、日志或发布包。不配置仍可继续规划，路线会明确显示“未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure.”
+
+Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key。本包不调用 Google Places API / does not call Google Places API，也不调用 Google Routes API / does not call Google Routes API；路线在用户打开 Google Maps 后重新计算。
+
+地图可逐个下载 `places.csv`、`itinerary.kml`、`README.md`，用于手动导入 Google My Maps。导出不会自动写入普通 Google Maps 收藏夹 / not automatically added to regular Google Maps saved lists，也不会自动写入高德收藏夹。仅有高德 GCJ-02 坐标的地点不会冒充 WGS84 写入 KML，会保留在 CSV 中供人工定位。
+
 ## 运行条件
 
 - 支持 Skills 的运行环境。
@@ -52,6 +60,9 @@ Skill 会先尝试不带 Cookie 的公开读取。完整收藏夹若必须使用
 安装后可在 skill 目录运行：
 
 ```bash
+node scripts/check-amap-cli.js
+node scripts/amap-cli.js --help
+node scripts/export-google-my-maps.js --guide <guide-directory> --output <new-directory>
 node scripts/test-redskill-package.js
 node scripts/test-redskill-release.js .
 node scripts/test-core-map-route.js

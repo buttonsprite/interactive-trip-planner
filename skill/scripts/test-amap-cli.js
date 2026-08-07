@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -11,6 +13,74 @@ const secrets = {
   AMAP_KEY: "never-print-web-key",
   AMAP_SECURITY_KEY: "never-print-security-key",
 };
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "interactive-trip-planner-amap-cli-"));
+const fakeBinDir = path.join(tempDir, "bin");
+const contextPath = path.join(tempDir, "search.json");
+fs.mkdirSync(fakeBinDir);
+fs.writeFileSync(contextPath, JSON.stringify({
+  action: "search-poi",
+  keyword: "菜市场",
+  city: "大理",
+  center: { lng: 100.1602, lat: 25.7001 },
+  radiusMeters: 1500,
+  pageSize: 10,
+  pageIndex: 1,
+}));
+fs.writeFileSync(path.join(fakeBinDir, "amap-gui"), `#!/usr/bin/env node
+const secret = process.env.AMAP_SECURITY_KEY || "";
+if (process.env.FAKE_AMAP_BEHAVIOR === "stderr-secret") {
+  process.stderr.write("provider failed: " + secret);
+  process.exit(1);
+}
+if (process.env.FAKE_AMAP_BEHAVIOR === "malformed") {
+  process.stdout.write("{malformed-provider-json");
+  process.exit(0);
+}
+process.stdout.write(JSON.stringify({
+  success: true,
+  data: {
+    keyword: "菜市场",
+    city: "大理",
+    total: 1,
+    pageSize: 10,
+    pageIndex: 1,
+    pois: [{
+      id: "B0FFTEST01",
+      name: "北门市场",
+      type: "购物服务;综合市场",
+      address: "云南省大理白族自治州大理市",
+      tel: "0872-0000000",
+      distance: 680,
+      location: [100.1602, 25.7001],
+      province: "云南省",
+      city: "大理白族自治州",
+      district: "大理市"
+    }]
+  },
+  error: null
+}));
+`);
+fs.chmodSync(path.join(fakeBinDir, "amap-gui"), 0o755);
+
+function runExecutionCli(args, input = "", extraEnv = {}) {
+  return spawnSync(process.execPath, [path.join(scriptDir, "amap-cli.js"), ...args], {
+    encoding: "utf8",
+    input,
+    env: {
+      ...process.env,
+      ...secrets,
+      PATH: `${fakeBinDir}${path.delimiter}${process.env.PATH || ""}`,
+      ...extraEnv,
+    },
+  });
+}
+
+function assertSanitizedCliFailure(result) {
+  assert.equal(result.status, 2, result.stderr);
+  assert.equal(result.stdout, "");
+  assert.match(result.stderr, /^(?:Invalid AMap (?:action|search request|route request)\.|Context must contain valid JSON\.|Context must be a JSON object\.|Context path must be a readable file\.|Provide exactly one of --context <file> or --stdin\.)\n$/);
+  assert.doesNotMatch(result.stderr, /never-print|invalid-source-secret/);
+}
 
 const missingCli = probeAmapCapability({ env: { ...secrets }, commandExists: () => false });
 assert.equal(missingCli.status, "unavailable");
@@ -60,4 +130,51 @@ assert.equal(cli.status, 0, cli.stdout + cli.stderr);
 const output = JSON.parse(cli.stdout);
 assert.equal(output.status, "unavailable");
 assert.doesNotMatch(cli.stdout + cli.stderr, /never-print/);
+
+try {
+  const help = runExecutionCli(["--help"]);
+  assert.equal(help.status, 0, help.stderr);
+  assert.deepEqual(JSON.parse(help.stdout), {
+    status: "usage",
+    usage: "Usage: amap-cli.js (--context <file> | --stdin)",
+  });
+  assert.equal(help.stderr, "");
+
+  const contextRun = runExecutionCli(["--context", contextPath]);
+  assert.equal(contextRun.status, 0, contextRun.stderr);
+  assert.equal(contextRun.stderr, "");
+  const contextOutput = JSON.parse(contextRun.stdout);
+  assert.equal(contextOutput.status, "ok");
+  assert.equal(contextOutput.items[0].poiId, "B0FFTEST01");
+  assert.deepEqual(contextOutput.items[0].position, { lng: 100.1602, lat: 25.7001, system: "gcj02" });
+  assert.doesNotMatch(contextRun.stdout + contextRun.stderr, /never-print/);
+
+  const stdinRun = runExecutionCli(["--stdin"], fs.readFileSync(contextPath, "utf8"));
+  assert.equal(stdinRun.status, 0, stdinRun.stderr);
+  assert.equal(JSON.parse(stdinRun.stdout).status, "ok");
+  assert.equal(stdinRun.stderr, "");
+
+  for (const behavior of ["stderr-secret", "malformed"]) {
+    const providerFailure = runExecutionCli(["--context", contextPath], "", { FAKE_AMAP_BEHAVIOR: behavior });
+    assert.equal(providerFailure.status, 0, providerFailure.stderr);
+    assert.equal(providerFailure.stderr, "");
+    assert.equal(JSON.parse(providerFailure.stdout).status, "provider-error");
+    assert.doesNotMatch(providerFailure.stdout + providerFailure.stderr, /never-print|malformed-provider-json/);
+  }
+
+  const unavailable = runExecutionCli(["--context", contextPath], "", { PATH: "/definitely/missing" });
+  assert.equal(unavailable.status, 0, unavailable.stderr);
+  assert.equal(JSON.parse(unavailable.stdout).status, "unavailable");
+  assert.equal(unavailable.stderr, "");
+
+  assertSanitizedCliFailure(runExecutionCli(["--stdin"], JSON.stringify({
+    action: "search-poi",
+    keyword: "   ",
+    invalidSource: "invalid-source-secret",
+  })));
+  assertSanitizedCliFailure(runExecutionCli(["--stdin"], "{invalid-source-secret"));
+  assertSanitizedCliFailure(runExecutionCli([]));
+} finally {
+  fs.rmSync(tempDir, { recursive: true, force: true });
+}
 console.log("Amap capability and downgrade contract passed");

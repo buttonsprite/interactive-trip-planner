@@ -33,8 +33,14 @@ const routeRequest = {
 const searchProviderOutput = {
   success: true,
   data: {
-    keyword: "菜市场",
-    city: "大理",
+    state: {
+      keyword: "菜市场",
+      pageSize: 10,
+      pageIndex: 1,
+      extensions: "all",
+      resultCount: 1,
+      city: "大理",
+    },
     total: 1,
     pageSize: 10,
     pageIndex: 1,
@@ -46,10 +52,13 @@ const searchProviderOutput = {
       tel: "0872-0000000",
       distance: 680,
       location: [100.1602, 25.7001],
-      province: "云南省",
-      city: "大理白族自治州",
-      district: "大理市",
-      photos: [{ url: "https://example.invalid/?secret=provider-photo" }],
+      pname: "云南省",
+      cityname: "大理白族自治州",
+      adname: "大理市",
+      province: "错误旧省份",
+      city: "错误旧城市",
+      district: "错误旧区域",
+      photo: "https://example.invalid/?secret=provider-photo",
       headers: { authorization: "provider-header-secret" },
     }],
     arbitraryProviderField: "provider-raw-secret",
@@ -60,16 +69,19 @@ const searchProviderOutput = {
 const routeProviderOutput = {
   success: true,
   data: {
-    type: "walking",
-    from: { name: "大理古城南门", position: [100.165, 25.689], rawHtml: "<b>unsafe</b>" },
-    to: { name: "北门市场", position: [100.1602, 25.7001] },
+    state: {
+      from: { name: "大理古城南门", position: [100.165, 25.689], rawHtml: "<b>unsafe</b>" },
+      to: { name: "北门市场", position: [100.1602, 25.7001] },
+      waypoints: [],
+      type: "walking",
+    },
     summary: {
       distance: 1420,
       time: 1080,
       tolls: 0,
       steps: [
-        { instruction: `从南门出发，${secrets.AMAP_SECURITY_KEY}，沿复兴路向北步行。`, distance: 720, time: 540, path: "provider-path-secret" },
-        { instruction: "右转前往北门市场。", distance: 700, time: 540 },
+        { instruction: `从南门出发，${secrets.AMAP_SECURITY_KEY}，沿复兴路向北步行。`, road: "复兴路", distance: 720, time: 540, action: "直行", path: "provider-path-secret" },
+        { instruction: "右转前往北门市场。", road: "人民路", distance: 700, time: 540, action: "右转" },
       ],
       rawPolyline: "provider-polyline-secret",
     },
@@ -212,7 +224,13 @@ assert.deepEqual(JSON.parse(waypointArgs[2]), {
 });
 const normalizedDrivingRoute = normalizeAmapOutput(
   drivingWithWaypoints,
-  { ...routeProviderOutput, data: { ...routeProviderOutput.data, type: "driving" } },
+  {
+    ...routeProviderOutput,
+    data: {
+      ...routeProviderOutput.data,
+      state: { ...routeProviderOutput.data.state, type: "driving" },
+    },
+  },
   checkedAt,
   { env: secrets },
 );
@@ -262,9 +280,12 @@ const secretNamedRouteResult = executeAmapRequest(secretNamedDrivingRoute, {
         ...routeProviderOutput,
         data: {
           ...routeProviderOutput.data,
-          type: "driving",
-          from: { ...routeProviderOutput.data.from, name: secretNamedDrivingRoute.origin.name },
-          to: { ...routeProviderOutput.data.to, name: secretNamedDrivingRoute.destination.name },
+          state: {
+            ...routeProviderOutput.data.state,
+            type: "driving",
+            from: { ...routeProviderOutput.data.state.from, name: secretNamedDrivingRoute.origin.name },
+            to: { ...routeProviderOutput.data.state.to, name: secretNamedDrivingRoute.destination.name },
+          },
         },
       }),
       stderr: "",
@@ -301,7 +322,10 @@ const escapedSecretResult = executeAmapRequest(escapedSecretRequest, {
       status: 0,
       stdout: JSON.stringify({
         ...routeProviderOutput,
-        data: { ...routeProviderOutput.data, type: "driving" },
+        data: {
+          ...routeProviderOutput.data,
+          state: { ...routeProviderOutput.data.state, type: "driving" },
+        },
       }),
       stderr: "",
     };
@@ -420,7 +444,10 @@ const mismatchedRoute = executeAmapRequest(routeRequest, {
     status: 0,
     stdout: JSON.stringify({
       ...routeProviderOutput,
-      data: { ...routeProviderOutput.data, type: "driving" },
+      data: {
+        ...routeProviderOutput.data,
+        state: { ...routeProviderOutput.data.state, type: "driving" },
+      },
     }),
     stderr: "",
   }),
@@ -428,6 +455,27 @@ const mismatchedRoute = executeAmapRequest(routeRequest, {
 assert.equal(mismatchedRoute.status, "provider-error");
 assert.equal(mismatchedRoute.message, providerErrorMessage);
 assertNoSecrets(mismatchedRoute);
+
+const conflictingLegacyRoute = executeAmapRequest(routeRequest, {
+  env: { ...secrets },
+  commandExists: () => true,
+  runCommand: () => ({
+    status: 0,
+    stdout: JSON.stringify({
+      ...routeProviderOutput,
+      data: {
+        ...routeProviderOutput.data,
+        type: "walking",
+        from: { name: "错误兼容起点", position: [101, 26] },
+        to: { name: "错误兼容终点", position: [102, 27] },
+      },
+    }),
+    stderr: "",
+  }),
+});
+assert.equal(conflictingLegacyRoute.status, "provider-error");
+assert.equal(conflictingLegacyRoute.message, providerErrorMessage);
+assertNoSecrets(conflictingLegacyRoute);
 
 const encodedMarkupOutput = normalizeAmapOutput(
   searchRequest,

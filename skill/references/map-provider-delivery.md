@@ -72,6 +72,8 @@ route mode 只接受 `driving`、`walking`、`riding`、`transit`。公交必须
 
 搜索成功只允许返回：查询条件、分页、`poiId`、名称、类型、地址、电话、与锚点距离、行政区、GCJ-02 position 和 `reviewedAt`。路线成功只允许返回：起终点、途经点、方式、距离、预计时间、费用、步骤与 `reviewedAt`。照片、header、raw polyline、任意 provider 字段和原始错误不会进入结果。
 
+执行层按高德官方 CLI 当前响应契约规范化字段：`searchPOI` 的省、市、区分别来自 POI 的 `pname`、`cityname`、`adname`；路线起点、终点和交通方式来自 `data.state.from`、`data.state.to`、`data.state.type`，距离、时间、费用和步骤来自 `data.summary`。旧的同名 flat 字段不覆盖官方字段；若 route 响应同时携带冲突的 flat `data.from`、`data.to` 或 `data.type`，或 `data.state.type` 与请求方式不一致，本次结果返回 `provider-error`，不能形成 `performed: true` 或 verified 路线事实。
+
 - `status: "ok"` 且 `performed: true`：本次调用产生了可用的 allowlist provider 事实。
 - `missing-credentials` / `unavailable`：没有执行 provider 请求。
 - `provider-error`：请求没有形成可用事实；保留原候选或顺序并进入公开地图人工复核。

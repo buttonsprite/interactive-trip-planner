@@ -41,8 +41,14 @@ if (behavior === "malformed") {
 process.stdout.write(JSON.stringify({
   success: true,
   data: {
-    keyword: "菜市场",
-    city: "大理",
+    state: {
+      keyword: "菜市场",
+      pageSize: 10,
+      pageIndex: 1,
+      extensions: "all",
+      resultCount: 1,
+      city: "大理"
+    },
     total: 1,
     pageSize: 10,
     pageIndex: 1,
@@ -54,9 +60,9 @@ process.stdout.write(JSON.stringify({
       tel: "0872-0000000",
       distance: 680,
       location: [100.1602, 25.7001],
-      province: "云南省",
-      city: "大理白族自治州",
-      district: "大理市"
+      pname: "云南省",
+      cityname: "大理白族自治州",
+      adname: "大理市"
     }]
   },
   error: null
@@ -153,6 +159,9 @@ try {
   assert.equal(contextOutput.status, "ok");
   assert.equal(contextOutput.items[0].poiId, "B0FFTEST01");
   assert.deepEqual(contextOutput.items[0].position, { lng: 100.1602, lat: 25.7001, system: "gcj02" });
+  assert.equal(contextOutput.items[0].province, "云南省");
+  assert.equal(contextOutput.items[0].city, "大理白族自治州");
+  assert.equal(contextOutput.items[0].district, "大理市");
   assert.doesNotMatch(contextRun.stdout + contextRun.stderr, /never-print/);
 
   const stdinRun = runExecutionCli(["--stdin"], fs.readFileSync(contextPath, "utf8"));

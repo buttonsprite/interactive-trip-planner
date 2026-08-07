@@ -184,6 +184,16 @@ function requestPosition(value) {
   return { lng: value.lng, lat: value.lat, system: "gcj02" };
 }
 
+function providerRoutePointMatches(left, right) {
+  if (!isPlainObject(left) || !isPlainObject(right)) return false;
+  const leftPosition = providerPosition(left.position);
+  const rightPosition = providerPosition(right.position);
+  return Boolean(leftPosition && rightPosition)
+    && leftPosition.lng === rightPosition.lng
+    && leftPosition.lat === rightPosition.lat
+    && providerText(left.name) === providerText(right.name);
+}
+
 function credentialValues(env) {
   const values = [];
   for (const name of ["AMAP_KEY", "AMAP_SECURITY_KEY"]) {
@@ -240,9 +250,9 @@ function normalizeSearchOutput(request, data, checkedAt) {
       phone: providerText(poi.tel, 120),
       distanceMeters: providerNumber(poi.distance),
       position,
-      province: providerText(poi.province),
-      city: providerText(poi.city),
-      district: providerText(poi.district),
+      province: providerText(poi.pname),
+      city: providerText(poi.cityname),
+      district: providerText(poi.adname),
     };
   });
 
@@ -264,12 +274,20 @@ function normalizeSearchOutput(request, data, checkedAt) {
 }
 
 function normalizeRouteOutput(request, data, checkedAt) {
-  if (!isPlainObject(data.from) || !isPlainObject(data.to) || !isPlainObject(data.summary)) {
+  const state = data.state;
+  if (!isPlainObject(state) || !isPlainObject(state.from) || !isPlainObject(state.to) || !isPlainObject(data.summary)) {
     throw new Error(PROVIDER_ERROR_MESSAGE);
   }
-  if (data.type !== request.mode) throw new Error(PROVIDER_ERROR_MESSAGE);
-  const originPosition = providerPosition(data.from.position);
-  const destinationPosition = providerPosition(data.to.position);
+  if (state.type !== request.mode) throw new Error(PROVIDER_ERROR_MESSAGE);
+  if (data.type !== undefined && data.type !== state.type) throw new Error(PROVIDER_ERROR_MESSAGE);
+  if (data.from !== undefined && !providerRoutePointMatches(data.from, state.from)) {
+    throw new Error(PROVIDER_ERROR_MESSAGE);
+  }
+  if (data.to !== undefined && !providerRoutePointMatches(data.to, state.to)) {
+    throw new Error(PROVIDER_ERROR_MESSAGE);
+  }
+  const originPosition = providerPosition(state.from.position);
+  const destinationPosition = providerPosition(state.to.position);
   const distanceMeters = providerNumber(data.summary.distance);
   const durationSeconds = providerNumber(data.summary.time);
   if (!originPosition || !destinationPosition || distanceMeters === null || durationSeconds === null) {
@@ -298,11 +316,11 @@ function normalizeRouteOutput(request, data, checkedAt) {
     performed: true,
     action: "route",
     origin: {
-      name: providerText(data.from.name) || request.origin.name,
+      name: providerText(state.from.name) || request.origin.name,
       position: originPosition,
     },
     destination: {
-      name: providerText(data.to.name) || request.destination.name,
+      name: providerText(state.to.name) || request.destination.name,
       position: destinationPosition,
     },
     waypoints: request.waypoints.map((waypoint) => ({

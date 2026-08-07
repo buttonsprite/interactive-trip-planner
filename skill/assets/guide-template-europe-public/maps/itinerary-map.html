@@ -13099,9 +13099,13 @@
       const handoffs = TripMapDelivery.buildDayHandoffs(deliveryDay, pois, {
         orderedPoiIds: deliveryDay.orderedPoiIds,
         dirty: Boolean(itineraryPlan.dirtyDays[dayId]),
+        region: PUBLIC_TRIP_DATA.trip.countryCode || "",
         source: PUBLIC_TRIP_DATA.trip.slug
       });
-      const links = [handoffs.overview, ...handoffs.routeLinks].filter(Boolean);
+      const overviewLinks = Array.isArray(handoffs.overviews)
+        ? handoffs.overviews
+        : [handoffs.overview].filter(Boolean);
+      const links = [...overviewLinks, ...handoffs.routeLinks].filter(Boolean);
       const statusLabels = {
         verified: "路线已复核 / Route verified",
         partial: "路线部分复核 / Route partially verified",
@@ -13645,8 +13649,11 @@
         anchor.click();
         URL.revokeObjectURL(objectUrl);
         mapExportFeedback.textContent = `${fileName} 已开始下载 / Download started`;
-      } catch {
-        mapExportFeedback.textContent = "暂时无法生成导出文件，请稍后重试 / Export unavailable";
+      } catch (error) {
+        const message = String(error?.message || "");
+        mapExportFeedback.textContent = /^My Maps export blocked: privacy issue at (?:POI|day) #\d+, field "[a-z_]+"\.$/.test(message)
+          ? message
+          : "暂时无法生成导出文件，请稍后重试 / Export unavailable";
       }
     };
 

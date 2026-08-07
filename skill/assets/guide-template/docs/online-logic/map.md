@@ -33,8 +33,9 @@
 ## 地图交接与路线状态
 
 - 地点详情通过 `buildPlaceLinks` 生成地图入口；`countryCode: "CN"` 时优先高德，其他地区优先 Google Maps。高德只有 `mapProviderRefs.amap.status: "resolved"` 时才生成直接入口；两种 provider 都没有安全链接时显示“复制地点名称和地址”的手动搜索降级。
-- 每日摘要下通过 `buildDayHandoffs` 显示路线复核状态、可直接打开的路线分段和需要手动查找的地点。拆分后的每一段保留 runtime 返回的序号和 provider，不会因为部分地点缺少 provider 定位而隐藏 `manualItems`。
-- 高德当天地点总览只收录当前顺序里前 10 个具有安全高德定位的 marker，**不会自动拆分**成多张总览；第 11 个起不进入当天总览，仍可使用单点入口、适用的路线分段或手动查找。路线链接与地点总览分开处理：高德路线和 Google 路线才会按交通方式与 provider 限制拆段。
+- 每日摘要下通过 `buildDayHandoffs` 显示路线复核状态、全部地点总览、可直接打开的路线分段和需要手动查找的地点。拆分后的每一段保留 runtime 返回的序号和 provider，不会因为部分地点缺少 provider 定位而隐藏 `manualItems`。
+- `countryCode: "CN"` 才启用高德 day provider；海外日程不显示高德 overview、路线或高德手动查找项。中国大陆当天地点总览把全部安全 marker 按当前顺序连续拆分，每张最多 10 个并显示 `1/N` 序号；`overview` 保留为首块兼容字段。旧的“前 10 个、不会自动拆分、第 11 个起不进入总览”合同已经废弃。
+- Google 当天路线同时遵守最多 3 个中间停靠点（每块最多 5 点）与完整编码 URL 不超过 2048 字符两项限制。runtime 贪心选择最长安全块，块间共享边界地点；单一相邻 pair 超限时不截断链接，两个端点进入 Google 手动查找项。
 - 当天顺序或归类被用户修改后，界面无条件显示“路线待重新复核”，即使原路线曾标记为已复核；外部路线链接只使用当前 `orders` 生成，打开后仍由对应地图重新计算。
 - 地点和路线链接都是浏览器 handoff，不调用付费 API、不携带 API key，也不会把静态地图中的修改写回高德或 Google 账号。
 - 中国大陆行程向旅行者解释 provider 状态时使用固定三档：已用高德复核 / Verified with AMap；部分移动段已复核 / Partially verified；未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure. 模板中的短标签“路线已复核 / 路线部分复核 / 路线待复核”只是同一状态的紧凑显示，不会单独证明 provider。
@@ -45,6 +46,7 @@
 - 总览中的“导出到 Google My Maps”通过原生 `dialog.showModal()` 进入浏览器 modal top layer；背景内容在窗口打开时不可聚焦，Tab / Shift+Tab 由浏览器限制在导出窗口内。Escape 触发 `cancel` 后关闭窗口，并把焦点回到原触发按钮。
 - `places.csv`、`itinerary.kml` 和 `README.md` 必须逐个下载。每次点击都即时用 `buildMyMapsFiles({ trip, state, locale })` 读取当前保存的 `assignments`、`orders`、`priorities` 和 `dirtyDays`，不会导出页面初始顺序或另存一份状态。
 - 浏览器每次只创建一个 Blob URL，触发单个文件下载后立即撤销；失败时在 dialog 内显示可见错误，不影响继续浏览和修改地图。
+- 三个文件生成前由共享 builder 扫描实际 POI 输出字段与 KML 日期文件夹字段。疑似 API key、Cookie、token 或 release 私密数据会阻止整次生成；弹窗只显示稳定的 POI/日期序号和字段名，不回显原值，也不会创建 Blob URL。CLI 使用同一 builder，因此隐私失败发生在 staging 和替换之前。
 - 导出文件用于手动导入 Google My Maps，不等于 Google Maps Saved Lists，也不会自动更新个人地图。
 - `itinerary.kml` 只写入有效 WGS84 坐标并按日期加候选文件夹；仅有 GCJ-02 或缺少可靠坐标的地点仍保留在 `places.csv`，由 `README.md` 报告需要人工定位的数量。导出不会自动写入普通 Google Maps 收藏夹 / not automatically added to regular Google Maps saved lists，也不会自动导入高德收藏夹。
 - 命令行导出使用 `node scripts/export-google-my-maps.js --guide <guide-directory> --output <new-directory>`，可选 `--state <state.json>`、`--locale zh-CN|en` 与 `--replace`。它只读取指定攻略的 `data/pois.json`、`data/itinerary.json` 和可选 state；输出目录不能等于文件系统根、用户主目录、仓库根、Skill 根或攻略根。默认拒绝覆盖；`--replace` 只替换三个已知导出文件并保留无关文件，整个提交可回滚。成功 stdout 只包含文件名与计数，失败 stderr 只有固定错误，不回显路径、旅行正文或密钥。

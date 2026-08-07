@@ -99,8 +99,9 @@ route mode 只接受 `driving`、`walking`、`riding`、`transit`。公交必须
 高德 URI：
 
 - 地点入口使用 resolved 高德 `poiId`，否则使用合法 GCJ-02 position。
-- 当天地点总览只包含当前顺序中前 10 个具有安全高德定位的 marker，**不会自动拆分**成多张总览；第 11 个起不进入 overview，仍可使用单点入口、适用的路线分段或手动查找。
-- 路线入口与地点总览独立构建，可以按交通方式与 provider 限制拆成多个 route chunks；路线分段不受 overview 的 10-marker 截断影响，但仍要求合法定位和明确交通方式。
+- 高德当天交接只在目的地区域明确为 `CN` 时启用；海外 day 不生成高德地点总览、路线入口或高德手动查找项。地点详情的 primary / secondary provider 选择仍按原合同执行。
+- 当天地点总览按当前顺序把全部具有安全高德定位的 marker 连续拆成多张 overview，每张最多 10 个，标签显示 `1/N`、`2/N` 等顺序；兼容字段 `overview` 指向 `overviews[0]`。旧的“前 10 个、不会自动拆分、第 11 个起不进入 overview”合同已经废弃，不再截断或丢点。
+- 路线入口与地点总览独立构建，可以按交通方式与 provider 限制拆成多个 route chunks；路线分段不受 overview 的 10-marker 分块影响，但仍要求合法定位和明确交通方式。
 - driving 路线单条最多为起点、一个 via、终点；walking、riding、transit 按相邻起终点拆分。
 - 缺少交通方式时不默认驾车，也不生成假的路线入口；相关地点保留为手动查找项。
 
@@ -108,6 +109,7 @@ Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key�
 
 - 地点入口优先使用有效 WGS84 坐标；没有坐标时使用可搜索的名称和地址。
 - 单条 directions 最多 3 个中间停靠点；更长路线拆成最多 5 个地点的短段，前一段终点与后一段起点重叠。
+- 每条 directions URL 还必须不超过 2048 个字符。runtime 从最多 5 个地点开始按顺序贪心试装，只有完整 URL 编码后仍在上限内才生成；相邻分段共享边界地点且不丢点。若单一相邻 pair 自身已经无法安全编码在 2048 字符内，则既不生成也不截断该 URL，并把两个端点列入 Google 手动查找项。
 - mixed mode 按连续相同交通方式拆分；未知 mode 不猜测。
 - Google Maps 在用户打开链接后重新计算路线，因此链接存在不表示“已由 Google 验证”。
 
@@ -154,6 +156,7 @@ node scripts/export-google-my-maps.js \
 
 - `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 的值只保存在用户本地环境中；执行进程会读取继承环境中的值用于检查、传递和脱敏，但不会回显、持久化或写入旅行文件、导出、截图、日志、Git、REDSkill 或 release。文档可以出现环境变量名称，不能出现值。
 - Google Maps URL 和 My Maps 导出不需要 Google API key，也不会登录用户账号。
-- 导出只包含当前攻略允许进入 POI 数据的字段；小红书原文、Cookie、订单号、同行人身份和私人浏览器状态不自动进入公开样例或发布包。
+- My Maps 在生成任一文件前扫描实际将写入 CSV/KML 的 POI 字段与 KML 日期文件夹字段；命中 `AMAP_KEY=`、`AMAP_SECURITY_KEY=`、Google `AIza` key、`Cookie:`、`token=` 或现有 release 私密数据模式时，浏览器与 CLI 共用的 builder 会整体阻止生成。浏览器只显示稳定的 POI/日期序号和字段名，不回显命中内容；CLI 继续使用固定安全错误，且不会创建或替换任何目标文件。
+- 导出只包含当前攻略允许进入 POI 数据的字段；小红书原文、Cookie、订单号、同行人身份和私人浏览器状态不自动进入公开样例或发布包。没有进入真实输出字段的内部 metadata 不参与导出扫描。
 - REDSkill 构建会包含 JavaScript CLI、共享 delivery runtime 与本文档，但不包含凭据、私人资料库或用户当前浏览器状态；两个地图模板内联 delivery runtime，单 HTML 仍需联网加载底图和远程图片。
 - 任何 provider 能力、位置、路线或导出失败都不能阻断旅行研究和候选保留；降级结果必须告诉旅行者哪些事实未完成、仍可使用什么，以及出发前在哪里人工确认。

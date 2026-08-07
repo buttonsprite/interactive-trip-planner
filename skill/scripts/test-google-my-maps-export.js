@@ -230,6 +230,49 @@ try {
   assert.doesNotMatch(JSON.stringify(files), secretPattern);
   assert.deepEqual(trip, snapshot, "buildMyMapsFiles must not mutate trip input");
   assert.equal(Object.isFrozen(TripMapDelivery), true, "delivery API must remain immutable");
+  const privateFieldCases = [
+    "AMAP_KEY=private-web-key",
+    "AMAP_SECURITY_KEY=private-security-key",
+    "AIza1234567890abcdefghijklmnop",
+    "Cookie: session=private-cookie",
+    "https://example.com/?token=private-token",
+    "file:///Users/cyx/private-trip.txt",
+    "https://example.com/?xsec_token=private-xhs-token",
+  ];
+  for (const privateValue of privateFieldCases) {
+    const unsafeTrip = structuredClone(trip);
+    unsafeTrip.pois[0].tip = privateValue;
+    let privacyError;
+    try {
+      TripMapDelivery.buildMyMapsFiles({ trip: unsafeTrip, locale: "zh-CN" });
+    } catch (error) {
+      privacyError = error;
+    }
+    assert.equal(typeof privacyError?.message, "string", `export must reject private output field: ${privateValue}`);
+    assert.equal(
+      privacyError.message,
+      'My Maps export blocked: privacy issue at POI #1, field "tip".',
+      "privacy failures must identify only a stable POI ordinal and output field",
+    );
+    assert.doesNotMatch(privacyError.message, /private|AMAP|AIza|Cookie|token|file:\/\//i);
+  }
+  const ignoredPrivateTrip = structuredClone(trip);
+  ignoredPrivateTrip.internalOnly = "AMAP_KEY=not-an-export-field";
+  assert.doesNotThrow(
+    () => TripMapDelivery.buildMyMapsFiles({ trip: ignoredPrivateTrip, locale: "zh-CN" }),
+    "privacy scanning must inspect fields that are actually exported, not arbitrary source metadata",
+  );
+  const unsafeDayTrip = structuredClone(trip);
+  unsafeDayTrip.days[0].title = "Cookie: session=private-day-title";
+  assert.throws(
+    () => TripMapDelivery.buildMyMapsFiles({ trip: unsafeDayTrip, locale: "zh-CN" }),
+    (error) => {
+      assert.equal(error.message, 'My Maps export blocked: privacy issue at day #1, field "title".');
+      assert.doesNotMatch(error.message, /private|Cookie|session/i);
+      return true;
+    },
+    "KML day-folder metadata must pass through the same sanitized privacy gate",
+  );
   assert.throws(
     () => TripMapDelivery.buildMyMapsFiles({ trip, locale: "fr" }),
     /locale must be zh-CN or en/,
@@ -282,6 +325,32 @@ try {
   assert.equal(stateRun.status, 0, stateRun.stdout + stateRun.stderr);
   const stateCsv = fs.readFileSync(path.join(stateOutput, "places.csv"), "utf8");
   assert.match(stateCsv, /"候选咖啡"[^\n]*"2026-10-14","1","正式路线"[^\n]*"需要重新安排"/);
+
+  const privateGuide = createGuide("private-guide");
+  const privatePois = fixturePois();
+  privatePois[1].tip = "Cookie: session=never-print-private-cookie";
+  writeJson(path.join(privateGuide, "data/pois.json"), privatePois);
+  const privateOutput = path.join(tempRoot, "private-output");
+  fs.mkdirSync(privateOutput);
+  const privateOriginals = {
+    "README.md": "old private readme",
+    "places.csv": "old private places",
+    "itinerary.kml": "old private itinerary",
+  };
+  for (const [file, content] of Object.entries(privateOriginals)) {
+    fs.writeFileSync(path.join(privateOutput, file), content);
+  }
+  fs.writeFileSync(path.join(privateOutput, "keep.txt"), "unrelated private-output sentinel");
+  const privateRun = runCli(["--guide", privateGuide, "--output", privateOutput, "--replace"]);
+  assertSafeFailure(privateRun);
+  for (const [file, content] of Object.entries(privateOriginals)) {
+    assert.equal(
+      fs.readFileSync(path.join(privateOutput, file), "utf8"),
+      content,
+      "privacy rejection must leave every prior export file unchanged",
+    );
+  }
+  assert.equal(fs.readFileSync(path.join(privateOutput, "keep.txt"), "utf8"), "unrelated private-output sentinel");
 
   for (const args of [
     [],

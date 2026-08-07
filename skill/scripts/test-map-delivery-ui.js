@@ -112,6 +112,8 @@ const map = chain({
 const layer = chain({ clearLayers() {} });
 const revoked = [];
 let exportedOptions = null;
+let exportError = null;
+let dayHandoffOptions = null;
 const trip = {
   slug: "delivery-ui-test",
   title: "交付测试",
@@ -176,14 +178,22 @@ const sandbox = {
       google: { provider: "google", label: "在 Google Maps 打开 / Open in Google Maps", url: "https://www.google.com/maps/search/?api=1&query=test" },
       manualItems: [],
     }),
-    buildDayHandoffs: (_day, _pois, options) => ({
-      routeStatus: options.dirty ? "unverified" : "verified",
-      overview: null,
-      routeLinks: [{ provider: "google", label: "Google Maps 路线 1/1 / Google Maps route 1/1", url: "https://www.google.com/maps/dir/" }],
-      manualItems: [{ poiId: "b", name: "地点乙", provider: "amap", reason: "manual-location-required" }],
-    }),
+    buildDayHandoffs: (_day, _pois, options) => {
+      dayHandoffOptions = options;
+      return {
+        routeStatus: options.dirty ? "unverified" : "verified",
+        overview: { provider: "amap", label: "高德今日地点 1/2 / AMap day overview 1/2", url: "https://uri.amap.com/marker?markers=one" },
+        overviews: [
+          { provider: "amap", label: "高德今日地点 1/2 / AMap day overview 1/2", url: "https://uri.amap.com/marker?markers=one" },
+          { provider: "amap", label: "高德今日地点 2/2 / AMap day overview 2/2", url: "https://uri.amap.com/marker?markers=two" },
+        ],
+        routeLinks: [{ provider: "google", label: "Google Maps 路线 1/1 / Google Maps route 1/1", url: "https://www.google.com/maps/dir/" }],
+        manualItems: [{ poiId: "b", name: "地点乙", provider: "amap", reason: "manual-location-required" }],
+      };
+    },
     buildMyMapsFiles: (options) => {
       exportedOptions = options;
+      if (exportError) throw exportError;
       return { "places.csv": "csv", "itinerary.kml": "kml", "README.md": "readme" };
     },
   },
@@ -202,6 +212,9 @@ mounted.requestAction({ type: "move-order", poiId: "b", toIndex: 1 });
 assert.match(elements.get("day-place-list").innerHTML, /路线待重新复核/);
 assert.match(elements.get("day-place-list").innerHTML, /data-day-handoff/);
 assert.match(elements.get("day-place-list").innerHTML, /需要手动查找/);
+assert.match(elements.get("day-place-list").innerHTML, /高德今日地点 1\/2/);
+assert.match(elements.get("day-place-list").innerHTML, /高德今日地点 2\/2/);
+assert.equal(dayHandoffOptions.region, "CN", "light day delivery must pass the trip region to the shared runtime");
 
 const exportTrigger = elements.get("open-map-export");
 mounted.openMapExportDialog(exportTrigger);
@@ -225,5 +238,15 @@ assert.equal(exportedOptions.state.dirtyDays["day-1"], true);
 assert.equal(exportedOptions.locale, "zh-CN");
 assert.deepEqual(clickedDownloads, ["places.csv"], "one export action must trigger one file download");
 assert.deepEqual(revoked, ["blob:test-export"], "each download must revoke its Blob URL immediately");
+
+exportError = new Error('My Maps export blocked: privacy issue at POI #2, field "tip".');
+mounted.downloadExportFile("places.csv");
+assert.equal(
+  elements.get("map-export-error").textContent,
+  'My Maps export blocked: privacy issue at POI #2, field "tip".',
+  "the browser must expose the stable sanitized privacy issue without echoing field content",
+);
+assert.deepEqual(clickedDownloads, ["places.csv"], "privacy rejection must not start another download");
+assert.deepEqual(revoked, ["blob:test-export"], "privacy rejection must not create a Blob URL");
 
 console.log("light map delivery UI passed");

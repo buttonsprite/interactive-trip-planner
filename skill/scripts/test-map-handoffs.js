@@ -124,6 +124,27 @@ const sevenHandoffs = TripMapDelivery.buildDayHandoffs(sevenDay, sevenPois, {
   source: "interactive-trip-planner",
 });
 
+const overseasSevenHandoffs = TripMapDelivery.buildDayHandoffs(sevenDay, sevenPois, {
+  orderedPoiIds: sevenPois.map((poi) => poi.id),
+  region: "OVERSEAS",
+  source: "interactive-trip-planner",
+});
+assert.equal(overseasSevenHandoffs.overview, null, "overseas days must not emit an AMap overview");
+assert.deepEqual(overseasSevenHandoffs.overviews, [], "overseas days must not emit AMap overview chunks");
+assert.ok(
+  overseasSevenHandoffs.routeLinks.every((link) => link.provider === "google"),
+  "overseas day routes must not emit AMap navigation links",
+);
+assert.ok(
+  overseasSevenHandoffs.manualItems.every((item) => item.provider !== "amap"),
+  "overseas day handoff must not ask travelers to resolve AMap manual items",
+);
+assert.equal(
+  overseasSevenHandoffs.routeLinks.filter((link) => link.provider === "google").length,
+  2,
+  "the overseas region gate must preserve the existing Google route policy",
+);
+
 const googleRoutes = sevenHandoffs.routeLinks.filter((link) => link.provider === "google");
 assert.equal(googleRoutes.length, 2, "seven stops must split into two Google direction links");
 for (const route of googleRoutes) {
@@ -139,6 +160,73 @@ assert.equal(
 );
 assert.equal(googleRoutes[0].label, "Google Maps 路线 1/2 / Google Maps route 1/2");
 
+function longGooglePoi(id, length) {
+  return {
+    id,
+    name: `地点${id}${"长".repeat(length)}`,
+    city: "测试城",
+    area: "测试区",
+    category: "sight",
+    priority: "preferred",
+  };
+}
+
+const longGooglePois = deepFreeze(Array.from({ length: 5 }, (_, index) => longGooglePoi(`long-${index + 1}`, 80)));
+const longGoogleDay = deepFreeze({
+  id: "long-google-day",
+  routeReview: { status: "unverified" },
+  routeStops: longGooglePois.map((poi, index) => ({ poiId: poi.id, order: index })),
+  transitSegments: longGooglePois.slice(1).map((poi, index) => ({
+    fromPoiId: longGooglePois[index].id,
+    toPoiId: poi.id,
+    mode: "walking",
+  })),
+});
+const longGoogleHandoffs = TripMapDelivery.buildDayHandoffs(longGoogleDay, longGooglePois, {
+  region: "OVERSEAS",
+  source: "interactive-trip-planner",
+});
+const longGoogleRoutes = longGoogleHandoffs.routeLinks.filter((link) => link.provider === "google");
+assert.ok(longGoogleRoutes.length > 1, "encoded Google URLs must split before the 2048-character cap");
+assert.ok(longGoogleRoutes.every((link) => link.url.length <= 2048), "every Google route URL must be at most 2048 characters");
+assert.ok(longGoogleRoutes.every((link) => link.poiIds.length <= 5), "length-aware chunks must retain the five-point limit");
+assert.deepEqual(
+  [longGoogleRoutes[0].poiIds[0], ...longGoogleRoutes.flatMap((link) => link.poiIds.slice(1))],
+  longGooglePois.map((poi) => poi.id),
+  "length-aware Google chunks must overlap at boundaries and preserve every ordered point",
+);
+
+const impossibleGooglePois = deepFreeze([
+  longGooglePoi("impossible-1", 300),
+  longGooglePoi("impossible-2", 300),
+]);
+const impossibleGoogleDay = deepFreeze({
+  id: "impossible-google-day",
+  routeReview: { status: "unverified" },
+  routeStops: impossibleGooglePois.map((poi, index) => ({ poiId: poi.id, order: index })),
+  transitSegments: [{
+    fromPoiId: impossibleGooglePois[0].id,
+    toPoiId: impossibleGooglePois[1].id,
+    mode: "walking",
+  }],
+});
+const impossibleGoogleHandoffs = TripMapDelivery.buildDayHandoffs(impossibleGoogleDay, impossibleGooglePois, {
+  region: "OVERSEAS",
+  source: "interactive-trip-planner",
+});
+assert.equal(
+  impossibleGoogleHandoffs.routeLinks.filter((link) => link.provider === "google").length,
+  0,
+  "an adjacent pair that cannot fit must not emit an overlong or truncated Google URL",
+);
+assert.deepEqual(
+  impossibleGoogleHandoffs.manualItems
+    .filter((item) => item.provider === "google" && item.reason === "route-url-too-long")
+    .map((item) => item.poiId),
+  impossibleGooglePois.map((poi) => poi.id),
+  "both endpoints of an unencodable adjacent pair must remain as Google manual items",
+);
+
 assert.equal(sevenHandoffs.overview.provider, "amap");
 assert.equal(sevenHandoffs.overview.label, "在高德查看今日地点 / View today's places in AMap");
 assert.equal(sevenHandoffs.overview.poiIds.length, 7);
@@ -146,6 +234,47 @@ assert.ok(
   parse(sevenHandoffs.overview.url).searchParams.get("markers").split("|").length <= 10,
   "AMap marker overviews may contain at most ten markers",
 );
+const manyOverviewPois = deepFreeze(Array.from({ length: 23 }, (_, index) => resolvedPoi(`overview-${index + 1}`, index + 30)));
+const manyOverviewDay = deepFreeze({
+  id: "many-overview-day",
+  routeReview: { status: "unverified" },
+  routeStops: manyOverviewPois.map((poi, index) => ({ poiId: poi.id, order: index })),
+  transitSegments: manyOverviewPois.slice(1).map((poi, index) => ({
+    fromPoiId: manyOverviewPois[index].id,
+    toPoiId: poi.id,
+    mode: "walking",
+  })),
+});
+const manyOverviewHandoffs = TripMapDelivery.buildDayHandoffs(manyOverviewDay, manyOverviewPois, {
+  region: "CN",
+  source: "interactive-trip-planner",
+});
+assert.equal(manyOverviewHandoffs.overviews.length, 3, "23 AMap markers must split into three complete overviews");
+assert.deepEqual(
+  manyOverviewHandoffs.overviews.map((item) => item.poiIds.length),
+  [10, 10, 3],
+  "every AMap overview must contain at most ten markers without truncating the tail",
+);
+assert.deepEqual(
+  manyOverviewHandoffs.overviews.flatMap((item) => item.poiIds),
+  manyOverviewPois.map((poi) => poi.id),
+  "AMap overview chunks must preserve the complete ordered marker sequence",
+);
+assert.deepEqual(manyOverviewHandoffs.overview, manyOverviewHandoffs.overviews[0], "overview must remain a first-chunk compatibility alias");
+assert.deepEqual(
+  manyOverviewHandoffs.overviews.map((item) => item.label),
+  [
+    "高德今日地点 1/3 / AMap day overview 1/3",
+    "高德今日地点 2/3 / AMap day overview 2/3",
+    "高德今日地点 3/3 / AMap day overview 3/3",
+  ],
+);
+for (const item of manyOverviewHandoffs.overviews) {
+  assert.ok(
+    parse(item.url).searchParams.get("markers").split("|").length <= 10,
+    "each emitted AMap overview URL must remain within the ten-marker provider limit",
+  );
+}
 const walkingAmapRoutes = sevenHandoffs.routeLinks.filter((link) => link.provider === "amap");
 assert.equal(walkingAmapRoutes.length, 6, "walking AMap handoffs must remain adjacent segments");
 for (const route of walkingAmapRoutes) {

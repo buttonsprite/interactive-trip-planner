@@ -58,6 +58,11 @@ assert.ok(
 assert.match(html, /<dialog\b[^>]*\bid="map-export-dialog"/);
 assert.match(html, /TripMapDelivery\.buildPlaceLinks\(/);
 assert.match(html, /TripMapDelivery\.buildDayHandoffs\(/);
+assert.match(
+  html,
+  /TripMapDelivery\.buildDayHandoffs\([\s\S]*?region:\s*PUBLIC_TRIP_DATA\.trip\.countryCode\s*\|\|\s*""/,
+  "public day delivery must pass the destination region into the shared runtime",
+);
 assert.match(html, /TripMapDelivery\.buildMyMapsFiles\(/);
 assert.match(html, /const currentDeliveryState = \(\) => \{/);
 assert.match(html, /assignments\[poi\.id\] = getPoiAssignment\(poi\.id\)\?\.dayId \|\| ""/);

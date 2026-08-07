@@ -258,9 +258,34 @@
     for (const locationRun of locationRuns) {
       const modeRuns = homogeneousModeRuns(day, locationRun, "google", manualItems);
       for (const modeRun of modeRuns) {
-        for (let start = 0; start < modeRun.items.length - 1; start += 4) {
-          const items = modeRun.items.slice(start, Math.min(start + 5, modeRun.items.length));
-          if (items.length >= 2) chunks.push({ items, mode: modeRun.mode });
+        let start = 0;
+        while (start < modeRun.items.length - 1) {
+          let accepted = null;
+          const lastCandidate = Math.min(start + 4, modeRun.items.length - 1);
+          for (let end = lastCandidate; end > start; end -= 1) {
+            const items = modeRun.items.slice(start, end + 1);
+            const url = buildUrl(GOOGLE_DIRECTIONS_ENDPOINT, [
+              ["api", "1"],
+              ["origin", items[0].location],
+              ["destination", items[items.length - 1].location],
+              ["travelmode", modeRun.mode],
+              ["waypoints", items.slice(1, -1).map((item) => item.location).join("|")],
+              ["utm_source", sourceName(options)],
+              ["utm_campaign", "directions_request"],
+            ]);
+            if (url.length <= 2048) {
+              accepted = { items, mode: modeRun.mode, url, end };
+              break;
+            }
+          }
+          if (accepted) {
+            chunks.push(accepted);
+            start = accepted.end;
+          } else {
+            appendManual(manualItems, modeRun.items[start].poi, "google", "route-url-too-long");
+            appendManual(manualItems, modeRun.items[start + 1].poi, "google", "route-url-too-long");
+            start += 1;
+          }
         }
       }
     }
@@ -272,15 +297,7 @@
         label: chunks.length === 1
           ? "在 Google Maps 打开今日路线 / Open today's route in Google Maps"
           : `Google Maps 路线 ${index + 1}/${chunks.length} / Google Maps route ${index + 1}/${chunks.length}`,
-        url: buildUrl(GOOGLE_DIRECTIONS_ENDPOINT, [
-          ["api", "1"],
-          ["origin", items[0].location],
-          ["destination", items[items.length - 1].location],
-          ["travelmode", chunk.mode],
-          ["waypoints", items.slice(1, -1).map((item) => item.location).join("|")],
-          ["utm_source", sourceName(options)],
-          ["utm_campaign", "directions_request"],
-        ]),
+        url: chunk.url,
         poiIds: items.map((item) => item.poi.id),
       };
     });
@@ -384,33 +401,41 @@
     const orderedPoiIds = orderedDayPoiIds(day, poisById, options);
     const orderedItems = orderedPoiIds.map((poiId) => ({ poiId, poi: poisById.get(poiId) }));
     const manualItems = [];
-    const markerItems = orderedItems
-      .map((item) => ({ ...item, marker: amapMarkerToken(item.poi) }))
-      .filter((item) => {
-        if (item.marker) return true;
-        appendManual(manualItems, item.poi, "amap", "manual-location-required");
-        return false;
-      })
-      .slice(0, 10);
-    const overview = markerItems.length
-      ? {
+    const amapEnabled = String(options?.region || "").toUpperCase() === "CN";
+    const markerItems = amapEnabled
+      ? orderedItems
+        .map((item) => ({ ...item, marker: amapMarkerToken(item.poi) }))
+        .filter((item) => {
+          if (item.marker) return true;
+          appendManual(manualItems, item.poi, "amap", "manual-location-required");
+          return false;
+        })
+      : [];
+    const overviewChunks = [];
+    for (let start = 0; start < markerItems.length; start += 10) {
+      overviewChunks.push(markerItems.slice(start, start + 10));
+    }
+    const overviews = overviewChunks.map((items, index) => ({
         provider: "amap",
         kind: "markers",
-        label: "在高德查看今日地点 / View today's places in AMap",
+        label: overviewChunks.length === 1
+          ? "在高德查看今日地点 / View today's places in AMap"
+          : `高德今日地点 ${index + 1}/${overviewChunks.length} / AMap day overview ${index + 1}/${overviewChunks.length}`,
         url: buildUrl(AMAP_MARKER_ENDPOINT, [
-          ["markers", markerItems.map((item) => item.marker).join("|")],
+          ["markers", items.map((item) => item.marker).join("|")],
           ["src", sourceName(options)],
           ["callnative", "1"],
         ]),
-        poiIds: markerItems.map((item) => item.poiId),
-      }
-      : null;
+        poiIds: items.map((item) => item.poiId),
+      }));
+    const overview = overviews[0] || null;
     const routeLinks = [
       ...buildGoogleRoutes(day, orderedItems, options, manualItems),
-      ...buildAmapRoutes(day, orderedItems, options, manualItems),
+      ...(amapEnabled ? buildAmapRoutes(day, orderedItems, options, manualItems) : []),
     ];
     return {
       overview,
+      overviews,
       routeLinks,
       routeStatus: dayRouteStatus(day, { ...options, orderedPoiIds }),
       manualItems,
@@ -536,6 +561,42 @@
       },
     },
   };
+
+  const MY_MAPS_PRIVACY_PATTERNS = [
+    /\b(?:AMAP_KEY|AMAP_SECURITY_KEY)\s*=\s*\S+/i,
+    /\bAIza[0-9A-Za-z_-]{20,}\b/,
+    /\bcookie\s*:/i,
+    /\bauthorization\s*[:=]\s*(?:bearer\s+)?\S+/i,
+    /(?:^|[?&;\s])token\s*=/i,
+    /\/Users\//i,
+    /file:\/\//i,
+    /Airbnb/i,
+    /51240589/,
+    /\bAF\d{3,4}\b/,
+    /europe-2026-itinerary-/i,
+    /[?&](?:xsec_token|share_id|appuid)=[^&\s"']+/i,
+  ];
+
+  function hasPrivateMyMapsContent(value) {
+    return MY_MAPS_PRIVACY_PATTERNS.some((pattern) => pattern.test(String(value ?? "")));
+  }
+
+  function assertMyMapsExportPrivacy(entries, days) {
+    entries.forEach((entry, entryIndex) => {
+      for (const column of MY_MAPS_COLUMNS) {
+        if (hasPrivateMyMapsContent(entry.csv[column])) {
+          throw new Error(`My Maps export blocked: privacy issue at POI #${entryIndex + 1}, field "${column}".`);
+        }
+      }
+    });
+    days.forEach((day, dayIndex) => {
+      for (const field of ["date", "title"]) {
+        if (hasPrivateMyMapsContent(day?.[field])) {
+          throw new Error(`My Maps export blocked: privacy issue at day #${dayIndex + 1}, field "${field}".`);
+        }
+      }
+    });
+  }
 
   function csvCell(value) {
     return `"${String(value ?? "").replace(/"/g, '""')}"`;
@@ -669,10 +730,12 @@
       throw new Error("trip must contain pois and days arrays");
     }
     const entries = myMapsEntries(trip, options?.state, locale);
+    const currentDays = currentTripView(trip, options?.state).days;
+    assertMyMapsExportPrivacy(entries, currentDays);
     return {
       "README.md": buildMyMapsReadme(entries, locale),
       "places.csv": buildMyMapsCsv(entries),
-      "itinerary.kml": buildMyMapsKml(entries, currentTripView(trip, options?.state).days, locale),
+      "itinerary.kml": buildMyMapsKml(entries, currentDays, locale),
     };
   }
 

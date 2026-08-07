@@ -290,10 +290,14 @@
       const handoffs = root.TripMapDelivery.buildDayHandoffs(day, trip.pois, {
         orderedPoiIds: ordered,
         dirty: Boolean(state.dirtyDays[day.id]),
+        region: destinationRegion(),
         source: trip.slug || "interactive-trip-planner",
       });
       const statusLabel = routeVerificationLabel(day, handoffs.routeStatus, Boolean(state.dirtyDays[day.id]));
-      const dayLinks = [handoffs.overview, ...(handoffs.routeLinks || [])].filter(Boolean);
+      const overviewLinks = Array.isArray(handoffs.overviews)
+        ? handoffs.overviews
+        : [handoffs.overview].filter(Boolean);
+      const dayLinks = [...overviewLinks, ...(handoffs.routeLinks || [])].filter(Boolean);
       const manualItems = handoffs.manualItems || [];
       const dayHandoffHtml = `<div class="day-delivery-block">
           <div class="route-verification-status ${state.dirtyDays[day.id] ? "is-dirty" : ""}">${escapeHtml(statusLabel)}</div>
@@ -597,8 +601,11 @@
           root.URL.revokeObjectURL(url);
         }
         feedback.textContent = `已开始下载 ${fileName}`;
-      } catch (_error) {
-        feedback.textContent = `无法生成 ${fileName}，请刷新页面后重试。`;
+      } catch (error) {
+        const message = String(error?.message || "");
+        feedback.textContent = /^My Maps export blocked: privacy issue at (?:POI|day) #\d+, field "[a-z_]+"\.$/.test(message)
+          ? message
+          : `无法生成 ${fileName}，请刷新页面后重试。`;
       }
     }
 

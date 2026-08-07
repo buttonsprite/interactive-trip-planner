@@ -37,7 +37,7 @@
 
 ## Google My Maps 导出
 
-- 总览中的“导出到 Google My Maps”打开可键盘关闭的 dialog；关闭后焦点回到原触发按钮。
+- 总览中的“导出到 Google My Maps”通过原生 `dialog.showModal()` 进入浏览器 modal top layer；背景内容在窗口打开时不可聚焦，Tab / Shift+Tab 由浏览器限制在导出窗口内。Escape 触发 `cancel` 后关闭窗口，并把焦点回到原触发按钮。
 - `places.csv`、`itinerary.kml` 和 `README.md` 必须逐个下载。每次点击都即时用 `buildMyMapsFiles({ trip, state, locale })` 读取当前保存的 `assignments`、`orders`、`priorities` 和 `dirtyDays`，不会导出页面初始顺序或另存一份状态。
 - 浏览器每次只创建一个 Blob URL，触发单个文件下载后立即撤销；失败时在 dialog 内显示可见错误，不影响继续浏览和修改地图。
 - 导出文件用于手动导入 Google My Maps，不等于 Google Maps Saved Lists，也不会自动更新个人地图。

@@ -96,7 +96,7 @@
     </div>
   </section>
 
-  <section class="dialog-backdrop" id="map-export-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="map-export-title" aria-describedby="map-export-description">
+  <dialog class="dialog-backdrop" id="map-export-dialog" hidden aria-labelledby="map-export-title" aria-describedby="map-export-description">
     <div class="dialog-panel map-export-panel">
       <div class="dialog-heading"><div><div class="section-kicker">保存当前地图安排</div><h2 id="map-export-title">导出到 Google My Maps</h2></div><button class="icon-button" id="close-map-export" type="button" aria-label="关闭导出窗口">×</button></div>
       <p class="muted" id="map-export-description">每次下载一个文件，避免浏览器拦截多个下载。三个文件都会使用你当前保存的地点顺序和优先级。</p>
@@ -107,7 +107,7 @@
       </div>
       <div class="map-export-error" id="map-export-error" role="status" aria-live="polite"></div>
     </div>
-  </section>
+  </dialog>
 
   <script>
     window.TRIP_DATA = {

@@ -96,6 +96,21 @@ for (const mapPath of mapPaths) {
   }
 }
 
+const lightMapHtml = fs.readFileSync(mapPaths[1], "utf8");
+const deliveryMarker = "REDSkill embedded trip-map-delivery.js";
+assert.equal(
+  lightMapHtml.split(deliveryMarker).length - 1,
+  1,
+  "light REDSkill map must inline Delivery exactly once",
+);
+const stateMarkerIndex = lightMapHtml.indexOf("REDSkill embedded trip-map-state.js");
+const deliveryMarkerIndex = lightMapHtml.indexOf(deliveryMarker);
+const coreMarkerIndex = lightMapHtml.indexOf("REDSkill embedded trip-map-core.js");
+assert.ok(
+  stateMarkerIndex >= 0 && stateMarkerIndex < deliveryMarkerIndex && deliveryMarkerIndex < coreMarkerIndex,
+  "light REDSkill runtime order must be State, then Delivery, then Core",
+);
+
 const publicTravelerFiles = [
   path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "itinerary-map.html"),
   path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "assets", "trip-data.js"),

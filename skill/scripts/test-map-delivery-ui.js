@@ -30,6 +30,9 @@ class FakeElement {
     this.classList = new FakeClassList();
     this.style = { setProperty() {}, removeProperty() {} };
     this.listeners = new Map();
+    this.open = false;
+    this.showModalCalls = 0;
+    this.closeCalls = 0;
   }
 
   addEventListener(type, listener) {
@@ -41,7 +44,18 @@ class FakeElement {
   closest() { return null; }
   appendChild() {}
   remove() {}
-  focus() { this.focused = true; }
+  focus() {
+    this.focused = true;
+    document.activeElement = this;
+  }
+  showModal() {
+    this.open = true;
+    this.showModalCalls += 1;
+  }
+  close() {
+    this.open = false;
+    this.closeCalls += 1;
+  }
   select() {}
   click() { this.clicked = true; }
   scrollIntoView() {}
@@ -60,15 +74,21 @@ const ids = [
 ];
 const elements = new Map(ids.map((id) => [id, new FakeElement(id)]));
 const body = new FakeElement("body");
+const firstExportButton = new FakeElement("places-export");
+firstExportButton.dataset.exportFile = "places.csv";
 const clickedDownloads = [];
 const document = {
   body,
+  activeElement: body,
   createElement: () => {
     const element = new FakeElement();
     element.click = () => clickedDownloads.push(element.download);
     return element;
   },
-  querySelector: (selector) => selector.startsWith("#") ? elements.get(selector.slice(1)) || null : null,
+  querySelector: (selector) => {
+    if (selector === "[data-export-file]") return firstExportButton;
+    return selector.startsWith("#") ? elements.get(selector.slice(1)) || null : null;
+  },
   addEventListener() {},
 };
 const appRoot = new FakeElement("trip-app");
@@ -182,6 +202,21 @@ mounted.requestAction({ type: "move-order", poiId: "b", toIndex: 1 });
 assert.match(elements.get("day-place-list").innerHTML, /路线待重新复核/);
 assert.match(elements.get("day-place-list").innerHTML, /data-day-handoff/);
 assert.match(elements.get("day-place-list").innerHTML, /需要手动查找/);
+
+const exportTrigger = elements.get("open-map-export");
+mounted.openMapExportDialog(exportTrigger);
+assert.equal(elements.get("map-export-dialog").showModalCalls, 1, "export must call native showModal exactly once");
+assert.equal(elements.get("map-export-dialog").open, true, "native export dialog must be open");
+assert.equal(firstExportButton.focused, true, "modal must focus its first file action");
+
+let cancelPrevented = false;
+const cancelHandler = elements.get("map-export-dialog").listeners.get("cancel");
+assert.equal(typeof cancelHandler, "function", "native dialog cancel must be handled");
+cancelHandler({ preventDefault: () => { cancelPrevented = true; } });
+assert.equal(cancelPrevented, true, "cancel must be intercepted so focus return runs");
+assert.equal(elements.get("map-export-dialog").open, false, "cancel must close the native dialog");
+assert.equal(elements.get("map-export-dialog").closeCalls, 1);
+assert.equal(document.activeElement, exportTrigger, "closing the modal must return focus to its opener");
 
 mounted.downloadExportFile("places.csv");
 assert.ok(exportedOptions, "export must call TripMapDelivery.buildMyMapsFiles");

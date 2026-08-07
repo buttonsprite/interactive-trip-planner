@@ -789,6 +789,20 @@ a {
   place-items: center;
 }
 
+dialog.dialog-backdrop {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  color: inherit;
+}
+
+dialog.dialog-backdrop::backdrop {
+  background: transparent;
+}
+
 .dialog-panel {
   width: min(540px, 100%);
   max-height: min(720px, calc(100vh - 40px));
@@ -961,9 +975,16 @@ a {
   }
 
   .day-map-actions a,
+  .map-provider-action,
   .map-export-files button,
+  #close-map-export,
   .map-export-trigger {
     min-height: 44px;
+  }
+
+  #close-map-export {
+    width: 44px;
+    min-width: 44px;
   }
 
   .day-map-actions,

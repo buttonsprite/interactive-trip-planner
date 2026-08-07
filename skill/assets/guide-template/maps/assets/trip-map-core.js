@@ -553,12 +553,21 @@
     function openMapExportDialog(trigger = null) {
       mapExportReturnFocus = trigger || document.activeElement || $("#open-map-export");
       $("#map-export-error").textContent = "";
-      $("#map-export-dialog").hidden = false;
+      const dialog = $("#map-export-dialog");
+      dialog.hidden = false;
+      if (typeof dialog.showModal === "function") {
+        if (!dialog.open) dialog.showModal();
+      } else {
+        dialog.setAttribute("open", "");
+      }
       $("[data-export-file]")?.focus();
     }
 
     function closeMapExportDialog() {
-      $("#map-export-dialog").hidden = true;
+      const dialog = $("#map-export-dialog");
+      if (typeof dialog.close === "function" && dialog.open) dialog.close();
+      else dialog.removeAttribute("open");
+      dialog.hidden = true;
       const target = mapExportReturnFocus;
       mapExportReturnFocus = null;
       target?.focus?.();
@@ -844,6 +853,10 @@
       $("#copy-replan").addEventListener("click", copyReplanPrompt);
       $("#open-map-export").addEventListener("click", (event) => openMapExportDialog(event.currentTarget));
       $("#close-map-export").addEventListener("click", closeMapExportDialog);
+      $("#map-export-dialog").addEventListener("cancel", (event) => {
+        event.preventDefault();
+        closeMapExportDialog();
+      });
       $("#map-export-dialog").addEventListener("click", (event) => {
         const download = event.target.closest("[data-export-file]");
         if (download) downloadExportFile(download.dataset.exportFile);
@@ -857,7 +870,7 @@
         if (event.key !== "Escape") return;
         if (!$("#impact-dialog").hidden) closeImpactDialog();
         else if (!$("#replan-dialog").hidden) closeReplanDialog();
-        else if (!$("#map-export-dialog").hidden) closeMapExportDialog();
+        else if (!$("#map-export-dialog").hidden && typeof $("#map-export-dialog").showModal !== "function") closeMapExportDialog();
       });
     }
 

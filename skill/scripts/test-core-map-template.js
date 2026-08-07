@@ -51,6 +51,11 @@ for (const token of requiredHtml) {
 assert.match(html, /trip-map-state\.js/);
 assert.match(html, /trip-map-delivery\.js/);
 assert.match(html, /trip-map-core\.js/);
+assert.match(
+  html,
+  /<dialog\b[^>]*\bid="map-export-dialog"/,
+  "map export must use a native modal dialog",
+);
 const stateScriptIndex = Math.max(
   html.indexOf('assets/trip-map-state.js'),
   html.indexOf('REDSkill embedded trip-map-state.js'),
@@ -103,6 +108,18 @@ assert.match(
   /@media \(max-width: 820px\)[\s\S]*?\.map-export-files button[\s\S]*?min-height:\s*44px/,
   "mobile export actions must expose a 44 px target",
 );
+assert.match(
+  css,
+  /@media \(max-width: 820px\)[\s\S]*?\.map-provider-action[\s\S]*?min-height:\s*44px/,
+  "mobile provider actions must expose a 44 px target",
+);
+assert.match(
+  css,
+  /@media \(max-width: 820px\)[\s\S]*?#close-map-export[\s\S]*?min-height:\s*44px[\s\S]*?(?:min-)?width:\s*44px/,
+  "mobile export close action must expose a 44 by 44 px target",
+);
+assert.match(core, /\.showModal\(\)/, "map export must enter the browser modal top layer");
+assert.match(core, /addEventListener\("cancel"/, "native dialog Escape must use the cancel contract");
 assert.doesNotMatch(html + core, /姓周桥|德盛饭店|Hin Bus Depot/);
 
 console.log("core map template contract passed");

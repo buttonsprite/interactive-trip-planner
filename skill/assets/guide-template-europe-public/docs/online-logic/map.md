@@ -28,7 +28,7 @@
 
 - 完整公开母版加载 `maps/assets/trip-map-delivery.js`。该文件不维护独立实现，而是在每次运行 `build-europe-public-template.js` 时从轻量母版的 canonical runtime byte-for-byte 复制；REDSkill 构建把同一份 runtime 在公开应用脚本之前内联一次，并移除外部引用。
 - 地点详情继续使用原有详情滚动面板，并在同一 action row 中加入 provider-aware 地图入口。中国大陆数据优先高德，其他目的地优先 Google Maps；高德只消费 `status: resolved` 的 provider ref，没有安全直达地址时保留手动搜索提示，不拼接模糊或未解析 POI id。
-- 当天 header 的地图交接只读取现有 `itineraryPlan`、`priorities`、`getPoiAssignment()` 与 `getDayPois()`。`currentDeliveryState()` 把当前日期归类、当前顺序、优先级和 dirty days 投影给共享 runtime，不创建第二份 storage 或另一套行程状态。
+- 当天地图交接只读取现有 `itineraryPlan`、`priorities`、`getPoiAssignment()` 与 `getDayPois()`。`currentDeliveryState()` 把当前日期归类、当前顺序、优先级和 dirty days 投影给共享 runtime，不创建第二份 storage 或另一套行程状态。交付区位于 sticky 日期标题之后、当天地点列表之前的 normal flow；桌面随面板内容滚走，移动端占用独立的紧凑布局行，provider actions 横向滚动，任何状态都不能扩大 sticky header 或覆盖地点与换序按钮。
 - Google Maps / 高德链接的存在不代表路线已经复核。公开欧洲样例没有 provider、review date、正距离三项完整路网证据，所以初始状态仍显示“路线待复核”；加入、移出或重排后的 dirty day 继续显示“路线待重新复核”。只有当前相邻地点能对应到母版已有的明确 transport mode 时才生成该段 provider route，规划估算或未知模式不会被提升为已验证路线。
 - “导出到 Google My Maps”使用 native `<dialog>`，桌面和移动端共用一个入口与同一弹窗。打开弹窗不重绘详情、不改变地图选择或滚动位置；关闭后焦点回到触发按钮。移动端 provider、route、文件下载和关闭按钮的 touch target 至少为 44px。
 - 每次只下载一个当前状态文件：`places.csv` 保存全部地点与当前日期/顺序/优先级，`itinerary.kml` 只写 WGS84 point 并按日期和候选分组，`README.md` 说明导入步骤与必须手动定位的地点。导出不修改 Google Maps Saved Lists，也不把仅有 GCJ-02 的坐标写入 KML。

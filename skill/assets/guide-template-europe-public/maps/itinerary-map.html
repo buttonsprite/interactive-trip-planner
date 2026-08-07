@@ -1431,10 +1431,10 @@
 
     .day-map-delivery {
       display: grid;
-      gap: 8px;
-      padding-top: 10px;
-      margin-top: 10px;
-      border-top: 1px solid #e2ddd0;
+      gap: 6px;
+      padding: 8px 12px;
+      background: #fbfcfd;
+      border-bottom: 1px solid #e2ddd0;
     }
 
     .day-map-delivery-status {
@@ -1449,13 +1449,17 @@
 
     .day-map-actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 2px;
+      scrollbar-width: thin;
     }
 
     .day-map-actions a,
     .map-provider-action {
       display: inline-flex;
+      flex: 0 0 auto;
       align-items: center;
       min-height: 36px;
       padding: 7px 11px;
@@ -2212,7 +2216,7 @@
 
       .poi-detail-day-list-panel {
         display: grid;
-        grid-template-rows: auto minmax(0, 1fr);
+        grid-template-rows: auto auto minmax(0, 1fr);
         height: 100%;
         min-height: 0;
         overflow: hidden;
@@ -2504,8 +2508,8 @@
           <header class="poi-detail-day-list-header">
             <strong id="poi-detail-day-heading">当天安排</strong>
             <span id="poi-detail-day-summary">请选择日期</span>
-            <div class="day-map-delivery" id="day-map-delivery" aria-live="polite"></div>
           </header>
+          <div class="day-map-delivery" id="day-map-delivery" aria-live="polite"></div>
           <div class="poi-detail-day-list" id="poi-detail-day-list"></div>
         </section>
         <div class="poi-detail-main">

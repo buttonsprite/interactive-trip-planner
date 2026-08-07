@@ -10,6 +10,18 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..", "assets", "guide-template-europe-public");
 const htmlPath = path.join(root, "maps", "itinerary-map.html");
 const html = fs.readFileSync(htmlPath, "utf8");
+const dayPanelStart = html.indexOf('<section class="poi-detail-day-list-panel"');
+const dayHeaderStart = html.indexOf('<header class="poi-detail-day-list-header">', dayPanelStart);
+const dayHeaderEnd = html.indexOf("</header>", dayHeaderStart);
+const dayDeliveryIndex = html.indexOf('id="day-map-delivery"', dayPanelStart);
+const dayListIndex = html.indexOf('id="poi-detail-day-list"', dayPanelStart);
+assert.ok(
+  dayPanelStart >= 0
+    && dayHeaderStart > dayPanelStart
+    && dayHeaderEnd < dayDeliveryIndex
+    && dayDeliveryIndex < dayListIndex,
+  "mobile day delivery must not be a descendant of the sticky header or cover the day list",
+);
 const eventRuntimeMatch = html.match(/\/\* EVENT_RUNTIME_PURE_START \*\/([\s\S]*?)\/\* EVENT_RUNTIME_PURE_END \*\//);
 assert.ok(eventRuntimeMatch, "mobile contract needs the shipped pure event runtime");
 const eventRuntimeNames = [
@@ -160,6 +172,7 @@ for (const pattern of [
   /\.mobile-bottom-sheet\[data-sheet-snap="compact"\]/,
   /\.mobile-bottom-sheet\[data-sheet-snap="expanded"\]/,
   /@media \(max-width: 820px\)[\s\S]*?\.poi-detail-day-list\s*\{[\s\S]*?overflow-x:\s*hidden;[\s\S]*?overflow-y:\s*auto;/,
+  /@media \(max-width: 820px\)[\s\S]*?\.poi-detail-day-list-panel\s*\{[\s\S]*?grid-template-rows:\s*auto auto minmax\(0,\s*1fr\);/,
   /@media \(min-width: 1100px\)[\s\S]*?\.app\.detail-browse/,
   /L\.control\.layers\(null, overlayControlEntries, \{ collapsed: shouldCollapseLayerControl\(window\.innerWidth\) \}\)/,
   /\.poi-detail-day-place\s*\{[\s\S]*?grid-template-columns:\s*44px minmax\(0, 1fr\) auto;/,
@@ -187,6 +200,35 @@ assert.doesNotMatch(
   html,
   /saveItineraryPlan\(itineraryPlan\);\s*entry\.marker\.setIcon\(poiIcon\(entry\.item\)\);\s*renderPoiList\(\);\s*if \(!isListPriority\)/,
   "priority changes must not bypass the unified itinerary/map refresh",
+);
+
+assert.match(
+  html,
+  /const shiftPoiButton = event\.target\.closest\("\[data-shift-poi\]\[data-shift-direction\]"\);[\s\S]*?shiftPoiInDay\([\s\S]*?shiftPoiButton\.getAttribute\("data-shift-poi"\)/,
+  "delegated day-list interaction must continue routing shift buttons into shiftPoiInDay",
+);
+const shiftPoiRuntimeMatch = html.match(/const shiftPoiInDay = \(poiId, direction\) => \{[\s\S]*?\n    \};/);
+assert.ok(shiftPoiRuntimeMatch, "mobile contract needs the shipped shiftPoiInDay state transition");
+const shiftPoiSandbox = {};
+vm.runInNewContext(
+  `
+    let capturedOrder = null;
+    const getPoiAssignment = (poiId) => poiId === "b" ? { dayId: "d1", order: 2 } : null;
+    const getDayPois = () => ["a", "b", "c"].map((id, index) => ({
+      item: { id },
+      assignment: { dayId: "d1", order: index + 1 },
+    }));
+    const reorderDayPois = (_dayId, nextOrder) => { capturedOrder = nextOrder; };
+    ${shiftPoiRuntimeMatch[0]}
+    shiftPoiInDay("b", 1);
+    this.capturedOrder = capturedOrder;
+  `,
+  shiftPoiSandbox,
+);
+assert.equal(
+  JSON.stringify(shiftPoiSandbox.capturedOrder),
+  JSON.stringify(["a", "c", "b"]),
+  "delegated shift target must produce the expected reordered state projection",
 );
 
 assert.doesNotMatch(

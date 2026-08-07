@@ -45,6 +45,16 @@ assert.equal(deliveryReferences + deliveryMarkers, 1, "public map must contain e
 if (deliveryMarkers) assert.equal(deliveryReferences, 0, "built public map must not retain an external delivery runtime");
 assert.equal((html.match(/id="open-map-export"/g) || []).length, 1, "public map needs exactly one export entry");
 assert.equal((html.match(/id="map-export-dialog"/g) || []).length, 1, "public map needs exactly one export dialog");
+const dayPanelStart = html.indexOf('<section class="poi-detail-day-list-panel"');
+const dayHeaderStart = html.indexOf('<header class="poi-detail-day-list-header">', dayPanelStart);
+const dayHeaderEnd = html.indexOf("</header>", dayHeaderStart);
+const dayDeliveryIndex = html.indexOf('id="day-map-delivery"', dayPanelStart);
+const dayListIndex = html.indexOf('id="poi-detail-day-list"', dayPanelStart);
+assert.ok(dayPanelStart >= 0 && dayHeaderStart > dayPanelStart, "public day panel/header must exist");
+assert.ok(
+  dayHeaderEnd < dayDeliveryIndex && dayDeliveryIndex < dayListIndex,
+  "day delivery must be a normal-flow sibling after the sticky header and before the day list",
+);
 assert.match(html, /<dialog\b[^>]*\bid="map-export-dialog"/);
 assert.match(html, /TripMapDelivery\.buildPlaceLinks\(/);
 assert.match(html, /TripMapDelivery\.buildDayHandoffs\(/);

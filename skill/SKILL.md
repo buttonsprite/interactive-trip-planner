@@ -80,7 +80,7 @@ description: Use when 用户想规划旅行、制作旅游攻略、根据小红�
 执行前读取 `references/source-verification.md`、`references/regional-source-packs.md` 和 `references/map-provider-delivery.md`。当前源码继承 Global、中国大陆、日本、法语区四个 Regional Source Pack；其他目的地使用 Global Base 与三语动态搜索。按照“先发现、后核实”的顺序搜索：
 
 1. 建立搜索任务单：明确日期、区域、主题、用户偏好、选中的生活品味、必须覆盖的地点角色和需要实时复核的事实。
-2. 选择 Global Base 与一个匹配的地区包，按 A/B/C 可访问性先探测来源；B/C 失败时执行明确 fallback。中国大陆进入地点定位时才运行 `node scripts/check-amap-cli.js` 探测可选增强；只有结果为 `available` 才调用 `node scripts/amap-cli.js --context <file>` 或 `--stdin`。先做城市关键词搜索，再用锚点的 GCJ-02 坐标与半径做周边搜索；同名分店、商场内店或名称变化使用更精确关键词重新查询。输入 action 是 `search-poi`，结果只用于召回、定位和消歧，不能证明营业或值得去。CLI 不可用、缺少 `AMAP_KEY` / `AMAP_SECURITY_KEY`、调用失败或没有可靠匹配时保留原候选，并明确“未完成高德定位”；不得虚构 provider 结果。
+2. 选择 Global Base 与一个匹配的地区包，按 A/B/C 可访问性先探测来源；B/C 失败时执行明确 fallback。中国大陆进入地点定位时才提示用户先运行 `amap-gui start`，再运行 `node scripts/check-amap-cli.js` 探测可选增强；探测只检查命令存在与两个凭据变量非空，**不会确认高德服务容器正在运行**。只有结果为 `available` 才调用 `node scripts/amap-cli.js --context <file>` 或 `--stdin`。先做城市关键词搜索，再用锚点的 GCJ-02 坐标与半径做周边搜索；同名分店、商场内店或名称变化使用更精确关键词重新查询。输入 action 是 `search-poi`，结果只用于召回、定位和消歧，不能证明营业或值得去。CLI 不可用、缺少 `AMAP_KEY` / `AMAP_SECURITY_KEY`、调用返回 `provider-error` 或没有可靠匹配时保留原候选，并明确“未完成高德定位”；不得虚构 provider 结果。
 3. 使用地区包的十类查询意图，至少组合中文、英文和目的地当地语言搜索。先从官方旅游、文化日历、地图和主题资料发现候选，再用地点官网、主办方、交通运营方和订位入口逐项核实。具名本地编辑源必须说明覆盖地区、beat、检索方法和事实边界，不能用模糊来源名称代替。活动扫描必须写入 `data/events.json`：`venue` 是可地图化活动地点，`hosted` 关联既有地点的特别项目，`citywide` 只影响城市或当天语境；字段与引用按 `references/event-schema.md`。
 4. 按体验角色补候选，而不是按类别凑数量：主题主锚点、代表性景点、当地生活、酒店基地、正式餐、地方经典、小吃、咖啡甜品、夜间体验、休息点、交通节点和天气/闭馆替代。城市有至少两个完整旅行日时，逐城至少评估 3 个代表性景点并写明采用或舍弃理由；在该城市停留段内保留的主锚点接到同方向当地生活角色：市场、居民广场、社区空间、街区咖啡、社区饭馆、传统商业或短半径夜间体验。
 5. 每个准备进入资料池的地点都要回答：为什么符合这个模板（未选模板时为什么符合用户偏好）、为什么安排在这里、与附近地点如何衔接、需要预约或复核什么。按地点在路线中的角色分配 `contentTier`：主锚点和必去地点用 `deep`，正式路线中的支撑地点用 `standard`，候选池与留档地点用 `compact`。正式路线地点使用“具体价值陈述 → 类型化现场动作 → 可解析证据”三层合同：`whyWorthIt` 说明这个地方独有的路线价值，`detailSections` 告诉旅行者到场做什么，`sourceIds` 必须解析到结构化来源。不同类型地点不强制写同样的四段；市场、博物馆、餐厅、咖啡/酒吧、街区、酒店/交通使用与现场体验相匹配的 `detailSections`。当来源同时支持当地食材结构、居民使用方式和行程月份季节时，市场详情必须连起来写；库存未核实时用“留意/询问”而非断言。只有可靠且能帮助现场理解的历史才写故事，不为凑结构编造，也不使用“感受当地生活”“随便逛逛”“值得一去”等没有地点特异性的占位表达。
@@ -150,7 +150,7 @@ node skill/scripts/probe-source-access.js --context <sources.json>
    旅行叙事主题、taste model 与 UI theme 是三个独立层次：前两者决定体验和选点，UI theme 只决定地图呈现。需要复用完整组件语言时读取 `assets/themes/index.json`，选择与 `europe-map-direct-v1` 兼容的主题与目的地 preset；选择结果仍需写回当前攻略自己的 design tokens、设计语言和单文件 HTML，不能让地图运行时依赖 theme registry。
 8. 轻量模板 `assets/guide-template/` 只用于用户明确要求的低保真原型、内部功能试验或三天以内且不需要完整修改闭环的简单地图；不能把它作为完整攻略交付后声称与欧洲版交互一致。
 9. 把地图当前实际行为写入 `docs/online-logic/map.md`，不把尚未实现的想法写成事实。
-10. 为地点详情和当天路线生成高德 URI / Google Maps URL 交接入口。Google Maps URLs 不需要 API Key，也不代表生成阶段已经用 Google 验证路线；不调用 Google Places API 或 Google Routes API。高德多点总览与路线、Google 路线按 runtime 的安全限制自动拆分，无法可靠定位或缺少交通方式的地点必须保留为手动查找项。
+10. 为地点详情和当天路线生成高德 URI / Google Maps URL 交接入口。Google Maps URLs 不需要 API Key，也不代表生成阶段已经用 Google 验证路线；不调用 Google Places API 或 Google Routes API。高德当天地点总览只包含当前顺序中前 10 个具有安全高德定位的 marker，**不会自动拆分**成多张总览；第 11 个起的已定位地点仍需手动打开单点入口或通过适用的路线分段处理。路线链接与地点总览是不同能力：高德路线和 Google 路线会按交通方式与 provider 限制拆分为短段。无法可靠定位或缺少交通方式的地点必须保留为手动查找项。
 11. 全程总览提供 Google My Maps 导出。浏览器中逐个下载 `places.csv`、`itinerary.kml` 和 `README.md`；命令行使用 `node scripts/export-google-my-maps.js --guide <guide-directory> --output <new-directory>`，可选 `--state <state.json>`、`--locale zh-CN|en` 与 `--replace`。仅有 GCJ-02 坐标的地点保留在 CSV 中按名称和地址人工定位，不写入 KML。导出不会自动写入普通 Google Maps 收藏夹，也不会自动导入高德收藏夹。
 12. 只有用户明确要求改变交互时，才建立独立的 **interaction fork**：先写差异规格、验证新状态语义和回退边界，再复制并改 Core。视觉方向、配色和装饰变化不构成 interaction fork。
 

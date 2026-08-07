@@ -10,7 +10,13 @@
 
 ## 高德能力与安全执行
 
-安装和申请 Key 以[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)为准。本 Skill 不维护未经验证的安装命令。
+安装和申请 Key 以[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)为准。本 Skill 不维护未经验证的安装命令。完成安装和本地环境配置后，先启动服务：
+
+```bash
+amap-gui start
+```
+
+需要人工排查时可以运行 `amap-gui status`；这是可选诊断，不是 Skill 的自动 readiness probe。
 
 先运行：
 
@@ -18,7 +24,7 @@
 node scripts/check-amap-cli.js
 ```
 
-探测只确认 `amap-gui` 命令存在，并检查 `AMAP_KEY`、`AMAP_SECURITY_KEY` 是 trim 后非空的本地环境变量。它不会执行查询，不输出变量值，也不能证明任何地点或路线。结果是 `available`、`missing-credentials` 或 `unavailable`；后两种进入降级。
+探测只确认 `amap-gui` 命令存在，并读取 `AMAP_KEY`、`AMAP_SECURITY_KEY`，检查它们是 trim 后非空的本地环境变量。它不会执行查询，不输出变量值，**不会确认高德服务容器正在运行**，也不能证明任何地点或路线。结果是 `available`、`missing-credentials` 或 `unavailable`；后两种进入降级。即使是 `available`，真实执行仍可能因服务未启动或 provider 故障返回 `provider-error`，此时继续规划、保留原候选或顺序，并保持未复核。
 
 真实查询通过以下唯一入口执行：
 
@@ -60,7 +66,7 @@ node scripts/amap-cli.js --stdin
 
 route mode 只接受 `driving`、`walking`、`riding`、`transit`。公交必须给 `city`；`waypoints` 只允许 driving，最多 16 个，每个途经点也必须有 name 与 GCJ-02 position。
 
-执行层用参数数组启动 `amap-gui`，`shell: false`，超时 35 秒，并继承本地环境。凭据值在生成参数前、序列化后和返回结果中都会被精确替换为 `[REDACTED]`。无效输入写固定 stderr 并以 2 退出；能力不可用、缺凭据或 provider 失败以结构化 fallback 返回，不泄露 provider stderr、进程错误或凭据。
+执行层用参数数组启动 `amap-gui`，`shell: false`，超时 35 秒，并继承本地环境。进程会读取继承环境中的值，用于能力检查、传给本地 provider 和精确脱敏；凭据值在生成参数前、序列化后和返回结果中都会被替换为 `[REDACTED]`。它不会回显、持久化或把凭据写入旅行文件、导出、日志、Git 或发布包。无效输入写固定 stderr 并以 2 退出；能力不可用、缺凭据或 provider 失败以结构化 fallback 返回，不泄露 provider stderr、进程错误或凭据。
 
 ## Provider 事实边界
 
@@ -89,7 +95,8 @@ route mode 只接受 `driving`、`walking`、`riding`、`transit`。公交必须
 高德 URI：
 
 - 地点入口使用 resolved 高德 `poiId`，否则使用合法 GCJ-02 position。
-- 当天地点总览最多包含 10 个 marker；路线入口按移动段单独构建，不受总览数量限制，但仍要求合法定位和明确交通方式。
+- 当天地点总览只包含当前顺序中前 10 个具有安全高德定位的 marker，**不会自动拆分**成多张总览；第 11 个起不进入 overview，仍可使用单点入口、适用的路线分段或手动查找。
+- 路线入口与地点总览独立构建，可以按交通方式与 provider 限制拆成多个 route chunks；路线分段不受 overview 的 10-marker 截断影响，但仍要求合法定位和明确交通方式。
 - driving 路线单条最多为起点、一个 via、终点；walking、riding、transit 按相邻起终点拆分。
 - 缺少交通方式时不默认驾车，也不生成假的路线入口；相关地点保留为手动查找项。
 
@@ -141,7 +148,7 @@ node scripts/export-google-my-maps.js \
 
 ## 隐私、发布与降级
 
-- `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 只来自用户本地环境；不进入旅行文件、导出、截图、日志、Git 或 REDSkill。
+- `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 的值只保存在用户本地环境中；执行进程会读取继承环境中的值用于检查、传递和脱敏，但不会回显、持久化或写入旅行文件、导出、截图、日志、Git、REDSkill 或 release。文档可以出现环境变量名称，不能出现值。
 - Google Maps URL 和 My Maps 导出不需要 Google API key，也不会登录用户账号。
 - 导出只包含当前攻略允许进入 POI 数据的字段；小红书原文、Cookie、订单号、同行人身份和私人浏览器状态不自动进入公开样例或发布包。
 - REDSkill 构建会包含 JavaScript CLI、共享 delivery runtime 与本文档，但不包含凭据、私人资料库或用户当前浏览器状态；两个地图模板内联 delivery runtime，单 HTML 仍需联网加载底图和远程图片。

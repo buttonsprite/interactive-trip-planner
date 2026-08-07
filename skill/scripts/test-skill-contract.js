@@ -61,42 +61,189 @@ const repositoryEnglishReadmePath = path.join(repositoryRoot, "README.en.md");
 const repositoryEnglishReadme = fs.existsSync(repositoryEnglishReadmePath)
   ? fs.readFileSync(repositoryEnglishReadmePath, "utf8")
   : null;
+const redskillInstallTemplatePath = path.join(repositoryRoot, "docs", "REDSKILL_INSTALL.template.md");
+const redskillInstallTemplate = fs.existsSync(redskillInstallTemplatePath)
+  ? fs.readFileSync(redskillInstallTemplatePath, "utf8")
+  : null;
 const startupIntroduction = markdownSection(skill, "情境化启动介绍");
 const planningStartup = markdownSection(planning, "启动说明");
 
-assert.ok(fs.existsSync(mapProviderDeliveryPath), "missing map provider delivery online logic");
+const routeStatusCopy = [
+  "已用高德复核 / Verified with AMap",
+  "部分移动段已复核 / Partially verified",
+  "未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure.",
+];
 
-for (const [label, document] of [
-  ["SKILL.md", skill],
-  ["map-provider-delivery.md", mapProviderDelivery],
-]) {
-  assert.match(document, /amap-cli\.js/, `${label} must name the executable AMap wrapper`);
-  assert.match(document, /AMAP_KEY/, `${label} must name AMAP_KEY without exposing a value`);
-  assert.match(document, /AMAP_SECURITY_KEY/, `${label} must name AMAP_SECURITY_KEY without exposing a value`);
-  assert.match(document, /places\.csv/, `${label} must document the My Maps CSV`);
-  assert.match(document, /itinerary\.kml/, `${label} must document the My Maps KML`);
+function assertIncludesAll(label, document, phrases) {
+  for (const phrase of phrases) {
+    assert.ok(document.includes(phrase), `${label} is missing: ${phrase}`);
+  }
 }
 
-for (const [label, document, expectations] of [
-  ["README.md", repositoryReadme || "", [
-    /未完成高德路网复核/,
-    /Google Maps URLs 不需要 API Key/,
-    /不会自动写入普通 Google Maps 收藏夹/,
-  ]],
-  ["README.en.md", repositoryEnglishReadme || "", [
-    /AMap road-network verification was not completed/,
-    /Google Maps URLs do not require an API key/,
-    /not automatically added to regular Google Maps saved lists/,
-  ]],
-]) {
-  for (const expectation of expectations) {
-    assert.match(document, expectation, `${label} is missing map-delivery copy: ${expectation}`);
+function assertNoUnsupportedProviderClaims(label, document) {
+  const clauses = document.split(/[。；\n]+/).map((clause) => clause.trim()).filter(Boolean);
+  for (const clause of clauses) {
+    const mentionsGoogleApi = /Google (?:Places|Routes) API/i.test(clause);
+    const claimsApiAction = /调用 Google (?:Places|Routes) API/i.test(clause)
+      || /\b(?:calls?|uses?|invokes?) (?:the )?Google (?:Places|Routes) API\b/i.test(clause);
+    const negatesApiAction = /(?:不|未|不会|不能|不得|绝不|没有)[^，,]{0,8}调用 Google (?:Places|Routes) API/i.test(clause)
+      || /\b(?:does not|doesn't|do not|never) (?:call|use|invoke) (?:the )?Google (?:Places|Routes) API\b/i.test(clause);
+    if (mentionsGoogleApi && claimsApiAction && !negatesApiAction) {
+      assert.fail(`${label} contains an unsupported positive Google API claim: ${clause}`);
+    }
+
+    const mentionsSavedSurface = /高德收藏夹|Google Maps (?:收藏夹|Saved Lists?|saved lists?)|AMap favorites?/i.test(clause);
+    const claimsAutomaticSync = /自动[^，,]{0,20}(?:写入|导入|同步|更新)/i.test(clause)
+      || /automatically (?:adds?|added|imports?|imported|writes?|written|syncs?|synced|updates?|updated)/i.test(clause);
+    const negatesAutomaticSync = /(?:不|未|不会|不能|不得|绝不|没有)[^，,]{0,8}自动/i.test(clause)
+      || /\b(?:does not|doesn't|do not|never|is not|are not|will not|won't) automatically\b/i.test(clause);
+    if (mentionsSavedSurface && claimsAutomaticSync && !negatesAutomaticSync) {
+      assert.fail(`${label} contains an unsupported positive account-sync claim: ${clause}`);
+    }
   }
-  assert.match(document, /amap-cli\.js/, `${label} must name the executable AMap wrapper`);
-  assert.match(document, /AMAP_KEY/, `${label} must name AMAP_KEY without exposing a value`);
-  assert.match(document, /AMAP_SECURITY_KEY/, `${label} must name AMAP_SECURITY_KEY without exposing a value`);
-  assert.match(document, /places\.csv/, `${label} must document the My Maps CSV`);
-  assert.match(document, /itinerary\.kml/, `${label} must document the My Maps KML`);
+}
+
+assert.throws(
+  () => assertNoUnsupportedProviderClaims(
+    "positive-claim fixture",
+    "This source calls Google Places API.",
+  ),
+  /unsupported positive/,
+  "positive provider claims must fail the document contract",
+);
+assert.throws(
+  () => assertNoUnsupportedProviderClaims(
+    "positive-sync fixture",
+    "This source automatically syncs Google Maps Saved Lists.",
+  ),
+  /unsupported positive/,
+  "positive account-sync claims must fail the document contract",
+);
+assert.doesNotThrow(
+  () => assertNoUnsupportedProviderClaims(
+    "negative-claim fixture",
+    "This source does not call Google Places API and is not automatically added to Google Maps saved lists.",
+  ),
+  "negative boundary copy must not be mistaken for an unsupported claim",
+);
+
+assert.ok(fs.existsSync(mapProviderDeliveryPath), "missing map provider delivery online logic");
+
+assert.ok(repositoryReadme, "README.md is required for the public provider workflow");
+assert.ok(repositoryEnglishReadme, "README.en.md is required for the public provider workflow");
+assert.ok(redskillInstallTemplate, "REDSKILL install template is required for provider setup");
+
+assertIncludesAll("README.md", repositoryReadme, [
+  "amap-gui start",
+  "amap-gui status",
+  "check-amap-cli.js",
+  "不会确认高德服务容器正在运行",
+  "进程会读取继承环境中的密钥值",
+  "未完成高德路网复核；请在出发前打开高德确认。",
+  "Google Maps URLs 不需要 API Key",
+  "places.csv",
+  "itinerary.kml",
+  "不会自动写入普通 Google Maps 收藏夹",
+]);
+assertIncludesAll("README.en.md", repositoryEnglishReadme, [
+  "amap-gui start",
+  "amap-gui status",
+  "check-amap-cli.js",
+  "does not confirm that the AMap service container is running",
+  "process reads credential values from the inherited environment",
+  "AMap road-network verification was not completed. Recheck in AMap before departure.",
+  "Google Maps URLs do not require an API key",
+  "places.csv",
+  "itinerary.kml",
+  "not automatically added to regular Google Maps saved lists",
+]);
+assertIncludesAll("REDSKILL_INSTALL.template.md", redskillInstallTemplate, [
+  "amap-gui start",
+  "amap-gui status",
+  "check-amap-cli.js",
+  "不会确认高德服务容器正在运行",
+  "进程会读取继承环境中的密钥值",
+  ...routeStatusCopy,
+]);
+assertIncludesAll("SKILL.md", skill, [
+  "amap-gui start",
+  "check-amap-cli.js",
+  "不会确认高德服务容器正在运行",
+  "provider-error",
+  "前 10 个",
+  "不会自动拆分",
+  "第 11 个",
+  "手动",
+  "places.csv",
+  "itinerary.kml",
+  ...routeStatusCopy,
+]);
+assertIncludesAll("map-provider-delivery.md", mapProviderDelivery, [
+  "amap-gui start",
+  "amap-gui status",
+  "check-amap-cli.js",
+  "不会确认高德服务容器正在运行",
+  "进程会读取继承环境中的值",
+  "provider-error",
+  "前 10 个",
+  "不会自动拆分",
+  "第 11 个",
+  "手动",
+  "places.csv",
+  "itinerary.kml",
+  ...routeStatusCopy,
+]);
+assertIncludesAll("planning-workflow.md", planning, [
+  "amap-gui start",
+  "check-amap-cli.js",
+  "不会确认高德服务容器正在运行",
+  "provider-error",
+  ...routeStatusCopy,
+]);
+assertIncludesAll("regional-source-packs.md", sourcePackReference, [
+  "amap-gui start",
+  "check-amap-cli.js",
+  "不会确认高德服务容器正在运行",
+  "provider-error",
+]);
+assertIncludesAll("taste-and-source-online-logic.md", tasteSourceOnlineLogic, [
+  "amap-gui start",
+  "check-amap-cli.js",
+  "不会确认高德服务容器正在运行",
+  "执行进程会读取继承环境中的密钥值",
+  "provider-error",
+]);
+assertIncludesAll("user-facing-language.md", userLanguage, [
+  "amap-gui start",
+  "amap-gui status",
+  "不会确认高德服务容器正在运行",
+  "已用高德复核",
+  "Verified with AMap",
+  "部分移动段已复核",
+  "Partially verified",
+  "未完成高德路网复核；请在出发前打开高德确认。",
+  "AMap road-network verification was not completed. Recheck in AMap before departure.",
+]);
+assertIncludesAll("guide-template map online logic", templateMapOnlineLogic, [
+  "前 10 个",
+  "不会自动拆分",
+  "第 11 个",
+  ...routeStatusCopy,
+]);
+
+for (const [label, document] of [
+  ["README.md", repositoryReadme],
+  ["README.en.md", repositoryEnglishReadme],
+  ["REDSKILL_INSTALL.template.md", redskillInstallTemplate],
+  ["SKILL.md", skill],
+  ["map-provider-delivery.md", mapProviderDelivery],
+  ["planning-workflow.md", planning],
+  ["regional-source-packs.md", sourcePackReference],
+  ["taste-and-source-online-logic.md", tasteSourceOnlineLogic],
+  ["user-facing-language.md", userLanguage],
+  ["guide-template map online logic", templateMapOnlineLogic],
+]) {
+  assertNoUnsupportedProviderClaims(label, document);
 }
 
 const mapDeliveryDocuments = [
@@ -114,10 +261,6 @@ assert.match(mapDeliveryDocuments, /不调用 Google Places API/);
 assert.match(mapDeliveryDocuments, /不调用 Google Routes API/);
 assert.match(mapDeliveryDocuments, /does not call Google Places API/);
 assert.match(mapDeliveryDocuments, /does not call Google Routes API/);
-assert.doesNotMatch(mapDeliveryDocuments, /(?<!不)(?:会|将)自动(?:导入|写入|同步)[^\n]{0,30}高德收藏夹/);
-assert.doesNotMatch(mapDeliveryDocuments, /(?<!不)(?:会|将)自动(?:导入|写入|同步)[^\n]{0,30}Google Maps (?:收藏夹|Saved List)/i);
-assert.doesNotMatch(mapDeliveryDocuments, /automatically (?:imports?|writes?|syncs?)[^\n]{0,40}AMap favorites/i);
-assert.doesNotMatch(mapDeliveryDocuments, /automatically (?:imports?|writes?|syncs?)[^\n]{0,40}Google Maps (?:Saved Lists?|saved lists?)/i);
 
 if (openaiYaml !== null) {
   assert.doesNotMatch(openaiYaml, /消化/);

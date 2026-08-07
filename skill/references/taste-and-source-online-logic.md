@@ -38,12 +38,12 @@
 - Global Base 的当地语言模板以 `{local:<token>}` 解析为 `{ languageTag, query }` 变体。Lexicon 用 `countryCodes` 限定可用国家，用 `defaultCountryCodes` 定义每国唯一默认语言：Spain 默认 `es`，显式 `ca` 追加在其后；Brazil 显式 `es` 不复用 Spain 内置词。调用方仍可通过 `localLanguageTerms` 提供自己的任意 language tag 词条。词条不完整的变体不会输出，并在 `missingLocalTerms` 中报告；地区包自己的无 token 模板继续使用其首个当地语言 tag。
 - `probe-source-access.js` 从 `--context <file>` 或 `--stdin` 读取 `{ sources, timeoutMs?, concurrency? }`，先校验全部 `http`/`https` URL（拒绝内嵌用户名/密码），保留原 URL 仅供内部请求、单独安全化输出 URL（移除 query/fragment），再以最多 4 并发执行 HEAD/manual redirect；仅 405/501 以 `Range: bytes=0-1023` 的 GET 降级并取消、不读取 body。输出为 `{ checkedAt, results }`；401/407 与其他非 404/429 的 4xx 是 `access-blocked`，只有 5xx 是 `server-error`。顶层 URL `fallback` 保持兼容并仅输出安全 URL；正式 `source.access.fallback` 字符串数组只输出 status、availability 和 optionCount，不回显原文。两种 fallback 都不自动访问；主访问 `reachable` 标为 `available`，其他状态标为 `fallback-required`。不会输出 headers、body、cookie、authorization 或 credentials。
 - Probe 的状态只表示当时的有限网络访问结果：`reachable`、`redirected`、`rate-limited`、`access-blocked`、`server-error`、`not-found` 或 `network-error`。它不能证明 POI 或商家存在、营业、可订、符合行程或安全，且不能取代各来源的事实复核。
-- 中国大陆可运行 check-amap-cli.js 探测可选增强；两个凭据变量必须是 trim 后非空字符串。探测不输出密钥、不执行路线，缺变量、空字符串、全空白、CLI 缺失时均返回结构化降级。
+- 中国大陆进入地点定位或路线复核时，用户先运行 `amap-gui start` 启动本地服务，再运行 `check-amap-cli.js` 探测可选增强；两个凭据变量必须是 trim 后非空字符串。探测会读取继承环境中的值来检查是否非空，但不输出密钥、不执行路线，**不会确认高德服务容器正在运行**。缺变量、空字符串、全空白、CLI 缺失时均返回结构化降级；探测为 `available` 后的真实请求仍可能返回 `provider-error` 并保持未复核。
 - 地点说明使用“为什么符合这个模板”和“为什么安排在这里”；只在真实异常时显示“需要临近复核”，不增加常驻来源 badge。
 
 ### 地图服务交接与导出
 
-- 中国大陆只有在 POI 定位或路线复核阶段才探测 `amap-gui`、`AMAP_KEY` 与 `AMAP_SECURITY_KEY`。能力 `available` 后，`amap-cli.js` 才真实执行城市关键词、锚点周边、同名消歧或路线请求；探测成功、搜索成功、URI 存在都不能冒充路线已复核。
+- 中国大陆只有在 POI 定位或路线复核阶段才提示 `amap-gui start` 并探测 `amap-gui`、`AMAP_KEY` 与 `AMAP_SECURITY_KEY`。能力 `available` 后，`amap-cli.js` 才真实执行城市关键词、锚点周边、同名消歧或路线请求；探测成功、搜索成功、URI 存在都不能冒充路线已复核。执行进程会读取继承环境中的密钥值用于传递和脱敏，但不回显、持久化或写入旅行文件、导出、日志、Git 或发布包。
 - 高德请求结果先归一化为 allowlist 事实。CLI 不输出凭据、provider stderr、raw polyline、照片、header 或任意原始字段；失败返回可继续规划的固定降级。完整边界见 `map-provider-delivery.md`。
 - 路线状态只使用三档：已用高德复核 / Verified with AMap；部分移动段已复核 / Partially verified；未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure. 用户改变日期归类或同日顺序后，受影响日期无条件回到未复核，直到新的相邻关系再次完成真实路网查询。
 - 地图生成高德 URI 和 Google Maps URL。Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key；不调用 Google Places API / does not call Google Places API，也不调用 Google Routes API / does not call Google Routes API。链接只负责打开地点或路线，Google Maps 会在打开后重新计算。

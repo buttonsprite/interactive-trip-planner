@@ -60,9 +60,9 @@ Global Base 的当地语言 query 使用 `{local:<token>}`，由 `assets/source-
 
 ## 中国大陆地图增强
 
-只有进入中国大陆 POI 定位或正式路线复核时才介绍并探测高德增强，不在全局启动时要求安装。安装与 Key 申请遵循[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)；本 Skill 不猜测或维护第三方安装命令。
+只有进入中国大陆 POI 定位或正式路线复核时才介绍并探测高德增强，不在全局启动时要求安装。安装与 Key 申请遵循[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)；本 Skill 不猜测或维护第三方安装命令。完成配置后先运行 `amap-gui start` 启动服务；`amap-gui status` 只作为用户可选的人工排查命令。
 
-运行 `node scripts/check-amap-cli.js` 只探测 `amap-gui` 是否存在，并确认 `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 是 trim 后非空的字符串；不输出值，也不执行搜索或路线。空字符串或全空白字符串视为缺少凭据。只有探测结果为 `available` 才表示真实请求可以开始；它仍不代表任何地点或路线已经核实。
+运行 `node scripts/check-amap-cli.js` 只探测 `amap-gui` 是否存在，并确认 `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 是 trim 后非空的字符串；不输出值，也不执行搜索或路线，**不会确认高德服务容器正在运行**。空字符串或全空白字符串视为缺少凭据。探测结果为 `available` 只表示真实请求可以开始；实际执行仍可能返回 `provider-error`，此时必须降级且不得把地点或路线写成已核实。
 
 能力可用时，使用 `node scripts/amap-cli.js --context <file>` 或 `--stdin` 传入一个 JSON object：
 

@@ -34,6 +34,7 @@
 
 - 地点详情通过 `buildPlaceLinks` 生成地图入口；`countryCode: "CN"` 时优先高德，其他地区优先 Google Maps。高德只有 `mapProviderRefs.amap.status: "resolved"` 时才生成直接入口；两种 provider 都没有安全链接时显示“复制地点名称和地址”的手动搜索降级。
 - 每日摘要下通过 `buildDayHandoffs` 显示路线复核状态、可直接打开的路线分段和需要手动查找的地点。拆分后的每一段保留 runtime 返回的序号和 provider，不会因为部分地点缺少 provider 定位而隐藏 `manualItems`。
+- 高德当天地点总览只收录当前顺序里前 10 个具有安全高德定位的 marker，**不会自动拆分**成多张总览；第 11 个起不进入当天总览，仍可使用单点入口、适用的路线分段或手动查找。路线链接与地点总览分开处理：高德路线和 Google 路线才会按交通方式与 provider 限制拆段。
 - 当天顺序或归类被用户修改后，界面无条件显示“路线待重新复核”，即使原路线曾标记为已复核；外部路线链接只使用当前 `orders` 生成，打开后仍由对应地图重新计算。
 - 地点和路线链接都是浏览器 handoff，不调用付费 API、不携带 API key，也不会把静态地图中的修改写回高德或 Google 账号。
 - 中国大陆行程向旅行者解释 provider 状态时使用固定三档：已用高德复核 / Verified with AMap；部分移动段已复核 / Partially verified；未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure. 模板中的短标签“路线已复核 / 路线部分复核 / 路线待复核”只是同一状态的紧凑显示，不会单独证明 provider。

@@ -43,7 +43,9 @@ Skill 会先尝试不带 Cookie 的公开读取。完整收藏夹若必须使用
 
 ## 可选地图增强与导出
 
-高德增强只在规划中国大陆地点和路线时出现，不是安装后的全局启动门。需要时先按[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)安装并配置本地 `amap-gui`，再由用户自己的环境提供 `AMAP_KEY` 与 `AMAP_SECURITY_KEY`。Skill 不会读取或回显密钥值，也不会把它们写入旅行文件、导出、日志或发布包。不配置仍可继续规划，路线会明确显示“未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure.”
+高德增强只在规划中国大陆地点和路线时出现，不是安装后的全局启动门。需要时先按[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)安装并配置本地 `amap-gui`，再由用户自己的环境提供 `AMAP_KEY` 与 `AMAP_SECURITY_KEY`。完成后运行 `amap-gui start` 启动服务；排查问题时可选运行 `amap-gui status`，再运行 `node scripts/check-amap-cli.js` 做 Skill 能力探测。该探测只检查命令存在和两个环境变量为非空字符串，**不会确认高德服务容器正在运行**；真实请求仍可能返回 `provider-error`，此时继续降级并保持未复核。执行进程会读取继承环境中的密钥值，用于检查、传递和脱敏，但不会回显、持久化或把它们写入旅行文件、导出、日志、Git 或发布包。不配置仍可继续规划。
+
+路线状态只使用三档：已用高德复核 / Verified with AMap；部分移动段已复核 / Partially verified；未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure.
 
 Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key。本包不调用 Google Places API / does not call Google Places API，也不调用 Google Routes API / does not call Google Routes API；路线在用户打开 Google Maps 后重新计算。
 

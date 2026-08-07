@@ -1,0 +1,108 @@
+{
+  "scenario": "overseas-my-maps-public",
+  "description": "Thirty synthetic public-safe overseas POIs across five days for Google Maps and My Maps forward evaluation.",
+  "trip": {
+    "title": "Overseas public delivery evaluation",
+    "pois": [
+      { "id": "overseas-01", "name": "Public Eval Hotel Base", "name_zh": "公开评估酒店基底", "city": "Lisbon", "area": "Baixa", "address": "Sample Block 1, Lisbon", "category": "hotel", "tripRole": "hotel", "priority": "must", "coords": [38.7101, -9.1401], "note": "Synthetic public-safe hotel anchor.", "tip": "Reconfirm before travel." },
+      { "id": "overseas-02", "name": "Public Eval Transit Hub", "name_zh": "公开评估交通节点", "city": "Lisbon", "area": "Baixa", "address": "Sample Block 2, Lisbon", "category": "transit", "tripRole": "transit", "priority": "must", "coords": [38.7111, -9.1391], "note": "Synthetic public-safe transit anchor.", "tip": "Reconfirm schedules." },
+      { "id": "overseas-03", "name": "Public Eval Morning Cafe", "name_zh": "公开评估晨间咖啡", "city": "Lisbon", "area": "Baixa", "address": "Sample Block 3, Lisbon", "category": "coffee", "tripRole": "meal", "priority": "preferred", "coords": [38.7121, -9.1381], "note": "Synthetic meal stop.", "tip": "Reconfirm opening hours." },
+      { "id": "overseas-04", "name": "Public Eval Gallery One", "name_zh": "公开评估画廊一", "city": "Lisbon", "area": "Baixa", "address": "Sample Block 4, Lisbon", "category": "art", "priority": "preferred", "coords": [38.7131, -9.1371], "note": "Synthetic art stop.", "tip": "Reconfirm admission." },
+      { "id": "overseas-05", "name": "Public Eval Market One", "name_zh": "公开评估市场一", "city": "Lisbon", "area": "Mouraria", "address": "Sample Block 5, Lisbon", "category": "local-life", "priority": "preferred", "coords": [38.7141, -9.1361], "note": "Synthetic market stop.", "tip": "Reconfirm market day." },
+      { "id": "overseas-06", "name": "Public Eval Lunch Counter", "name_zh": "公开评估午餐小店", "city": "Lisbon", "area": "Mouraria", "address": "Sample Block 6, Lisbon", "category": "restaurant", "tripRole": "meal", "priority": "preferred", "coords": [38.7151, -9.1351], "note": "Synthetic meal stop.", "tip": "Reconfirm service hours." },
+      { "id": "overseas-07", "name": "Public Eval Sunset Square", "name_zh": "公开评估日落广场", "city": "Lisbon", "area": "Mouraria", "address": "Sample Block 7, Lisbon", "category": "sight", "priority": "nearby", "coords": [38.7161, -9.1341], "note": "Synthetic public square stop.", "tip": "Use normal evening safety judgment." },
+      { "id": "overseas-08", "name": "Public Eval Museum Two", "name_zh": "公开评估博物馆二", "city": "Lisbon", "area": "Alfama", "address": "Sample Block 8, Lisbon", "category": "museum", "priority": "must", "coords": [38.7171, -9.1331], "note": "Synthetic museum stop.", "tip": "Reconfirm tickets." },
+      { "id": "overseas-09", "name": "Public Eval Tram Stop", "name_zh": "公开评估电车站", "city": "Lisbon", "area": "Alfama", "address": "Sample Block 9, Lisbon", "category": "transit", "tripRole": "transit", "priority": "preferred", "coords": [38.7181, -9.1321], "note": "Synthetic transit stop.", "tip": "Reconfirm service." },
+      { "id": "overseas-10", "name": "Public Eval Bakery", "name_zh": "公开评估面包店", "city": "Lisbon", "area": "Alfama", "address": "Sample Block 10, Lisbon", "category": "dessert", "tripRole": "meal", "priority": "preferred", "coords": [38.7191, -9.1311], "note": "Synthetic meal stop.", "tip": "Reconfirm opening hours." },
+      { "id": "overseas-11", "name": "Public Eval Courtyard", "name_zh": "公开评估庭院", "city": "Lisbon", "area": "Alfama", "address": "Sample Block 11, Lisbon", "category": "local-life", "priority": "nearby", "coords": [38.7201, -9.1301], "note": "Synthetic neighborhood stop.", "tip": "Respect residents." },
+      { "id": "overseas-12", "name": "Public Eval Dinner Room", "name_zh": "公开评估晚餐厅", "city": "Lisbon", "area": "Alfama", "address": "Sample Block 12, Lisbon", "category": "restaurant", "tripRole": "meal", "priority": "booked", "coords": [38.7211, -9.1291], "note": "Synthetic dinner stop.", "tip": "Reconfirm reservation." },
+      { "id": "overseas-13", "name": "Public Eval Design Archive", "name_zh": "公开评估设计档案馆", "city": "Lisbon", "area": "Belem", "address": "Sample Block 13, Lisbon", "category": "art", "priority": "must", "coords": [38.6961, -9.2011], "note": "Synthetic design stop.", "tip": "Reconfirm opening day." },
+      { "id": "overseas-14", "name": "Public Eval Riverside Walk", "name_zh": "公开评估河岸步道", "city": "Lisbon", "area": "Belem", "address": "Sample Block 14, Lisbon", "category": "walk", "priority": "preferred", "coords": [38.6971, -9.2001], "note": "Synthetic riverside stop.", "tip": "Check weather." },
+      { "id": "overseas-15", "name": "Public Eval Seafood Lunch", "name_zh": "公开评估海鲜午餐", "city": "Lisbon", "area": "Belem", "address": "Sample Block 15, Lisbon", "category": "restaurant", "tripRole": "meal", "priority": "preferred", "coords": [38.6981, -9.1991], "note": "Synthetic meal stop.", "tip": "Reconfirm menu and hours." },
+      { "id": "overseas-16", "name": "Public Eval Ferry Pier", "name_zh": "公开评估渡轮码头", "city": "Lisbon", "area": "Belem", "address": "Sample Block 16, Lisbon", "category": "transit", "tripRole": "transit", "priority": "preferred", "coords": [38.6991, -9.1981], "note": "Synthetic transit stop.", "tip": "Reconfirm timetable." },
+      { "id": "overseas-17", "name": "Public Eval Craft Studio", "name_zh": "公开评估工艺工作室", "city": "Lisbon", "area": "Estrela", "address": "Sample Block 17, Lisbon", "category": "craft", "priority": "must", "coords": [38.7102, -9.1602], "note": "Synthetic craft stop.", "tip": "Reconfirm visit access." },
+      { "id": "overseas-18", "name": "Public Eval Garden", "name_zh": "公开评估花园", "city": "Lisbon", "area": "Estrela", "address": "Sample Block 18, Lisbon", "category": "nature", "priority": "preferred", "coords": [38.7112, -9.1592], "note": "Synthetic garden stop.", "tip": "Check weather." },
+      { "id": "overseas-19", "name": "Public Eval Neighborhood Cafe", "name_zh": "公开评估社区咖啡", "city": "Lisbon", "area": "Estrela", "address": "Sample Block 19, Lisbon", "category": "coffee", "tripRole": "meal", "priority": "preferred", "coords": [38.7122, -9.1582], "note": "Synthetic meal stop.", "tip": "Reconfirm opening hours." },
+      { "id": "overseas-20", "name": "Public Eval Wine Bar", "name_zh": "公开评估葡萄酒吧", "city": "Lisbon", "area": "Estrela", "address": "Sample Block 20, Lisbon", "category": "bar", "tripRole": "meal", "priority": "preferred", "coords": [38.7132, -9.1572], "note": "Synthetic evening stop.", "tip": "Keep the return route short." },
+      { "id": "overseas-21", "name": "Public Eval Station", "name_zh": "公开评估车站", "city": "Lisbon", "area": "Oriente", "address": "Sample Block 21, Lisbon", "category": "transit", "tripRole": "transit", "priority": "must", "coords": [38.7671, -9.0991], "note": "Synthetic transit anchor.", "tip": "Reconfirm platform and time." },
+      { "id": "overseas-22", "name": "Public Eval Contemporary Hall", "name_zh": "公开评估当代展厅", "city": "Lisbon", "area": "Oriente", "address": "Sample Block 22, Lisbon", "category": "art", "priority": "preferred", "coords": [38.7681, -9.0981], "note": "Synthetic art stop.", "tip": "Reconfirm exhibition hours." },
+      { "id": "overseas-23", "name": "Public Eval Food Hall", "name_zh": "公开评估餐饮大厅", "city": "Lisbon", "area": "Oriente", "address": "Sample Block 23, Lisbon", "category": "restaurant", "tripRole": "meal", "priority": "preferred", "coords": [38.7691, -9.0971], "note": "Synthetic meal stop.", "tip": "Reconfirm stalls." },
+      { "id": "overseas-24", "name": "Public Eval Departure Hotel", "name_zh": "公开评估离境酒店", "city": "Lisbon", "area": "Oriente", "address": "Sample Block 24, Lisbon", "category": "hotel", "tripRole": "hotel", "priority": "must", "coords": [38.7701, -9.0961], "note": "Synthetic hotel anchor.", "tip": "Reconfirm checkout." },
+      { "id": "overseas-25", "name": "Public Eval Candidate Bookshop", "name_zh": "公开评估候选书店", "city": "Lisbon", "area": "Baixa", "address": "Sample Block 25, Lisbon", "category": "shop", "priority": "nearby", "coords": [38.7103, -9.1413], "note": "Synthetic candidate.", "tip": "Use only if nearby." },
+      { "id": "overseas-26", "name": "Public Eval Candidate Dessert", "name_zh": "公开评估候选甜品", "city": "Lisbon", "area": "Alfama", "address": "Sample Block 26, Lisbon", "category": "dessert", "priority": "nearby", "coords": [38.7173, -9.1343], "note": "Synthetic candidate.", "tip": "Use only if nearby." },
+      { "id": "overseas-27", "name": "Public Eval Candidate Lookout", "name_zh": "公开评估候选观景点", "city": "Lisbon", "area": "Belem", "address": "Sample Block 27, Lisbon", "category": "sight", "priority": "nearby", "coords": [38.6963, -9.2023], "note": "Synthetic candidate.", "tip": "Check weather." },
+      { "id": "overseas-28", "name": "Public Eval Candidate Ice Cream", "name_zh": "公开评估候选冰淇淋", "city": "Lisbon", "area": "Belem", "address": "Sample Block 28, Lisbon", "category": "dessert", "priority": "nearby", "coords": [38.6973, -9.2013], "note": "Synthetic candidate.", "tip": "Use only if nearby." },
+      { "id": "overseas-29", "name": "Public Eval Candidate Park", "name_zh": "公开评估候选公园", "city": "Lisbon", "area": "Estrela", "address": "Sample Block 29, Lisbon", "category": "nature", "priority": "nearby", "coords": [38.7104, -9.1614], "note": "Synthetic candidate.", "tip": "Check weather." },
+      { "id": "overseas-30", "name": "Public Eval Candidate Bakery", "name_zh": "公开评估候选面包店", "city": "Lisbon", "area": "Oriente", "address": "Sample Block 30, Lisbon", "category": "dessert", "priority": "nearby", "coords": [38.7674, -9.1004], "note": "Synthetic candidate.", "tip": "Use only if nearby." }
+    ],
+    "days": [
+      {
+        "id": "day-1-seven-stop",
+        "date": "2026-10-13",
+        "title": "Seven-stop delivery day",
+        "city": "Lisbon",
+        "routeReview": { "status": "unverified" },
+        "routeStops": [
+          { "poiId": "overseas-01", "order": 1 }, { "poiId": "overseas-02", "order": 2 }, { "poiId": "overseas-03", "order": 3 }, { "poiId": "overseas-04", "order": 4 }, { "poiId": "overseas-05", "order": 5 }, { "poiId": "overseas-06", "order": 6 }, { "poiId": "overseas-07", "order": 7 }
+        ],
+        "transitSegments": [
+          { "fromPoiId": "overseas-01", "toPoiId": "overseas-02", "mode": "walking", "label": "Open in Google Maps", "routeStatus": "unverified" },
+          { "fromPoiId": "overseas-02", "toPoiId": "overseas-03", "mode": "walking", "label": "Open in Google Maps", "routeStatus": "unverified" },
+          { "fromPoiId": "overseas-03", "toPoiId": "overseas-04", "mode": "walking", "label": "Open in Google Maps", "routeStatus": "unverified" },
+          { "fromPoiId": "overseas-04", "toPoiId": "overseas-05", "mode": "walking", "label": "Open in Google Maps", "routeStatus": "unverified" },
+          { "fromPoiId": "overseas-05", "toPoiId": "overseas-06", "mode": "walking", "label": "Open in Google Maps", "routeStatus": "unverified" },
+          { "fromPoiId": "overseas-06", "toPoiId": "overseas-07", "mode": "walking", "label": "Open in Google Maps", "routeStatus": "unverified" }
+        ],
+        "candidates": ["overseas-25"]
+      },
+      {
+        "id": "day-2",
+        "date": "2026-10-14",
+        "title": "Five-stop delivery day",
+        "city": "Lisbon",
+        "travelMode": "walking",
+        "routeReview": { "status": "unverified" },
+        "routeStops": [
+          { "poiId": "overseas-08", "order": 1 }, { "poiId": "overseas-09", "order": 2 }, { "poiId": "overseas-10", "order": 3 }, { "poiId": "overseas-11", "order": 4 }, { "poiId": "overseas-12", "order": 5 }
+        ],
+        "candidates": ["overseas-26"]
+      },
+      {
+        "id": "day-3",
+        "date": "2026-10-15",
+        "title": "Four-stop delivery day",
+        "city": "Lisbon",
+        "travelMode": "walking",
+        "routeReview": { "status": "unverified" },
+        "routeStops": [
+          { "poiId": "overseas-13", "order": 1 }, { "poiId": "overseas-14", "order": 2 }, { "poiId": "overseas-15", "order": 3 }, { "poiId": "overseas-16", "order": 4 }
+        ],
+        "candidates": ["overseas-27", "overseas-28"]
+      },
+      {
+        "id": "day-4",
+        "date": "2026-10-16",
+        "title": "Four-stop delivery day",
+        "city": "Lisbon",
+        "travelMode": "walking",
+        "routeReview": { "status": "unverified" },
+        "routeStops": [
+          { "poiId": "overseas-17", "order": 1 }, { "poiId": "overseas-18", "order": 2 }, { "poiId": "overseas-19", "order": 3 }, { "poiId": "overseas-20", "order": 4 }
+        ],
+        "candidates": ["overseas-29"]
+      },
+      {
+        "id": "day-5",
+        "date": "2026-10-17",
+        "title": "Four-stop delivery day",
+        "city": "Lisbon",
+        "travelMode": "walking",
+        "routeReview": { "status": "unverified" },
+        "routeStops": [
+          { "poiId": "overseas-21", "order": 1 }, { "poiId": "overseas-22", "order": 2 }, { "poiId": "overseas-23", "order": 3 }, { "poiId": "overseas-24", "order": 4 }
+        ],
+        "candidates": ["overseas-30"]
+      }
+    ]
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "scenario": "amap-dali-public",
+  "description": "Public planning-level Dali places for offline map-delivery evaluation. Provider IDs are synthetic test identifiers.",
+  "trip": {
+    "title": "大理公开离线交付评估",
+    "pois": [
+      {
+        "id": "dali-south-gate",
+        "name": "Dali Ancient City South Gate",
+        "name_zh": "大理古城南门",
+        "city": "大理",
+        "area": "大理古城",
+        "address": "大理古城南门片区",
+        "category": "sight",
+        "priority": "must",
+        "coords": [25.6889, 100.1651],
+        "note": "公开地点名，仅用于离线交付评估。",
+        "tip": "出发前复核入口。",
+        "mapProviderRefs": {
+          "amap": {
+            "status": "resolved",
+            "poiId": "EVAL-DALI-SOUTH-GATE-01",
+            "name": "大理古城南门",
+            "address": "大理古城南门片区",
+            "position": { "lng": 100.1651, "lat": 25.6889, "system": "gcj02" },
+            "checkedAt": "2026-08-06"
+          }
+        }
+      },
+      {
+        "id": "dali-wuhua-tower",
+        "name": "Wuhua Tower",
+        "name_zh": "五华楼",
+        "city": "大理",
+        "area": "大理古城",
+        "address": "复兴路五华楼片区",
+        "category": "sight",
+        "priority": "preferred",
+        "coords": [25.6956, 100.164],
+        "note": "公开地点名，仅用于离线交付评估。",
+        "tip": "按步行顺序打开路线。",
+        "mapProviderRefs": {
+          "amap": {
+            "status": "resolved",
+            "poiId": "EVAL-DALI-WUHUA-02",
+            "name": "五华楼",
+            "address": "复兴路五华楼片区",
+            "position": { "lng": 100.164, "lat": 25.6956, "system": "gcj02" },
+            "checkedAt": "2026-08-06"
+          }
+        }
+      },
+      {
+        "id": "dali-foreigner-street",
+        "name": "Dali Foreigner Street",
+        "name_zh": "大理洋人街",
+        "city": "大理",
+        "area": "大理古城",
+        "address": "护国路片区",
+        "category": "street",
+        "priority": "preferred",
+        "coords": [25.6972, 100.1627],
+        "note": "公开地点名，仅用于离线交付评估。",
+        "tip": "地点入口不代表路线已复核。",
+        "mapProviderRefs": {
+          "amap": {
+            "status": "resolved",
+            "poiId": "EVAL-DALI-STREET-03",
+            "name": "大理洋人街",
+            "address": "护国路片区",
+            "position": { "lng": 100.1627, "lat": 25.6972, "system": "gcj02" },
+            "checkedAt": "2026-08-06"
+          }
+        }
+      },
+      {
+        "id": "dali-north-gate-market",
+        "name": "Dali North Gate Market",
+        "name_zh": "大理北门市场",
+        "city": "大理",
+        "area": "大理古城北侧",
+        "address": "北门片区",
+        "category": "local-life",
+        "priority": "preferred",
+        "coords": [25.704, 100.1605],
+        "note": "公开地点名，仅用于离线交付评估。",
+        "tip": "市场状态需临近出发复核。",
+        "mapProviderRefs": {
+          "amap": {
+            "status": "resolved",
+            "poiId": "EVAL-DALI-MARKET-04",
+            "name": "大理北门市场",
+            "address": "北门片区",
+            "position": { "lng": 100.1605, "lat": 25.704, "system": "gcj02" },
+            "checkedAt": "2026-08-06"
+          }
+        }
+      },
+      {
+        "id": "dali-ambiguous-tea-shop",
+        "name": "Dali Tea Shop Branch To Confirm",
+        "name_zh": "待确认分店的茶店",
+        "city": "大理",
+        "area": "大理古城",
+        "address": "分店地址待确认",
+        "category": "tea",
+        "priority": "pending",
+        "coords": [25.698, 100.163],
+        "note": "同名分店歧义场景。",
+        "tip": "不得把候选 POI ID 用作直接高德入口。",
+        "mapProviderRefs": {
+          "amap": {
+            "status": "ambiguous",
+            "poiId": "EVAL-DALI-AMBIGUOUS-MUST-NOT-LEAK",
+            "name": "待确认分店",
+            "address": "分店地址待确认",
+            "position": { "lng": 100.163, "lat": 25.698, "system": "gcj02" },
+            "checkedAt": "2026-08-06"
+          }
+        }
+      },
+      {
+        "id": "dali-unresolved-viewpoint",
+        "name": "Dali Viewpoint To Resolve",
+        "name_zh": "待定位观景点",
+        "city": "大理",
+        "area": "大理",
+        "address": "具体入口待确认",
+        "category": "nature",
+        "priority": "pending",
+        "coords": [25.71, 100.15],
+        "note": "未获得可靠 provider 定位的场景。",
+        "tip": "保留名称和地址供人工查找。",
+        "mapProviderRefs": {
+          "amap": {
+            "status": "unresolved",
+            "name": "待定位观景点",
+            "address": "具体入口待确认",
+            "checkedAt": "2026-08-06"
+          }
+        }
+      }
+    ],
+    "days": [
+      {
+        "id": "dali-four-stop-day",
+        "date": "2026-10-13",
+        "title": "古城四站公开评估日",
+        "city": "大理",
+        "routeReview": { "status": "unverified" },
+        "routeStops": [
+          { "poiId": "dali-south-gate", "order": 1 },
+          { "poiId": "dali-wuhua-tower", "order": 2 },
+          { "poiId": "dali-foreigner-street", "order": 3 },
+          { "poiId": "dali-north-gate-market", "order": 4 }
+        ],
+        "transitSegments": [
+          { "fromPoiId": "dali-south-gate", "toPoiId": "dali-wuhua-tower", "mode": "walking", "label": "步行后由高德重新计算", "routeStatus": "unverified" },
+          { "fromPoiId": "dali-wuhua-tower", "toPoiId": "dali-foreigner-street", "mode": "walking", "label": "步行后由高德重新计算", "routeStatus": "unverified" },
+          { "fromPoiId": "dali-foreigner-street", "toPoiId": "dali-north-gate-market", "mode": "walking", "label": "步行后由高德重新计算", "routeStatus": "unverified" }
+        ],
+        "candidates": ["dali-ambiguous-tea-shop", "dali-unresolved-viewpoint"]
+      }
+    ]
+  }
+}

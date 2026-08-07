@@ -16,6 +16,15 @@
 - `golden/tokyo-rail-neon-craft`：高密度大城市、轨道交通和分区漫游。
 这些目录当前只保留内容、字段和设计说明作为参考。旧地图实现已经移除，不能作为新攻略模板；新的基础地图统一从 `assets/guide-template/` 生成。
 
+## Eval fixtures
+
+`evals/` 只用于可重复的离线 forward test，不是可直接采用的旅行建议：
+
+- `evals/amap-dali-public.json`：使用公开地点名与合成 provider ID，覆盖大理四站高德总览、相邻路线入口，以及 resolved、ambiguous、unresolved 三种状态。
+- `evals/overseas-my-maps-public.json`：使用 5 天、30 个公开安全的合成海外地点，覆盖七站 Google Maps 拆段、正式路线与候选区分，以及酒店、用餐和交通角色。
+
+运行 `node scripts/test-map-delivery-forward.js` 只使用本地 runtime 与临时目录，不访问 provider。真实高德验收必须显式设置 `RUN_AMAP_LIVE=1`；未设置时 `node scripts/test-amap-cli-live.js` 会清晰输出 `SKIP` 并以 0 退出。公开 fixture 不包含真实凭据、订单或私人行程。
+
 ## 使用方式
 
 1. 先读 sample 的字段完整度和交互需求。

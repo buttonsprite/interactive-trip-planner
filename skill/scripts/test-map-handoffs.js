@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { loadMapDeliveryRuntime } from "./load-map-delivery-runtime.js";
 
@@ -45,6 +46,16 @@ function parse(url) {
   return new URL(url);
 }
 
+function loadTripMapStateRuntime() {
+  const statePath = path.resolve(
+    scriptDir,
+    "../assets/guide-template/maps/assets/trip-map-state.js",
+  );
+  const sandbox = {};
+  vm.runInNewContext(fs.readFileSync(statePath, "utf8"), sandbox, { filename: statePath });
+  return sandbox.TripMapState;
+}
+
 const TripMapDelivery = loadMapDeliveryRuntime();
 assert.equal(Object.isFrozen(TripMapDelivery), true, "delivery API must be immutable");
 
@@ -57,6 +68,8 @@ const links = TripMapDelivery.buildPlaceLinks(amapPoi, {
 assert.match(links.primary.url, /^https:\/\/uri\.amap\.com\/marker\?/);
 assert.match(links.amap.url, /markers=B0FFTEST01/);
 assert.match(links.google.url, /^https:\/\/www\.google\.com\/maps\/search\/\?api=1/);
+assert.equal(links.amap.label, "在高德地图打开 / Open in AMap");
+assert.equal(links.google.label, "在 Google Maps 打开 / Open in Google Maps");
 assert.equal(parse(links.amap.url).searchParams.get("src"), "interactive-trip-planner");
 assert.equal(parse(links.google.url).searchParams.get("api"), "1");
 assert.deepEqual(amapPoi, placeSnapshot, "place links must not mutate a frozen POI");
@@ -99,6 +112,8 @@ const sevenDay = deepFreeze({
     toPoiId: poi.id,
     mode: "walking",
     routeStatus: index < 2 ? "verified" : "unverified",
+    routeProvider: index < 2 ? "amap" : undefined,
+    routeReviewedAt: index < 2 ? "2026-08-06" : undefined,
   })),
 });
 const daySnapshot = structuredClone({ sevenPois, sevenDay });
@@ -121,8 +136,10 @@ assert.equal(
   parse(googleRoutes[1].url).searchParams.get("origin"),
   "split Google links must overlap at their boundary stop",
 );
+assert.equal(googleRoutes[0].label, "Google Maps 路线 1/2 / Google Maps route 1/2");
 
 assert.equal(sevenHandoffs.overview.provider, "amap");
+assert.equal(sevenHandoffs.overview.label, "在高德查看今日地点 / View today's places in AMap");
 assert.equal(sevenHandoffs.overview.poiIds.length, 7);
 assert.ok(
   parse(sevenHandoffs.overview.url).searchParams.get("markers").split("|").length <= 10,
@@ -134,6 +151,7 @@ for (const route of walkingAmapRoutes) {
   assert.equal(parse(route.url).searchParams.has("via"), false, "walking links must never contain via");
   assert.equal(parse(route.url).searchParams.get("mode"), "walk");
 }
+assert.equal(walkingAmapRoutes[0].label, "高德路线 1/6 / AMap route 1/6");
 assert.equal(sevenHandoffs.routeStatus, "partial");
 assert.deepEqual({ sevenPois, sevenDay }, daySnapshot, "day links must not mutate frozen fixtures");
 
@@ -144,8 +162,8 @@ const drivingDay = deepFreeze({
   routeReview: { status: "verified" },
   routeStops: drivingPois.map((poi, index) => ({ poiId: poi.id, order: index })),
   transitSegments: [
-    { fromPoiId: drivingPois[0].id, toPoiId: drivingPois[1].id, mode: "driving", routeStatus: "verified" },
-    { fromPoiId: drivingPois[1].id, toPoiId: drivingPois[2].id, mode: "driving", routeStatus: "verified" },
+    { fromPoiId: drivingPois[0].id, toPoiId: drivingPois[1].id, mode: "driving", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
+    { fromPoiId: drivingPois[1].id, toPoiId: drivingPois[2].id, mode: "driving", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
   ],
 });
 const drivingHandoffs = TripMapDelivery.buildDayHandoffs(drivingDay, drivingPois, {
@@ -153,9 +171,12 @@ const drivingHandoffs = TripMapDelivery.buildDayHandoffs(drivingDay, drivingPois
   source: "interactive-trip-planner",
 });
 const drivingAmapRoutes = drivingHandoffs.routeLinks.filter((link) => link.provider === "amap");
+const drivingGoogleRoutes = drivingHandoffs.routeLinks.filter((link) => link.provider === "google");
 assert.equal(drivingAmapRoutes.length, 1, "three driving stops may share one AMap navigation link");
 assert.ok(parse(drivingAmapRoutes[0].url).searchParams.has("via"));
 assert.equal(parse(drivingAmapRoutes[0].url).searchParams.get("mode"), "car");
+assert.equal(drivingAmapRoutes[0].label, "在高德查看这段路线 / Open this route in AMap");
+assert.equal(drivingGoogleRoutes[0].label, "在 Google Maps 打开今日路线 / Open today's route in Google Maps");
 
 const unknownModeHandoffs = TripMapDelivery.buildDayHandoffs(
   {
@@ -167,10 +188,92 @@ const unknownModeHandoffs = TripMapDelivery.buildDayHandoffs(
   { region: "CN", source: "interactive-trip-planner" },
 );
 const unknownModeAmapRoutes = unknownModeHandoffs.routeLinks.filter((link) => link.provider === "amap");
-assert.equal(unknownModeAmapRoutes.length, 2, "unknown transport must remain adjacent AMap links");
+const unknownModeGoogleRoutes = unknownModeHandoffs.routeLinks.filter((link) => link.provider === "google");
+assert.equal(unknownModeAmapRoutes.length, 0, "unknown transport cannot emit an AMap navigation URL");
+assert.equal(unknownModeGoogleRoutes.length, 0, "unknown transport cannot emit a Google directions URL");
 assert.ok(
-  unknownModeAmapRoutes.every((link) => !parse(link.url).searchParams.has("via")),
-  "unknown transport cannot be promoted to a driving via link",
+  drivingPois.every((poi) => unknownModeHandoffs.manualItems.some(
+    (item) => item.poiId === poi.id && item.provider === "amap" && item.reason === "route-mode-required",
+  )),
+  "unknown AMap edges must keep every affected POI for manual routing",
+);
+assert.ok(
+  drivingPois.every((poi) => unknownModeHandoffs.manualItems.some(
+    (item) => item.poiId === poi.id && item.provider === "google" && item.reason === "route-mode-required",
+  )),
+  "unknown Google edges must keep every affected POI for manual routing",
+);
+
+const mixedPois = deepFreeze(Array.from({ length: 4 }, (_, index) => resolvedPoi(`mixed-${index + 1}`, index + 10)));
+const mixedDay = deepFreeze({
+  id: "mixed-mode-day",
+  routeReview: { status: "verified" },
+  routeStops: mixedPois.map((poi, index) => ({ poiId: poi.id, order: index })),
+  transitSegments: [
+    { fromPoiId: mixedPois[0].id, toPoiId: mixedPois[1].id, mode: "walking", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
+    { fromPoiId: mixedPois[1].id, toPoiId: mixedPois[2].id, mode: "driving", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
+    { fromPoiId: mixedPois[2].id, toPoiId: mixedPois[3].id, mode: "driving", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
+  ],
+});
+const mixedHandoffs = TripMapDelivery.buildDayHandoffs(mixedDay, mixedPois, {
+  region: "CN",
+  source: "interactive-trip-planner",
+});
+const mixedGoogleRoutes = mixedHandoffs.routeLinks.filter((link) => link.provider === "google");
+assert.equal(mixedGoogleRoutes.length, 2, "mixed known Google modes must split into homogeneous links");
+assert.deepEqual(
+  mixedGoogleRoutes.map((link) => parse(link.url).searchParams.get("travelmode")),
+  ["walking", "driving"],
+);
+assert.equal(mixedGoogleRoutes[0].poiIds.at(-1), mixedGoogleRoutes[1].poiIds[0]);
+assert.ok(mixedGoogleRoutes.every((link) => parse(link.url).searchParams.has("travelmode")));
+const mixedAmapRoutes = mixedHandoffs.routeLinks.filter((link) => link.provider === "amap");
+assert.deepEqual(mixedAmapRoutes.map((link) => parse(link.url).searchParams.get("mode")), ["walk", "car"]);
+
+const statusPois = deepFreeze(Array.from({ length: 3 }, (_, index) => resolvedPoi(`status-${index + 1}`, index + 14)));
+const verifiedStatusDay = deepFreeze({
+  id: "status-day",
+  routeReview: { status: "verified" },
+  routeStops: statusPois.map((poi, index) => ({ poiId: poi.id, order: index })),
+  transitSegments: [
+    { fromPoiId: statusPois[0].id, toPoiId: statusPois[1].id, mode: "walking", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
+    { fromPoiId: statusPois[1].id, toPoiId: statusPois[2].id, mode: "walking", routeStatus: "verified", routeProvider: "amap", routeReviewedAt: "2026-08-06" },
+  ],
+});
+assert.equal(
+  TripMapDelivery.buildDayHandoffs(verifiedStatusDay, statusPois, {}).routeStatus,
+  "verified",
+);
+assert.equal(
+  TripMapDelivery.buildDayHandoffs(verifiedStatusDay, statusPois, {
+    orderedPoiIds: [statusPois[0].id, statusPois[2].id, statusPois[1].id],
+  }).routeStatus,
+  "unverified",
+  "changed adjacency cannot retain a stale verified status",
+);
+const oneVerifiedEdgeDay = deepFreeze({
+  ...verifiedStatusDay,
+  transitSegments: [verifiedStatusDay.transitSegments[0]],
+});
+assert.equal(
+  TripMapDelivery.buildDayHandoffs(oneVerifiedEdgeDay, statusPois, {}).routeStatus,
+  "partial",
+  "some verified effective edges produce partial status",
+);
+assert.equal(
+  TripMapDelivery.buildDayHandoffs({ ...verifiedStatusDay, routeReview: { status: "partial" } }, statusPois, {}).routeStatus,
+  "partial",
+  "evidence cannot upgrade a declared partial day",
+);
+assert.equal(
+  TripMapDelivery.buildDayHandoffs({ ...verifiedStatusDay, routeReview: { status: "unverified" } }, statusPois, {}).routeStatus,
+  "unverified",
+  "evidence cannot upgrade a declared unverified day",
+);
+assert.equal(
+  TripMapDelivery.buildDayHandoffs(verifiedStatusDay, statusPois, { dirty: true }).routeStatus,
+  "unverified",
+  "dirty always overrides route evidence",
 );
 
 const missingLocationPoi = deepFreeze({
@@ -211,20 +314,27 @@ const currentTrip = deepFreeze({
     },
   ],
 });
-const currentState = deepFreeze({
-  assignments: { "state-a": "state-day-1", "state-b": "state-day-2", "state-c": "" },
-  orders: { "state-day-1": ["state-a"], "state-day-2": ["state-b"] },
-  priorities: { "state-a": "must", "state-b": "nearby", "state-c": "preferred" },
+const rawState = deepFreeze({
+  assignments: { "state-a": "state-day-1", "state-b": "state-day-1", "state-c": "state-day-1" },
+  orders: { "state-day-1": ["state-b", "state-a", "state-c"], "state-day-2": [] },
+  priorities: { "state-a": "S", "state-b": "invalid-priority", "state-c": "B" },
   dirtyDays: { "state-day-2": true },
 });
+const normalizedState = JSON.parse(JSON.stringify(loadTripMapStateRuntime().createState(currentTrip, rawState)));
+const currentState = deepFreeze(normalizedState);
 const stateSnapshot = structuredClone({ currentTrip, currentState });
 const currentView = TripMapDelivery.currentTripView(currentTrip, currentState);
 assert.deepEqual(currentView.assignments, currentState.assignments);
 assert.deepEqual(currentView.priorities, currentState.priorities);
+assert.deepEqual(currentView.orders, currentState.orders);
 assert.deepEqual(currentView.dirtyDays, { "state-day-2": true });
-assert.deepEqual(currentView.days[0].orderedPoiIds, ["state-a"]);
-assert.deepEqual(currentView.days[1].orderedPoiIds, ["state-b"]);
-assert.equal(currentView.days[0].routeStatus, "verified");
+assert.deepEqual(currentView.priorities, { "state-a": "must", "state-b": "", "state-c": "nearby" });
+assert.deepEqual(currentView.days[0].orderedPoiIds, ["state-a", "state-b", "state-c"]);
+assert.deepEqual(currentView.days[1].orderedPoiIds, []);
+assert.deepEqual(currentView.days.map((day) => day.orderedPoiIds), [
+  currentState.orders["state-day-1"],
+  currentState.orders["state-day-2"],
+]);
 assert.equal(currentView.days[1].routeStatus, "unverified", "dirty days override stale verified evidence");
 assert.deepEqual({ currentTrip, currentState }, stateSnapshot, "currentTripView must not mutate frozen inputs");
 

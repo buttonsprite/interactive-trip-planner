@@ -115,7 +115,7 @@
     return {
       provider: "amap",
       kind: "place",
-      label: "在高德地图打开",
+      label: "在高德地图打开 / Open in AMap",
       url: buildUrl(AMAP_MARKER_ENDPOINT, [
         ["markers", marker],
         ["src", sourceName(options)],
@@ -131,7 +131,7 @@
     return {
       provider: "google",
       kind: "place",
-      label: "在 Google Maps 打开",
+      label: "在 Google Maps 打开 / Open in Google Maps",
       url: buildUrl(GOOGLE_SEARCH_ENDPOINT, [
         ["api", "1"],
         ["query", query],
@@ -222,40 +222,66 @@
     return runs;
   }
 
+  function homogeneousModeRuns(day, run, provider, manualItems) {
+    const runs = [];
+    let current = null;
+    const flush = () => {
+      if (current) runs.push(current);
+      current = null;
+    };
+    for (let index = 0; index < run.length - 1; index += 1) {
+      const from = run[index];
+      const to = run[index + 1];
+      const mode = edgeMode(day, from.poi.id, to.poi.id, provider);
+      if (!mode) {
+        flush();
+        appendManual(manualItems, from.poi, provider, "route-mode-required");
+        appendManual(manualItems, to.poi, provider, "route-mode-required");
+      } else if (current?.mode === mode) {
+        current.items.push(to);
+      } else {
+        flush();
+        current = { mode, items: [from, to] };
+      }
+    }
+    flush();
+    return runs;
+  }
+
   function buildGoogleRoutes(day, orderedItems, options, manualItems) {
-    const runs = contiguousRuns(
+    const locationRuns = contiguousRuns(
       orderedItems,
       googleLocation,
       (poi) => appendManual(manualItems, poi, "google", "manual-location-required"),
     );
     const chunks = [];
-    for (const run of runs) {
-      for (let start = 0; start < run.length - 1; start += 4) {
-        const chunk = run.slice(start, Math.min(start + 5, run.length));
-        if (chunk.length >= 2) chunks.push(chunk);
+    for (const locationRun of locationRuns) {
+      const modeRuns = homogeneousModeRuns(day, locationRun, "google", manualItems);
+      for (const modeRun of modeRuns) {
+        for (let start = 0; start < modeRun.items.length - 1; start += 4) {
+          const items = modeRun.items.slice(start, Math.min(start + 5, modeRun.items.length));
+          if (items.length >= 2) chunks.push({ items, mode: modeRun.mode });
+        }
       }
     }
     return chunks.map((chunk, index) => {
-      const edgeModes = chunk.slice(1).map((item, edgeIndex) => (
-        edgeMode(day, chunk[edgeIndex].poi.id, item.poi.id, "google")
-      ));
-      const travelMode = edgeModes.length && edgeModes.every((mode) => mode === edgeModes[0])
-        ? edgeModes[0]
-        : "";
+      const items = chunk.items;
       return {
         provider: "google",
         kind: "directions",
-        label: chunks.length === 1 ? "在 Google Maps 打开今日路线" : `Google Maps 路线 ${index + 1}/${chunks.length}`,
+        label: chunks.length === 1
+          ? "在 Google Maps 打开今日路线 / Open today's route in Google Maps"
+          : `Google Maps 路线 ${index + 1}/${chunks.length} / Google Maps route ${index + 1}/${chunks.length}`,
         url: buildUrl(GOOGLE_DIRECTIONS_ENDPOINT, [
           ["api", "1"],
-          ["origin", chunk[0].location],
-          ["destination", chunk[chunk.length - 1].location],
-          ["travelmode", travelMode],
-          ["waypoints", chunk.slice(1, -1).map((item) => item.location).join("|")],
+          ["origin", items[0].location],
+          ["destination", items[items.length - 1].location],
+          ["travelmode", chunk.mode],
+          ["waypoints", items.slice(1, -1).map((item) => item.location).join("|")],
           ["utm_source", sourceName(options)],
           ["utm_campaign", "directions_request"],
         ]),
-        poiIds: chunk.map((item) => item.poi.id),
+        poiIds: items.map((item) => item.poi.id),
       };
     });
   }
@@ -266,25 +292,26 @@
   }
 
   function buildAmapRoutes(day, orderedItems, options, manualItems) {
-    const runs = contiguousRuns(
+    const locationRuns = contiguousRuns(
       orderedItems,
       amapNavigationLocation,
       (poi) => appendManual(manualItems, poi, "amap", "manual-location-required"),
     );
     const chunks = [];
-    for (const run of runs) {
-      let index = 0;
-      while (index < run.length - 1) {
-        const firstMode = edgeMode(day, run[index].poi.id, run[index + 1].poi.id, "amap");
-        const nextMode = index + 2 < run.length
-          ? edgeMode(day, run[index + 1].poi.id, run[index + 2].poi.id, "amap")
-          : "";
-        if (firstMode === "car" && nextMode === "car") {
-          chunks.push({ items: run.slice(index, index + 3), mode: "car" });
-          index += 2;
+    for (const locationRun of locationRuns) {
+      const modeRuns = homogeneousModeRuns(day, locationRun, "amap", manualItems);
+      for (const modeRun of modeRuns) {
+        if (modeRun.mode === "car") {
+          for (let start = 0; start < modeRun.items.length - 1; start += 2) {
+            chunks.push({
+              items: modeRun.items.slice(start, Math.min(start + 3, modeRun.items.length)),
+              mode: modeRun.mode,
+            });
+          }
         } else {
-          chunks.push({ items: run.slice(index, index + 2), mode: firstMode });
-          index += 1;
+          for (let index = 0; index < modeRun.items.length - 1; index += 1) {
+            chunks.push({ items: modeRun.items.slice(index, index + 2), mode: modeRun.mode });
+          }
         }
       }
     }
@@ -293,7 +320,9 @@
       return {
         provider: "amap",
         kind: "navigation",
-        label: chunks.length === 1 ? "在高德查看这段路线" : `高德路线 ${index + 1}/${chunks.length}`,
+        label: chunks.length === 1
+          ? "在高德查看这段路线 / Open this route in AMap"
+          : `高德路线 ${index + 1}/${chunks.length} / AMap route ${index + 1}/${chunks.length}`,
         url: buildUrl(AMAP_NAVIGATION_ENDPOINT, [
           ["from", items[0].location],
           ["to", items[items.length - 1].location],
@@ -307,10 +336,39 @@
     });
   }
 
+  function routeEvidenceStatus(day, orderedPoiIds) {
+    if (!Array.isArray(orderedPoiIds) || orderedPoiIds.length < 2) return "unverified";
+    let verifiedEdges = 0;
+    for (let index = 0; index < orderedPoiIds.length - 1; index += 1) {
+      const fromPoiId = orderedPoiIds[index];
+      const toPoiId = orderedPoiIds[index + 1];
+      const segment = (day?.transitSegments || []).find(
+        (item) => item.fromPoiId === fromPoiId && item.toPoiId === toPoiId,
+      );
+      if (
+        segment?.routeStatus === "verified"
+        && cleanText(segment.routeProvider)
+        && cleanText(segment.routeReviewedAt)
+      ) {
+        verifiedEdges += 1;
+      }
+    }
+    if (verifiedEdges === orderedPoiIds.length - 1) return "verified";
+    return verifiedEdges > 0 ? "partial" : "unverified";
+  }
+
   function dayRouteStatus(day, options) {
     if (options?.dirty || day?.dirty) return "unverified";
-    const status = cleanText(day?.routeStatus || day?.routeReview?.status);
-    return routeStatuses.has(status) ? status : "unverified";
+    const declared = cleanText(day?.routeStatus || day?.routeReview?.status);
+    if (!routeStatuses.has(declared) || declared === "unverified") return "unverified";
+    const fallbackOrder = Array.isArray(day?.orderedPoiIds)
+      ? day.orderedPoiIds
+      : [...(day?.routeStops || [])]
+        .sort((left, right) => Number(left.order || 0) - Number(right.order || 0))
+        .map((stop) => stop.poiId);
+    const evidence = routeEvidenceStatus(day, options?.orderedPoiIds || fallbackOrder);
+    if (declared === "partial" && evidence === "verified") return "partial";
+    return evidence;
   }
 
   function buildDayHandoffs(day, pois, options) {
@@ -330,7 +388,7 @@
       ? {
         provider: "amap",
         kind: "markers",
-        label: "在高德查看今日地点",
+        label: "在高德查看今日地点 / View today's places in AMap",
         url: buildUrl(AMAP_MARKER_ENDPOINT, [
           ["markers", markerItems.map((item) => item.marker).join("|")],
           ["src", sourceName(options)],
@@ -346,7 +404,7 @@
     return {
       overview,
       routeLinks,
-      routeStatus: dayRouteStatus(day, options),
+      routeStatus: dayRouteStatus(day, { ...options, orderedPoiIds }),
       manualItems,
     };
   }
@@ -361,48 +419,37 @@
     return assignments;
   }
 
+  function baseOrders(trip) {
+    return Object.fromEntries((trip?.days || []).map((day) => [
+      day.id,
+      [...(day.routeStops || [])]
+        .sort((left, right) => Number(left.order || 0) - Number(right.order || 0))
+        .map((stop) => stop.poiId),
+    ]));
+  }
+
+  function basePriorities(trip) {
+    return Object.fromEntries((trip?.pois || []).map((poi) => [poi.id, cleanText(poi.priority)]));
+  }
+
   function currentTripView(trip, state) {
     const sourceTrip = trip && typeof trip === "object" ? trip : {};
-    const sourceState = state && typeof state === "object" ? state : {};
+    const hasState = state !== null && state !== undefined && typeof state === "object";
+    const sourceState = hasState ? state : {};
     const pois = sourceTrip.pois || [];
     const days = sourceTrip.days || [];
-    const poiIds = new Set(pois.map((poi) => poi.id));
-    const dayIds = new Set(days.map((day) => day.id));
-    const defaults = baseAssignments(sourceTrip);
-    const assignments = {};
-    const priorities = {};
-    for (const poi of pois) {
-      const requestedDay = sourceState.assignments?.[poi.id];
-      assignments[poi.id] = requestedDay === "" || dayIds.has(requestedDay)
-        ? requestedDay
-        : defaults[poi.id];
-      priorities[poi.id] = cleanText(sourceState.priorities?.[poi.id] ?? poi.priority);
-    }
-    const dirtyDays = {};
-    for (const [dayId, dirty] of Object.entries(sourceState.dirtyDays || {})) {
-      if (dirty && dayIds.has(dayId)) dirtyDays[dayId] = true;
-    }
+    const assignments = clone(hasState ? (sourceState.assignments || {}) : baseAssignments(sourceTrip));
+    const priorities = clone(hasState ? (sourceState.priorities || {}) : basePriorities(sourceTrip));
+    const orders = clone(hasState ? (sourceState.orders || {}) : baseOrders(sourceTrip));
+    const dirtyDays = clone(hasState ? (sourceState.dirtyDays || {}) : {});
     const currentDays = days.map((day) => {
-      const requested = Array.isArray(sourceState.orders?.[day.id]) ? sourceState.orders[day.id] : [];
-      const base = [...(day.routeStops || [])]
-        .sort((left, right) => Number(left.order || 0) - Number(right.order || 0))
-        .map((stop) => stop.poiId);
-      const orderedPoiIds = [];
-      for (const poiId of [...requested, ...base, ...pois.map((poi) => poi.id)]) {
-        if (
-          poiIds.has(poiId)
-          && assignments[poiId] === day.id
-          && !orderedPoiIds.includes(poiId)
-        ) {
-          orderedPoiIds.push(poiId);
-        }
-      }
+      const orderedPoiIds = clone(Array.isArray(orders[day.id]) ? orders[day.id] : []);
       const dirty = Boolean(dirtyDays[day.id]);
       return {
         ...clone(day),
         orderedPoiIds,
         dirty,
-        routeStatus: dirty ? "unverified" : dayRouteStatus(day),
+        routeStatus: dayRouteStatus(day, { orderedPoiIds, dirty }),
       };
     });
     return {
@@ -411,6 +458,7 @@
       days: currentDays,
       assignments,
       priorities,
+      orders,
       dirtyDays,
     };
   }

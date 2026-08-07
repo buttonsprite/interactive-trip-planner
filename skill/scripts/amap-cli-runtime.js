@@ -123,6 +123,25 @@ export function buildAmapArgs(context) {
     return args;
   }
 
+  if (request.waypoints.length > 0) {
+    const payload = {
+      from: {
+        name: request.origin.name,
+        position: [request.origin.position.lng, request.origin.position.lat],
+      },
+      to: {
+        name: request.destination.name,
+        position: [request.destination.position.lng, request.destination.position.lat],
+      },
+      type: request.mode,
+      waypoints: request.waypoints.map((waypoint) => ({
+        position: [waypoint.position.lng, waypoint.position.lat],
+      })),
+    };
+    if (request.city !== undefined) payload.city = request.city;
+    return ["route", "--json", JSON.stringify(payload)];
+  }
+
   const args = [
     "route",
     "--from", formatPosition(request.origin.position),
@@ -131,9 +150,6 @@ export function buildAmapArgs(context) {
     "--to-name", request.destination.name,
     "--type", request.mode,
   ];
-  if (request.waypoints.length > 0) {
-    args.push("--waypoints", request.waypoints.map((waypoint) => formatPosition(waypoint.position)).join(","));
-  }
   if (request.city !== undefined) args.push("--city", request.city);
   return args;
 }
@@ -350,7 +366,10 @@ export function executeAmapRequest(context, {
   }
 
   try {
-    const processResult = runCommand("amap-gui", buildAmapArgs(request), {
+    const redactions = credentialValues(env);
+    const commandRequest = redactReturnedStrings(request, redactions);
+    const args = buildAmapArgs(commandRequest).map((arg) => redactString(arg, redactions));
+    const processResult = runCommand("amap-gui", args, {
       encoding: "utf8",
       env,
       shell: false,

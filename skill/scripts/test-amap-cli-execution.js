@@ -198,15 +198,18 @@ const drivingWithWaypoints = {
     { name: "洋人街口", position: { lng: 100.163, lat: 25.697 } },
   ],
 };
-assert.deepEqual(buildAmapArgs(drivingWithWaypoints), [
-  "route",
-  "--from", "100.165,25.689",
-  "--from-name", "大理古城南门",
-  "--to", "100.1602,25.7001",
-  "--to-name", "北门市场",
-  "--type", "driving",
-  "--waypoints", "100.162,25.695,100.163,25.697",
-]);
+const waypointArgs = buildAmapArgs(drivingWithWaypoints);
+assert.deepEqual(waypointArgs.slice(0, 2), ["route", "--json"]);
+assert.equal(waypointArgs.length, 3);
+assert.deepEqual(JSON.parse(waypointArgs[2]), {
+  from: { name: "大理古城南门", position: [100.165, 25.689] },
+  to: { name: "北门市场", position: [100.1602, 25.7001] },
+  type: "driving",
+  waypoints: [
+    { position: [100.162, 25.695] },
+    { position: [100.163, 25.697] },
+  ],
+});
 const normalizedDrivingRoute = normalizeAmapOutput(
   drivingWithWaypoints,
   { ...routeProviderOutput, data: { ...routeProviderOutput.data, type: "driving" } },
@@ -218,6 +221,93 @@ assert.deepEqual(normalizedDrivingRoute.waypoints, [
   { name: "洋人街口", position: { lng: 100.163, lat: 25.697, system: "gcj02" } },
 ]);
 assertNoSecrets(normalizedDrivingRoute);
+
+const secretNamedDrivingRoute = {
+  ...drivingWithWaypoints,
+  origin: {
+    ...drivingWithWaypoints.origin,
+    name: `${secrets.AMAP_KEY} 大理古城南门`,
+  },
+  destination: {
+    ...drivingWithWaypoints.destination,
+    name: `${secrets.AMAP_SECURITY_KEY} 北门市场`,
+  },
+  waypoints: drivingWithWaypoints.waypoints.map((waypoint, index) => ({
+    ...waypoint,
+    name: `${index === 0 ? secrets.AMAP_KEY : secrets.AMAP_SECURITY_KEY} ${waypoint.name}`,
+  })),
+};
+const secretNamedRouteResult = executeAmapRequest(secretNamedDrivingRoute, {
+  env: { ...secrets },
+  commandExists: () => true,
+  now: () => checkedAt,
+  runCommand: (command, args, options) => {
+    assert.equal(command, "amap-gui");
+    assert.equal(options.shell, false);
+    assert.equal(options.timeout, 35_000);
+    assert.deepEqual(args.slice(0, 2), ["route", "--json"]);
+    for (const arg of args) assertNoSecrets(arg);
+    assert.deepEqual(JSON.parse(args[2]), {
+      from: { name: "[REDACTED] 大理古城南门", position: [100.165, 25.689] },
+      to: { name: "[REDACTED] 北门市场", position: [100.1602, 25.7001] },
+      type: "driving",
+      waypoints: [
+        { position: [100.162, 25.695] },
+        { position: [100.163, 25.697] },
+      ],
+    });
+    return {
+      status: 0,
+      stdout: JSON.stringify({
+        ...routeProviderOutput,
+        data: {
+          ...routeProviderOutput.data,
+          type: "driving",
+          from: { ...routeProviderOutput.data.from, name: secretNamedDrivingRoute.origin.name },
+          to: { ...routeProviderOutput.data.to, name: secretNamedDrivingRoute.destination.name },
+        },
+      }),
+      stderr: "",
+    };
+  },
+});
+assert.equal(secretNamedRouteResult.status, "ok");
+assert.equal(secretNamedRouteResult.origin.name, "[REDACTED] 大理古城南门");
+assert.equal(secretNamedRouteResult.destination.name, "[REDACTED] 北门市场");
+assert.deepEqual(secretNamedRouteResult.waypoints, [
+  { name: "[REDACTED] 人民路口", position: { lng: 100.162, lat: 25.695, system: "gcj02" } },
+  { name: "[REDACTED] 洋人街口", position: { lng: 100.163, lat: 25.697, system: "gcj02" } },
+]);
+assertNoSecrets(secretNamedRouteResult);
+
+const escapedCredentials = {
+  AMAP_KEY: "json\"web-secret",
+  AMAP_SECURITY_KEY: "json\\security-secret",
+};
+const escapedSecretRequest = {
+  ...drivingWithWaypoints,
+  origin: { ...drivingWithWaypoints.origin, name: `${escapedCredentials.AMAP_KEY} 南门` },
+  destination: { ...drivingWithWaypoints.destination, name: `${escapedCredentials.AMAP_SECURITY_KEY} 北门` },
+};
+const escapedSecretResult = executeAmapRequest(escapedSecretRequest, {
+  env: escapedCredentials,
+  commandExists: () => true,
+  now: () => checkedAt,
+  runCommand: (_command, args) => {
+    const payload = JSON.parse(args[2]);
+    assert.equal(payload.from.name, "[REDACTED] 南门");
+    assert.equal(payload.to.name, "[REDACTED] 北门");
+    return {
+      status: 0,
+      stdout: JSON.stringify({
+        ...routeProviderOutput,
+        data: { ...routeProviderOutput.data, type: "driving" },
+      }),
+      stderr: "",
+    };
+  },
+});
+assert.equal(escapedSecretResult.status, "ok");
 
 const transitRoute = {
   ...routeRequest,

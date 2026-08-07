@@ -194,6 +194,36 @@ function providerRoutePointMatches(left, right) {
     && providerText(left.name) === providerText(right.name);
 }
 
+function providerPositionMatchesRequest(providerValue, requestValue) {
+  const position = providerPosition(providerValue);
+  return position
+    && position.lng === requestValue.lng
+    && position.lat === requestValue.lat
+    ? position
+    : null;
+}
+
+function normalizeRouteWaypoints(stateWaypoints, requestWaypoints) {
+  if (requestWaypoints.length === 0) {
+    if (stateWaypoints === undefined) return [];
+    if (Array.isArray(stateWaypoints) && stateWaypoints.length === 0) return [];
+    throw new Error(PROVIDER_ERROR_MESSAGE);
+  }
+  if (!Array.isArray(stateWaypoints) || stateWaypoints.length !== requestWaypoints.length) {
+    throw new Error(PROVIDER_ERROR_MESSAGE);
+  }
+  return stateWaypoints.map((stateWaypoint, index) => {
+    if (!isPlainObject(stateWaypoint)) throw new Error(PROVIDER_ERROR_MESSAGE);
+    const requestWaypoint = requestWaypoints[index];
+    const position = providerPositionMatchesRequest(stateWaypoint.position, requestWaypoint.position);
+    if (!position) throw new Error(PROVIDER_ERROR_MESSAGE);
+    return {
+      name: providerText(stateWaypoint.name) || requestWaypoint.name,
+      position,
+    };
+  });
+}
+
 function credentialValues(env) {
   const values = [];
   for (const name of ["AMAP_KEY", "AMAP_SECURITY_KEY"]) {
@@ -286,8 +316,9 @@ function normalizeRouteOutput(request, data, checkedAt) {
   if (data.to !== undefined && !providerRoutePointMatches(data.to, state.to)) {
     throw new Error(PROVIDER_ERROR_MESSAGE);
   }
-  const originPosition = providerPosition(state.from.position);
-  const destinationPosition = providerPosition(state.to.position);
+  const originPosition = providerPositionMatchesRequest(state.from.position, request.origin.position);
+  const destinationPosition = providerPositionMatchesRequest(state.to.position, request.destination.position);
+  const waypoints = normalizeRouteWaypoints(state.waypoints, request.waypoints);
   const distanceMeters = providerNumber(data.summary.distance);
   const durationSeconds = providerNumber(data.summary.time);
   if (!originPosition || !destinationPosition || distanceMeters === null || durationSeconds === null) {
@@ -323,10 +354,7 @@ function normalizeRouteOutput(request, data, checkedAt) {
       name: providerText(state.to.name) || request.destination.name,
       position: destinationPosition,
     },
-    waypoints: request.waypoints.map((waypoint) => ({
-      name: waypoint.name,
-      position: requestPosition(waypoint.position),
-    })),
+    waypoints,
     mode: request.mode,
     distanceMeters,
     durationSeconds,

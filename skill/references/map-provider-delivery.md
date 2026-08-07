@@ -74,6 +74,8 @@ route mode 只接受 `driving`、`walking`、`riding`、`transit`。公交必须
 
 执行层按高德官方 CLI 当前响应契约规范化字段：`searchPOI` 的省、市、区分别来自 POI 的 `pname`、`cityname`、`adname`；路线起点、终点和交通方式来自 `data.state.from`、`data.state.to`、`data.state.type`，距离、时间、费用和步骤来自 `data.summary`。旧的同名 flat 字段不覆盖官方字段；若 route 响应同时携带冲突的 flat `data.from`、`data.to` 或 `data.type`，或 `data.state.type` 与请求方式不一致，本次结果返回 `provider-error`，不能形成 `performed: true` 或 verified 路线事实。
 
+路线 success 还必须与本次 validated request 绑定：`state.from.position` 和 `state.to.position` 必须分别与请求起终点完全一致；有 driving waypoints 时，`state.waypoints` 必须按相同数量、顺序和 GCJ-02 坐标逐项一致。返回的 waypoint position 来自已经完成绑定的 provider state；provider 未返回 waypoint name 时才沿用 validated request name。无 waypoint 请求兼容官方空数组与缺失 `state.waypoints`，但 provider 返回额外 waypoint、遗漏请求 waypoint 或改变顺序/坐标都返回 `provider-error`，不能形成 verified 路线事实。
+
 - `status: "ok"` 且 `performed: true`：本次调用产生了可用的 allowlist provider 事实。
 - `missing-credentials` / `unavailable`：没有执行 provider 请求。
 - `provider-error`：请求没有形成可用事实；保留原候选或顺序并进入公开地图人工复核。

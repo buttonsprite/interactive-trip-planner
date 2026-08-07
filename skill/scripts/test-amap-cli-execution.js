@@ -210,6 +210,13 @@ const drivingWithWaypoints = {
     { name: "洋人街口", position: { lng: 100.163, lat: 25.697 } },
   ],
 };
+const drivingProviderState = {
+  ...routeProviderOutput.data.state,
+  type: "driving",
+  waypoints: drivingWithWaypoints.waypoints.map((waypoint) => ({
+    position: [waypoint.position.lng, waypoint.position.lat],
+  })),
+};
 const waypointArgs = buildAmapArgs(drivingWithWaypoints);
 assert.deepEqual(waypointArgs.slice(0, 2), ["route", "--json"]);
 assert.equal(waypointArgs.length, 3);
@@ -228,7 +235,7 @@ const normalizedDrivingRoute = normalizeAmapOutput(
     ...routeProviderOutput,
     data: {
       ...routeProviderOutput.data,
-      state: { ...routeProviderOutput.data.state, type: "driving" },
+      state: drivingProviderState,
     },
   },
   checkedAt,
@@ -239,6 +246,30 @@ assert.deepEqual(normalizedDrivingRoute.waypoints, [
   { name: "洋人街口", position: { lng: 100.163, lat: 25.697, system: "gcj02" } },
 ]);
 assertNoSecrets(normalizedDrivingRoute);
+
+const providerNamedDrivingRoute = normalizeAmapOutput(
+  drivingWithWaypoints,
+  {
+    ...routeProviderOutput,
+    data: {
+      ...routeProviderOutput.data,
+      state: {
+        ...drivingProviderState,
+        waypoints: [
+          { ...drivingProviderState.waypoints[0], name: "高德人民路口" },
+          drivingProviderState.waypoints[1],
+        ],
+      },
+    },
+  },
+  checkedAt,
+  { env: secrets },
+);
+assert.deepEqual(providerNamedDrivingRoute.waypoints, [
+  { name: "高德人民路口", position: { lng: 100.162, lat: 25.695, system: "gcj02" } },
+  { name: "洋人街口", position: { lng: 100.163, lat: 25.697, system: "gcj02" } },
+]);
+assertNoSecrets(providerNamedDrivingRoute);
 
 const secretNamedDrivingRoute = {
   ...drivingWithWaypoints,
@@ -281,10 +312,9 @@ const secretNamedRouteResult = executeAmapRequest(secretNamedDrivingRoute, {
         data: {
           ...routeProviderOutput.data,
           state: {
-            ...routeProviderOutput.data.state,
-            type: "driving",
-            from: { ...routeProviderOutput.data.state.from, name: secretNamedDrivingRoute.origin.name },
-            to: { ...routeProviderOutput.data.state.to, name: secretNamedDrivingRoute.destination.name },
+            ...drivingProviderState,
+            from: { ...drivingProviderState.from, name: secretNamedDrivingRoute.origin.name },
+            to: { ...drivingProviderState.to, name: secretNamedDrivingRoute.destination.name },
           },
         },
       }),
@@ -324,7 +354,7 @@ const escapedSecretResult = executeAmapRequest(escapedSecretRequest, {
         ...routeProviderOutput,
         data: {
           ...routeProviderOutput.data,
-          state: { ...routeProviderOutput.data.state, type: "driving" },
+          state: drivingProviderState,
         },
       }),
       stderr: "",
@@ -455,6 +485,118 @@ const mismatchedRoute = executeAmapRequest(routeRequest, {
 assert.equal(mismatchedRoute.status, "provider-error");
 assert.equal(mismatchedRoute.message, providerErrorMessage);
 assertNoSecrets(mismatchedRoute);
+
+for (const [label, stateOverride] of [
+  ["origin", { from: { name: "上海外滩", position: [121.490317, 31.241701] } }],
+  ["destination", { to: { name: "上海虹桥站", position: [121.326997, 31.200547] } }],
+]) {
+  const mismatchedEndpoint = executeAmapRequest(routeRequest, {
+    env: { ...secrets },
+    commandExists: () => true,
+    runCommand: () => ({
+      status: 0,
+      stdout: JSON.stringify({
+        ...routeProviderOutput,
+        data: {
+          ...routeProviderOutput.data,
+          state: {
+            ...routeProviderOutput.data.state,
+            ...stateOverride,
+          },
+        },
+      }),
+      stderr: "",
+    }),
+  });
+  assert.equal(mismatchedEndpoint.status, "provider-error", label);
+  assert.equal(mismatchedEndpoint.message, providerErrorMessage, label);
+  assertNoSecrets(mismatchedEndpoint);
+}
+
+const missingProviderWaypoints = executeAmapRequest(drivingWithWaypoints, {
+  env: { ...secrets },
+  commandExists: () => true,
+  runCommand: () => ({
+    status: 0,
+    stdout: JSON.stringify({
+      ...routeProviderOutput,
+      data: {
+        ...routeProviderOutput.data,
+        state: {
+          ...drivingProviderState,
+          waypoints: [],
+        },
+      },
+    }),
+    stderr: "",
+  }),
+});
+assert.equal(missingProviderWaypoints.status, "provider-error");
+assert.equal(missingProviderWaypoints.message, providerErrorMessage);
+assertNoSecrets(missingProviderWaypoints);
+
+const reorderedProviderWaypoints = executeAmapRequest(drivingWithWaypoints, {
+  env: { ...secrets },
+  commandExists: () => true,
+  runCommand: () => ({
+    status: 0,
+    stdout: JSON.stringify({
+      ...routeProviderOutput,
+      data: {
+        ...routeProviderOutput.data,
+        state: {
+          ...drivingProviderState,
+          waypoints: [...drivingProviderState.waypoints].reverse(),
+        },
+      },
+    }),
+    stderr: "",
+  }),
+});
+assert.equal(reorderedProviderWaypoints.status, "provider-error");
+assert.equal(reorderedProviderWaypoints.message, providerErrorMessage);
+assertNoSecrets(reorderedProviderWaypoints);
+
+const routeWithoutProviderWaypointField = normalizeAmapOutput(
+  routeRequest,
+  {
+    ...routeProviderOutput,
+    data: {
+      ...routeProviderOutput.data,
+      state: {
+        from: routeProviderOutput.data.state.from,
+        to: routeProviderOutput.data.state.to,
+        type: routeProviderOutput.data.state.type,
+      },
+    },
+  },
+  checkedAt,
+  { env: secrets },
+);
+assert.deepEqual(routeWithoutProviderWaypointField.waypoints, []);
+assertNoSecrets(routeWithoutProviderWaypointField);
+
+const unexpectedProviderWaypoint = executeAmapRequest(routeRequest, {
+  env: { ...secrets },
+  commandExists: () => true,
+  runCommand: () => ({
+    status: 0,
+    stdout: JSON.stringify({
+      ...routeProviderOutput,
+      data: {
+        ...routeProviderOutput.data,
+        state: {
+          ...routeProviderOutput.data.state,
+          waypoints: [{ position: [100.162, 25.695] }],
+        },
+      },
+    }),
+    stderr: "",
+  }),
+});
+assert.equal(unexpectedProviderWaypoint.status, "provider-error");
+assert.equal(unexpectedProviderWaypoint.message, providerErrorMessage);
+assertNoSecrets(unexpectedProviderWaypoint);
 
 const conflictingLegacyRoute = executeAmapRequest(routeRequest, {
   env: { ...secrets },

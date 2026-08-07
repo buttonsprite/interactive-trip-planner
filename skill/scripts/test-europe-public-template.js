@@ -2,6 +2,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -18,8 +19,10 @@ const eventsPath = path.join(root, "data", "events.json");
 const tripDataPath = path.join(root, "maps", "assets", "trip-data.js");
 const onlineLogicPath = path.join(root, "docs", "online-logic", "map.md");
 const builderPath = path.join(scriptDir, "build-europe-public-template.js");
+const publicDeliveryPath = path.join(root, "maps", "assets", "trip-map-delivery.js");
+const canonicalDeliveryPath = path.resolve(root, "..", "guide-template", "maps", "assets", "trip-map-delivery.js");
 
-for (const file of [htmlPath, poiPath, itineraryPath, sourcesPath, eventsPath, tripDataPath, onlineLogicPath]) {
+for (const file of [htmlPath, poiPath, itineraryPath, sourcesPath, eventsPath, tripDataPath, onlineLogicPath, publicDeliveryPath, canonicalDeliveryPath]) {
   assert.ok(fs.existsSync(file) && fs.statSync(file).size > 0, `missing public template file: ${file}`);
 }
 
@@ -29,6 +32,28 @@ const pois = JSON.parse(fs.readFileSync(poiPath, "utf8"));
 const itinerary = JSON.parse(fs.readFileSync(itineraryPath, "utf8"));
 const sources = JSON.parse(fs.readFileSync(sourcesPath, "utf8"));
 const events = JSON.parse(fs.readFileSync(eventsPath, "utf8"));
+const publicDelivery = fs.readFileSync(publicDeliveryPath, "utf8");
+const canonicalDelivery = fs.readFileSync(canonicalDeliveryPath, "utf8");
+assert.equal(
+  crypto.createHash("sha256").update(publicDelivery).digest("hex"),
+  crypto.createHash("sha256").update(canonicalDelivery).digest("hex"),
+  "public delivery runtime must be a byte-identical copy of the canonical light runtime",
+);
+const deliveryReferences = (html.match(/<script src="\.\/assets\/trip-map-delivery\.js"><\/script>/g) || []).length;
+const deliveryMarkers = (html.match(/REDSkill embedded public trip-map-delivery\.js/g) || []).length;
+assert.equal(deliveryReferences + deliveryMarkers, 1, "public map must contain exactly one delivery runtime");
+if (deliveryMarkers) assert.equal(deliveryReferences, 0, "built public map must not retain an external delivery runtime");
+assert.equal((html.match(/id="open-map-export"/g) || []).length, 1, "public map needs exactly one export entry");
+assert.equal((html.match(/id="map-export-dialog"/g) || []).length, 1, "public map needs exactly one export dialog");
+assert.match(html, /<dialog\b[^>]*\bid="map-export-dialog"/);
+assert.match(html, /TripMapDelivery\.buildPlaceLinks\(/);
+assert.match(html, /TripMapDelivery\.buildDayHandoffs\(/);
+assert.match(html, /TripMapDelivery\.buildMyMapsFiles\(/);
+assert.match(html, /const currentDeliveryState = \(\) => \{/);
+assert.match(html, /assignments\[poi\.id\] = getPoiAssignment\(poi\.id\)\?\.dayId \|\| ""/);
+assert.match(html, /getDayPois\(day\.id\)\.map\(\(\{ item \}\) => item\.id\)/);
+assert.match(html, /dirtyDays: \{ \.\.\.itineraryPlan\.dirtyDays \}/);
+assert.doesNotMatch(html, /google[^\n]{0,80}(routeStatus|routeReview)[^\n]{0,40}verified/i);
 const travelerEvents = events.map(({ sourceIds: _sourceIds, ...event }) => event);
 const dataMatch = html.match(/const PUBLIC_TRIP_DATA = (\{[\s\S]*?\});\n\n    const stops = PUBLIC_TRIP_DATA\.stops;/);
 assert.ok(dataMatch, "public HTML must expose a single replaceable PUBLIC_TRIP_DATA block");
@@ -559,6 +584,26 @@ const scripts = [...html.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/sc
   .filter((script) => script.trim());
 assert.equal(scripts.length, 1);
 new vm.Script(scripts[0], { filename: htmlPath });
+
+const currentDeliveryStateMatch = html.match(/const currentDeliveryState = \(\) => \{[\s\S]*?\n    \};/);
+assert.ok(currentDeliveryStateMatch, "public map must expose its current-state delivery adapter");
+const deliveryStateSandbox = {
+  pois: [{ id: "a" }, { id: "b" }, { id: "c" }],
+  itineraryDays: [{ id: "d1" }, { id: "d2" }],
+  priorities: { a: "S", c: "B" },
+  itineraryPlan: { dirtyDays: { d1: true } },
+  getPoiAssignment: (poiId) => ({ a: { dayId: "d1" }, b: null, c: { dayId: "d2" } })[poiId],
+  getDayPois: (dayId) => dayId === "d1"
+    ? [{ item: { id: "a" } }]
+    : [{ item: { id: "c" } }, { item: { id: "b" } }],
+};
+vm.runInNewContext(`${currentDeliveryStateMatch[0]}\nthis.currentDeliveryState = currentDeliveryState;`, deliveryStateSandbox);
+assert.deepEqual(JSON.parse(JSON.stringify(deliveryStateSandbox.currentDeliveryState())), {
+  assignments: { a: "d1", b: "", c: "d2" },
+  orders: { d1: ["a"], d2: ["c", "b"] },
+  priorities: { a: "S", c: "B" },
+  dirtyDays: { d1: true },
+});
 
 function runRealBuilderFixture({
   nextItinerary,

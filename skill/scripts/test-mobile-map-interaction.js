@@ -118,6 +118,10 @@ for (const token of [
   'id="mobile-change-summary-action"',
   'id="mobile-replan-action"',
   'id="mobile-replan-fallback"',
+  'id="open-map-export"',
+  'id="map-export-dialog"',
+  'id="close-map-export"',
+  'id="day-map-delivery"',
   'data-mobile-view="overview"',
   'data-mobile-view="day"',
   'data-mobile-view="detail"',
@@ -172,6 +176,9 @@ for (const pattern of [
   /changes\.map\(\(change\) => `<li>\$\{escapeHtml\(describeItineraryChange\(change\)\)\}<\/li>`\)/,
   /const invalidateMapAfterViewportTransition = \(\) => \{[\s\S]*?requestAnimationFrame\([\s\S]*?map\.invalidateSize\(\{ pan: false \}\)/,
   /window\.addEventListener\("resize", \(\) => \{[\s\S]*?invalidateMapAfterViewportTransition\(\);/,
+  /@media \(max-width: 820px\)[\s\S]*?\.map-provider-action[\s\S]*?min-height:\s*44px/,
+  /@media \(max-width: 820px\)[\s\S]*?\.map-export-files button[\s\S]*?min-height:\s*44px/,
+  /@media \(max-width: 820px\)[\s\S]*?#close-map-export[\s\S]*?min-height:\s*44px[\s\S]*?(?:min-)?width:\s*44px/,
 ]) {
   assert.match(html, pattern, `missing mobile layout/behavior contract: ${pattern}`);
 }

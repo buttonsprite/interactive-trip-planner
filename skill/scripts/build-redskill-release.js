@@ -54,6 +54,7 @@ const sanitizeLeafletCss = (css) => css
   .replace(/\s*background-image:\s*url\(images\/marker-icon\.png\);/g, "\n\tbackground-image: none;");
 const leafletCss = sanitizeLeafletCss(readSource("assets", "guide-template-europe-public", "maps", "vendor", "leaflet", "leaflet.css"));
 const leafletJs = readSource("assets", "guide-template-europe-public", "maps", "vendor", "leaflet", "leaflet.js");
+const publicDeliveryJs = readSource("assets", "guide-template-europe-public", "maps", "assets", "trip-map-delivery.js");
 
 function replaceExactly(text, search, replacement, label) {
   if (!text.includes(search)) throw new Error(`missing ${label}`);
@@ -73,9 +74,9 @@ function inlinePublicMap() {
   );
   html = replaceExactly(
     html,
-    '  <script src="./vendor/leaflet/leaflet.js"></script>\n  <script>',
-    `  <script>\n    /* REDSkill embedded Leaflet JS */\n${leafletJs}\n`,
-    "public Leaflet script reference",
+    '  <script src="./vendor/leaflet/leaflet.js"></script>\n  <script src="./assets/trip-map-delivery.js"></script>\n  <script>',
+    `  <script>\n    /* REDSkill embedded Leaflet JS */\n${leafletJs}\n    /* REDSkill embedded public trip-map-delivery.js */\n${publicDeliveryJs}\n`,
+    "public Leaflet and delivery script references",
   );
   fs.writeFileSync(mapPath, html);
 }

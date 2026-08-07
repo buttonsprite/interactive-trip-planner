@@ -28,6 +28,31 @@ const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 assert.equal(packageJson.type, "module", 'package.json must declare "type": "module"');
 assert.equal(packageJson.version, "0.2.0", "Skill package must identify the 0.2.0 release");
 
+const publicMapPath = path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "itinerary-map.html");
+const publicDeliveryPath = path.join(skillRoot, "assets", "guide-template-europe-public", "maps", "assets", "trip-map-delivery.js");
+const canonicalDeliveryPath = path.join(skillRoot, "assets", "guide-template", "maps", "assets", "trip-map-delivery.js");
+for (const requiredPath of [publicMapPath, publicDeliveryPath, canonicalDeliveryPath]) {
+  assert.ok(fs.existsSync(requiredPath), `Missing public map delivery file: ${requiredPath}`);
+}
+assert.equal(
+  fs.readFileSync(publicDeliveryPath, "utf8"),
+  fs.readFileSync(canonicalDeliveryPath, "utf8"),
+  "public delivery runtime must match the canonical runtime",
+);
+const publicMapHtml = fs.readFileSync(publicMapPath, "utf8");
+const publicDeliveryReferences = (publicMapHtml.match(/<script src="\.\/assets\/trip-map-delivery\.js"><\/script>/g) || []).length;
+const publicDeliveryMarkers = (publicMapHtml.match(/REDSkill embedded public trip-map-delivery\.js/g) || []).length;
+assert.equal(publicDeliveryReferences + publicDeliveryMarkers, 1, "public map must contain exactly one delivery runtime");
+assert.equal((publicMapHtml.match(/id="open-map-export"/g) || []).length, 1, "public map must contain one export entry");
+assert.equal((publicMapHtml.match(/id="map-export-dialog"/g) || []).length, 1, "public map must contain one export dialog");
+if (publicDeliveryMarkers) {
+  assert.equal(publicDeliveryReferences, 0, "built public map must not retain an external delivery runtime");
+  assert.ok(
+    publicMapHtml.indexOf("REDSkill embedded public trip-map-delivery.js") < publicMapHtml.indexOf("const PUBLIC_TRIP_DATA ="),
+    "built public runtime must load before the public application script",
+  );
+}
+
 const requiredDiscoveryRuntimeFiles = [
   "scripts/test-first-visit-balance.js",
   "scripts/cli-json-input.js",

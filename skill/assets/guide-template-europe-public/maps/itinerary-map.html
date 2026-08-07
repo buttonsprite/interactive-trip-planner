@@ -1411,6 +1411,151 @@
       margin-top: 11px;
     }
 
+    .map-provider-action.is-primary,
+    .map-export-trigger {
+      color: #fff;
+      background: #1f4f4a;
+      border-color: #1f4f4a;
+    }
+
+    .map-export-trigger {
+      min-height: 38px;
+      margin-top: 12px;
+      padding: 8px 14px;
+      font: inherit;
+      font-weight: 700;
+      border: 1px solid #1f4f4a;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .day-map-delivery {
+      display: grid;
+      gap: 8px;
+      padding-top: 10px;
+      margin-top: 10px;
+      border-top: 1px solid #e2ddd0;
+    }
+
+    .day-map-delivery-status {
+      color: #5f594f;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .day-map-delivery-status.needs-review {
+      color: #9a3412;
+    }
+
+    .day-map-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .day-map-actions a,
+    .map-provider-action {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 7px 11px;
+      color: #174f4a;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid #b9c9c5;
+      border-radius: 999px;
+    }
+
+    .day-map-manual,
+    .map-action-disabled {
+      color: #6b6257;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .day-map-manual summary {
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .day-map-manual ul {
+      padding-left: 18px;
+      margin: 6px 0 0;
+    }
+
+    .map-export-dialog {
+      width: 100%;
+      max-width: none;
+      max-height: 100dvh;
+      padding: 20px;
+      color: inherit;
+      background: transparent;
+      border: 0;
+    }
+
+    .map-export-dialog::backdrop {
+      background: rgba(35, 31, 25, 0.62);
+    }
+
+    .map-export-panel {
+      max-width: 560px;
+      padding: 22px;
+      margin: min(12vh, 96px) auto 0;
+      background: #fffdf8;
+      border: 1px solid #d9d1c2;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(35, 31, 25, 0.22);
+    }
+
+    .map-export-heading {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .map-export-heading h2 {
+      margin: 0 0 8px;
+    }
+
+    #close-map-export {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      font-size: 22px;
+      background: transparent;
+      border: 1px solid #cfc7b9;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .map-export-files {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .map-export-files button {
+      min-height: 44px;
+      padding: 10px 12px;
+      color: #2f2a24;
+      font: inherit;
+      text-align: left;
+      background: #f7f1e6;
+      border: 1px solid #d4c9b8;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .map-export-feedback {
+      min-height: 1.5em;
+      color: #1f4f4a;
+    }
+
     .image-empty-actions {
       padding: 0 8px 10px;
     }
@@ -1998,6 +2143,29 @@
         resize: vertical;
       }
 
+      .map-provider-action,
+      .day-map-actions a,
+      .map-export-files button,
+      .map-export-trigger {
+        min-height: 44px;
+      }
+
+      #close-map-export {
+        min-width: 44px;
+        min-height: 44px;
+      }
+
+      .map-export-dialog {
+        padding: 12px;
+      }
+
+      .map-export-panel {
+        max-height: 82dvh;
+        padding: 18px;
+        margin-top: 6vh;
+        overflow-y: auto;
+      }
+
       aside.detail-mode {
         padding: 0;
       }
@@ -2287,6 +2455,7 @@
         <div class="metric"><strong>3</strong><span>节庆节点</span></div>
         <div class="metric"><strong id="poi-count">0</strong><span>吃喝玩 POI</span></div>
       </div>
+      <button class="map-export-trigger" id="open-map-export" type="button">导出到 Google My Maps</button>
       </div>
 
       <div class="section-title day-overview-section-title"><span class="desktop-only-label">每日行程路线</span><span class="mobile-only-label">全程安排</span></div>
@@ -2335,6 +2504,7 @@
           <header class="poi-detail-day-list-header">
             <strong id="poi-detail-day-heading">当天安排</strong>
             <span id="poi-detail-day-summary">请选择日期</span>
+            <div class="day-map-delivery" id="day-map-delivery" aria-live="polite"></div>
           </header>
           <div class="poi-detail-day-list" id="poi-detail-day-list"></div>
         </section>
@@ -2371,7 +2541,26 @@
     <div id="map" role="application" aria-label="公开旅行路线地图"></div>
   </main>
 
+  <dialog class="map-export-dialog" id="map-export-dialog" hidden aria-labelledby="map-export-title" aria-describedby="map-export-description">
+    <div class="map-export-panel">
+      <div class="map-export-heading">
+        <div>
+          <h2 id="map-export-title">导出到 Google My Maps</h2>
+          <p id="map-export-description">三个文件使用当前保存的地点顺序、日期归类和优先级；每次下载一个，避免浏览器拦截。</p>
+        </div>
+        <button id="close-map-export" type="button" aria-label="关闭导出窗口">×</button>
+      </div>
+      <div class="map-export-files">
+        <button type="button" data-export-map-file="places.csv">下载 places.csv</button>
+        <button type="button" data-export-map-file="itinerary.kml">下载 itinerary.kml</button>
+        <button type="button" data-export-map-file="README.md">下载 README.md</button>
+      </div>
+      <p class="map-export-feedback" id="map-export-feedback" role="status" aria-live="polite"></p>
+    </div>
+  </dialog>
+
   <script src="./vendor/leaflet/leaflet.js"></script>
+  <script src="./assets/trip-map-delivery.js"></script>
   <script>
     // Public data only. The interaction shell is copied from the accepted Europe map.
     const PUBLIC_TRIP_DATA = {
@@ -11082,6 +11271,38 @@
       .filter(({ assignment }) => assignment?.dayId === dayId)
       .sort((left, right) => left.assignment.order - right.assignment.order);
 
+    const currentDeliveryState = () => {
+      const assignments = {};
+      for (const poi of pois) assignments[poi.id] = getPoiAssignment(poi.id)?.dayId || "";
+      const orders = Object.fromEntries(itineraryDays.map((day) => [
+        day.id,
+        getDayPois(day.id).map(({ item }) => item.id)
+      ]));
+      return {
+        assignments,
+        orders,
+        priorities: { ...priorities },
+        dirtyDays: { ...itineraryPlan.dirtyDays }
+      };
+    };
+
+    const currentDeliveryTrip = () => ({
+      ...PUBLIC_TRIP_DATA.trip,
+      pois,
+      days: itineraryDays.map((day) => ({
+        ...day,
+        routeStatus: "unverified",
+        routeReview: { status: "unverified" },
+        routeStops: getDayPois(day.id).map(({ item, assignment }) => ({
+          poiId: item.id,
+          order: assignment.order
+        })),
+        candidates: pois
+          .filter((item) => item.city === day.city && !getPoiAssignment(item.id))
+          .map((item) => ({ poiId: item.id }))
+      }))
+    });
+
     const hasNumberedPoisForDay = (dayId) => getDayPois(dayId)
       .some(({ assignment }) => Number(assignment.order) > 0);
 
@@ -11385,6 +11606,21 @@
 
     const renderHostedEvents = (item) => renderHostedEventsForItem(tripEvents, item);
 
+    const poiMapProviderActionsHtml = (item) => {
+      const links = TripMapDelivery.buildPlaceLinks(item, {
+        region: PUBLIC_TRIP_DATA.trip.countryCode || "",
+        source: PUBLIC_TRIP_DATA.trip.slug
+      });
+      const ordered = [links.primary, links.amap, links.google]
+        .filter((link, index, items) => link && items.findIndex((candidate) => candidate?.url === link.url) === index);
+      if (!ordered.length) {
+        return '<span class="map-action-disabled">请复制地点名称到地图中手动查找 / Copy the place name to your map</span>';
+      }
+      return ordered.map((link, index) => `
+        <a class="map-provider-action ${index === 0 ? "is-primary" : ""}" href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" data-map-provider="${escapeHtml(link.provider)}">${escapeHtml(link.label)}</a>
+      `).join("");
+    };
+
     const poiDetailHtml = (item) => {
       const meta = poiCategories[item.category];
       const officialLabel = safePublicUrl(item.officialUrl || officialUrls[item.name]) ? "打开官网" : "官网搜索";
@@ -11409,6 +11645,7 @@
             <a href="${urls.xhs}" target="_blank" rel="noopener noreferrer">小红书</a>
             <a href="${urls.map}" target="_blank" rel="noopener noreferrer">外部地图</a>
             ${urls.official ? `<a href="${escapeHtml(urls.official)}" target="_blank" rel="noopener noreferrer">${officialLabel}</a>` : ""}
+            ${poiMapProviderActionsHtml(item)}
           </div>
         </section>
         <section class="poi-detail-section">
@@ -12822,12 +13059,71 @@
       };
     };
 
+    const getDeliveryTransitSegments = (day, dayPois) => {
+      if (!day || itineraryPlan.dirtyDays[day.id]) return [];
+      return dayPois.slice(1).flatMap(({ item: toItem }, index) => {
+        const fromItem = dayPois[index].item;
+        const fromEventIndex = findMatchingDayEventIndex(day, fromItem);
+        const toEventIndex = findMatchingDayEventIndex(day, toItem);
+        const reviewedTransit = fromEventIndex >= 0 && toEventIndex === fromEventIndex + 1
+          ? day.events[fromEventIndex].transitToNext
+          : null;
+        if (!reviewedTransit?.mode) return [];
+        return [{
+          fromPoiId: fromItem.id,
+          toPoiId: toItem.id,
+          mode: reviewedTransit.mode
+        }];
+      });
+    };
+
+    const renderDayMapDelivery = (dayId) => {
+      const container = document.getElementById("day-map-delivery");
+      const day = dayById[dayId];
+      if (!container || !day) {
+        if (container) container.innerHTML = "";
+        return;
+      }
+      const dayPois = getDayPois(dayId);
+      const deliveryDay = {
+        ...day,
+        routeStatus: "unverified",
+        routeReview: { status: "unverified" },
+        orderedPoiIds: dayPois.map(({ item }) => item.id),
+        transitSegments: getDeliveryTransitSegments(day, dayPois)
+      };
+      const handoffs = TripMapDelivery.buildDayHandoffs(deliveryDay, pois, {
+        orderedPoiIds: deliveryDay.orderedPoiIds,
+        dirty: Boolean(itineraryPlan.dirtyDays[dayId]),
+        source: PUBLIC_TRIP_DATA.trip.slug
+      });
+      const links = [handoffs.overview, ...handoffs.routeLinks].filter(Boolean);
+      const statusLabels = {
+        verified: "路线已复核 / Route verified",
+        partial: "路线部分复核 / Route partially verified",
+        unverified: itineraryPlan.dirtyDays[dayId]
+          ? "路线待重新复核 / Route needs review"
+          : "路线待复核 / Route review pending"
+      };
+      const manualItems = handoffs.manualItems || [];
+      container.innerHTML = `
+        <div class="day-map-delivery-status ${handoffs.routeStatus === "verified" ? "" : "needs-review"}">${escapeHtml(statusLabels[handoffs.routeStatus] || statusLabels.unverified)}</div>
+        <div class="day-map-actions">
+          ${links.length
+            ? links.map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" data-day-handoff="${escapeHtml(link.provider)}">${escapeHtml(link.label)}</a>`).join("")
+            : '<span class="map-action-disabled">当前顺序没有可安全直接打开的路线 / No safe direct route for the current order</span>'}
+        </div>
+        ${manualItems.length ? `<details class="day-map-manual"><summary>需要手动查找 ${manualItems.length} 项 / Manual lookup ${manualItems.length}</summary><ul>${manualItems.map((manual) => `<li>${escapeHtml(manual.name)} · ${escapeHtml(manual.provider === "amap" ? "高德地图" : "Google Maps")}</li>`).join("")}</ul></details>` : ""}
+      `;
+    };
+
     const renderPoiDetailDayList = (dayId) => {
       const day = dayById[dayId];
       if (!day) {
         poiDetailDayHeading.textContent = "当天安排";
         poiDetailDaySummary.textContent = "请选择日期";
         poiDetailDaySummary.classList.remove("needs-reroute");
+        renderDayMapDelivery("");
         poiDetailDayList.innerHTML = '<div class="poi-detail-day-list-empty">从左侧选择日期，查看当天已经安排的地点。</div>';
         return;
       }
@@ -12845,6 +13141,7 @@
       poiDetailDayHeading.innerHTML = `<span class="desktop-only-label">${escapeHtml(day.short)}</span><span class="mobile-only-label">当天安排</span>`;
       poiDetailDaySummary.textContent = `${cityLabels[day.city] || day.city} · ${formatScheduledPlacesSummary(dayPois)}${cityEventNoticeSummary ? ` · ${cityEventNoticeSummary}` : ""}${needsReroute ? " · 路线需要重新安排" : ""}`;
       poiDetailDaySummary.classList.toggle("needs-reroute", needsReroute);
+      renderDayMapDelivery(dayId);
       if (day.city === "Transit") {
         poiDetailDayList.innerHTML = composeDayListEventSections(
           cityEventNoticesHtml,
@@ -13303,6 +13600,66 @@
       if (event.key === "Escape" && detailPointerSort) {
         event.preventDefault();
         finishDetailPointerSort(false);
+      }
+    });
+
+    const mapExportDialog = document.getElementById("map-export-dialog");
+    const mapExportFeedback = document.getElementById("map-export-feedback");
+    let mapExportReturnFocus = null;
+
+    const openMapExportDialog = (trigger) => {
+      mapExportReturnFocus = trigger || document.activeElement;
+      mapExportFeedback.textContent = "";
+      mapExportDialog.hidden = false;
+      mapExportDialog.showModal();
+      mapExportDialog.querySelector("[data-export-map-file]")?.focus();
+    };
+
+    const closeMapExportDialog = () => {
+      if (mapExportDialog.open) mapExportDialog.close();
+      mapExportDialog.hidden = true;
+      mapExportReturnFocus?.focus();
+    };
+
+    const downloadMapExportFile = (fileName) => {
+      try {
+        const files = TripMapDelivery.buildMyMapsFiles({
+          trip: currentDeliveryTrip(),
+          state: currentDeliveryState(),
+          locale: PUBLIC_TRIP_DATA.trip.language === "en" ? "en" : "zh-CN"
+        });
+        if (!Object.hasOwn(files, fileName)) throw new Error("unknown export file");
+        const mimeType = fileName.endsWith(".csv")
+          ? "text/csv;charset=utf-8"
+          : fileName.endsWith(".kml")
+            ? "application/vnd.google-earth.kml+xml;charset=utf-8"
+            : "text/markdown;charset=utf-8";
+        const objectUrl = URL.createObjectURL(new Blob([files[fileName]], { type: mimeType }));
+        const anchor = document.createElement("a");
+        anchor.href = objectUrl;
+        anchor.download = fileName;
+        anchor.click();
+        URL.revokeObjectURL(objectUrl);
+        mapExportFeedback.textContent = `${fileName} 已开始下载 / Download started`;
+      } catch {
+        mapExportFeedback.textContent = "暂时无法生成导出文件，请稍后重试 / Export unavailable";
+      }
+    };
+
+    document.getElementById("open-map-export").addEventListener("click", (event) => {
+      openMapExportDialog(event.currentTarget);
+    });
+    document.getElementById("close-map-export").addEventListener("click", closeMapExportDialog);
+    mapExportDialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      closeMapExportDialog();
+    });
+    mapExportDialog.addEventListener("click", (event) => {
+      const fileButton = event.target.closest("[data-export-map-file]");
+      if (fileButton) {
+        downloadMapExportFile(fileButton.getAttribute("data-export-map-file"));
+      } else if (event.target === mapExportDialog) {
+        closeMapExportDialog();
       }
     });
 

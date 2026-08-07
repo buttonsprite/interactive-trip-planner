@@ -13,6 +13,9 @@ function parseTemplateRoot(args) {
 }
 
 const root = parseTemplateRoot(process.argv.slice(2));
+const canonicalDeliveryPath = path.resolve(defaultRoot, "..", "guide-template", "maps", "assets", "trip-map-delivery.js");
+const publicDeliveryPath = path.join(root, "maps", "assets", "trip-map-delivery.js");
+const canonicalDeliveryRuntime = fs.readFileSync(canonicalDeliveryPath, "utf8");
 const sourcePois = JSON.parse(fs.readFileSync(path.join(root, "data", "pois.json"), "utf8"));
 const sourceItinerary = JSON.parse(fs.readFileSync(path.join(root, "data", "itinerary.json"), "utf8"));
 const sourceEvents = JSON.parse(fs.readFileSync(path.join(root, "data", "events.json"), "utf8"));
@@ -379,6 +382,7 @@ if (dataStart < 0 || aliasStart < 0) throw new Error("canonical HTML is missing 
 const nextHtml = `${html.slice(0, dataStart)}const PUBLIC_TRIP_DATA = ${serializeForInlineScript(directTrip, 2)};\n\n${html.slice(aliasStart)}`;
 
 // Complete both outputs and all foreseeable validation before the first real write.
+fs.writeFileSync(publicDeliveryPath, canonicalDeliveryRuntime);
 fs.writeFileSync(path.join(root, "maps", "assets", "trip-data.js"), output);
 fs.writeFileSync(htmlPath, nextHtml);
 

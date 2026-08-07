@@ -84,8 +84,15 @@ function inlineLightMap() {
   const mapPath = path.join(targetSkillRoot, "assets", "guide-template", "maps", "itinerary-map.html");
   const coreCss = readSource("assets", "guide-template", "maps", "assets", "trip-map-core.css");
   const stateJs = readSource("assets", "guide-template", "maps", "assets", "trip-map-state.js");
+  const deliveryJs = readSource("assets", "guide-template", "maps", "assets", "trip-map-delivery.js");
   const coreJs = readSource("assets", "guide-template", "maps", "assets", "trip-map-core.js");
   let html = fs.readFileSync(mapPath, "utf8");
+  html = replaceExactly(
+    html,
+    '  <script src="assets/trip-map-delivery.js"></script>',
+    `  <script>\n    /* REDSkill embedded trip-map-delivery.js */\n${deliveryJs}\n  </script>`,
+    "light delivery script reference",
+  );
   html = replaceExactly(
     html,
     '  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">',

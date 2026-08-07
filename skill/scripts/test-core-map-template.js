@@ -34,16 +34,39 @@ const requiredHtml = [
   'id="change-summary"',
   'id="undo-change"',
   'id="request-replan"',
+  'id="open-map-export"',
+  'id="map-export-dialog"',
+  'data-map-provider',
+  'data-day-handoff',
+  'data-export-file',
   'id="replan-dialog"',
   'id="impact-dialog"',
 ];
 
 for (const token of requiredHtml) {
-  assert.ok(html.includes(token), `missing template token: ${token}`);
+  const surface = token.startsWith("data-") ? `${html}\n${core}` : html;
+  assert.ok(surface.includes(token), `missing template token: ${token}`);
 }
 
 assert.match(html, /trip-map-state\.js/);
+assert.match(html, /trip-map-delivery\.js/);
 assert.match(html, /trip-map-core\.js/);
+const stateScriptIndex = Math.max(
+  html.indexOf('assets/trip-map-state.js'),
+  html.indexOf('REDSkill embedded trip-map-state.js'),
+);
+const deliveryScriptIndex = Math.max(
+  html.indexOf('assets/trip-map-delivery.js'),
+  html.indexOf('REDSkill embedded trip-map-delivery.js'),
+);
+const coreScriptIndex = Math.max(
+  html.indexOf('assets/trip-map-core.js'),
+  html.indexOf('REDSkill embedded trip-map-core.js'),
+);
+assert.ok(
+  stateScriptIndex >= 0 && stateScriptIndex < deliveryScriptIndex && deliveryScriptIndex < coreScriptIndex,
+  "light map scripts must load State, then Delivery, then Core",
+);
 assert.match(html, /trip-map-core\.css/);
 assert.doesNotMatch(travelerFacingHtml, />\s*POI\s*</);
 assert.doesNotMatch(travelerFacingHtml, /renderer|localStorage|themeProfile|JSON|schema|hash/);
@@ -67,6 +90,19 @@ assert.match(core, /navigator\.clipboard\.writeText/);
 assert.match(core, /需要重新安排/);
 assert.match(css, /--trip-accent/);
 assert.match(css, /@media \(max-width: 820px\)/);
+assert.match(css, /\.map-provider-action\.is-primary/);
+assert.match(css, /\.route-verification-status/);
+assert.match(css, /\.map-export-error/);
+assert.match(
+  css,
+  /@media \(max-width: 820px\)[\s\S]*?\.day-map-actions a[\s\S]*?min-height:\s*44px/,
+  "mobile handoff actions must expose a 44 px target",
+);
+assert.match(
+  css,
+  /@media \(max-width: 820px\)[\s\S]*?\.map-export-files button[\s\S]*?min-height:\s*44px/,
+  "mobile export actions must expose a 44 px target",
+);
 assert.doesNotMatch(html + core, /姓周桥|德盛饭店|Hin Bus Depot/);
 
 console.log("core map template contract passed");

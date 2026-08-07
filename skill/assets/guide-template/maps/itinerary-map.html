@@ -21,6 +21,7 @@
               <div class="trip-stat"><strong id="trip-place-count">0</strong><span>地点</span></div>
               <div class="trip-stat"><strong id="trip-city-count">0</strong><span>城市/区域</span></div>
             </div>
+            <button class="text-button primary map-export-trigger" id="open-map-export" type="button">导出到 Google My Maps</button>
           </header>
 
           <section class="section-block" aria-labelledby="days-heading">
@@ -95,10 +96,24 @@
     </div>
   </section>
 
+  <section class="dialog-backdrop" id="map-export-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="map-export-title" aria-describedby="map-export-description">
+    <div class="dialog-panel map-export-panel">
+      <div class="dialog-heading"><div><div class="section-kicker">保存当前地图安排</div><h2 id="map-export-title">导出到 Google My Maps</h2></div><button class="icon-button" id="close-map-export" type="button" aria-label="关闭导出窗口">×</button></div>
+      <p class="muted" id="map-export-description">每次下载一个文件，避免浏览器拦截多个下载。三个文件都会使用你当前保存的地点顺序和优先级。</p>
+      <div class="map-export-files">
+        <button class="text-button" type="button" data-export-file="places.csv">下载 places.csv</button>
+        <button class="text-button" type="button" data-export-file="itinerary.kml">下载 itinerary.kml</button>
+        <button class="text-button" type="button" data-export-file="README.md">下载 README.md</button>
+      </div>
+      <div class="map-export-error" id="map-export-error" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
   <script>
     window.TRIP_DATA = {
       slug: "core-map-example",
       title: "巴黎两日功能示例",
+      countryCode: "FR",
       summary: "用两天示例展示全程总览、当天安排、候选地点、修改撤销和正式重排请求。",
       map: { center: [48.8588, 2.3295], zoom: 13 },
       categories: { hotel: "住宿", art: "艺术", sight: "景点", food: "餐厅" },
@@ -121,6 +136,7 @@
   </script>
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="assets/trip-map-state.js"></script>
+  <script src="assets/trip-map-delivery.js"></script>
   <script src="assets/trip-map-core.js"></script>
   <script>
     window.TripMapCore.mount({ root: document.getElementById("trip-app"), trip: window.TRIP_DATA });

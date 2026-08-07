@@ -6,7 +6,7 @@
 
 - `maps/itinerary-map.html` 内嵌 `TRIP_DATA`，因此直接打开文件或通过本地服务打开都能读取旅行数据。
 - `data/pois.json` 和 `data/itinerary.json` 保存同一份结构化内容，供 Agent 规划和验证。
-- 脚本加载顺序是本地 Leaflet、`trip-map-state.js`、`trip-map-core.js`，最后挂载页面。
+- 脚本加载顺序是本地 Leaflet、`trip-map-state.js`、`trip-map-delivery.js`、`trip-map-core.js`，最后挂载页面。Delivery 只消费现有 Core 状态，不另建行程状态。
 - 真实底图来自 OpenStreetMap 瓦片；瓦片需要网络，地点、路线和列表不依赖远端脚本。
 
 ## 三级浏览
@@ -27,6 +27,20 @@
 - `transitSegments` 存在时显示已提供的相邻交通说明。
 - 缺少相邻交通时，用两点球面距离乘 1.25 生成“规划估算”，并要求出发前复核。
 - 用户修改某天后，原路线降低透明度并改成虚线；新增地点不会自动连接到路线。旧相邻交通和规划估算同时失效，统一显示“顺序或安排已调整，交通待复核”。
+
+## 地图交接与路线状态
+
+- 地点详情通过 `buildPlaceLinks` 生成地图入口；`countryCode: "CN"` 时优先高德，其他地区优先 Google Maps。高德只有 `mapProviderRefs.amap.status: "resolved"` 时才生成直接入口；两种 provider 都没有安全链接时显示“复制地点名称和地址”的手动搜索降级。
+- 每日摘要下通过 `buildDayHandoffs` 显示路线复核状态、可直接打开的路线分段和需要手动查找的地点。拆分后的每一段保留 runtime 返回的序号和 provider，不会因为部分地点缺少 provider 定位而隐藏 `manualItems`。
+- 当天顺序或归类被用户修改后，界面无条件显示“路线待重新复核”，即使原路线曾标记为已复核；外部路线链接只使用当前 `orders` 生成，打开后仍由对应地图重新计算。
+- 地点和路线链接都是浏览器 handoff，不调用付费 API、不携带 API key，也不会把静态地图中的修改写回高德或 Google 账号。
+
+## Google My Maps 导出
+
+- 总览中的“导出到 Google My Maps”打开可键盘关闭的 dialog；关闭后焦点回到原触发按钮。
+- `places.csv`、`itinerary.kml` 和 `README.md` 必须逐个下载。每次点击都即时用 `buildMyMapsFiles({ trip, state, locale })` 读取当前保存的 `assignments`、`orders`、`priorities` 和 `dirtyDays`，不会导出页面初始顺序或另存一份状态。
+- 浏览器每次只创建一个 Blob URL，触发单个文件下载后立即撤销；失败时在 dialog 内显示可见错误，不影响继续浏览和修改地图。
+- 导出文件用于手动导入 Google My Maps，不等于 Google Maps Saved Lists，也不会自动更新个人地图。
 
 ## 修改和确认
 
@@ -58,6 +72,8 @@
 
 - `test-core-map-state.js` 验证影响判断、提交、撤销、请求生成和恢复清洗。
 - `test-core-map-template.js` 验证页面容器、共享资源、用户语言和响应式合同。
+- `test-map-delivery-ui.js` 在 VM 中挂载轻量 Core，验证日期切换、重排后的 route status、当前状态导出和 Blob URL 回收。
 - `test-route-reorder-interaction.js` 验证两套模板共用的长按、44px 手柄、边缘自动滚动、插入线、交通失效、绝对位置提交与撤销合同。
 - `validate-map-html.js` 把 Core 缺失作为错误，把图片和目的地视觉缺失作为非阻塞提醒。
+- REDSkill 构建会按 State → Delivery → Core 的顺序把三个 runtime 各内联一次，发布版轻量地图不依赖外部 delivery script。
 - 发布前仍需实际完成桌面和手机浏览器验证。

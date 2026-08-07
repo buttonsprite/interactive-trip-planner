@@ -16,7 +16,9 @@
     if (!trip || !Array.isArray(trip.pois) || !Array.isArray(trip.days)) {
       throw new Error("旅行地图缺少地点或每日路线数据");
     }
-    if (!root.L || !root.TripMapState) throw new Error("旅行地图基础资源没有加载完成");
+    if (!root.L || !root.TripMapState || !root.TripMapDelivery) {
+      throw new Error("旅行地图基础资源没有加载完成");
+    }
 
     const $ = (selector) => appRoot.querySelector(selector) || document.querySelector(selector);
     const storageKey = `trip-map-core:${trip.slug || "guide"}`;
@@ -31,6 +33,7 @@
     let routeLayer;
     let markerByPoi = new Map();
     let pendingAction = null;
+    let mapExportReturnFocus = null;
     let shouldFitMap = true;
     const PLACE_SORT_HOLD_MS = 160;
     const PLACE_SORT_EDGE_PX = 48;
@@ -284,6 +287,19 @@
         return;
       }
       const ordered = (state.orders[dayId] || []).filter((poiId) => state.assignments[poiId] === dayId);
+      const handoffs = root.TripMapDelivery.buildDayHandoffs(day, trip.pois, {
+        orderedPoiIds: ordered,
+        dirty: Boolean(state.dirtyDays[day.id]),
+        source: trip.slug || "interactive-trip-planner",
+      });
+      const statusLabel = routeVerificationLabel(day, handoffs.routeStatus, Boolean(state.dirtyDays[day.id]));
+      const dayLinks = [handoffs.overview, ...(handoffs.routeLinks || [])].filter(Boolean);
+      const manualItems = handoffs.manualItems || [];
+      const dayHandoffHtml = `<div class="day-delivery-block">
+          <div class="route-verification-status ${state.dirtyDays[day.id] ? "is-dirty" : ""}">${escapeHtml(statusLabel)}</div>
+          <div class="day-map-actions">${dayLinks.map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" data-day-handoff="${escapeHtml(link.provider)}">${escapeHtml(link.label)}</a>`).join("") || '<span class="map-action-disabled">当前路线没有可直接打开的地图链接</span>'}</div>
+          ${manualItems.length ? `<div class="day-map-manual"><strong>需要手动查找：</strong><ul>${manualItems.map((item) => `<li>${escapeHtml(item.name)} · ${escapeHtml(item.provider === "amap" ? "高德地图" : "Google Maps")}</li>`).join("")}</ul></div>` : ""}
+        </div>`;
       const rows = ordered.map((poiId, index) => {
         const poi = pois.get(poiId);
         if (!poi) return "";
@@ -314,10 +330,40 @@
           <div class="day-meta">${escapeHtml(day.date)} · ${escapeHtml(day.city)}</div>
           <h2>${escapeHtml(day.title)}</h2>
           <p>${escapeHtml(day.summary)}</p>
+          ${dayHandoffHtml}
           ${state.dirtyDays[day.id] ? '<div class="route-status">顺序或安排已调整，交通待复核。地图保留原正式路线作为参考，不会自动连接新增地点。</div>' : ""}
         </section>
         <section class="section-block"><div class="section-heading-row"><h3 class="section-title">当天安排</h3><span class="muted">${ordered.filter((id) => pois.get(id)?.category !== "hotel").length} / ${Number(day.capacity || 6)} 个主要地点</span></div><div class="place-list">${rows || '<div class="empty-state">这一天还没有安排地点。</div>'}</div></section>
         <section class="section-block"><h3 class="section-title">顺路候选</h3><div class="quick-list">${candidates.map((poi) => `<button class="quick-place" type="button" data-open-place="${escapeHtml(poi.id)}"><span class="place-name">${escapeHtml(poi.name_zh || poi.name)}</span><span class="place-meta">${escapeHtml(poi.area)} · ${escapeHtml(priorityLabel(poi.id))}</span></button>`).join("") || '<div class="empty-state">当前没有额外候选。</div>'}</div></section>`;
+    }
+
+    function routeVerificationLabel(day, status, dirty) {
+      if (dirty) return "路线待重新复核";
+      if (status === "partial") return "路线部分复核";
+      if (status !== "verified") return "路线待复核";
+      const providers = new Set((day.transitSegments || [])
+        .map((segment) => String(segment.routeProvider || "").trim().toLowerCase())
+        .filter(Boolean));
+      if (providers.size === 1 && providers.has("amap")) return "已用高德复核";
+      if (providers.size === 1 && providers.has("google")) return "已用 Google Maps 复核";
+      return "路线已复核";
+    }
+
+    function destinationRegion() {
+      return trip.countryCode || trip.destinationRegion || trip.region || "";
+    }
+
+    function renderMapProviderActions(poi) {
+      const links = root.TripMapDelivery.buildPlaceLinks(poi, {
+        region: destinationRegion(),
+        source: trip.slug || "interactive-trip-planner",
+      });
+      const orderedLinks = [links.primary, links.amap, links.google]
+        .filter((link, index, all) => link && all.findIndex((candidate) => candidate?.url === link.url) === index);
+      if (!orderedLinks.length) {
+        return `<button type="button" data-copy-place="${escapeHtml(poi.id)}">复制地点名称和地址</button>`;
+      }
+      return orderedLinks.map((link, index) => `<a class="map-provider-action ${index === 0 ? "is-primary" : ""}" href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" data-map-provider="${escapeHtml(link.provider)}">${escapeHtml(link.label)}</a>`).join("");
     }
 
     function renderPoiDetail(poiId) {
@@ -346,9 +392,10 @@
         </div>
         <div class="detail-actions">
           <a href="${escapeHtml(poi.officialUrl || `https://www.google.com/search?q=${encodeURIComponent(`${poi.name} official`)}`)}" target="_blank" rel="noreferrer">官网/预约</a>
-          <a href="${escapeHtml(poi.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${poi.name} ${poi.city}`)}`)}" target="_blank" rel="noreferrer">Google Maps 地图</a>
+          ${renderMapProviderActions(poi)}
           <a href="${escapeHtml(poi.experienceUrl || `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(poi.name_zh || poi.name)}`)}" target="_blank" rel="noreferrer">体验线索</a>
         </div>
+        <div class="copy-feedback" id="poi-map-feedback" aria-live="polite"></div>
         <section class="section-block"><h3 class="section-title">优先级</h3><div class="priority-controls">${Object.entries(priorityLabels).map(([value, label]) => `<button type="button" class="${state.priorities[poi.id] === value ? "is-active" : ""}" data-action="set-priority" data-poi-id="${escapeHtml(poi.id)}" data-priority="${escapeHtml(value)}">${escapeHtml(label)}</button>`).join("")}</div></section>
         <section class="section-block"><h3 class="section-title">安排日期</h3><div class="assignment-controls">${assignmentButtons}${currentDayId ? `<button type="button" class="warning" data-action="remove-day" data-poi-id="${escapeHtml(poi.id)}">移出行程</button>` : ""}</div></section>`;
     }
@@ -495,6 +542,67 @@
         textarea.focus();
         textarea.select();
         feedback.textContent = "浏览器没有允许自动复制，完整文字已经选中，请手动复制。";
+      }
+    }
+
+    function mapExportLocale() {
+      const language = String(document.documentElement?.lang || trip.locale || "zh-CN").toLowerCase();
+      return language.startsWith("en") ? "en" : "zh-CN";
+    }
+
+    function openMapExportDialog(trigger = null) {
+      mapExportReturnFocus = trigger || document.activeElement || $("#open-map-export");
+      $("#map-export-error").textContent = "";
+      $("#map-export-dialog").hidden = false;
+      $("[data-export-file]")?.focus();
+    }
+
+    function closeMapExportDialog() {
+      $("#map-export-dialog").hidden = true;
+      const target = mapExportReturnFocus;
+      mapExportReturnFocus = null;
+      target?.focus?.();
+    }
+
+    function exportContentType(fileName) {
+      if (fileName.endsWith(".csv")) return "text/csv;charset=utf-8";
+      if (fileName.endsWith(".kml")) return "application/vnd.google-earth.kml+xml;charset=utf-8";
+      return "text/markdown;charset=utf-8";
+    }
+
+    function downloadExportFile(fileName) {
+      const feedback = $("#map-export-error");
+      try {
+        const files = root.TripMapDelivery.buildMyMapsFiles({ trip, state, locale: mapExportLocale() });
+        if (!Object.prototype.hasOwnProperty.call(files, fileName)) throw new Error("找不到导出文件");
+        const url = root.URL.createObjectURL(new root.Blob([files[fileName]], { type: exportContentType(fileName) }));
+        try {
+          const anchor = document.createElement("a");
+          anchor.href = url;
+          anchor.download = fileName;
+          anchor.hidden = true;
+          document.body.appendChild(anchor);
+          anchor.click();
+          anchor.remove();
+        } finally {
+          root.URL.revokeObjectURL(url);
+        }
+        feedback.textContent = `已开始下载 ${fileName}`;
+      } catch (_error) {
+        feedback.textContent = `无法生成 ${fileName}，请刷新页面后重试。`;
+      }
+    }
+
+    async function copyPlaceFallback(poiId) {
+      const poi = pois.get(poiId);
+      if (!poi) return;
+      const feedback = $("#poi-map-feedback");
+      const text = [poi.name_zh || poi.name, poi.address || poi.area, poi.city].filter(Boolean).join("，");
+      try {
+        await navigator.clipboard.writeText(text);
+        feedback.textContent = "地点信息已复制，可以粘贴到地图中搜索。";
+      } catch (_error) {
+        feedback.textContent = `请手动复制：${text}`;
       }
     }
 
@@ -717,6 +825,8 @@
           return renderAll({ preserveMapView: true });
         }
         if (event.target.closest("#request-replan")) return openReplanDialog();
+        const copyPlace = event.target.closest("[data-copy-place]");
+        if (copyPlace) return copyPlaceFallback(copyPlace.dataset.copyPlace);
       });
 
       appRoot.addEventListener("input", (event) => {
@@ -732,6 +842,13 @@
       });
       $("#close-replan").addEventListener("click", closeReplanDialog);
       $("#copy-replan").addEventListener("click", copyReplanPrompt);
+      $("#open-map-export").addEventListener("click", (event) => openMapExportDialog(event.currentTarget));
+      $("#close-map-export").addEventListener("click", closeMapExportDialog);
+      $("#map-export-dialog").addEventListener("click", (event) => {
+        const download = event.target.closest("[data-export-file]");
+        if (download) downloadExportFile(download.dataset.exportFile);
+        else if (event.target === $("#map-export-dialog")) closeMapExportDialog();
+      });
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && placePointerSort) {
           finishPlacePointerSort(null, { cancel: true });
@@ -740,6 +857,7 @@
         if (event.key !== "Escape") return;
         if (!$("#impact-dialog").hidden) closeImpactDialog();
         else if (!$("#replan-dialog").hidden) closeReplanDialog();
+        else if (!$("#map-export-dialog").hidden) closeMapExportDialog();
       });
     }
 
@@ -754,6 +872,10 @@
       renderMapLayers,
       renderFilters,
       renderChangeSummary,
+      requestAction,
+      openMapExportDialog,
+      closeMapExportDialog,
+      downloadExportFile,
     };
   }
 

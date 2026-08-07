@@ -23,24 +23,66 @@ function assertIncludesAll(label, document, phrases) {
 }
 
 function assertNoUnsupportedProviderClaims(label, document) {
-  const clauses = document.split(/[。；\n]+/).map((clause) => clause.trim()).filter(Boolean);
+  const normalizedDocument = document.replace(/[*_`]/g, "");
+  const clauses = normalizedDocument.split(/[。；.!?\n]+/).map((clause) => clause.trim()).filter(Boolean);
   for (const clause of clauses) {
-    const mentionsGoogleApi = /Google (?:Places|Routes) API/i.test(clause);
-    const claimsApiAction = /调用 Google (?:Places|Routes) API/i.test(clause)
-      || /\b(?:calls?|uses?|invokes?) (?:the )?Google (?:Places|Routes) API\b/i.test(clause);
-    const negatesApiAction = /(?:不|未|不会|不能|不得|绝不|没有)[^，,]{0,8}调用 Google (?:Places|Routes) API/i.test(clause)
-      || /\b(?:does not|doesn't|do not|never) (?:call|use|invoke) (?:the )?Google (?:Places|Routes) API\b/i.test(clause);
-    if (mentionsGoogleApi && claimsApiAction && !negatesApiAction) {
-      assert.fail(`${label} contains an unsupported positive Google API claim: ${clause}`);
+    for (const apiName of ["Google Places API", "Google Routes API"]) {
+      const escapedApiName = apiName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const referenceSuffix = "(?:documentation|docs?|reference|specification|as\\s+(?:a\\s+)?(?:factual\\s+)?reference)";
+      const claimsChineseApiAction = new RegExp(
+        `调用\\s*${escapedApiName}(?!\\s*(?:文档|参考|规范))`,
+        "i",
+      ).test(clause);
+      const negatesChineseApiAction = new RegExp(
+        `(?:不|未|不会|不能|不得|绝不|没有)(?:再|会)?[^，,]{0,8}调用\\s*${escapedApiName}`,
+        "i",
+      ).test(clause);
+      if (claimsChineseApiAction && !negatesChineseApiAction) {
+        assert.fail(`${label} contains an unsupported positive Chinese ${apiName} claim: ${clause}`);
+      }
+
+      const claimsEnglishApiAction = new RegExp(
+        `\\b(?:calls?|uses?|invokes?)\\s+(?:the\\s+)?${escapedApiName}\\b(?!\\s+${referenceSuffix}\\b)`,
+        "i",
+      ).test(clause);
+      const negatesEnglishApiAction = new RegExp(
+        `\\b(?:does\\s+not|doesn't|do\\s+not|never|will\\s+not|won't|cannot|can't)\\s+(?:call|use|invoke)\\s+(?:the\\s+)?${escapedApiName}\\b`,
+        "i",
+      ).test(clause);
+      if (claimsEnglishApiAction && !negatesEnglishApiAction) {
+        assert.fail(`${label} contains an unsupported positive English ${apiName} claim: ${clause}`);
+      }
     }
 
-    const mentionsSavedSurface = /高德收藏夹|Google Maps (?:收藏夹|Saved Lists?|saved lists?)|AMap favorites?/i.test(clause);
-    const claimsAutomaticSync = /自动[^，,]{0,20}(?:写入|导入|同步|更新)/i.test(clause)
-      || /automatically (?:adds?|added|imports?|imported|writes?|written|syncs?|synced|updates?|updated)/i.test(clause);
-    const negatesAutomaticSync = /(?:不|未|不会|不能|不得|绝不|没有)[^，,]{0,8}自动/i.test(clause)
-      || /\b(?:does not|doesn't|do not|never|is not|are not|will not|won't) automatically\b/i.test(clause);
-    if (mentionsSavedSurface && claimsAutomaticSync && !negatesAutomaticSync) {
-      assert.fail(`${label} contains an unsupported positive account-sync claim: ${clause}`);
+    for (const [surfaceLabel, surfacePattern] of [
+      ["Google Maps saved lists", "Google Maps\\s+(?:收藏夹|Saved Lists?|saved lists?)"],
+      ["AMap favorites", "(?:高德收藏夹|AMap favorites?)"],
+    ]) {
+      const automaticAction = "(?:写入|导入|同步|更新)";
+      const englishAutomaticAction = "(?:adds?|added|imports?|imported|writes?|written|syncs?|synced|updates?|updated)";
+      const claimsChineseAutomaticSync = new RegExp(
+        `自动${automaticAction}[^，,]{0,40}${surfacePattern}`,
+        "i",
+      ).test(clause);
+      const negatesChineseAutomaticSync = new RegExp(
+        `(?:不|未|不会|不能|不得|绝不|没有)(?:会)?[^，,]{0,8}自动${automaticAction}[^，,]{0,40}${surfacePattern}`,
+        "i",
+      ).test(clause);
+      if (claimsChineseAutomaticSync && !negatesChineseAutomaticSync) {
+        assert.fail(`${label} contains an unsupported positive Chinese ${surfaceLabel} claim: ${clause}`);
+      }
+
+      const claimsEnglishAutomaticSync = new RegExp(
+        `automatically\\s+${englishAutomaticAction}[^,，]{0,60}${surfacePattern}`,
+        "i",
+      ).test(clause);
+      const negatesEnglishAutomaticSync = new RegExp(
+        `\\b(?:does\\s+not|doesn't|do\\s+not|never|is\\s+not|are\\s+not|will\\s+not|won't|not)\\s+automatically\\s+${englishAutomaticAction}[^,，]{0,60}${surfacePattern}`,
+        "i",
+      ).test(clause);
+      if (claimsEnglishAutomaticSync && !negatesEnglishAutomaticSync) {
+        assert.fail(`${label} contains an unsupported positive English ${surfaceLabel} claim: ${clause}`);
+      }
     }
   }
 }
@@ -162,6 +204,62 @@ const packagedProviderDocs = {
     "utf8",
   ),
 };
+
+const packagedProviderBoundaryLine = packagedProviderDocs["map-provider-delivery.md"].split("\n").find(
+  (line) => line.includes("当前源码不调用 Google Places API"),
+) || "";
+assert.ok(packagedProviderBoundaryLine, "packaged provider docs must expose a real API boundary line for mutation coverage");
+assert.throws(
+  () => assertNoUnsupportedProviderClaims(
+    "packaged mixed API mutation",
+    packagedProviderBoundaryLine.replace(
+      "当前源码不调用 Google Places API",
+      "当前源码调用 Google Places API",
+    ),
+  ),
+  /Google Places API/,
+  "a Routes negation must not hide a positive Places call in packaged docs",
+);
+assert.throws(
+  () => assertNoUnsupportedProviderClaims(
+    "packaged English mixed API mutation",
+    packagedProviderBoundaryLine.replace(
+      "does not call Google Places API",
+      "calls Google Places API",
+    ),
+  ),
+  /Google Places API/,
+  "a Chinese Places negation must not hide an English positive Places call",
+);
+
+const packagedAccountBoundaryLine = packagedProviderDocs["map-provider-delivery.md"].split("\n").find(
+  (line) => line.includes("不会自动写入高德收藏夹"),
+) || "";
+assert.ok(packagedAccountBoundaryLine, "packaged provider docs must expose a real account boundary line for mutation coverage");
+assert.throws(
+  () => assertNoUnsupportedProviderClaims(
+    "packaged mixed account mutation",
+    packagedAccountBoundaryLine.replace("不会自动写入高德收藏夹", "会自动写入高德收藏夹"),
+  ),
+  /高德收藏夹/,
+  "a Google Saved Lists negation must not hide positive AMap favorites writing",
+);
+assert.throws(
+  () => assertNoUnsupportedProviderClaims(
+    "packaged English mixed account mutation",
+    "This export automatically adds places to Google Maps saved lists, but never automatically adds them to AMap favorites.",
+  ),
+  /Google Maps saved lists/,
+  "an English AMap-favorites negation must not hide positive Google Maps account sync",
+);
+
+assert.doesNotThrow(
+  () => assertNoUnsupportedProviderClaims(
+    "packaged documentation reference fixture",
+    "This workflow uses Google Places API documentation only as a factual reference and does not call Google Routes API.",
+  ),
+  "packaged docs may cite API documentation without claiming an API call",
+);
 
 assertIncludesAll("SKILL.md", packagedProviderDocs["SKILL.md"], [
   "amap-gui start",

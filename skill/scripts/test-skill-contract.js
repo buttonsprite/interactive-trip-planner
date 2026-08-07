@@ -81,24 +81,66 @@ function assertIncludesAll(label, document, phrases) {
 }
 
 function assertNoUnsupportedProviderClaims(label, document) {
-  const clauses = document.split(/[。；\n]+/).map((clause) => clause.trim()).filter(Boolean);
+  const normalizedDocument = document.replace(/[*_`]/g, "");
+  const clauses = normalizedDocument.split(/[。；.!?\n]+/).map((clause) => clause.trim()).filter(Boolean);
   for (const clause of clauses) {
-    const mentionsGoogleApi = /Google (?:Places|Routes) API/i.test(clause);
-    const claimsApiAction = /调用 Google (?:Places|Routes) API/i.test(clause)
-      || /\b(?:calls?|uses?|invokes?) (?:the )?Google (?:Places|Routes) API\b/i.test(clause);
-    const negatesApiAction = /(?:不|未|不会|不能|不得|绝不|没有)[^，,]{0,8}调用 Google (?:Places|Routes) API/i.test(clause)
-      || /\b(?:does not|doesn't|do not|never) (?:call|use|invoke) (?:the )?Google (?:Places|Routes) API\b/i.test(clause);
-    if (mentionsGoogleApi && claimsApiAction && !negatesApiAction) {
-      assert.fail(`${label} contains an unsupported positive Google API claim: ${clause}`);
+    for (const apiName of ["Google Places API", "Google Routes API"]) {
+      const escapedApiName = apiName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const referenceSuffix = "(?:documentation|docs?|reference|specification|as\\s+(?:a\\s+)?(?:factual\\s+)?reference)";
+      const claimsChineseApiAction = new RegExp(
+        `调用\\s*${escapedApiName}(?!\\s*(?:文档|参考|规范))`,
+        "i",
+      ).test(clause);
+      const negatesChineseApiAction = new RegExp(
+        `(?:不|未|不会|不能|不得|绝不|没有)(?:再|会)?[^，,]{0,8}调用\\s*${escapedApiName}`,
+        "i",
+      ).test(clause);
+      if (claimsChineseApiAction && !negatesChineseApiAction) {
+        assert.fail(`${label} contains an unsupported positive Chinese ${apiName} claim: ${clause}`);
+      }
+
+      const claimsEnglishApiAction = new RegExp(
+        `\\b(?:calls?|uses?|invokes?)\\s+(?:the\\s+)?${escapedApiName}\\b(?!\\s+${referenceSuffix}\\b)`,
+        "i",
+      ).test(clause);
+      const negatesEnglishApiAction = new RegExp(
+        `\\b(?:does\\s+not|doesn't|do\\s+not|never|will\\s+not|won't|cannot|can't)\\s+(?:call|use|invoke)\\s+(?:the\\s+)?${escapedApiName}\\b`,
+        "i",
+      ).test(clause);
+      if (claimsEnglishApiAction && !negatesEnglishApiAction) {
+        assert.fail(`${label} contains an unsupported positive English ${apiName} claim: ${clause}`);
+      }
     }
 
-    const mentionsSavedSurface = /高德收藏夹|Google Maps (?:收藏夹|Saved Lists?|saved lists?)|AMap favorites?/i.test(clause);
-    const claimsAutomaticSync = /自动[^，,]{0,20}(?:写入|导入|同步|更新)/i.test(clause)
-      || /automatically (?:adds?|added|imports?|imported|writes?|written|syncs?|synced|updates?|updated)/i.test(clause);
-    const negatesAutomaticSync = /(?:不|未|不会|不能|不得|绝不|没有)[^，,]{0,8}自动/i.test(clause)
-      || /\b(?:does not|doesn't|do not|never|is not|are not|will not|won't) automatically\b/i.test(clause);
-    if (mentionsSavedSurface && claimsAutomaticSync && !negatesAutomaticSync) {
-      assert.fail(`${label} contains an unsupported positive account-sync claim: ${clause}`);
+    for (const [surfaceLabel, surfacePattern] of [
+      ["Google Maps saved lists", "Google Maps\\s+(?:收藏夹|Saved Lists?|saved lists?)"],
+      ["AMap favorites", "(?:高德收藏夹|AMap favorites?)"],
+    ]) {
+      const automaticAction = "(?:写入|导入|同步|更新)";
+      const englishAutomaticAction = "(?:adds?|added|imports?|imported|writes?|written|syncs?|synced|updates?|updated)";
+      const claimsChineseAutomaticSync = new RegExp(
+        `自动${automaticAction}[^，,]{0,40}${surfacePattern}`,
+        "i",
+      ).test(clause);
+      const negatesChineseAutomaticSync = new RegExp(
+        `(?:不|未|不会|不能|不得|绝不|没有)(?:会)?[^，,]{0,8}自动${automaticAction}[^，,]{0,40}${surfacePattern}`,
+        "i",
+      ).test(clause);
+      if (claimsChineseAutomaticSync && !negatesChineseAutomaticSync) {
+        assert.fail(`${label} contains an unsupported positive Chinese ${surfaceLabel} claim: ${clause}`);
+      }
+
+      const claimsEnglishAutomaticSync = new RegExp(
+        `automatically\\s+${englishAutomaticAction}[^,，]{0,60}${surfacePattern}`,
+        "i",
+      ).test(clause);
+      const negatesEnglishAutomaticSync = new RegExp(
+        `\\b(?:does\\s+not|doesn't|do\\s+not|never|is\\s+not|are\\s+not|will\\s+not|won't|not)\\s+automatically\\s+${englishAutomaticAction}[^,，]{0,60}${surfacePattern}`,
+        "i",
+      ).test(clause);
+      if (claimsEnglishAutomaticSync && !negatesEnglishAutomaticSync) {
+        assert.fail(`${label} contains an unsupported positive English ${surfaceLabel} claim: ${clause}`);
+      }
     }
   }
 }
@@ -125,6 +167,91 @@ assert.doesNotThrow(
     "This source does not call Google Places API and is not automatically added to Google Maps saved lists.",
   ),
   "negative boundary copy must not be mistaken for an unsupported claim",
+);
+
+const readmeProviderLine = (repositoryReadme || "").split("\n").find(
+  (line) => line.includes("当前源码不调用 Google Places API 或 Google Routes API"),
+) || "";
+assert.ok(readmeProviderLine, "README.md must expose a real provider-boundary line for mutation coverage");
+assert.throws(
+  () => assertNoUnsupportedProviderClaims(
+    "README.md mixed API mutation",
+    readmeProviderLine.replace(
+      "当前源码不调用 Google Places API 或 Google Routes API",
+      "当前源码调用 Google Places API，但不调用 Google Routes API",
+    ),
+  ),
+  /Google Places API/,
+  "a Routes negation must not hide a positive Places call in the real README line",
+);
+
+const englishReadmeProviderLine = (repositoryEnglishReadme || "").split("\n").find(
+  (line) => line.includes("does not call Google Places API and does not call Google Routes API"),
+) || "";
+assert.ok(englishReadmeProviderLine, "README.en.md must expose a real provider-boundary line for mutation coverage");
+assert.throws(
+  () => assertNoUnsupportedProviderClaims(
+    "README.en.md mixed API mutation",
+    englishReadmeProviderLine.replace("does not call Google Places API", "calls Google Places API"),
+  ),
+  /Google Places API/,
+  "an English Routes negation must not hide a positive Places call",
+);
+
+const installProviderLine = (redskillInstallTemplate || "").split("\n").find(
+  (line) => line.includes("本包不调用 Google Places API"),
+) || "";
+assert.ok(installProviderLine, "REDSKILL install template must expose a real provider-boundary line for mutation coverage");
+assert.throws(
+  () => assertNoUnsupportedProviderClaims(
+    "REDSKILL install mixed API mutation",
+    installProviderLine.replace(
+      "本包不调用 Google Places API",
+      "本包调用 Google Places API",
+    ),
+  ),
+  /Google Places API/,
+  "the bilingual Routes negation must not hide a positive Places call in the install line",
+);
+
+const readmeSyncLine = (repositoryReadme || "").split("\n").find(
+  (line) => line.includes("不会自动写入普通 Google Maps 收藏夹"),
+) || "";
+assert.ok(readmeSyncLine, "README.md must expose a real account-boundary line for mutation coverage");
+assert.throws(
+  () => assertNoUnsupportedProviderClaims(
+    "README.md mixed account mutation",
+    readmeSyncLine.replace(
+      "不会自动写入普通 Google Maps 收藏夹",
+      "会自动写入普通 Google Maps 收藏夹",
+    ),
+  ),
+  /Google Maps 收藏夹/,
+  "an AMap-favorites negation must not hide positive Google Maps account writing",
+);
+
+const englishReadmeSyncLine = (repositoryEnglishReadme || "").split("\n").find(
+  (line) => line.includes("not automatically added to regular Google Maps saved lists"),
+) || "";
+assert.ok(englishReadmeSyncLine, "README.en.md must expose a real account-boundary line for mutation coverage");
+assert.throws(
+  () => assertNoUnsupportedProviderClaims(
+    "README.en.md mixed account mutation",
+    englishReadmeSyncLine.replace(
+      "not automatically added to regular Google Maps saved lists",
+      "automatically added to regular Google Maps saved lists",
+    ),
+  ),
+  /Google Maps saved lists/,
+  "an English AMap-favorites negation must not hide positive Google Maps account writing",
+);
+
+assert.doesNotThrow(
+  () => assertNoUnsupportedProviderClaims(
+    "documentation reference fixture",
+    "The Skill uses Google Places API documentation only as a factual reference; it does not call Google Routes API.",
+  ),
+  "using API documentation as a factual reference is not a provider call",
 );
 
 assert.ok(fs.existsSync(mapProviderDeliveryPath), "missing map provider delivery online logic");

@@ -28,11 +28,13 @@ fs.writeFileSync(contextPath, JSON.stringify({
 }));
 fs.writeFileSync(path.join(fakeBinDir, "amap-gui"), `#!/usr/bin/env node
 const secret = process.env.AMAP_SECURITY_KEY || "";
-if (process.env.FAKE_AMAP_BEHAVIOR === "stderr-secret") {
+const webKey = process.env.AMAP_KEY || "";
+const behavior = process.env.FAKE_AMAP_BEHAVIOR || "success";
+if (behavior === "stderr-secret") {
   process.stderr.write("provider failed: " + secret);
   process.exit(1);
 }
-if (process.env.FAKE_AMAP_BEHAVIOR === "malformed") {
+if (behavior === "malformed") {
   process.stdout.write("{malformed-provider-json");
   process.exit(0);
 }
@@ -45,10 +47,10 @@ process.stdout.write(JSON.stringify({
     pageSize: 10,
     pageIndex: 1,
     pois: [{
-      id: "B0FFTEST01",
-      name: "北门市场",
+      id: behavior === "missing-identity" ? "" : "B0FFTEST01",
+      name: behavior === "echo-secret" ? webKey + " 北门市场 " + secret : "北门市场",
       type: "购物服务;综合市场",
-      address: "云南省大理白族自治州大理市",
+      address: behavior === "encoded-markup" ? "&lt;script&gt;encoded" : "云南省大理白族自治州大理市",
       tel: "0872-0000000",
       distance: 680,
       location: [100.1602, 25.7001],
@@ -90,6 +92,10 @@ assert.equal(missingCli.routePlanningAvailable, false);
 assert.equal(missingCli.routeVerification, "not-performed");
 assert.equal(missingCli.mustNotSynthesizeRoutes, true);
 assert.ok(missingCli.fallback.length >= 2);
+for (const item of missingCli.fallback) {
+  assert.match(item, /[\u4e00-\u9fff]/);
+  assert.match(item, /[A-Za-z]/);
+}
 assert.doesNotMatch(JSON.stringify(missingCli), /never-print/);
 
 const missingCredentials = probeAmapCapability({ env: {}, commandExists: () => true });
@@ -159,12 +165,33 @@ try {
     assert.equal(providerFailure.status, 0, providerFailure.stderr);
     assert.equal(providerFailure.stderr, "");
     assert.equal(JSON.parse(providerFailure.stdout).status, "provider-error");
+    assert.match(JSON.parse(providerFailure.stdout).message, /[\u4e00-\u9fff].*[A-Za-z]/);
     assert.doesNotMatch(providerFailure.stdout + providerFailure.stderr, /never-print|malformed-provider-json/);
   }
+
+  const echoedSecret = runExecutionCli(["--context", contextPath], "", { FAKE_AMAP_BEHAVIOR: "echo-secret" });
+  assert.equal(echoedSecret.status, 0, echoedSecret.stderr);
+  assert.equal(echoedSecret.stderr, "");
+  assert.equal(JSON.parse(echoedSecret.stdout).items[0].name, "[REDACTED] 北门市场 [REDACTED]");
+  assert.doesNotMatch(echoedSecret.stdout, /never-print/);
+
+  const encodedMarkup = runExecutionCli(["--context", contextPath], "", { FAKE_AMAP_BEHAVIOR: "encoded-markup" });
+  assert.equal(encodedMarkup.status, 0, encodedMarkup.stderr);
+  assert.equal(JSON.parse(encodedMarkup.stdout).items[0].address, "");
+  assert.doesNotMatch(encodedMarkup.stdout, /&lt;|&gt;|<|>/i);
+
+  const missingIdentity = runExecutionCli(["--context", contextPath], "", { FAKE_AMAP_BEHAVIOR: "missing-identity" });
+  assert.equal(missingIdentity.status, 0, missingIdentity.stderr);
+  assert.equal(JSON.parse(missingIdentity.stdout).status, "provider-error");
+  assert.equal(missingIdentity.stderr, "");
 
   const unavailable = runExecutionCli(["--context", contextPath], "", { PATH: "/definitely/missing" });
   assert.equal(unavailable.status, 0, unavailable.stderr);
   assert.equal(JSON.parse(unavailable.stdout).status, "unavailable");
+  for (const item of JSON.parse(unavailable.stdout).fallback) {
+    assert.match(item, /[\u4e00-\u9fff]/);
+    assert.match(item, /[A-Za-z]/);
+  }
   assert.equal(unavailable.stderr, "");
 
   assertSanitizedCliFailure(runExecutionCli(["--stdin"], JSON.stringify({

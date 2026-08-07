@@ -12,6 +12,7 @@ const secrets = {
   AMAP_KEY: "execution-web-key-secret",
   AMAP_SECURITY_KEY: "execution-security-key-secret",
 };
+const providerErrorMessage = "高德地图调用失败，请稍后重试或使用备用复核方式。 AMap request failed. Retry later or use a fallback verification method.";
 const checkedAt = "2026-08-07T12:00:00.000Z";
 const searchRequest = {
   action: "search-poi",
@@ -39,7 +40,7 @@ const searchProviderOutput = {
     pageIndex: 1,
     pois: [{
       id: "B0FFTEST01",
-      name: "北门市场",
+      name: `${secrets.AMAP_KEY} 北门市场`,
       type: "购物服务;综合市场",
       address: "云南省大理白族自治州大理市",
       tel: "0872-0000000",
@@ -67,8 +68,8 @@ const routeProviderOutput = {
       time: 1080,
       tolls: 0,
       steps: [
-        { instruction: "从南门出发，沿复兴路向北步行。", distance: 720, time: 540, path: "provider-path-secret" },
-        { instruction: "<b>右转</b>前往北门市场。", distance: 700, time: 540 },
+        { instruction: `从南门出发，${secrets.AMAP_SECURITY_KEY}，沿复兴路向北步行。`, distance: 720, time: 540, path: "provider-path-secret" },
+        { instruction: "右转前往北门市场。", distance: 700, time: 540 },
       ],
       rawPolyline: "provider-polyline-secret",
     },
@@ -87,6 +88,7 @@ function fakeSuccessRunner(providerOutput, expectedArgs) {
   return (command, args, options) => {
     assert.equal(command, "amap-gui");
     assert.equal(options.shell, false);
+    assert.equal(options.timeout, 35_000);
     assert.deepEqual(args, expectedArgs);
     for (const arg of args) {
       assert.doesNotMatch(String(arg), /execution-(?:web-key|security-key)-secret/);
@@ -142,7 +144,7 @@ assert.deepEqual(searchResult, {
   pageIndex: 1,
   items: [{
     poiId: "B0FFTEST01",
-    name: "北门市场",
+    name: "[REDACTED] 北门市场",
     type: "购物服务;综合市场",
     address: "云南省大理白族自治州大理市",
     phone: "0872-0000000",
@@ -181,7 +183,7 @@ assert.deepEqual(routeResult, {
   durationSeconds: 1080,
   tollsYuan: 0,
   steps: [
-    { instruction: "从南门出发，沿复兴路向北步行。", distanceMeters: 720, durationSeconds: 540 },
+    { instruction: "从南门出发，[REDACTED]，沿复兴路向北步行。", distanceMeters: 720, durationSeconds: 540 },
     { instruction: "右转前往北门市场。", distanceMeters: 700, durationSeconds: 540 },
   ],
   reviewedAt: checkedAt,
@@ -203,16 +205,34 @@ assert.deepEqual(buildAmapArgs(drivingWithWaypoints), [
   "--to", "100.1602,25.7001",
   "--to-name", "北门市场",
   "--type", "driving",
-  "--waypoints", "人民路口,洋人街口",
+  "--waypoints", "100.162,25.695,100.163,25.697",
 ]);
 const normalizedDrivingRoute = normalizeAmapOutput(
   drivingWithWaypoints,
   { ...routeProviderOutput, data: { ...routeProviderOutput.data, type: "driving" } },
   checkedAt,
+  { env: secrets },
 );
 assert.deepEqual(normalizedDrivingRoute.waypoints, [
   { name: "人民路口", position: { lng: 100.162, lat: 25.695, system: "gcj02" } },
   { name: "洋人街口", position: { lng: 100.163, lat: 25.697, system: "gcj02" } },
+]);
+assertNoSecrets(normalizedDrivingRoute);
+
+const transitRoute = {
+  ...routeRequest,
+  mode: "transit",
+  city: "  大理  ",
+};
+assert.equal(validateAmapRequest(transitRoute).city, "大理");
+assert.deepEqual(buildAmapArgs(transitRoute), [
+  "route",
+  "--from", "100.165,25.689",
+  "--from-name", "大理古城南门",
+  "--to", "100.1602,25.7001",
+  "--to-name", "北门市场",
+  "--type", "transit",
+  "--city", "大理",
 ]);
 
 for (const [label, request, message] of [
@@ -223,6 +243,8 @@ for (const [label, request, message] of [
   ["unsupported mode", { ...routeRequest, mode: "flying" }, "Invalid AMap route request."],
   ["walking waypoints", { ...routeRequest, waypoints: [drivingWithWaypoints.waypoints[0]] }, "Invalid AMap route request."],
   ["too many driving waypoints", { ...drivingWithWaypoints, waypoints: Array.from({ length: 17 }, (_, index) => ({ name: `途经点${index}`, position: { lng: 100 + index / 100, lat: 25 } })) }, "Invalid AMap route request."],
+  ["missing transit city", { ...routeRequest, mode: "transit" }, "Invalid AMap route request."],
+  ["blank transit city", { ...routeRequest, mode: "transit", city: "   " }, "Invalid AMap route request."],
 ]) {
   assert.throws(() => validateAmapRequest(request), (error) => {
     assert.equal(error.message, message, label);
@@ -232,8 +254,8 @@ for (const [label, request, message] of [
 }
 
 const fallback = [
-  "使用高德公开网页或 URI 入口人工复核地点和移动关系。",
-  "使用其他可访问的公开地图搜索，并明确标记未完成 amap-gui 路网复核。",
+  "使用高德公开网页或 URI 入口人工复核地点和移动关系。 Manually verify places and travel relationships with the public AMap website or URI.",
+  "使用其他可访问的公开地图搜索，并明确标记未完成 amap-gui 路网复核。 Use another accessible public map and clearly mark that amap-gui route verification was not completed.",
 ];
 for (const [expectedStatus, commandExists, env] of [
   ["unavailable", false, { ...secrets }],
@@ -257,6 +279,7 @@ for (const [label, processResult] of [
   ["malformed provider JSON", { status: 0, stdout: "{provider-malformed-secret", stderr: "" }],
   ["provider stderr secret", { status: 1, stdout: "", stderr: `failed: ${secrets.AMAP_SECURITY_KEY}` }],
   ["provider-declared failure", { status: 0, stdout: JSON.stringify({ success: false, data: null, error: secrets.AMAP_KEY }), stderr: "" }],
+  ["provider timeout", { status: null, stdout: "", stderr: "", error: { code: "ETIMEDOUT", message: secrets.AMAP_KEY } }],
 ]) {
   const failed = executeAmapRequest(searchRequest, {
     env: { ...secrets },
@@ -266,7 +289,7 @@ for (const [label, processResult] of [
   assert.equal(failed.status, "provider-error", label);
   assert.equal(failed.provider, "amap");
   assert.equal(failed.performed, false);
-  assert.equal(failed.message, "高德地图调用失败，请稍后重试或使用备用复核方式。");
+  assert.equal(failed.message, providerErrorMessage);
   assert.deepEqual(failed.fallback, fallback);
   assertNoSecrets(failed);
 }
@@ -274,8 +297,82 @@ for (const [label, processResult] of [
 assert.throws(
   () => normalizeAmapOutput(searchRequest, "{provider-direct-secret", checkedAt),
   (error) => {
-    assert.equal(error.message, "高德地图调用失败，请稍后重试或使用备用复核方式。");
+    assert.equal(error.message, providerErrorMessage);
     assert.doesNotMatch(error.message, /provider-direct-secret/);
+    return true;
+  },
+);
+
+for (const [label, malformedPoi] of [
+  ["missing POI id", { ...searchProviderOutput.data.pois[0], id: "" }],
+  ["missing POI name", { ...searchProviderOutput.data.pois[0], name: "   " }],
+]) {
+  const malformedIdentity = executeAmapRequest(searchRequest, {
+    env: { ...secrets },
+    commandExists: () => true,
+    runCommand: () => ({
+      status: 0,
+      stdout: JSON.stringify({
+        ...searchProviderOutput,
+        data: { ...searchProviderOutput.data, pois: [malformedPoi] },
+      }),
+      stderr: "",
+    }),
+  });
+  assert.equal(malformedIdentity.status, "provider-error", label);
+  assertNoSecrets(malformedIdentity);
+}
+
+const mismatchedRoute = executeAmapRequest(routeRequest, {
+  env: { ...secrets },
+  commandExists: () => true,
+  runCommand: () => ({
+    status: 0,
+    stdout: JSON.stringify({
+      ...routeProviderOutput,
+      data: { ...routeProviderOutput.data, type: "driving" },
+    }),
+    stderr: "",
+  }),
+});
+assert.equal(mismatchedRoute.status, "provider-error");
+assert.equal(mismatchedRoute.message, providerErrorMessage);
+assertNoSecrets(mismatchedRoute);
+
+const encodedMarkupOutput = normalizeAmapOutput(
+  searchRequest,
+  {
+    ...searchProviderOutput,
+    data: {
+      ...searchProviderOutput.data,
+      pois: [{ ...searchProviderOutput.data.pois[0], address: "&lt;script&gt;encoded-alert" }],
+    },
+  },
+  checkedAt,
+  { env: secrets },
+);
+assert.equal(encodedMarkupOutput.items[0].address, "");
+assert.equal(encodedMarkupOutput.items[0].type, "购物服务;综合市场", "normal provider text must remain intact");
+assertNoSecrets(encodedMarkupOutput);
+
+assert.throws(
+  () => normalizeAmapOutput(
+    routeRequest,
+    {
+      ...routeProviderOutput,
+      data: {
+        ...routeProviderOutput.data,
+        summary: {
+          ...routeProviderOutput.data.summary,
+          steps: [{ instruction: "向北步行<script", distance: 100, time: 60 }],
+        },
+      },
+    },
+    checkedAt,
+    { env: secrets },
+  ),
+  (error) => {
+    assert.equal(error.message, providerErrorMessage);
     return true;
   },
 );

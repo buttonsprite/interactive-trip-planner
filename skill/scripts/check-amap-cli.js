@@ -40,8 +40,8 @@ export function probeAmapCapability({
     routeVerification: "not-performed",
     mustNotSynthesizeRoutes: true,
     fallback: [
-      "使用高德公开网页或 URI 入口人工复核地点和移动关系。",
-      "使用其他可访问的公开地图搜索，并明确标记未完成 amap-gui 路网复核。",
+      "使用高德公开网页或 URI 入口人工复核地点和移动关系。 Manually verify places and travel relationships with the public AMap website or URI.",
+      "使用其他可访问的公开地图搜索，并明确标记未完成 amap-gui 路网复核。 Use another accessible public map and clearly mark that amap-gui route verification was not completed.",
     ],
     factBoundary: "能力探测只确认命令存在且所需凭据变量为非空字符串，不输出凭据值，不执行搜索或路线，也不证明任何路线结果。",
   };

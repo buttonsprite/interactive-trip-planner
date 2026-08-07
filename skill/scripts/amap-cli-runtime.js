@@ -4,7 +4,8 @@ import { probeAmapCapability } from "./check-amap-cli.js";
 const INVALID_ACTION = "Invalid AMap action.";
 const INVALID_SEARCH = "Invalid AMap search request.";
 const INVALID_ROUTE = "Invalid AMap route request.";
-const PROVIDER_ERROR_MESSAGE = "高德地图调用失败，请稍后重试或使用备用复核方式。";
+const PROVIDER_ERROR_MESSAGE = "高德地图调用失败，请稍后重试或使用备用复核方式。 AMap request failed. Retry later or use a fallback verification method.";
+const AMAP_COMMAND_TIMEOUT_MS = 35_000;
 const ROUTE_MODES = new Set(["driving", "walking", "riding", "transit"]);
 
 function isPlainObject(value) {
@@ -31,11 +32,11 @@ function normalizePosition(value) {
   return { lng, lat };
 }
 
-function normalizeRoutePoint(value, { waypoint = false } = {}) {
+function normalizeRoutePoint(value) {
   if (!isPlainObject(value)) return null;
   const name = trimmedString(value.name);
   const position = normalizePosition(value.position);
-  if (!name || !position || (waypoint && name.includes(","))) return null;
+  if (!name || !position) return null;
   return { name, position };
 }
 
@@ -82,13 +83,20 @@ function validateRouteRequest(context) {
     if (!Array.isArray(context.waypoints) || context.waypoints.length > 16) {
       throw new Error(INVALID_ROUTE);
     }
-    waypoints = context.waypoints.map((waypoint) => normalizeRoutePoint(waypoint, { waypoint: true }));
+    waypoints = context.waypoints.map((waypoint) => normalizeRoutePoint(waypoint));
     if (waypoints.some((waypoint) => !waypoint) || (waypoints.length > 0 && mode !== "driving")) {
       throw new Error(INVALID_ROUTE);
     }
   }
 
-  return { action: "route", origin, destination, mode, waypoints };
+  let city;
+  if (context.city !== undefined) {
+    city = trimmedString(context.city);
+    if (!city) throw new Error(INVALID_ROUTE);
+  }
+  if (mode === "transit" && !city) throw new Error(INVALID_ROUTE);
+
+  return { action: "route", origin, destination, mode, waypoints, ...(city ? { city } : {}) };
 }
 
 export function validateAmapRequest(context) {
@@ -124,15 +132,20 @@ export function buildAmapArgs(context) {
     "--type", request.mode,
   ];
   if (request.waypoints.length > 0) {
-    args.push("--waypoints", request.waypoints.map((waypoint) => waypoint.name).join(","));
+    args.push("--waypoints", request.waypoints.map((waypoint) => formatPosition(waypoint.position)).join(","));
   }
+  if (request.city !== undefined) args.push("--city", request.city);
   return args;
+}
+
+function containsMarkup(value) {
+  return /[<>]|&(?:lt|gt|#0*60|#0*62|#x0*3c|#x0*3e);?/i.test(value);
 }
 
 function providerText(value, maximumLength = 300) {
   if (typeof value !== "string") return "";
+  if (containsMarkup(value)) return "";
   return value
-    .replace(/<[^>]*>/g, "")
     .replace(/[\u0000-\u001f\u007f]+/g, " ")
     .replace(/\s+/g, " ")
     .trim()
@@ -155,6 +168,32 @@ function requestPosition(value) {
   return { lng: value.lng, lat: value.lat, system: "gcj02" };
 }
 
+function credentialValues(env) {
+  const values = [];
+  for (const name of ["AMAP_KEY", "AMAP_SECURITY_KEY"]) {
+    if (typeof env?.[name] !== "string" || !env[name].trim()) continue;
+    values.push(env[name]);
+    if (env[name].trim() !== env[name]) values.push(env[name].trim());
+  }
+  return [...new Set(values)].sort((left, right) => right.length - left.length);
+}
+
+function redactString(value, redactions) {
+  return redactions.reduce(
+    (redacted, secret) => redacted.split(secret).join("[REDACTED]"),
+    value,
+  );
+}
+
+function redactReturnedStrings(value, redactions) {
+  if (typeof value === "string") return redactString(value, redactions);
+  if (Array.isArray(value)) return value.map((item) => redactReturnedStrings(item, redactions));
+  if (!isPlainObject(value)) return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, item]) => [key, redactReturnedStrings(item, redactions)]),
+  );
+}
+
 function parseProviderOutput(providerOutput) {
   let parsed;
   try {
@@ -174,9 +213,12 @@ function normalizeSearchOutput(request, data, checkedAt) {
     if (!isPlainObject(poi)) throw new Error(PROVIDER_ERROR_MESSAGE);
     const position = providerPosition(poi.location);
     if (!position) throw new Error(PROVIDER_ERROR_MESSAGE);
+    const poiId = providerText(poi.id, 120);
+    const name = providerText(poi.name);
+    if (!poiId || !name) throw new Error(PROVIDER_ERROR_MESSAGE);
     return {
-      poiId: providerText(poi.id, 120),
-      name: providerText(poi.name),
+      poiId,
+      name,
       type: providerText(poi.type),
       address: providerText(poi.address, 500),
       phone: providerText(poi.tel, 120),
@@ -209,6 +251,7 @@ function normalizeRouteOutput(request, data, checkedAt) {
   if (!isPlainObject(data.from) || !isPlainObject(data.to) || !isPlainObject(data.summary)) {
     throw new Error(PROVIDER_ERROR_MESSAGE);
   }
+  if (data.type !== request.mode) throw new Error(PROVIDER_ERROR_MESSAGE);
   const originPosition = providerPosition(data.from.position);
   const destinationPosition = providerPosition(data.to.position);
   const distanceMeters = providerNumber(data.summary.distance);
@@ -259,25 +302,27 @@ function normalizeRouteOutput(request, data, checkedAt) {
   };
 }
 
-export function normalizeAmapOutput(context, providerOutput, checkedAt) {
+export function normalizeAmapOutput(context, providerOutput, checkedAt, { env = process.env } = {}) {
   const request = validateAmapRequest(context);
   const data = parseProviderOutput(providerOutput);
-  if (request.action === "search-poi") return normalizeSearchOutput(request, data, checkedAt);
-  return normalizeRouteOutput(request, data, checkedAt);
+  const result = request.action === "search-poi"
+    ? normalizeSearchOutput(request, data, checkedAt)
+    : normalizeRouteOutput(request, data, checkedAt);
+  return redactReturnedStrings(result, credentialValues(env));
 }
 
 function defaultRunCommand(command, args, options) {
   return spawnSync(command, args, options);
 }
 
-function providerError(fallback) {
-  return {
+function providerError(fallback, env) {
+  return redactReturnedStrings({
     status: "provider-error",
     provider: "amap",
     performed: false,
     message: PROVIDER_ERROR_MESSAGE,
     fallback,
-  };
+  }, credentialValues(env));
 }
 
 function reviewedAt(now) {
@@ -296,12 +341,12 @@ export function executeAmapRequest(context, {
   const request = validateAmapRequest(context);
   const capability = probeAmapCapability({ env, commandExists });
   if (capability.status !== "available") {
-    return {
+    return redactReturnedStrings({
       status: capability.status,
       provider: "amap",
       performed: false,
       fallback: capability.fallback,
-    };
+    }, credentialValues(env));
   }
 
   try {
@@ -309,12 +354,13 @@ export function executeAmapRequest(context, {
       encoding: "utf8",
       env,
       shell: false,
+      timeout: AMAP_COMMAND_TIMEOUT_MS,
     });
     if (!processResult || processResult.status !== 0 || processResult.error) {
-      return providerError(capability.fallback);
+      return providerError(capability.fallback, env);
     }
-    return normalizeAmapOutput(request, processResult.stdout, reviewedAt(now));
+    return normalizeAmapOutput(request, processResult.stdout, reviewedAt(now), { env });
   } catch {
-    return providerError(capability.fallback);
+    return providerError(capability.fallback, env);
   }
 }

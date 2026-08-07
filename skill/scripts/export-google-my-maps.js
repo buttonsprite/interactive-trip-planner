@@ -56,19 +56,35 @@ function assertDirectory(value) {
 }
 
 function assertSafeOutput(outputValue, guideRoot) {
+  const requested = path.resolve(outputValue);
+  const requestedStats = lstatMaybe(requested);
+  if (requestedStats?.isSymbolicLink()) throw new Error("unsafe output directory");
   const output = canonicalPlannedPath(outputValue);
-  const protectedRoots = [
+  const protectedRoots = outputProtectedRoots(output, guideRoot);
+  if (protectedRoots.includes(output)) throw new Error("unsafe output directory");
+  if (fs.existsSync(output) && !fs.statSync(output).isDirectory()) {
+    throw new Error("output must be a directory");
+  }
+  return { output, protectedRoots };
+}
+
+function outputProtectedRoots(output, guideRoot) {
+  return [
     path.parse(output).root,
     canonicalPlannedPath(os.homedir()),
     canonicalPlannedPath(repoRoot),
     canonicalPlannedPath(skillRoot),
     guideRoot,
   ];
-  if (protectedRoots.includes(output)) throw new Error("unsafe output directory");
-  if (fs.existsSync(output) && !fs.statSync(output).isDirectory()) {
-    throw new Error("output must be a directory");
+}
+
+function lstatMaybe(target) {
+  try {
+    return fs.lstatSync(target);
+  } catch (error) {
+    if (error?.code === "ENOENT") return null;
+    throw error;
   }
-  return output;
 }
 
 function readJson(file) {
@@ -199,47 +215,187 @@ function validWgs84(coords) {
     && Number(coords[1]) <= 180;
 }
 
-function preflightOutput(output, replace) {
-  if (!fs.existsSync(output)) return;
-  const entries = outputFiles.map((file) => ({ file, target: path.join(output, file) }));
-  for (const entry of entries) {
-    let stats;
+function inspectOutputDirectory(output, protectedRoots) {
+  if (protectedRoots.includes(output)) throw new Error("unsafe output directory");
+  const stats = lstatMaybe(output);
+  if (!stats) return "absent";
+  if (stats.isSymbolicLink() || !stats.isDirectory()) throw new Error("unsafe output directory");
+  const realOutput = fs.realpathSync(output);
+  if (realOutput !== output || protectedRoots.includes(realOutput)) {
+    throw new Error("unsafe output directory");
+  }
+  return "directory";
+}
+
+function ensureCanonicalDirectory(directory) {
+  const missing = [];
+  let cursor = directory;
+  let stats = lstatMaybe(cursor);
+  while (!stats) {
+    const parent = path.dirname(cursor);
+    if (parent === cursor) throw new Error("unsafe output directory");
+    missing.unshift(path.basename(cursor));
+    cursor = parent;
+    stats = lstatMaybe(cursor);
+  }
+  if (stats.isSymbolicLink() || !stats.isDirectory() || fs.realpathSync(cursor) !== cursor) {
+    throw new Error("unsafe output directory");
+  }
+  for (const segment of missing) {
+    cursor = path.join(cursor, segment);
     try {
-      stats = fs.lstatSync(entry.target);
+      fs.mkdirSync(cursor);
     } catch (error) {
-      if (error?.code === "ENOENT") continue;
-      throw error;
+      if (error?.code !== "EEXIST") throw error;
     }
-    if (!replace || (!stats.isFile() && !stats.isSymbolicLink())) throw new Error("output conflict");
+    stats = lstatMaybe(cursor);
+    if (!stats?.isDirectory() || stats.isSymbolicLink() || fs.realpathSync(cursor) !== cursor) {
+      throw new Error("unsafe output directory");
+    }
   }
 }
 
-function writeOutput(output, files, replace) {
-  fs.mkdirSync(output, { recursive: true });
-  if (replace) {
-    for (const file of outputFiles) {
-      const target = path.join(output, file);
-      try {
-        fs.unlinkSync(target);
-      } catch (error) {
-        if (error?.code !== "ENOENT") throw error;
-      }
+function inspectKnownTargets(directory, replace) {
+  for (const file of outputFiles) {
+    const stats = lstatMaybe(path.join(directory, file));
+    if (!stats) continue;
+    if (!replace || (!stats.isFile() && !stats.isSymbolicLink())) {
+      throw new Error("output conflict");
     }
   }
-  for (const file of outputFiles) {
-    fs.writeFileSync(path.join(output, file), files[file], { encoding: "utf8", flag: "wx" });
+}
+
+function testFailure(phase, file) {
+  if (
+    process.env.NODE_ENV === "test"
+    && process.env.TRIP_MAP_EXPORT_TEST_FAILURE === `${phase}:${file}`
+  ) {
+    throw new Error("injected export failure");
+  }
+}
+
+function testPause(phase) {
+  const pauseDir = process.env.TRIP_MAP_EXPORT_TEST_PAUSE_DIR;
+  if (process.env.NODE_ENV !== "test" || !pauseDir) return;
+  const ready = path.join(pauseDir, `${phase}.ready`);
+  const resume = path.join(pauseDir, `${phase}.continue`);
+  fs.writeFileSync(ready, "ready", { flag: "wx" });
+  const signal = new Int32Array(new SharedArrayBuffer(4));
+  const deadline = Date.now() + 5000;
+  while (!fs.existsSync(resume)) {
+    if (Date.now() >= deadline) throw new Error("test pause timed out");
+    Atomics.wait(signal, 0, 0, 10);
+  }
+}
+
+function oldStageName(file) {
+  return `.old-${file}`;
+}
+
+function cleanupStage(stage) {
+  for (const file of [...outputFiles, ...outputFiles.map(oldStageName)]) {
+    const target = path.join(stage, file);
+    const stats = lstatMaybe(target);
+    if (!stats) continue;
+    if (!stats.isFile() && !stats.isSymbolicLink()) throw new Error("unsafe staging entry");
+    fs.unlinkSync(target);
+  }
+  fs.rmdirSync(stage);
+}
+
+function stageOutputFiles(parent, files) {
+  const stage = fs.mkdtempSync(path.join(parent, ".trip-map-export-"));
+  try {
+    for (const file of outputFiles) {
+      fs.writeFileSync(path.join(stage, file), files[file], { encoding: "utf8", flag: "wx" });
+      testFailure("stage", file);
+    }
+    return stage;
+  } catch (error) {
+    cleanupStage(stage);
+    throw error;
+  }
+}
+
+function restoreCapturedOutput({ captured, output, stage, installed, movedOld }) {
+  for (const file of [...installed].reverse()) {
+    const installedPath = path.join(captured, file);
+    if (lstatMaybe(installedPath)) fs.renameSync(installedPath, path.join(stage, file));
+  }
+  for (const file of [...movedOld].reverse()) {
+    const oldPath = path.join(stage, oldStageName(file));
+    if (lstatMaybe(oldPath)) fs.renameSync(oldPath, path.join(captured, file));
+  }
+  const unexpected = lstatMaybe(output);
+  if (unexpected) {
+    if (!unexpected.isSymbolicLink()) throw new Error("output changed during rollback");
+    fs.unlinkSync(output);
+  }
+  fs.renameSync(captured, output);
+}
+
+function commitIntoExistingOutput(output, stage, replace) {
+  const captured = `${stage}.captured`;
+  fs.renameSync(output, captured);
+  const capturedStats = lstatMaybe(captured);
+  if (!capturedStats?.isDirectory() || capturedStats.isSymbolicLink()) {
+    fs.renameSync(captured, output);
+    throw new Error("unsafe output directory");
+  }
+  const installed = [];
+  const movedOld = [];
+  try {
+    inspectKnownTargets(captured, replace);
+    for (const file of outputFiles) {
+      const current = path.join(captured, file);
+      if (!lstatMaybe(current)) continue;
+      fs.renameSync(current, path.join(stage, oldStageName(file)));
+      movedOld.push(file);
+    }
+    for (const file of outputFiles) {
+      fs.renameSync(path.join(stage, file), path.join(captured, file));
+      installed.push(file);
+      testFailure("commit", file);
+    }
+    if (lstatMaybe(output)) throw new Error("output changed during commit");
+    fs.renameSync(captured, output);
+  } catch (error) {
+    restoreCapturedOutput({ captured, output, stage, installed, movedOld });
+    throw error;
+  }
+  cleanupStage(stage);
+}
+
+function writeOutput(output, expectedState, protectedRoots, files, replace) {
+  const parent = path.dirname(output);
+  ensureCanonicalDirectory(parent);
+  if (fs.realpathSync(parent) !== parent) throw new Error("unsafe output directory");
+  const stage = stageOutputFiles(parent, files);
+  try {
+    const currentState = inspectOutputDirectory(output, protectedRoots);
+    if (currentState !== expectedState) throw new Error("output changed during export");
+    if (currentState === "absent") {
+      fs.renameSync(stage, output);
+      return;
+    }
+    commitIntoExistingOutput(output, stage, replace);
+  } catch (error) {
+    if (lstatMaybe(stage)?.isDirectory()) cleanupStage(stage);
+    throw error;
   }
 }
 
 try {
   const args = parseArgs(process.argv.slice(2));
   const guideRoot = assertDirectory(args.guide);
-  const output = assertSafeOutput(args.output, guideRoot);
+  const { output, protectedRoots } = assertSafeOutput(args.output, guideRoot);
+  const expectedOutputState = inspectOutputDirectory(output, protectedRoots);
+  if (expectedOutputState === "directory") inspectKnownTargets(output, args.replace);
   const trip = loadTrip(guideRoot);
   const state = loadState(args.state);
   const files = loadMapDeliveryRuntime().buildMyMapsFiles({ trip, state, locale: args.locale });
-  preflightOutput(output, args.replace);
-  writeOutput(output, files, args.replace);
+  testPause("before-write");
+  writeOutput(output, expectedOutputState, protectedRoots, files, args.replace);
   const summary = {
     status: "ok",
     files: outputFiles,

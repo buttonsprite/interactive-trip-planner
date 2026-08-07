@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadMapDeliveryRuntime } from "./load-map-delivery-runtime.js";
 
@@ -25,6 +25,46 @@ function runCli(args, env = {}) {
     encoding: "utf8",
     env: { ...process.env, ...env },
   });
+}
+
+function collectChild(child) {
+  let stdout = "";
+  let stderr = "";
+  child.stdout.on("data", (chunk) => { stdout += chunk; });
+  child.stderr.on("data", (chunk) => { stderr += chunk; });
+  return new Promise((resolve, reject) => {
+    child.once("error", reject);
+    child.once("close", (status, signal) => resolve({ status, signal, stdout, stderr }));
+  });
+}
+
+async function waitForFile(file, timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs;
+  while (!fs.existsSync(file)) {
+    if (Date.now() >= deadline) throw new Error(`Timed out waiting for ${file}`);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+}
+
+async function startCliPausedBeforeWrite(args, pauseDir) {
+  fs.mkdirSync(pauseDir);
+  const cli = spawn(process.execPath, [cliPath, ...args], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    env: {
+      ...process.env,
+      NODE_ENV: "test",
+      TRIP_MAP_EXPORT_TEST_PAUSE_DIR: pauseDir,
+    },
+  });
+  const cliResult = collectChild(cli);
+  await waitForFile(path.join(pauseDir, "before-write.ready"));
+  return {
+    async release() {
+      fs.writeFileSync(path.join(pauseDir, "before-write.continue"), "continue");
+      return cliResult;
+    },
+  };
 }
 
 function assertSafeFailure(result) {
@@ -295,6 +335,31 @@ try {
     "a broken known-file symlink must be detected before any sibling output is written",
   );
 
+  const raceGuide = createGuide("race-guide");
+  const raceSentinel = "guide README must survive output redirection";
+  fs.writeFileSync(path.join(raceGuide, "README.md"), raceSentinel);
+  const raceOutput = path.join(tempRoot, "race-output");
+  const blockedRace = await startCliPausedBeforeWrite(
+    ["--guide", raceGuide, "--output", raceOutput, "--replace"],
+    path.join(tempRoot, "race-pause"),
+  );
+  fs.symlinkSync(raceGuide, raceOutput, "dir");
+  const raceResult = await blockedRace.release();
+  assertSafeFailure(raceResult);
+  assert.equal(fs.readFileSync(path.join(raceGuide, "README.md"), "utf8"), raceSentinel);
+  assert.equal(fs.existsSync(path.join(raceGuide, "places.csv")), false);
+  assert.equal(fs.existsSync(path.join(raceGuide, "itinerary.kml")), false);
+
+  const stageFailureOutput = path.join(tempRoot, "stage-failure-output");
+  assertSafeFailure(runCli(
+    ["--guide", guide, "--output", stageFailureOutput],
+    {
+      NODE_ENV: "test",
+      TRIP_MAP_EXPORT_TEST_FAILURE: "stage:places.csv",
+    },
+  ));
+  assert.equal(fs.existsSync(stageFailureOutput), false, "failed staging must leave no partial output");
+
   const replaceOutput = path.join(tempRoot, "replace-output");
   fs.mkdirSync(replaceOutput);
   for (const file of ["README.md", "places.csv", "itinerary.kml"]) {
@@ -310,6 +375,37 @@ try {
     "keep.txt",
     "places.csv",
   ]);
+
+  const rollbackOutput = path.join(tempRoot, "rollback-output");
+  fs.mkdirSync(rollbackOutput);
+  const oldFiles = {
+    "README.md": "old readme",
+    "places.csv": "old places",
+    "itinerary.kml": "old itinerary",
+  };
+  for (const [file, content] of Object.entries(oldFiles)) {
+    fs.writeFileSync(path.join(rollbackOutput, file), content);
+  }
+  fs.writeFileSync(path.join(rollbackOutput, "keep.txt"), "unrelated survives rollback");
+  assertSafeFailure(runCli(
+    ["--guide", guide, "--output", rollbackOutput, "--replace"],
+    {
+      NODE_ENV: "test",
+      TRIP_MAP_EXPORT_TEST_FAILURE: "commit:README.md",
+    },
+  ));
+  for (const [file, content] of Object.entries(oldFiles)) {
+    assert.equal(fs.readFileSync(path.join(rollbackOutput, file), "utf8"), content);
+  }
+  assert.equal(
+    fs.readFileSync(path.join(rollbackOutput, "keep.txt"), "utf8"),
+    "unrelated survives rollback",
+  );
+  assert.equal(
+    fs.readdirSync(tempRoot).some((name) => name.startsWith(".trip-map-export-")),
+    false,
+    "staging and rollback directories must be cleaned after failure",
+  );
 
   console.log("Google My Maps export contract passed");
 } finally {

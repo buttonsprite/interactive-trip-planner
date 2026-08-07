@@ -75,6 +75,48 @@ function isNonEmptyString(value) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function validateAmapRef(poi, errors) {
+  const ref = poi.mapProviderRefs?.amap;
+  if (!ref) return;
+  const poiLabel = poi.id || poi.name || "<unknown>";
+  if (!["resolved", "ambiguous", "unresolved"].includes(ref.status)) errors.push(`${poiLabel}: invalid AMap status`);
+  if (ref.status === "resolved" && !String(ref.poiId || "").trim()) errors.push(`${poiLabel}: resolved AMap ref requires poiId`);
+  if (ref.position && ref.position.system !== "gcj02") errors.push(`${poiLabel}: AMap position must use gcj02`);
+  if (ref.status === "resolved" && !String(ref.checkedAt || "").trim()) errors.push(`${poiLabel}: resolved AMap ref requires checkedAt`);
+}
+
+function validateTransitSegmentVerification(dayLabel, segment, errors) {
+  if (segment?.routeStatus == null) return;
+  if (!["verified", "unverified"].includes(segment.routeStatus)) {
+    errors.push(`${dayLabel} transit segment has invalid routeStatus: ${segment.routeStatus}`);
+    return;
+  }
+  if (segment.routeStatus !== "verified") return;
+  if (!isNonEmptyString(segment.routeProvider)) errors.push(`${dayLabel} verified transit segment requires routeProvider`);
+  if (!Number.isFinite(segment.distanceMeters) || segment.distanceMeters <= 0) {
+    errors.push(`${dayLabel} verified transit segment requires positive distanceMeters`);
+  }
+  if (!isNonEmptyString(segment.routeReviewedAt)) errors.push(`${dayLabel} verified transit segment requires routeReviewedAt`);
+}
+
+function validateDayRouteReview(day, dayLabel, stopIds, segments, errors) {
+  const status = day.routeReview?.status;
+  if (status == null) return;
+  if (!["verified", "partial", "unverified"].includes(status)) {
+    errors.push(`${dayLabel} routeReview has invalid status: ${status}`);
+    return;
+  }
+  if (status !== "verified") return;
+  for (let index = 1; index < stopIds.length; index += 1) {
+    const fromPoiId = stopIds[index - 1];
+    const toPoiId = stopIds[index];
+    const segment = segments.find((item) => item.fromPoiId === fromPoiId && item.toPoiId === toPoiId);
+    if (!segment || segment.routeStatus !== "verified") {
+      errors.push(`${dayLabel} routeReview.status verified requires verified transit segment: ${fromPoiId} -> ${toPoiId}`);
+    }
+  }
+}
+
 function isSafeHttpUrl(value) {
   if (!isNonEmptyString(value)) return false;
   try {
@@ -251,6 +293,7 @@ function main() {
       poisByName.set(poi.name, named);
     }
     if (!isValidCoord(poi.coords)) errors.push(`POI ${poi.id || poi.name} has invalid coords`);
+    validateAmapRef(poi, errors);
     if (poi.priority != null && !allowedPriorities.has(poi.priority)) {
       errors.push(`POI ${poi.id || poi.name} has invalid priority: ${poi.priority}`);
     }
@@ -385,6 +428,7 @@ function main() {
       }
 
       const segments = Array.isArray(day.transitSegments) ? day.transitSegments : [];
+      for (const segment of segments) validateTransitSegmentVerification(dayLabel, segment, errors);
       for (let index = 1; index < stopIds.length; index += 1) {
         const fromPoiId = stopIds[index - 1];
         const toPoiId = stopIds[index];
@@ -400,6 +444,7 @@ function main() {
         if (!ids.has(segment.fromPoiId)) errors.push(`${dayLabel} transit segment references missing POI: ${segment.fromPoiId}`);
         if (!ids.has(segment.toPoiId)) errors.push(`${dayLabel} transit segment references missing POI: ${segment.toPoiId}`);
       }
+      validateDayRouteReview(day, dayLabel, stopIds, segments, errors);
     }
 
     if (day.routeGeometry != null) {

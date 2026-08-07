@@ -23,6 +23,30 @@
 
 `coords` 使用 `[lat, lng]`。坐标可以是规划级近似定位，但出发前需要用地图、官网或订位页复核门牌和入口。
 
+### 可选地图 Provider 事实
+
+`mapProviderRefs` 是可选的 provider 复核事实；缺失时旧有 `coords` 合法且继续按 `[lat, lng]` 使用。当前支持 `mapProviderRefs.amap`：
+
+```json
+{
+  "mapProviderRefs": {
+    "amap": {
+      "status": "resolved",
+      "poiId": "B0FFTEST01",
+      "name": "北门市场",
+      "address": "云南省大理白族自治州大理市",
+      "position": { "lng": 100.1602, "lat": 25.7001, "system": "gcj02" },
+      "checkedAt": "2026-08-06"
+    }
+  }
+}
+```
+
+- `status` 只能是 `resolved`、`ambiguous` 或 `unresolved`。
+- 只有 `resolved` 可以把 provider `poiId` 或 `position` 用于直接 handoff；它必须有非空 `poiId` 和 `checkedAt`。
+- AMap `position` 存在时必须使用 GCJ-02，写作 `{ "lng", "lat", "system": "gcj02" }`；它不改变通用 `coords` 的 `[lat, lng]` 顺序。
+- `ambiguous` 和 `unresolved` 保留候选/失败事实，后续执行不得把它们当成已确认 provider 结果。
+
 ## 推荐字段
 
 - `day`
@@ -185,6 +209,20 @@
   "label": "沿主街步行约 0.9 公里，午餐就在前往下午主锚点的方向上"
 }
 ```
+
+Provider 已复核的段可以补充以下归一化字段；旧数据缺失这些字段仍然有效：
+
+```json
+{
+  "routeStatus": "verified",
+  "routeProvider": "amap",
+  "distanceMeters": 980,
+  "routeReviewedAt": "2026-08-06"
+}
+```
+
+- `routeStatus` 为 `verified` 或 `unverified`。`verified` 必须同时有非空 `routeProvider`、正数 `distanceMeters` 与非空 `routeReviewedAt`。
+- `routeReview.status` 是每日路线状态，只能是 `verified`、`partial` 或 `unverified`。只有当天每一段显示的正式相邻移动都是 `routeStatus: "verified"`，并带 provider 与复核日期时，才能标记当天 `verified`。
 
 不能用 `museum -> afternoon-anchor` 的一条记录跨过实际存在的午餐或酒店停靠。缺少复核数据时保留“这段移动尚未复核”，不能根据两点直线距离自动生成时间。
 

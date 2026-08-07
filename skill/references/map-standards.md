@@ -28,6 +28,9 @@
 - 没有路径几何时显示编号地点和外部导航入口。
 - 允许用非交互虚线连接当天编号顺序帮助扫读，但必须标为顺序参考，不能称为道路、步行路线或导航结果。
 - 当天每两个相邻正式地点都必须有对应的移动说明；缺失时明确显示尚未复核，不使用直线距离自动估算。
+- `transitSegments` 可选使用 `routeStatus`、`routeProvider`、`distanceMeters` 与 `routeReviewedAt` 记录 provider 复核。只有 `routeStatus: "verified"` 且带 provider、正数距离和复核日期的段可展示为已复核；否则明确显示尚未复核。
+- 每日 `routeReview.status` 使用 `verified`、`partial` 或 `unverified`。只有所有显示的正式相邻移动都已按上述字段复核，才可标记 `verified`；旧数据没有这些字段时保持兼容并视为未复核。
+- POI 的可选 `mapProviderRefs.amap` 记录 AMap provider 事实；仅 `resolved` 的 `poiId` 或 GCJ-02 `position` 可供直接 handoff，不改变通用 `coords: [lat, lng]`。
 - 午餐、回酒店、取行李和晚餐前移动如果会改变顺序，必须进入当天时间线或相邻移动说明。
 - 用户修改后弱化原路线并标记“路线需要重新安排”；正式重排前不向新增地点画线。
 - 相邻交通只使用已复核信息；没有可靠路网或时刻信息时明确保留待复核状态。

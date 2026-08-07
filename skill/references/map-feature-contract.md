@@ -15,6 +15,7 @@
 - 地点搜索、城市/区域、类别、优先级和行程归类筛选。
 - 真实地图、地点标记和正式路线。
 - 正式路线必须来自提供的 `routeGeometry`；没有路径几何时只显示编号地点。
+- 地点可选保存 `mapProviderRefs.amap` 作为 provider 复核事实。只有 `status: "resolved"` 的 AMap `poiId`/GCJ-02 `position` 可以直接交给后续 provider；缺失 provider 字段的旧地点继续使用 `coords: [lat, lng]`。
 - 没有合格路径几何时可以绘制非交互虚线作为“顺序参考”，但它不代表道路，不得附带推测距离或时间。
 - 地图提供行程图层和按地点类别分组的图层开关；开关状态刷新恢复。
 - 用户改动后弱化原路线并提示“路线需要重新安排”，不绘制推测线路。
@@ -25,7 +26,7 @@
 - 连续日期栏用于切换日期，并提供返回全程入口。
 - 当天地点按顺序展示；住宿不参与游玩编号。
 - 普通地点卡片左侧有至少 44px 的专用排序手柄，卡片正文仍打开详情。按住 160ms 后进入拖动，显示单一插入线；手机路线列表的顶部/底部 48px 支持最高每帧 14px 的渐进自动滚动。`pointercancel`、`Escape` 和原位松手不保存；上移/下移按钮保留。
-- 相邻地点显示交通信息。只使用已复核的 `transitSegments`；没有时显示“这段移动尚未复核”，不能用坐标直线距离自动补出时间。
+- 相邻地点显示交通信息。只使用已复核的 `transitSegments`；没有时显示“这段移动尚未复核”，不能用坐标直线距离自动补出时间。`routeStatus: "verified"` 的段必须携带 `routeProvider`、正数 `distanceMeters` 与 `routeReviewedAt`；`routeReview.status` 只有在全部显示的正式相邻段均为已复核时才可以是 `verified`。
 - 当天候选仍可在地图和列表中浏览，并能用行内 `＋` 加入；已安排普通地点能用行内 `−` 移出。
 - 进入当天后聚焦当天已安排地点、当天候选和当前选中地点；其他日期地点默认隐藏，回到全程总览后恢复完整分布。
 - 日期栏切换保留用户地图视野，不反复强制 fit bounds；桌面保留并排的当前地点详情，手机从地点详情切换日期后返回所选日期的当天路线。
@@ -95,9 +96,9 @@ MapLibre、Three.js 或其他会替换公开母版运行时的表达，不再属
 
 ## 数据字段
 
-地点建议包含：`id`、`name`、`name_zh`、`city`、`area`、`category`、`coords`、`priority`、`note`、`plan`、`tip`、`officialUrl`、`mapUrl`、`experienceUrl`。住宿可补 `hotelRationale` 和 `hotelTradeoffs`；餐饮可补 `mealRole` 和 `reservationDifficulty`。
+地点建议包含：`id`、`name`、`name_zh`、`city`、`area`、`category`、`coords`、`priority`、`note`、`plan`、`tip`、`officialUrl`、`mapUrl`、`experienceUrl`。可选 `mapProviderRefs.amap` 使用 `resolved | ambiguous | unresolved`，且只有 resolved 允许 direct handoff。住宿可补 `hotelRationale` 和 `hotelTradeoffs`；餐饮可补 `mealRole` 和 `reservationDifficulty`。
 
-每日路线建议包含：`id`、`date`、`title`、`city`、`summary`、`capacity`、`routeStops`、`candidates`、`routeGeometry` 和 `transitSegments`。
+每日路线建议包含：`id`、`date`、`title`、`city`、`summary`、`capacity`、`routeStops`、`candidates`、`routeGeometry`、`transitSegments` 和可选 `routeReview.status`（`verified | partial | unverified`）。
 
 ## 验证
 

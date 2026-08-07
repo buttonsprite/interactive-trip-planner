@@ -26,6 +26,16 @@
     "priority": "preferred",
     "coords": [48.86, 2.3266],
     "note": "从火车站改造空间理解法国十九世纪艺术，也是左岸艺术路线最合适的开场。",
+    "mapProviderRefs": {
+      "amap": {
+        "status": "resolved",
+        "poiId": "B0FFTEST01",
+        "name": "Synthetic template AMap reference",
+        "address": "Synthetic template address only",
+        "position": { "lng": 2.3266, "lat": 48.86, "system": "gcj02" },
+        "checkedAt": "2026-08-06"
+      }
+    },
     "plan": "第一天上午作为主锚点，之后沿左岸向罗丹美术馆移动。",
     "tip": "开放时间和临展会变化，出发前用官网复核并提前订票。",
     "source": "template-example",

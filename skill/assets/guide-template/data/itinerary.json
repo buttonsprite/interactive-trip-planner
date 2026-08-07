@@ -26,10 +26,13 @@
     ],
     "routeGeometrySource": "模板人工示例路径，仅用于功能验证",
     "routeGeometryReviewedAt": "2026-07-17",
+    "routeReview": {
+      "status": "unverified"
+    },
     "transitSegments": [
-      { "fromPoiId": "paris-saint-germain-hotel", "toPoiId": "paris-musee-orsay", "mode": "步行", "minutes": 18, "label": "约 18 分钟步行" },
-      { "fromPoiId": "paris-musee-orsay", "toPoiId": "paris-musee-rodin", "mode": "步行", "minutes": 17, "label": "约 17 分钟步行" },
-      { "fromPoiId": "paris-musee-rodin", "toPoiId": "paris-eiffel-tower", "mode": "步行", "minutes": 25, "label": "约 25 分钟步行" }
+      { "fromPoiId": "paris-saint-germain-hotel", "toPoiId": "paris-musee-orsay", "mode": "步行", "minutes": 18, "label": "约 18 分钟步行", "routeStatus": "unverified" },
+      { "fromPoiId": "paris-musee-orsay", "toPoiId": "paris-musee-rodin", "mode": "步行", "minutes": 17, "label": "约 17 分钟步行", "routeStatus": "unverified" },
+      { "fromPoiId": "paris-musee-rodin", "toPoiId": "paris-eiffel-tower", "mode": "步行", "minutes": 25, "label": "约 25 分钟步行", "routeStatus": "unverified" }
     ]
   },
   {

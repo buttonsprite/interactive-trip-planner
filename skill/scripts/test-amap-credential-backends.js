@@ -19,6 +19,7 @@ function assertNoSecretInArgs(calls) {
 
 {
   const calls = [];
+  const prompts = [];
   let stored = 0;
   const runCommand = (command, args, options = {}) => {
     calls.push({ command, args, options });
@@ -37,10 +38,16 @@ function assertNoSecretInArgs(calls) {
     }
     return { status: 0, stdout: "", stderr: "" };
   };
-  const backend = createPlatformCredentialBackend({ platform: "darwin", env: {}, runCommand });
+  const backend = createPlatformCredentialBackend({
+    platform: "darwin",
+    env: {},
+    runCommand,
+    announcePrompt: (label) => prompts.push(label),
+  });
   assert.deepEqual(backend.availability(), { status: "available" });
   backend.capturePair("11111111-1111-4111-8111-111111111111");
   assert.equal(stored, 2);
+  assert.deepEqual(prompts, ["AMAP_KEY", "AMAP_SECURITY_KEY"]);
   const addCalls = calls.filter(({ args }) => args[0] === "add-generic-password");
   assert.equal(addCalls.length, 2);
   assert.deepEqual(addCalls[0].args.slice(-1), ["-w"]);
@@ -65,7 +72,12 @@ function assertNoSecretInArgs(calls) {
     }
     return { status: 0, stdout: "", stderr: "" };
   };
-  const backend = createPlatformCredentialBackend({ platform: "darwin", env: {}, runCommand });
+  const backend = createPlatformCredentialBackend({
+    platform: "darwin",
+    env: {},
+    runCommand,
+    announcePrompt: () => {},
+  });
   assert.throws(
     () => backend.capturePair("22222222-2222-4222-8222-222222222222"),
     /^Error: AMap credential store failed\.$/,

@@ -121,7 +121,7 @@ function account(profileId, kind) {
   return `${profileId}:${kind}`;
 }
 
-function createMacBackend(runCommand) {
+function createMacBackend(runCommand, announcePrompt) {
   const runSecurity = (args, options) => runRequired(runCommand, "security", args, options);
   const deleteAccount = (profileId, kind) => {
     runSafely(runCommand, "security", [
@@ -139,6 +139,7 @@ function createMacBackend(runCommand) {
       const kinds = ["key", "security-key"];
       try {
         for (const kind of kinds) {
+          announcePrompt(kind === "key" ? "AMAP_KEY" : "AMAP_SECURITY_KEY");
           runSecurity([
             "add-generic-password",
             "-U",
@@ -319,12 +320,15 @@ export function createPlatformCredentialBackend({
   homedir = os.homedir(),
   pathApi,
   runCommand = defaultRunCommand,
+  announcePrompt = (label) => {
+    process.stderr.write(`请输入 ${label}（输入不会显示）。 Enter ${label} (input is hidden).\n`);
+  },
   promptSecret = () => {
     throw fixedError();
   },
 } = {}) {
   const paths = platformCredentialPaths({ platform, env, homedir, pathApi });
-  if (platform === "darwin") return createMacBackend(runCommand);
+  if (platform === "darwin") return createMacBackend(runCommand, announcePrompt);
   if (platform === "win32") {
     return createWindowsBackend({ runCommand, promptSecret, configRoot: paths.configRoot });
   }

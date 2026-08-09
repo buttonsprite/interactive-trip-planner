@@ -177,6 +177,29 @@ try {
   resumedStore.beginCandidate();
   assert.equal(staleBackend.pairs.has(staleCandidate.profileId), false);
 
+  const interruptedCommitDir = path.join(tempRoot, "interrupted-commit");
+  fs.mkdirSync(interruptedCommitDir);
+  const interruptedProfileId = "55555555-5555-4555-8555-555555555555";
+  fs.writeFileSync(
+    path.join(interruptedCommitDir, "amap-profile.json"),
+    JSON.stringify({ version: 1, profileId: interruptedProfileId }),
+    { mode: 0o600 },
+  );
+  fs.writeFileSync(
+    path.join(interruptedCommitDir, "amap-profile.json.candidates"),
+    JSON.stringify({ version: 1, profileIds: [interruptedProfileId] }),
+    { mode: 0o600 },
+  );
+  const interruptedBackend = createFakeBackend({
+    initialPairs: { [interruptedProfileId]: secrets },
+  });
+  const interruptedStore = makeStore(interruptedCommitDir, interruptedBackend, [
+    "66666666-6666-4666-8666-666666666666",
+  ]);
+  interruptedStore.beginCandidate();
+  assert.equal(interruptedBackend.pairs.has(interruptedProfileId), true);
+  assert.equal(interruptedStore.readActive().status, "ready");
+
   const symlinkTarget = path.join(tempRoot, "real-config");
   const symlinkRoot = path.join(tempRoot, "linked-config");
   fs.mkdirSync(symlinkTarget);

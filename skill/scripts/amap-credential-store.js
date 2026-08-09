@@ -190,7 +190,10 @@ export function createAmapCredentialStore({
 
   function cleanupStaleCandidates() {
     const staleIds = readCandidateIds(ledgerFile);
+    const activePointer = parsePointer(pointerFile);
+    if (activePointer.status === "corrupt") throw new Error(STORE_ERROR);
     for (const profileId of staleIds) {
+      if (activePointer.status === "ok" && activePointer.value.profileId === profileId) continue;
       safeBackendCall(() => backend.deletePair(profileId));
     }
     writeCandidateIds(ledgerFile, []);

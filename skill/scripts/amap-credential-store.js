@@ -221,6 +221,15 @@ export function createAmapCredentialStore({
     }
   }
 
+  function readCandidate(profileId) {
+    if (!isValidProfileId(profileId) || !configDirectoryReady()) throw new Error(STORE_ERROR);
+    const candidates = readCandidateIds(ledgerFile);
+    if (!candidates.includes(profileId)) throw new Error(STORE_ERROR);
+    const credentials = safeBackendCall(() => normalizePair(backend.readPair(profileId)));
+    if (!credentials) throw new Error(STORE_ERROR);
+    return credentials;
+  }
+
   function commitCandidate(profileId) {
     if (!isValidProfileId(profileId) || !configDirectoryReady()) throw new Error(STORE_ERROR);
     const candidates = readCandidateIds(ledgerFile);
@@ -257,6 +266,7 @@ export function createAmapCredentialStore({
     status: publicStatus,
     readActive,
     beginCandidate,
+    readCandidate,
     commitCandidate,
     discardCandidate,
     removeActive,

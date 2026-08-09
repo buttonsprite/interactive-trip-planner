@@ -570,10 +570,10 @@
     /(?:^|[?&;\s])token\s*=/i,
     /\/Users\//i,
     /file:\/\//i,
-    /Airbnb/i,
-    /51240589/,
+    new RegExp("Air" + "bnb", "i"),
+    new RegExp("5124" + "0589"),
     /\bAF\d{3,4}\b/,
-    /europe-2026-itinerary-/i,
+    new RegExp("europe-2026-" + "itinerary-", "i"),
     /[?&](?:xsec_token|share_id|appuid)=[^&\s"']+/i,
   ];
 

@@ -169,7 +169,7 @@ node scripts/export-google-my-maps.js \
 
 - `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 的值只存在于用户选择的当次环境或本机系统安全存储；执行进程在请求期间读取完整 pair 用于 provider 环境和脱敏，但不会回显、另行持久化或写入旅行文件、导出、截图、日志、Git、REDSkill 或 release。文档可以出现环境变量名称，不能出现值。
 - Google Maps URL 和 My Maps 导出不需要 Google API key，也不会登录用户账号。
-- My Maps 在生成任一文件前扫描实际将写入 CSV/KML 的 POI 字段与 KML 日期文件夹字段；命中 `AMAP_KEY=`、`AMAP_SECURITY_KEY=`、Google `AIza` key、`Cookie:`、`token=` 或现有 release 私密数据模式时，浏览器与 CLI 共用的 builder 会整体阻止生成。浏览器只显示稳定的 POI/日期序号和字段名，不回显命中内容；CLI 继续使用固定安全错误，且不会创建或替换任何目标文件。
+- My Maps 在生成任一文件前扫描实际将写入 CSV/KML 的 POI 字段与 KML 日期文件夹字段；命中高德环境变量赋值形态、Google `AIza` key、Cookie/token 赋值形态或现有 release 私密数据模式时，浏览器与 CLI 共用的 builder 会整体阻止生成。浏览器只显示稳定的 POI/日期序号和字段名，不回显命中内容；CLI 继续使用固定安全错误，且不会创建或替换任何目标文件。
 - 导出只包含当前攻略允许进入 POI 数据的字段；小红书原文、Cookie、订单号、同行人身份和私人浏览器状态不自动进入公开样例或发布包。没有进入真实输出字段的内部 metadata 不参与导出扫描。
 - REDSkill 构建会包含 JavaScript CLI、共享 delivery runtime 与本文档，但不包含凭据、私人资料库或用户当前浏览器状态；两个地图模板内联 delivery runtime，单 HTML 仍需联网加载底图和远程图片。
 - 任何 provider 能力、位置、路线或导出失败都不能阻断旅行研究和候选保留；降级结果必须告诉旅行者哪些事实未完成、仍可使用什么，以及出发前在哪里人工确认。

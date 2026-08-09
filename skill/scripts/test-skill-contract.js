@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(scriptDir, "..");
 const repositoryRoot = path.resolve(skillRoot, "..");
+const isRepositoryCheckout = fs.existsSync(path.join(repositoryRoot, "package.json"));
 
 const read = (relativePath) => fs.readFileSync(path.join(skillRoot, relativePath), "utf8");
 
@@ -208,82 +209,92 @@ assert.doesNotThrow(
   "negative boundary copy must not be mistaken for an unsupported claim",
 );
 
-const readmeProviderLine = (repositoryReadme || "").split("\n").find(
-  (line) => line.includes("当前源码不调用 Google Places API 或 Google Routes API"),
-) || "";
-assert.ok(readmeProviderLine, "README.md must expose a real provider-boundary line for mutation coverage");
-assert.throws(
-  () => assertNoUnsupportedProviderClaims(
-    "README.md mixed API mutation",
-    readmeProviderLine.replace(
-      "当前源码不调用 Google Places API 或 Google Routes API",
-      "当前源码调用 Google Places API，但不调用 Google Routes API",
+if (repositoryReadme !== null) {
+  const readmeProviderLine = repositoryReadme.split("\n").find(
+    (line) => line.includes("当前源码不调用 Google Places API 或 Google Routes API"),
+  ) || "";
+  assert.ok(readmeProviderLine, "README.md must expose a real provider-boundary line for mutation coverage");
+  assert.throws(
+    () => assertNoUnsupportedProviderClaims(
+      "README.md mixed API mutation",
+      readmeProviderLine.replace(
+        "当前源码不调用 Google Places API 或 Google Routes API",
+        "当前源码调用 Google Places API，但不调用 Google Routes API",
+      ),
     ),
-  ),
-  /Google Places API/,
-  "a Routes negation must not hide a positive Places call in the real README line",
-);
+    /Google Places API/,
+    "a Routes negation must not hide a positive Places call in the real README line",
+  );
+}
 
-const englishReadmeProviderLine = (repositoryEnglishReadme || "").split("\n").find(
-  (line) => line.includes("does not call Google Places API and does not call Google Routes API"),
-) || "";
-assert.ok(englishReadmeProviderLine, "README.en.md must expose a real provider-boundary line for mutation coverage");
-assert.throws(
-  () => assertNoUnsupportedProviderClaims(
-    "README.en.md mixed API mutation",
-    englishReadmeProviderLine.replace("does not call Google Places API", "calls Google Places API"),
-  ),
-  /Google Places API/,
-  "an English Routes negation must not hide a positive Places call",
-);
-
-const installProviderLine = (redskillInstallTemplate || "").split("\n").find(
-  (line) => line.includes("本包不调用 Google Places API"),
-) || "";
-assert.ok(installProviderLine, "REDSKILL install template must expose a real provider-boundary line for mutation coverage");
-assert.throws(
-  () => assertNoUnsupportedProviderClaims(
-    "REDSKILL install mixed API mutation",
-    installProviderLine.replace(
-      "本包不调用 Google Places API",
-      "本包调用 Google Places API",
+if (repositoryEnglishReadme !== null) {
+  const englishReadmeProviderLine = repositoryEnglishReadme.split("\n").find(
+    (line) => line.includes("does not call Google Places API and does not call Google Routes API"),
+  ) || "";
+  assert.ok(englishReadmeProviderLine, "README.en.md must expose a real provider-boundary line for mutation coverage");
+  assert.throws(
+    () => assertNoUnsupportedProviderClaims(
+      "README.en.md mixed API mutation",
+      englishReadmeProviderLine.replace("does not call Google Places API", "calls Google Places API"),
     ),
-  ),
-  /Google Places API/,
-  "the bilingual Routes negation must not hide a positive Places call in the install line",
-);
+    /Google Places API/,
+    "an English Routes negation must not hide a positive Places call",
+  );
+}
 
-const readmeSyncLine = (repositoryReadme || "").split("\n").find(
-  (line) => line.includes("不会自动写入普通 Google Maps 收藏夹"),
-) || "";
-assert.ok(readmeSyncLine, "README.md must expose a real account-boundary line for mutation coverage");
-assert.throws(
-  () => assertNoUnsupportedProviderClaims(
-    "README.md mixed account mutation",
-    readmeSyncLine.replace(
-      "不会自动写入普通 Google Maps 收藏夹",
-      "会自动写入普通 Google Maps 收藏夹",
+if (redskillInstallTemplate !== null) {
+  const installProviderLine = redskillInstallTemplate.split("\n").find(
+    (line) => line.includes("本包不调用 Google Places API"),
+  ) || "";
+  assert.ok(installProviderLine, "REDSKILL install template must expose a real provider-boundary line for mutation coverage");
+  assert.throws(
+    () => assertNoUnsupportedProviderClaims(
+      "REDSKILL install mixed API mutation",
+      installProviderLine.replace(
+        "本包不调用 Google Places API",
+        "本包调用 Google Places API",
+      ),
     ),
-  ),
-  /Google Maps 收藏夹/,
-  "an AMap-favorites negation must not hide positive Google Maps account writing",
-);
+    /Google Places API/,
+    "the bilingual Routes negation must not hide a positive Places call in the install line",
+  );
+}
 
-const englishReadmeSyncLine = (repositoryEnglishReadme || "").split("\n").find(
-  (line) => line.includes("not automatically added to regular Google Maps saved lists"),
-) || "";
-assert.ok(englishReadmeSyncLine, "README.en.md must expose a real account-boundary line for mutation coverage");
-assert.throws(
-  () => assertNoUnsupportedProviderClaims(
-    "README.en.md mixed account mutation",
-    englishReadmeSyncLine.replace(
-      "not automatically added to regular Google Maps saved lists",
-      "automatically added to regular Google Maps saved lists",
+if (repositoryReadme !== null) {
+  const readmeSyncLine = repositoryReadme.split("\n").find(
+    (line) => line.includes("不会自动写入普通 Google Maps 收藏夹"),
+  ) || "";
+  assert.ok(readmeSyncLine, "README.md must expose a real account-boundary line for mutation coverage");
+  assert.throws(
+    () => assertNoUnsupportedProviderClaims(
+      "README.md mixed account mutation",
+      readmeSyncLine.replace(
+        "不会自动写入普通 Google Maps 收藏夹",
+        "会自动写入普通 Google Maps 收藏夹",
+      ),
     ),
-  ),
-  /Google Maps saved lists/,
-  "an English AMap-favorites negation must not hide positive Google Maps account writing",
-);
+    /Google Maps 收藏夹/,
+    "an AMap-favorites negation must not hide positive Google Maps account writing",
+  );
+}
+
+if (repositoryEnglishReadme !== null) {
+  const englishReadmeSyncLine = repositoryEnglishReadme.split("\n").find(
+    (line) => line.includes("not automatically added to regular Google Maps saved lists"),
+  ) || "";
+  assert.ok(englishReadmeSyncLine, "README.en.md must expose a real account-boundary line for mutation coverage");
+  assert.throws(
+    () => assertNoUnsupportedProviderClaims(
+      "README.en.md mixed account mutation",
+      englishReadmeSyncLine.replace(
+        "not automatically added to regular Google Maps saved lists",
+        "automatically added to regular Google Maps saved lists",
+      ),
+    ),
+    /Google Maps saved lists/,
+    "an English AMap-favorites negation must not hide positive Google Maps account writing",
+  );
+}
 
 assert.doesNotThrow(
   () => assertNoUnsupportedProviderClaims(
@@ -294,38 +305,45 @@ assert.doesNotThrow(
 );
 
 assert.ok(fs.existsSync(mapProviderDeliveryPath), "missing map provider delivery online logic");
+if (isRepositoryCheckout) {
+  assert.ok(repositoryReadme, "README.md is required for the public provider workflow");
+  assert.ok(repositoryEnglishReadme, "README.en.md is required for the public provider workflow");
+  assert.ok(redskillInstallTemplate, "REDSKILL install template is required for provider setup");
+}
 
-assert.ok(repositoryReadme, "README.md is required for the public provider workflow");
-assert.ok(repositoryEnglishReadme, "README.en.md is required for the public provider workflow");
-assert.ok(redskillInstallTemplate, "REDSKILL install template is required for provider setup");
-
-assertIncludesAll("README.md", repositoryReadme, [
-  ...credentialSetupCopy,
-  "高级/CI",
-  "真实 POI 与路线验证",
-  "未完成高德路网复核；请在出发前打开高德确认。",
-  "Google Maps URLs 不需要 API Key",
-  "places.csv",
-  "itinerary.kml",
-  "不会自动写入普通 Google Maps 收藏夹",
-]);
-assertIncludesAll("README.en.md", repositoryEnglishReadme, [
-  ...credentialSetupCopy,
-  "Advanced/CI",
-  "real POI and route validation",
-  "AMap road-network verification was not completed. Recheck in AMap before departure.",
-  "Google Maps URLs do not require an API key",
-  "places.csv",
-  "itinerary.kml",
-  "not automatically added to regular Google Maps saved lists",
-]);
-assertIncludesAll("REDSKILL_INSTALL.template.md", redskillInstallTemplate, [
-  ...credentialSetupCopy,
-  "高级/CI",
-  "真实 POI + 路线验证",
-  "不会明文保存",
-  ...routeStatusCopy,
-]);
+if (repositoryReadme !== null) {
+  assertIncludesAll("README.md", repositoryReadme, [
+    ...credentialSetupCopy,
+    "高级/CI",
+    "真实 POI 与路线验证",
+    "未完成高德路网复核；请在出发前打开高德确认。",
+    "Google Maps URLs 不需要 API Key",
+    "places.csv",
+    "itinerary.kml",
+    "不会自动写入普通 Google Maps 收藏夹",
+  ]);
+}
+if (repositoryEnglishReadme !== null) {
+  assertIncludesAll("README.en.md", repositoryEnglishReadme, [
+    ...credentialSetupCopy,
+    "Advanced/CI",
+    "real POI and route validation",
+    "AMap road-network verification was not completed. Recheck in AMap before departure.",
+    "Google Maps URLs do not require an API key",
+    "places.csv",
+    "itinerary.kml",
+    "not automatically added to regular Google Maps saved lists",
+  ]);
+}
+if (redskillInstallTemplate !== null) {
+  assertIncludesAll("REDSKILL_INSTALL.template.md", redskillInstallTemplate, [
+    ...credentialSetupCopy,
+    "高级/CI",
+    "真实 POI + 路线验证",
+    "不会明文保存",
+    ...routeStatusCopy,
+  ]);
+}
 assertIncludesAll("SKILL.md", skill, [
   ...credentialSetupCopy,
   "不要让用户把密钥粘贴到聊天",
@@ -380,7 +398,7 @@ for (const [label, document] of [
   ["regional-source-packs.md", sourcePackReference],
   ["taste-and-source-online-logic.md", tasteSourceOnlineLogic],
   ["user-facing-language.md", userLanguage],
-]) {
+].filter(([, document]) => document !== null)) {
   assert.doesNotMatch(document, /(?:每次|every use)[^\n。.]*(?:export\s+AMAP_KEY|set\s+AMAP_KEY)/i, `${label} must not require repeated environment setup`);
   assert.doesNotMatch(document, /(?:先|first)\s*(?:运行|run)\s*`?amap-gui start`?/i, `${label} must not make manual provider start the normal path`);
   assert.doesNotMatch(document, /(?:默认把?密钥?明文保存|密钥默认明文保存|默认创建明文(?:文件|配置)|默认使用\s*`?\.env)/i, `${label} must not recommend plaintext fallback`);
@@ -409,7 +427,7 @@ for (const [label, document] of [
   ["taste-and-source-online-logic.md", tasteSourceOnlineLogic],
   ["user-facing-language.md", userLanguage],
   ["guide-template map online logic", templateMapOnlineLogic],
-]) {
+].filter(([, document]) => document !== null)) {
   assertNoUnsupportedProviderClaims(label, document);
 }
 

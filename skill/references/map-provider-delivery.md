@@ -10,21 +10,32 @@
 
 ## 高德能力与安全执行
 
-安装和申请 Key 以[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)为准。本 Skill 不维护未经验证的安装命令。完成安装和本地环境配置后，先启动服务：
+安装和申请 Key 以[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)为准；高德控制台选择 Web端（JS API）。本 Skill 不维护未经验证的第三方安装命令。普通用户安装 `amap-gui` 后只做一次安全配置：
 
 ```bash
-amap-gui start
+node scripts/amap-credentials.js setup
+node scripts/amap-credentials.js status
+node scripts/amap-credentials.js update
+node scripts/amap-credentials.js remove
 ```
 
-需要人工排查时可以运行 `amap-gui status`；这是可选诊断，不是 Skill 的自动 readiness probe。
+`setup` 创建候选 profile，在两项凭据都捕获后执行一条真实 POI 查询和一条真实 walking route；两项均为 normalized `status: ok` 才原子切换 active pointer。`update` 使用同样事务，验证失败删除候选且旧 profile 保持 active。`status` 只展示平台、来源、是否有已保存 profile、provider readiness 和固定下一步，不显示凭据值、片段、长度、profile ID 或原生错误。`remove` 先停止 provider，再删除本 Skill namespace 下的 active pair 与非秘密指针，不删除高德控制台的 Key。
 
-先运行：
+平台默认存储：
+
+- macOS Keychain：两个 generic password item，共用 `com.pmacyx.interactive-trip-planner.amap` service，以随机 profile ID 区分；写入使用系统交互提示，秘密不进入 argv。
+- Windows DPAPI：使用 CurrentUser scope 加密，只有密文和非秘密元数据进入 `%APPDATA%/interactive-trip-planner`，目录使用当前用户 ACL；明文不进入 PowerShell 参数。
+- Linux Secret Service：通过 `secret-tool` 与 D-Bus/系统 Keyring 读写；Secret Service 缺失、锁定或 headless 环境不可用时返回 `store-unavailable`，不会明文保存，也不创建默认 `.env`。
+
+环境变量是高级/CI 覆盖入口：只有 `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 同时为 trim 后非空才覆盖系统存储；只提供一项返回 `partial-environment-credentials`，绝不从两个来源拼接。普通用户不要把密钥放进聊天、命令参数、攻略目录或 Git。
+
+只读能力检查可以运行：
 
 ```bash
 node scripts/check-amap-cli.js
 ```
 
-探测只确认 `amap-gui` 命令存在，并读取 `AMAP_KEY`、`AMAP_SECURITY_KEY`，检查它们是 trim 后非空的本地环境变量。它不会执行查询，不输出变量值，**不会确认高德服务容器正在运行**，也不能证明任何地点或路线。结果是 `available`、`missing-credentials` 或 `unavailable`；后两种进入降级。即使是 `available`，真实执行仍可能因服务未启动或 provider 故障返回 `provider-error`，此时继续规划、保留原候选或顺序，并保持未复核。
+探测只确认 `amap-gui` 命令和一个完整 credential source 可用，不执行查询、不输出凭据，也不能证明任何地点或路线。结果包括 `available`、`missing-cli`、`missing-credentials`、`partial-environment-credentials`、`store-unavailable` 或 `store-corrupt`；只有 `available` 可以开始真实请求。故障排查时可以人工运行 `amap-gui status/start/stop`，但这不是普通 onboarding，也不能替代真实查询。
 
 真实查询通过以下唯一入口执行：
 
@@ -66,7 +77,9 @@ node scripts/amap-cli.js --stdin
 
 route mode 只接受 `driving`、`walking`、`riding`、`transit`。公交必须给 `city`；`waypoints` 只允许 driving，最多 16 个，每个途经点也必须有 name 与 GCJ-02 position。
 
-执行层用参数数组启动 `amap-gui`，`shell: false`，超时 35 秒，并继承本地环境。进程会读取继承环境中的值，用于能力检查、传给本地 provider 和精确脱敏；凭据值在生成参数前、序列化后和返回结果中都会被替换为 `[REDACTED]`。它不会回显、持久化或把凭据写入旅行文件、导出、日志、Git 或发布包。无效输入写固定 stderr 并以 2 退出；能力不可用、缺凭据或 provider 失败以结构化 fallback 返回，不泄露 provider stderr、进程错误或凭据。
+每个真实请求使用 request-scoped provider session：解析一对完整凭据，停止来源不明的旧容器，用当前 pair 启动 `amap-gui`，确认 `mapReady: true`，执行一个 normalized 请求，并在成功、失败或超时的 `finally` 中停止本次容器。生命周期和查询均使用参数数组、`shell: false` 与有界超时；秘密只进入当前进程内存和子进程环境。最终停止失败也返回稳定 `provider-error`，不能留下“已复核”的成功声明。
+
+执行层按实际生效的完整 pair 做精确脱敏；凭据值在生成参数前、序列化后和返回结果中都会被替换为 `[REDACTED]`。它不会回显、持久化或把凭据写入旅行文件、导出、日志、Git 或发布包。无效输入写固定 stderr 并以 2 退出；能力或存储不可用、缺凭据或 provider 失败以结构化 fallback 返回，不泄露 Keychain、DPAPI、Secret Service、provider stderr 或进程错误。
 
 ## Provider 事实边界
 
@@ -77,7 +90,7 @@ route mode 只接受 `driving`、`walking`、`riding`、`transit`。公交必须
 路线 success 还必须与本次 validated request 绑定：`state.from.position` 和 `state.to.position` 必须分别与请求起终点完全一致；有 driving waypoints 时，`state.waypoints` 必须按相同数量、顺序和 GCJ-02 坐标逐项一致。返回的 waypoint position 来自已经完成绑定的 provider state；provider 未返回 waypoint name 时才沿用 validated request name。无 waypoint 请求兼容官方空数组与缺失 `state.waypoints`，但 provider 返回额外 waypoint、遗漏请求 waypoint 或改变顺序/坐标都返回 `provider-error`，不能形成 verified 路线事实。
 
 - `status: "ok"` 且 `performed: true`：本次调用产生了可用的 allowlist provider 事实。
-- `missing-credentials` / `unavailable`：没有执行 provider 请求。
+- `missing-cli` / `missing-credentials` / `partial-environment-credentials` / `store-unavailable` / `store-corrupt`：没有执行 provider 请求。
 - `provider-error`：请求没有形成可用事实；保留原候选或顺序并进入公开地图人工复核。
 
 搜索结果解决召回、具体分店、地址和平台定位；不证明营业、预约、菜单、活动、体验质量或安全。路线结果是查询时的规划事实，不是出发当天的实时承诺。
@@ -154,7 +167,7 @@ node scripts/export-google-my-maps.js \
 
 ## 隐私、发布与降级
 
-- `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 的值只保存在用户本地环境中；执行进程会读取继承环境中的值用于检查、传递和脱敏，但不会回显、持久化或写入旅行文件、导出、截图、日志、Git、REDSkill 或 release。文档可以出现环境变量名称，不能出现值。
+- `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 的值只存在于用户选择的当次环境或本机系统安全存储；执行进程在请求期间读取完整 pair 用于 provider 环境和脱敏，但不会回显、另行持久化或写入旅行文件、导出、截图、日志、Git、REDSkill 或 release。文档可以出现环境变量名称，不能出现值。
 - Google Maps URL 和 My Maps 导出不需要 Google API key，也不会登录用户账号。
 - My Maps 在生成任一文件前扫描实际将写入 CSV/KML 的 POI 字段与 KML 日期文件夹字段；命中 `AMAP_KEY=`、`AMAP_SECURITY_KEY=`、Google `AIza` key、`Cookie:`、`token=` 或现有 release 私密数据模式时，浏览器与 CLI 共用的 builder 会整体阻止生成。浏览器只显示稳定的 POI/日期序号和字段名，不回显命中内容；CLI 继续使用固定安全错误，且不会创建或替换任何目标文件。
 - 导出只包含当前攻略允许进入 POI 数据的字段；小红书原文、Cookie、订单号、同行人身份和私人浏览器状态不自动进入公开样例或发布包。没有进入真实输出字段的内部 metadata 不参与导出扫描。

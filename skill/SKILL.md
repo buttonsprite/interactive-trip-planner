@@ -27,7 +27,7 @@ description: Use when 用户想规划旅行、制作旅游攻略、根据小红�
 
 能力 list 后，只询问当前缺少的 1–3 组、并且会改变路线骨架的信息。用户只说“帮我规划旅行”时，优先询问目的地与日期或季节天数、进入离开方式、同行人与体力、喜欢或不喜欢、已定住宿与必去/不去；明确告诉用户不需要一次填完整。
 
-高德增强不是全局启动门。只有用户已经给出中国大陆目的地，并进入地点定位或正式路线复核时，才补充说明“可以使用你自己的高德 CLI；不安装也可以继续规划”。不要在海外行程或只有初步旅行想法时要求安装或配置地图工具。
+高德增强不是全局启动门。只有用户已经给出中国大陆目的地，并进入地点定位或正式路线复核时，才检查 `node scripts/amap-credentials.js status`；缺少配置时介绍一次性 `node scripts/amap-credentials.js setup`，并说明不配置也可以继续规划。`update` 与 `remove` 的完整入口分别是 `node scripts/amap-credentials.js update`、`node scripts/amap-credentials.js remove`。安全存储为 macOS Keychain、Windows DPAPI、Linux Secret Service；Linux 不可用时不写明文，只允许高级/CI 的完整环境变量对。不要让用户把密钥粘贴到聊天、命令参数、攻略或 `.env`。不要在海外行程或只有初步旅行想法时要求安装或配置地图工具。
 
 用户直接粘贴小红书、旧攻略或地图时，先根据资料整理地点与路线，再询问与本次旅行关联所需的最少信息。已有旅行中的 POI、顺序、地图或设计局部修改不重复展示启动介绍。
 
@@ -80,7 +80,7 @@ description: Use when 用户想规划旅行、制作旅游攻略、根据小红�
 执行前读取 `references/source-verification.md`、`references/regional-source-packs.md` 和 `references/map-provider-delivery.md`。当前源码继承 Global、中国大陆、日本、法语区四个 Regional Source Pack；其他目的地使用 Global Base 与三语动态搜索。按照“先发现、后核实”的顺序搜索：
 
 1. 建立搜索任务单：明确日期、区域、主题、用户偏好、选中的生活品味、必须覆盖的地点角色和需要实时复核的事实。
-2. 选择 Global Base 与一个匹配的地区包，按 A/B/C 可访问性先探测来源；B/C 失败时执行明确 fallback。中国大陆进入地点定位时才提示用户先运行 `amap-gui start`，再运行 `node scripts/check-amap-cli.js` 探测可选增强；探测只检查命令存在与两个凭据变量非空，**不会确认高德服务容器正在运行**。只有结果为 `available` 才调用 `node scripts/amap-cli.js --context <file>` 或 `--stdin`。先做城市关键词搜索，再用锚点的 GCJ-02 坐标与半径做周边搜索；同名分店、商场内店或名称变化使用更精确关键词重新查询。输入 action 是 `search-poi`，结果只用于召回、定位和消歧，不能证明营业或值得去。CLI 不可用、缺少 `AMAP_KEY` / `AMAP_SECURITY_KEY`、调用返回 `provider-error` 或没有可靠匹配时保留原候选，并明确“未完成高德定位”；不得虚构 provider 结果。
+2. 选择 Global Base 与一个匹配的地区包，按 A/B/C 可访问性先探测来源；B/C 失败时执行明确 fallback。中国大陆进入地点定位时才运行 credential `status`；`missing-credentials` 时向用户介绍一次 setup，配置完成后 Skill 自动管理 request-scoped provider session。只有能力为 `available` 才调用 `node scripts/amap-cli.js --context <file>` 或 `--stdin`。先做城市关键词搜索，再用锚点的 GCJ-02 坐标与半径做周边搜索；同名分店、商场内店或名称变化使用更精确关键词重新查询。输入 action 是 `search-poi`，结果只用于召回、定位和消歧，不能证明营业或值得去。CLI、系统安全存储或完整凭据不可用，调用返回 `provider-error`，或没有可靠匹配时保留原候选并明确“未完成高德定位”；不得虚构 provider 结果。
 3. 使用地区包的十类查询意图，至少组合中文、英文和目的地当地语言搜索。先从官方旅游、文化日历、地图和主题资料发现候选，再用地点官网、主办方、交通运营方和订位入口逐项核实。具名本地编辑源必须说明覆盖地区、beat、检索方法和事实边界，不能用模糊来源名称代替。活动扫描必须写入 `data/events.json`：`venue` 是可地图化活动地点，`hosted` 关联既有地点的特别项目，`citywide` 只影响城市或当天语境；字段与引用按 `references/event-schema.md`。
 4. 按体验角色补候选，而不是按类别凑数量：主题主锚点、代表性景点、当地生活、酒店基地、正式餐、地方经典、小吃、咖啡甜品、夜间体验、休息点、交通节点和天气/闭馆替代。城市有至少两个完整旅行日时，逐城至少评估 3 个代表性景点并写明采用或舍弃理由；在该城市停留段内保留的主锚点接到同方向当地生活角色：市场、居民广场、社区空间、街区咖啡、社区饭馆、传统商业或短半径夜间体验。
 5. 每个准备进入资料池的地点都要回答：为什么符合这个模板（未选模板时为什么符合用户偏好）、为什么安排在这里、与附近地点如何衔接、需要预约或复核什么。按地点在路线中的角色分配 `contentTier`：主锚点和必去地点用 `deep`，正式路线中的支撑地点用 `standard`，候选池与留档地点用 `compact`。正式路线地点使用“具体价值陈述 → 类型化现场动作 → 可解析证据”三层合同：`whyWorthIt` 说明这个地方独有的路线价值，`detailSections` 告诉旅行者到场做什么，`sourceIds` 必须解析到结构化来源。不同类型地点不强制写同样的四段；市场、博物馆、餐厅、咖啡/酒吧、街区、酒店/交通使用与现场体验相匹配的 `detailSections`。当来源同时支持当地食材结构、居民使用方式和行程月份季节时，市场详情必须连起来写；库存未核实时用“留意/询问”而非断言。只有可靠且能帮助现场理解的历史才写故事，不为凑结构编造，也不使用“感受当地生活”“随便逛逛”“值得一去”等没有地点特异性的占位表达。

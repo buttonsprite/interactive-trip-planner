@@ -81,7 +81,21 @@ Hybrid Taste Model（混合生活品味模型）记录的是可以迁移到新�
 
 ## 地图不是只看，还能带走
 
-中国大陆行程进入 POI 定位或路线复核时，可以选择使用你自己的高德 CLI。按官方手册完成安装与本地环境配置后，先运行 `amap-gui start` 启动服务；需要人工排查时可选运行 `amap-gui status` 查看状态。随后 Skill 运行 `node skill/scripts/check-amap-cli.js`：它只检查 `amap-gui` 命令存在，以及 `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 为非空字符串，**不会确认高德服务容器正在运行**。探测为 `available` 后，`amap-cli.js` 才真实执行城市关键词、锚点周边、同名分店消歧和正式移动段路线查询；实际执行仍可能返回 `provider-error`，此时必须降级且路线保持未复核。执行进程会读取继承环境中的密钥值，用于检查、传给本地 provider 并在结果中脱敏；它不会回显或持久化这些值，也不会写入旅行文件、导出、日志、Git 或发布包。不安装也可以继续规划，只是路线会明确显示：**未完成高德路网复核；请在出发前打开高德确认。**
+中国大陆行程进入 POI 定位或路线复核时，可以选择使用你自己的高德 CLI。安装 `@amap-lbs/amap-gui` 并在高德控制台创建 Web端（JS API）Key 后，普通用户只需运行一次：
+
+```bash
+node skill/scripts/amap-credentials.js setup
+```
+
+setup 会把两项凭据成对存入 macOS Keychain、Windows DPAPI 或 Linux Secret Service，并完成真实 POI 与路线验证；验证成功后，后续搜索和路线复核会自动建立并清理 request-scoped provider session，不再要求用户手动运行 `amap-gui start`。Linux 没有可用 Secret Service 时不会明文保存，可安装系统 Keyring 支持，或仅在当次会话使用高级/CI 环境变量覆盖。
+
+```bash
+node skill/scripts/amap-credentials.js status
+node skill/scripts/amap-credentials.js update
+node skill/scripts/amap-credentials.js remove
+```
+
+`status` 不显示 Key 值或片段；`update` 只有在新凭据同时通过真实 POI 与路线验证后才替换旧配置；`remove` 只删除本 Skill 的本机配置。`AMAP_KEY` 与 `AMAP_SECURITY_KEY` 仍是高级/CI 的完整成对覆盖入口，不与系统存储混用，也不会写入旅行文件、导出、日志、Git 或发布包。`amap-gui status/start/stop` 只保留给故障排查。不配置也可以继续规划，只是路线会明确显示：**未完成高德路网复核；请在出发前打开高德确认。**
 
 路线状态不会因为“搜索到了地点”或“生成了链接”而升级。全部正式相邻段得到有效结果时显示“已用高德复核”，只有部分完成时显示“部分移动段已复核”；你在地图里加入、移出、换日或调整顺序后，受影响日期会重新回到未复核，等待 Codex 重排和复查。
 

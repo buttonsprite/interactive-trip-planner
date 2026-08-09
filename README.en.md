@@ -81,7 +81,21 @@ Social media, forums, and named local editorial sources are discovery and experi
 
 ## A map you can use and take with you
 
-For a mainland-China trip, the AMap enhancement appears only when place resolution or route review begins. After following the official setup guide and configuring the local environment, run `amap-gui start`; `amap-gui status` is an optional troubleshooting check. The Skill then runs `node skill/scripts/check-amap-cli.js`, which only checks that the `amap-gui` command exists and that `AMAP_KEY` plus `AMAP_SECURITY_KEY` are non-empty strings; it **does not confirm that the AMap service container is running**. When the probe reports `available`, `amap-cli.js` can perform real city-keyword, anchor-radius, branch-disambiguation, and formal movement-segment queries. Execution can still return `provider-error`; the workflow must then degrade and remain unverified. The process reads credential values from the inherited environment to check, pass to the local provider, and redact them, but never echoes or persists them and never writes them to trip files, exports, logs, Git, or release packages. Planning still works without installation; the route is then labeled: **AMap road-network verification was not completed. Recheck in AMap before departure.**
+For a mainland-China trip, the AMap enhancement appears only when place resolution or route review begins. After installing `@amap-lbs/amap-gui` and creating a Web (JS API) Key in the AMap console, a regular user runs one command once:
+
+```bash
+node skill/scripts/amap-credentials.js setup
+```
+
+Setup saves the complete pair in macOS Keychain, Windows DPAPI, or Linux Secret Service and performs real POI and route validation. After validation succeeds, later searches and route reviews create and clean up a request-scoped provider session automatically; users do not manually run `amap-gui start` on the normal path. On Linux, an unavailable Secret Service never falls back to plaintext storage: enable a system keyring or use the Advanced/CI environment override for the current session only.
+
+```bash
+node skill/scripts/amap-credentials.js status
+node skill/scripts/amap-credentials.js update
+node skill/scripts/amap-credentials.js remove
+```
+
+`status` never prints a Key value or fragment. `update` replaces the old profile only after the new pair passes both real checks. `remove` deletes only this Skill's local configuration. `AMAP_KEY` plus `AMAP_SECURITY_KEY` remain an Advanced/CI complete-pair override and are never mixed with the system store or written to trip files, exports, logs, Git, or release packages. `amap-gui status/start/stop` are troubleshooting-only commands. Planning still works without AMap configuration; the route is then labeled: **AMap road-network verification was not completed. Recheck in AMap before departure.**
 
 A search result or handoff link never upgrades route status. Every formal adjacent segment must have valid route evidence for “Verified with AMap”; a day with only some valid segments is “Partially verified.” Adding, removing, moving, or reordering a place makes the affected day unverified again until Codex replans and rechecks the new adjacency.
 

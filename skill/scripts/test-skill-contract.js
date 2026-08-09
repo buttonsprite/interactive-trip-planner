@@ -74,6 +74,16 @@ const routeStatusCopy = [
   "未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure.",
 ];
 
+const credentialSetupCopy = [
+  "amap-credentials.js setup",
+  "amap-credentials.js status",
+  "amap-credentials.js update",
+  "amap-credentials.js remove",
+  "macOS Keychain",
+  "Windows DPAPI",
+  "Linux Secret Service",
+];
+
 function assertIncludesAll(label, document, phrases) {
   for (const phrase of phrases) {
     assert.ok(document.includes(phrase), `${label} is missing: ${phrase}`);
@@ -290,11 +300,9 @@ assert.ok(repositoryEnglishReadme, "README.en.md is required for the public prov
 assert.ok(redskillInstallTemplate, "REDSKILL install template is required for provider setup");
 
 assertIncludesAll("README.md", repositoryReadme, [
-  "amap-gui start",
-  "amap-gui status",
-  "check-amap-cli.js",
-  "不会确认高德服务容器正在运行",
-  "进程会读取继承环境中的密钥值",
+  ...credentialSetupCopy,
+  "高级/CI",
+  "真实 POI 与路线验证",
   "未完成高德路网复核；请在出发前打开高德确认。",
   "Google Maps URLs 不需要 API Key",
   "places.csv",
@@ -302,11 +310,9 @@ assertIncludesAll("README.md", repositoryReadme, [
   "不会自动写入普通 Google Maps 收藏夹",
 ]);
 assertIncludesAll("README.en.md", repositoryEnglishReadme, [
-  "amap-gui start",
-  "amap-gui status",
-  "check-amap-cli.js",
-  "does not confirm that the AMap service container is running",
-  "process reads credential values from the inherited environment",
+  ...credentialSetupCopy,
+  "Advanced/CI",
+  "real POI and route validation",
   "AMap road-network verification was not completed. Recheck in AMap before departure.",
   "Google Maps URLs do not require an API key",
   "places.csv",
@@ -314,57 +320,48 @@ assertIncludesAll("README.en.md", repositoryEnglishReadme, [
   "not automatically added to regular Google Maps saved lists",
 ]);
 assertIncludesAll("REDSKILL_INSTALL.template.md", redskillInstallTemplate, [
-  "amap-gui start",
-  "amap-gui status",
-  "check-amap-cli.js",
-  "不会确认高德服务容器正在运行",
-  "进程会读取继承环境中的密钥值",
+  ...credentialSetupCopy,
+  "高级/CI",
+  "真实 POI + 路线验证",
+  "不会明文保存",
   ...routeStatusCopy,
 ]);
 assertIncludesAll("SKILL.md", skill, [
-  "amap-gui start",
-  "check-amap-cli.js",
-  "不会确认高德服务容器正在运行",
+  ...credentialSetupCopy,
+  "不要让用户把密钥粘贴到聊天",
   "provider-error",
   "places.csv",
   "itinerary.kml",
   ...routeStatusCopy,
 ]);
 assertIncludesAll("map-provider-delivery.md", mapProviderDelivery, [
-  "amap-gui start",
-  "amap-gui status",
-  "check-amap-cli.js",
-  "不会确认高德服务容器正在运行",
-  "进程会读取继承环境中的值",
+  ...credentialSetupCopy,
+  "request-scoped provider session",
+  "环境变量是高级/CI 覆盖入口",
+  "不会明文保存",
   "provider-error",
   "places.csv",
   "itinerary.kml",
   ...routeStatusCopy,
 ]);
 assertIncludesAll("planning-workflow.md", planning, [
-  "amap-gui start",
-  "check-amap-cli.js",
-  "不会确认高德服务容器正在运行",
+  ...credentialSetupCopy,
   "provider-error",
   ...routeStatusCopy,
 ]);
 assertIncludesAll("regional-source-packs.md", sourcePackReference, [
-  "amap-gui start",
-  "check-amap-cli.js",
-  "不会确认高德服务容器正在运行",
+  ...credentialSetupCopy,
   "provider-error",
 ]);
 assertIncludesAll("taste-and-source-online-logic.md", tasteSourceOnlineLogic, [
-  "amap-gui start",
-  "check-amap-cli.js",
-  "不会确认高德服务容器正在运行",
-  "执行进程会读取继承环境中的密钥值",
+  ...credentialSetupCopy,
+  "系统安全存储",
   "provider-error",
 ]);
 assertIncludesAll("user-facing-language.md", userLanguage, [
-  "amap-gui start",
-  "amap-gui status",
-  "不会确认高德服务容器正在运行",
+  ...credentialSetupCopy,
+  "首次使用高德地图增强，需要完成一次安全配置",
+  "当前 Linux 环境没有可用的 Secret Service",
   "已用高德复核",
   "Verified with AMap",
   "部分移动段已复核",
@@ -372,6 +369,23 @@ assertIncludesAll("user-facing-language.md", userLanguage, [
   "未完成高德路网复核；请在出发前打开高德确认。",
   "AMap road-network verification was not completed. Recheck in AMap before departure.",
 ]);
+
+for (const [label, document] of [
+  ["README.md", repositoryReadme],
+  ["README.en.md", repositoryEnglishReadme],
+  ["REDSKILL_INSTALL.template.md", redskillInstallTemplate],
+  ["SKILL.md", skill],
+  ["map-provider-delivery.md", mapProviderDelivery],
+  ["planning-workflow.md", planning],
+  ["regional-source-packs.md", sourcePackReference],
+  ["taste-and-source-online-logic.md", tasteSourceOnlineLogic],
+  ["user-facing-language.md", userLanguage],
+]) {
+  assert.doesNotMatch(document, /(?:每次|every use)[^\n。.]*(?:export\s+AMAP_KEY|set\s+AMAP_KEY)/i, `${label} must not require repeated environment setup`);
+  assert.doesNotMatch(document, /(?:先|first)\s*(?:运行|run)\s*`?amap-gui start`?/i, `${label} must not make manual provider start the normal path`);
+  assert.doesNotMatch(document, /(?:默认把?密钥?明文保存|密钥默认明文保存|默认创建明文(?:文件|配置)|默认使用\s*`?\.env)/i, `${label} must not recommend plaintext fallback`);
+  assert.doesNotMatch(document, /\b(?:uses?|creates?|saves?|writes?)[^\n.]{0,40}(?:\.env|plaintext)[^\n.]{0,20}\bby default\b/i, `${label} must not recommend plaintext fallback`);
+}
 assertIncludesAll("guide-template map online logic", templateMapOnlineLogic, [
   ...routeStatusCopy,
 ]);

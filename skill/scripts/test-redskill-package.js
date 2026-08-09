@@ -16,6 +16,16 @@ const routeStatusCopy = [
   "未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure.",
 ];
 
+const credentialSetupCopy = [
+  "amap-credentials.js setup",
+  "amap-credentials.js status",
+  "amap-credentials.js update",
+  "amap-credentials.js remove",
+  "macOS Keychain",
+  "Windows DPAPI",
+  "Linux Secret Service",
+];
+
 function assertIncludesAll(label, document, phrases) {
   for (const phrase of phrases) {
     assert.ok(document.includes(phrase), `${label} is missing: ${phrase}`);
@@ -209,6 +219,11 @@ const requiredMapDeliveryFiles = [
   "scripts/amap-cli.js",
   "scripts/amap-cli-runtime.js",
   "scripts/check-amap-cli.js",
+  "scripts/amap-credential-backends.js",
+  "scripts/amap-credential-store.js",
+  "scripts/amap-credentials.js",
+  "scripts/amap-credentials-runtime.js",
+  "scripts/amap-provider-session.js",
   "scripts/export-google-my-maps.js",
   "references/map-provider-delivery.md",
 ];
@@ -291,51 +306,45 @@ assert.doesNotThrow(
 );
 
 assertIncludesAll("SKILL.md", packagedProviderDocs["SKILL.md"], [
-  "amap-gui start",
-  "check-amap-cli.js",
-  "不会确认高德服务容器正在运行",
+  ...credentialSetupCopy,
+  "不要让用户把密钥粘贴到聊天",
   "provider-error",
   "places.csv",
   "itinerary.kml",
   ...routeStatusCopy,
 ]);
 assertIncludesAll("map-provider-delivery.md", packagedProviderDocs["map-provider-delivery.md"], [
-  "amap-gui start",
-  "amap-gui status",
-  "check-amap-cli.js",
-  "不会确认高德服务容器正在运行",
-  "进程会读取继承环境中的值",
+  ...credentialSetupCopy,
+  "request-scoped provider session",
+  "环境变量是高级/CI 覆盖入口",
+  "不会明文保存",
   "provider-error",
   "places.csv",
   "itinerary.kml",
   ...routeStatusCopy,
 ]);
 assertIncludesAll("planning-workflow.md", packagedProviderDocs["planning-workflow.md"], [
-  "amap-gui start",
-  "check-amap-cli.js",
+  ...credentialSetupCopy,
   "provider-error",
   ...routeStatusCopy,
 ]);
 assertIncludesAll("regional-source-packs.md", packagedProviderDocs["regional-source-packs.md"], [
-  "amap-gui start",
-  "check-amap-cli.js",
+  ...credentialSetupCopy,
   "provider-error",
 ]);
 assertIncludesAll(
   "taste-and-source-online-logic.md",
   packagedProviderDocs["taste-and-source-online-logic.md"],
   [
-    "amap-gui start",
-    "check-amap-cli.js",
-    "不会确认高德服务容器正在运行",
-    "执行进程会读取继承环境中的密钥值",
+    ...credentialSetupCopy,
+    "系统安全存储",
     "provider-error",
   ],
 );
 assertIncludesAll("user-facing-language.md", packagedProviderDocs["user-facing-language.md"], [
-  "amap-gui start",
-  "amap-gui status",
-  "不会确认高德服务容器正在运行",
+  ...credentialSetupCopy,
+  "首次使用高德地图增强，需要完成一次安全配置",
+  "当前 Linux 环境没有可用的 Secret Service",
   "已用高德复核",
   "Verified with AMap",
   "部分移动段已复核",
@@ -343,6 +352,13 @@ assertIncludesAll("user-facing-language.md", packagedProviderDocs["user-facing-l
   "未完成高德路网复核；请在出发前打开高德确认。",
   "AMap road-network verification was not completed. Recheck in AMap before departure.",
 ]);
+
+for (const [label, document] of Object.entries(packagedProviderDocs)) {
+  assert.doesNotMatch(document, /(?:每次|every use)[^\n。.]*(?:export\s+AMAP_KEY|set\s+AMAP_KEY)/i, `${label} must not require repeated environment setup`);
+  assert.doesNotMatch(document, /(?:先|first)\s*(?:运行|run)\s*`?amap-gui start`?/i, `${label} must not make manual provider start the normal path`);
+  assert.doesNotMatch(document, /(?:默认把?密钥?明文保存|密钥默认明文保存|默认创建明文(?:文件|配置)|默认使用\s*`?\.env)/i, `${label} must not recommend plaintext fallback`);
+  assert.doesNotMatch(document, /\b(?:uses?|creates?|saves?|writes?)[^\n.]{0,40}(?:\.env|plaintext)[^\n.]{0,20}\bby default\b/i, `${label} must not recommend plaintext fallback`);
+}
 assertIncludesAll(
   "guide-template map online logic",
   packagedProviderDocs["guide-template map online logic"],

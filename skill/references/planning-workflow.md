@@ -27,7 +27,7 @@
 
 用户直接粘贴小红书、旧攻略或地图时，先根据资料整理地点与路线，再询问与本次旅行关联所需的最少信息。已有旅行中的 POI、顺序、地图或设计局部修改不重复展示启动介绍。不要一开始进入酒店清单、景点清单或地图实现。
 
-高德 CLI 介绍只在两个条件同时满足时出现：目的地位于中国大陆，且已经进入地点定位或路线复核。此时说明它是可选增强，需要本机 `amap-gui` 与本地环境中的 `AMAP_KEY`、`AMAP_SECURITY_KEY`；完成配置后先运行 `amap-gui start`，再运行 `check-amap-cli.js`。探测只检查命令与非空环境变量，**不会确认高德服务容器正在运行**；真实执行仍可能返回 `provider-error` 并进入未复核降级。不安装或暂不配置仍然继续规划。海外行程、主题提案和初步意向阶段不把地图工具作为启动问题或阻塞门。
+高德 CLI 介绍只在两个条件同时满足时出现：目的地位于中国大陆，且已经进入地点定位或路线复核。此时先运行 `node scripts/amap-credentials.js status`；尚未配置时，说明它是可选增强并提供一次性 `node scripts/amap-credentials.js setup`。后续不再重复询问，Skill 会自动建立 request-scoped provider session。配置替换与删除分别使用 `node scripts/amap-credentials.js update` 和 `node scripts/amap-credentials.js remove`。凭据保存在 macOS Keychain、Windows DPAPI 或 Linux Secret Service；Linux 安全存储不可用时不写明文，只提示系统 Keyring 或高级/CI 环境变量覆盖。真实执行仍可能返回 `provider-error` 并进入未复核降级。不安装或暂不配置仍然继续规划。海外行程、主题提案和初步意向阶段不把地图工具作为启动问题或阻塞门。
 
 ## 最小启动信息
 
@@ -142,7 +142,7 @@
 9. 先生成并验收 Core 地图：全程总览、某一天、地点详情、修改、撤销、重新安排和状态恢复。
 10. Core 通过浏览器验收后，再按目的地需要增加图片、专题信息和视觉设计。用户未要求视觉深化时，不阻塞交付。
 
-中国大陆深度规划在地点与路线两层使用真实 provider 结果：用户先运行 `amap-gui start`，Skill 再运行 `check-amap-cli.js`；只有 `available` 才把 city keyword、anchor-radius 或 disambiguation JSON 交给 `amap-cli.js`，正式路线再逐段执行 route action。能力探测不会确认高德服务容器正在运行；若真实执行返回 `provider-error`，保留候选与顺序并标记未复核。搜索结果只解决地点身份与 GCJ-02 定位，只有有效 route 结果才能支持距离、时间和“已用高德复核”。完整输入、状态和降级规则见 `map-provider-delivery.md`。
+中国大陆深度规划在地点与路线两层使用真实 provider 结果：credential status 为 `ready` 且 CLI 能力为 `available` 时，把 city keyword、anchor-radius 或 disambiguation JSON 交给 `amap-cli.js`，正式路线再逐段执行 route action。每个请求自动停旧容器、用当前完整凭据启动、检查 readiness、执行并在 finally 停止；若返回 `provider-error`，保留候选与顺序并标记未复核。搜索结果只解决地点身份与 GCJ-02 定位，只有有效 route 结果才能支持距离、时间和“已用高德复核”。完整输入、状态和降级规则见 `map-provider-delivery.md`。
 
 阶段四同时生成当前地点/路线的高德 URI 与 Google Maps URL，并提供 Google My Maps 的 `places.csv`、`itinerary.kml`、`README.md`。Google Maps URLs 不需要 API Key；Google 路线由用户打开后重新计算，生成链接不等于完成路线验证。
 

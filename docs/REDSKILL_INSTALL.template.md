@@ -43,7 +43,9 @@ Skill 会先尝试不带 Cookie 的公开读取。完整收藏夹若必须使用
 
 ## 可选地图增强与导出
 
-高德增强只在规划中国大陆地点和路线时出现，不是安装后的全局启动门。需要时先按[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)安装并配置本地 `amap-gui`，再由用户自己的环境提供 `AMAP_KEY` 与 `AMAP_SECURITY_KEY`。完成后运行 `amap-gui start` 启动服务；排查问题时可选运行 `amap-gui status`，再运行 `node scripts/check-amap-cli.js` 做 Skill 能力探测。该探测只检查命令存在和两个环境变量为非空字符串，**不会确认高德服务容器正在运行**；真实请求仍可能返回 `provider-error`，此时继续降级并保持未复核。执行进程会读取继承环境中的密钥值，用于检查、传递和脱敏，但不会回显、持久化或把它们写入旅行文件、导出、日志、Git 或发布包。不配置仍可继续规划。
+高德增强只在规划中国大陆地点和路线时出现，不是安装后的全局启动门。按[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)安装 `amap-gui` 并创建 Web端（JS API）Key 后，普通用户运行一次 `node scripts/amap-credentials.js setup`。它会把完整凭据对写入 macOS Keychain、Windows DPAPI 或 Linux Secret Service，并执行真实 POI + 路线验证；成功后查询会自动启动、检查并停止 request-scoped provider session。可用 `node scripts/amap-credentials.js status` 检查安全状态，用 `node scripts/amap-credentials.js update` 原子替换，用 `node scripts/amap-credentials.js remove` 删除本 Skill 的本机配置。
+
+Linux 没有 Secret Service 时不会明文保存，也不会默认创建 `.env`；请启用系统 Keyring，或只为当前会话使用高级/CI 的完整 `AMAP_KEY` + `AMAP_SECURITY_KEY` 覆盖。环境变量只配置一项时会拒绝混用系统存储。不要把 Key 粘贴到聊天或命令参数。`amap-gui status/start/stop` 仅用于故障排查；普通使用不需要手动维护容器。不配置仍可继续规划，真实请求失败时保持未复核。
 
 路线状态只使用三档：已用高德复核 / Verified with AMap；部分移动段已复核 / Partially verified；未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure.
 

@@ -30,6 +30,15 @@ fs.writeFileSync(path.join(fakeBinDir, "amap-gui"), `#!/usr/bin/env node
 const secret = process.env.AMAP_SECURITY_KEY || "";
 const webKey = process.env.AMAP_KEY || "";
 const behavior = process.env.FAKE_AMAP_BEHAVIOR || "success";
+const action = process.argv[2] || "";
+if (action === "stop" || action === "start") {
+  process.stdout.write(JSON.stringify({ success: true, data: { status: action === "start" ? "running" : "not_running" }, error: null }));
+  process.exit(0);
+}
+if (action === "status") {
+  process.stdout.write(JSON.stringify({ success: true, data: { status: "running", mapReady: true }, error: null }));
+  process.exit(0);
+}
 if (behavior === "stderr-secret") {
   process.stderr.write("provider failed: " + secret);
   process.exit(1);
@@ -90,8 +99,17 @@ function assertSanitizedCliFailure(result) {
   assert.doesNotMatch(result.stderr, /never-print|invalid-source-secret/);
 }
 
-const missingCli = probeAmapCapability({ env: { ...secrets }, commandExists: () => false });
-assert.equal(missingCli.status, "unavailable");
+const missingCli = probeAmapCapability({
+  env: { ...secrets },
+  commandExists: () => false,
+  credentialResolution: {
+    status: "ready",
+    source: "environment",
+    credentials: secrets,
+    savedProfileAvailable: false,
+  },
+});
+assert.equal(missingCli.status, "missing-cli");
 assert.equal(missingCli.cliAvailable, false);
 assert.equal(missingCli.credentialsConfigured, true);
 assert.equal(missingCli.routePlanningAvailable, false);
@@ -104,7 +122,11 @@ for (const item of missingCli.fallback) {
 }
 assert.doesNotMatch(JSON.stringify(missingCli), /never-print/);
 
-const missingCredentials = probeAmapCapability({ env: {}, commandExists: () => true });
+const missingCredentials = probeAmapCapability({
+  env: {},
+  commandExists: () => true,
+  credentialResolution: { status: "missing-credentials", source: "none", savedProfileAvailable: false },
+});
 assert.equal(missingCredentials.status, "missing-credentials");
 assert.equal(missingCredentials.cliAvailable, true);
 assert.equal(missingCredentials.credentialsConfigured, false);
@@ -114,20 +136,35 @@ assert.deepEqual(missingCredentials.missingRequirements, ["AMAP_KEY", "AMAP_SECU
 const emptyCredential = probeAmapCapability({
   env: { AMAP_KEY: "", AMAP_SECURITY_KEY: "configured" },
   commandExists: () => true,
+  credentialResolution: {
+    status: "partial-environment-credentials",
+    source: "none",
+    savedProfileAvailable: false,
+  },
 });
-assert.equal(emptyCredential.status, "missing-credentials");
+assert.equal(emptyCredential.status, "partial-environment-credentials");
 assert.equal(emptyCredential.credentialsConfigured, false);
 assert.deepEqual(emptyCredential.missingRequirements, ["AMAP_KEY"]);
 
 const whitespaceCredentials = probeAmapCapability({
   env: { AMAP_KEY: "   ", AMAP_SECURITY_KEY: "\t\n" },
   commandExists: () => true,
+  credentialResolution: { status: "missing-credentials", source: "none", savedProfileAvailable: false },
 });
 assert.equal(whitespaceCredentials.status, "missing-credentials");
 assert.equal(whitespaceCredentials.credentialsConfigured, false);
 assert.deepEqual(whitespaceCredentials.missingRequirements, ["AMAP_KEY", "AMAP_SECURITY_KEY"]);
 
-const capabilityReady = probeAmapCapability({ env: { ...secrets }, commandExists: () => true });
+const capabilityReady = probeAmapCapability({
+  env: { ...secrets },
+  commandExists: () => true,
+  credentialResolution: {
+    status: "ready",
+    source: "environment",
+    credentials: secrets,
+    savedProfileAvailable: false,
+  },
+});
 assert.equal(capabilityReady.status, "available");
 assert.equal(capabilityReady.routePlanningAvailable, true);
 assert.equal(capabilityReady.routeVerification, "not-performed");
@@ -140,7 +177,7 @@ const cli = spawnSync(process.execPath, [path.join(scriptDir, "check-amap-cli.js
 });
 assert.equal(cli.status, 0, cli.stdout + cli.stderr);
 const output = JSON.parse(cli.stdout);
-assert.equal(output.status, "unavailable");
+assert.equal(output.status, "missing-cli");
 assert.doesNotMatch(cli.stdout + cli.stderr, /never-print/);
 
 try {
@@ -196,7 +233,7 @@ try {
 
   const unavailable = runExecutionCli(["--context", contextPath], "", { PATH: "/definitely/missing" });
   assert.equal(unavailable.status, 0, unavailable.stderr);
-  assert.equal(JSON.parse(unavailable.stdout).status, "unavailable");
+  assert.equal(JSON.parse(unavailable.stdout).status, "missing-cli");
   for (const item of JSON.parse(unavailable.stdout).fallback) {
     assert.match(item, /[\u4e00-\u9fff]/);
     assert.match(item, /[A-Za-z]/);

@@ -1,8 +1,8 @@
 import os from "node:os";
 import { spawnSync } from "node:child_process";
-import { createPlatformCredentialBackend, platformCredentialPaths } from "./amap-credential-backends.js";
-import { createAmapCredentialStore, resolveAmapCredentials } from "./amap-credential-store.js";
+import { createDefaultAmapCredentialStore, resolveAmapCredentials } from "./amap-credential-store.js";
 import { probeAmapCapability } from "./check-amap-cli.js";
+import { executeAmapRequest } from "./amap-cli-runtime.js";
 
 const USAGE = "Usage: amap-credentials.js <setup|status|update|remove>";
 const ACTIONS = new Set(["setup", "status", "update", "remove"]);
@@ -205,25 +205,67 @@ export function promptHiddenSecret(label) {
     : null;
 }
 
+export function validateAmapCredentials(credentials, {
+  executeRequest = executeAmapRequest,
+} = {}) {
+  const credentialResolution = {
+    status: "ready",
+    source: "system-store",
+    credentials,
+    savedProfileAvailable: false,
+  };
+  const search = executeRequest({
+    action: "search-poi",
+    keyword: "大理古城南门",
+    city: "大理",
+    pageSize: 3,
+    pageIndex: 1,
+  }, { credentialResolution });
+  const route = executeRequest({
+    action: "route",
+    origin: {
+      name: "大理古城南门",
+      position: { lng: 100.1651, lat: 25.6889 },
+    },
+    destination: {
+      name: "五华楼",
+      position: { lng: 100.164, lat: 25.6956 },
+    },
+    mode: "walking",
+  }, { credentialResolution });
+  return { searchStatus: search?.status || "provider-error", routeStatus: route?.status || "provider-error" };
+}
+
+export function stopAmapProvider() {
+  try {
+    spawnSync("amap-gui", ["stop"], {
+      encoding: "utf8",
+      shell: false,
+      timeout: 35_000,
+      maxBuffer: 1024 * 1024,
+    });
+  } catch {
+    // Raw provider diagnostics are intentionally ignored.
+  }
+}
+
 export function createDefaultCredentialDependencies({
   platform = process.platform,
   env = process.env,
   homedir = os.homedir(),
   promptSecret = promptHiddenSecret,
-  validateCredentials,
-  stopProvider,
+  validateCredentials: validator = validateAmapCredentials,
+  stopProvider = stopAmapProvider,
 } = {}) {
-  const paths = platformCredentialPaths({ platform, env, homedir });
-  const backend = createPlatformCredentialBackend({ platform, env, homedir, promptSecret });
-  const store = createAmapCredentialStore({ backend, pointerFile: paths.pointerFile });
-  const capability = probeAmapCapability({ env });
+  const store = createDefaultAmapCredentialStore({ platform, env, homedir, promptSecret });
+  const capability = probeAmapCapability({ env, store });
   return {
     platform,
     env,
     store,
     cliAvailable: capability.cliAvailable,
     isTTY: Boolean(process.stdin.isTTY && process.stderr.isTTY),
-    validateCredentials,
+    validateCredentials: validator,
     stopProvider,
   };
 }

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import {
   runAmapCredentialAction,
   runAmapCredentialCli,
+  validateAmapCredentials,
 } from "./amap-credentials-runtime.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -168,6 +169,24 @@ function baseDeps(store, overrides = {}) {
   assert.equal(forbidden.stdout, "");
   assert.equal(forbidden.stderr, "Invalid AMap credential command.\n");
   assert.doesNotMatch(forbidden.stderr, /cli-key-secret/);
+}
+
+{
+  const requests = [];
+  const validation = validateAmapCredentials(pair, {
+    executeRequest: (request, options) => {
+      requests.push(request);
+      assert.deepEqual(options.credentialResolution, {
+        status: "ready",
+        source: "system-store",
+        credentials: pair,
+        savedProfileAvailable: false,
+      });
+      return { status: request.action === "search-poi" ? "ok" : "provider-error" };
+    },
+  });
+  assert.deepEqual(requests.map(({ action }) => action), ["search-poi", "route"]);
+  assert.deepEqual(validation, { searchStatus: "ok", routeStatus: "provider-error" });
 }
 
 {

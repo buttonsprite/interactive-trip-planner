@@ -1,6 +1,8 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { randomUUID as nodeRandomUUID } from "node:crypto";
+import { createPlatformCredentialBackend, platformCredentialPaths } from "./amap-credential-backends.js";
 
 const STORE_ERROR = "AMap credential store failed.";
 const POINTER_VERSION = 1;
@@ -290,4 +292,15 @@ export function resolveAmapCredentials({ env = process.env, store } = {}) {
     return { status: "partial-environment-credentials", source: "none", savedProfileAvailable };
   }
   return store.readActive();
+}
+
+export function createDefaultAmapCredentialStore({
+  platform = process.platform,
+  env = process.env,
+  homedir = os.homedir(),
+  promptSecret,
+} = {}) {
+  const paths = platformCredentialPaths({ platform, env, homedir });
+  const backend = createPlatformCredentialBackend({ platform, env, homedir, promptSecret });
+  return createAmapCredentialStore({ backend, pointerFile: paths.pointerFile });
 }

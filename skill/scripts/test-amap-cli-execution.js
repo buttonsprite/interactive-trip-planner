@@ -111,6 +111,13 @@ function fakeSuccessRunner(providerOutput, expectedArgs) {
   };
 }
 
+function executeWithoutLifecycle(context, options = {}) {
+  return executeAmapRequest(context, {
+    ...options,
+    withProviderSession: ({ credentials, env }, operation) => operation({ ...env, ...credentials }),
+  });
+}
+
 const normalizedSearchRequest = validateAmapRequest({
   ...searchRequest,
   keyword: "  菜市场  ",
@@ -136,7 +143,7 @@ assert.deepEqual(buildAmapArgs(routeRequest), [
   "--type", "walking",
 ]);
 
-const searchResult = executeAmapRequest(searchRequest, {
+const searchResult = executeWithoutLifecycle(searchRequest, {
   env: { ...secrets },
   commandExists: () => true,
   now: () => checkedAt,
@@ -170,7 +177,63 @@ assert.deepEqual(searchResult, {
 });
 assertNoSecrets(searchResult);
 
-const routeResult = executeAmapRequest(routeRequest, {
+{
+  const savedCredentials = {
+    AMAP_KEY: "saved-execution-key-secret",
+    AMAP_SECURITY_KEY: "saved-execution-security-secret",
+  };
+  const lifecycleEvents = [];
+  let stopCount = 0;
+  const storedResult = executeAmapRequest(searchRequest, {
+    env: { PATH: "/test/bin" },
+    store: {
+      status: () => ({ status: "ready", source: "system-store", savedProfileAvailable: true }),
+      readActive: () => ({
+        status: "ready",
+        source: "system-store",
+        credentials: savedCredentials,
+        savedProfileAvailable: true,
+      }),
+    },
+    commandExists: () => true,
+    now: () => checkedAt,
+    runLifecycleCommand: (_command, args, options) => {
+      const action = args[0];
+      if (action === "stop") stopCount += 1;
+      lifecycleEvents.push(action === "stop" ? `stop-${stopCount}` : action);
+      assert.equal(options.env.AMAP_KEY, savedCredentials.AMAP_KEY);
+      assert.equal(options.env.AMAP_SECURITY_KEY, savedCredentials.AMAP_SECURITY_KEY);
+      return action === "status"
+        ? { status: 0, stdout: JSON.stringify({ success: true, data: { status: "running", mapReady: true } }), stderr: "" }
+        : { status: 0, stdout: JSON.stringify({ success: true }), stderr: "" };
+    },
+    runCommand: (_command, args, options) => {
+      lifecycleEvents.push("query");
+      assert.deepEqual(args, buildAmapArgs(searchRequest));
+      assert.equal(options.env.AMAP_KEY, savedCredentials.AMAP_KEY);
+      return {
+        status: 0,
+        stdout: JSON.stringify({
+          ...searchProviderOutput,
+          data: {
+            ...searchProviderOutput.data,
+            pois: [{
+              ...searchProviderOutput.data.pois[0],
+              name: `${savedCredentials.AMAP_KEY} 北门市场`,
+            }],
+          },
+        }),
+        stderr: "",
+      };
+    },
+  });
+  assert.equal(storedResult.status, "ok");
+  assert.equal(storedResult.items[0].name, "[REDACTED] 北门市场");
+  assert.deepEqual(lifecycleEvents, ["stop-1", "start", "status", "query", "stop-2"]);
+  assert.doesNotMatch(JSON.stringify(storedResult), /saved-execution-(?:key|security)-secret/);
+}
+
+const routeResult = executeWithoutLifecycle(routeRequest, {
   env: { ...secrets },
   commandExists: () => true,
   now: () => checkedAt,
@@ -286,7 +349,7 @@ const secretNamedDrivingRoute = {
     name: `${index === 0 ? secrets.AMAP_KEY : secrets.AMAP_SECURITY_KEY} ${waypoint.name}`,
   })),
 };
-const secretNamedRouteResult = executeAmapRequest(secretNamedDrivingRoute, {
+const secretNamedRouteResult = executeWithoutLifecycle(secretNamedDrivingRoute, {
   env: { ...secrets },
   commandExists: () => true,
   now: () => checkedAt,
@@ -340,7 +403,7 @@ const escapedSecretRequest = {
   origin: { ...drivingWithWaypoints.origin, name: `${escapedCredentials.AMAP_KEY} 南门` },
   destination: { ...drivingWithWaypoints.destination, name: `${escapedCredentials.AMAP_SECURITY_KEY} 北门` },
 };
-const escapedSecretResult = executeAmapRequest(escapedSecretRequest, {
+const escapedSecretResult = executeWithoutLifecycle(escapedSecretRequest, {
   env: escapedCredentials,
   commandExists: () => true,
   now: () => checkedAt,
@@ -402,12 +465,20 @@ const fallback = [
   "使用其他可访问的公开地图搜索，并明确标记未完成 amap-gui 路网复核。 Use another accessible public map and clearly mark that amap-gui route verification was not completed.",
 ];
 for (const [expectedStatus, commandExists, env] of [
-  ["unavailable", false, { ...secrets }],
+  ["missing-cli", false, { ...secrets }],
   ["missing-credentials", true, {}],
 ]) {
-  const downgraded = executeAmapRequest(searchRequest, {
+  const downgraded = executeWithoutLifecycle(searchRequest, {
     env,
     commandExists: () => commandExists,
+    credentialResolution: expectedStatus === "missing-credentials"
+      ? { status: "missing-credentials", source: "none", savedProfileAvailable: false }
+      : {
+          status: "ready",
+          source: "environment",
+          credentials: secrets,
+          savedProfileAvailable: false,
+        },
     runCommand: () => assert.fail("provider must not run for a downgraded capability"),
   });
   assert.deepEqual(downgraded, {
@@ -425,7 +496,7 @@ for (const [label, processResult] of [
   ["provider-declared failure", { status: 0, stdout: JSON.stringify({ success: false, data: null, error: secrets.AMAP_KEY }), stderr: "" }],
   ["provider timeout", { status: null, stdout: "", stderr: "", error: { code: "ETIMEDOUT", message: secrets.AMAP_KEY } }],
 ]) {
-  const failed = executeAmapRequest(searchRequest, {
+  const failed = executeWithoutLifecycle(searchRequest, {
     env: { ...secrets },
     commandExists: () => true,
     runCommand: () => processResult,
@@ -451,7 +522,7 @@ for (const [label, malformedPoi] of [
   ["missing POI id", { ...searchProviderOutput.data.pois[0], id: "" }],
   ["missing POI name", { ...searchProviderOutput.data.pois[0], name: "   " }],
 ]) {
-  const malformedIdentity = executeAmapRequest(searchRequest, {
+  const malformedIdentity = executeWithoutLifecycle(searchRequest, {
     env: { ...secrets },
     commandExists: () => true,
     runCommand: () => ({
@@ -467,7 +538,7 @@ for (const [label, malformedPoi] of [
   assertNoSecrets(malformedIdentity);
 }
 
-const mismatchedRoute = executeAmapRequest(routeRequest, {
+const mismatchedRoute = executeWithoutLifecycle(routeRequest, {
   env: { ...secrets },
   commandExists: () => true,
   runCommand: () => ({
@@ -490,7 +561,7 @@ for (const [label, stateOverride] of [
   ["origin", { from: { name: "上海外滩", position: [121.490317, 31.241701] } }],
   ["destination", { to: { name: "上海虹桥站", position: [121.326997, 31.200547] } }],
 ]) {
-  const mismatchedEndpoint = executeAmapRequest(routeRequest, {
+  const mismatchedEndpoint = executeWithoutLifecycle(routeRequest, {
     env: { ...secrets },
     commandExists: () => true,
     runCommand: () => ({
@@ -513,7 +584,7 @@ for (const [label, stateOverride] of [
   assertNoSecrets(mismatchedEndpoint);
 }
 
-const missingProviderWaypoints = executeAmapRequest(drivingWithWaypoints, {
+const missingProviderWaypoints = executeWithoutLifecycle(drivingWithWaypoints, {
   env: { ...secrets },
   commandExists: () => true,
   runCommand: () => ({
@@ -535,7 +606,7 @@ assert.equal(missingProviderWaypoints.status, "provider-error");
 assert.equal(missingProviderWaypoints.message, providerErrorMessage);
 assertNoSecrets(missingProviderWaypoints);
 
-const reorderedProviderWaypoints = executeAmapRequest(drivingWithWaypoints, {
+const reorderedProviderWaypoints = executeWithoutLifecycle(drivingWithWaypoints, {
   env: { ...secrets },
   commandExists: () => true,
   runCommand: () => ({
@@ -576,7 +647,7 @@ const routeWithoutProviderWaypointField = normalizeAmapOutput(
 assert.deepEqual(routeWithoutProviderWaypointField.waypoints, []);
 assertNoSecrets(routeWithoutProviderWaypointField);
 
-const unexpectedProviderWaypoint = executeAmapRequest(routeRequest, {
+const unexpectedProviderWaypoint = executeWithoutLifecycle(routeRequest, {
   env: { ...secrets },
   commandExists: () => true,
   runCommand: () => ({
@@ -598,7 +669,7 @@ assert.equal(unexpectedProviderWaypoint.status, "provider-error");
 assert.equal(unexpectedProviderWaypoint.message, providerErrorMessage);
 assertNoSecrets(unexpectedProviderWaypoint);
 
-const conflictingLegacyRoute = executeAmapRequest(routeRequest, {
+const conflictingLegacyRoute = executeWithoutLifecycle(routeRequest, {
   env: { ...secrets },
   commandExists: () => true,
   runCommand: () => ({

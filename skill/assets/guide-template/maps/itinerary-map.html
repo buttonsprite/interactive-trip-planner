@@ -99,12 +99,13 @@
   <dialog class="dialog-backdrop" id="map-export-dialog" hidden aria-labelledby="map-export-title" aria-describedby="map-export-description">
     <div class="dialog-panel map-export-panel">
       <div class="dialog-heading"><div><div class="section-kicker">保存当前地图安排</div><h2 id="map-export-title">导出到 Google My Maps</h2></div><button class="icon-button" id="close-map-export" type="button" aria-label="关闭导出窗口">×</button></div>
-      <p class="muted" id="map-export-description">每次下载一个文件，避免浏览器拦截多个下载。三个文件都会使用你当前保存的地点顺序和优先级。</p>
+      <p class="muted" id="map-export-description">先下载一个使用当前地图安排的 KML，再打开 Google My Maps 导入；浏览器不能替你自动上传文件。</p>
       <div class="map-export-files">
-        <button class="text-button" type="button" data-export-file="places.csv">下载 places.csv</button>
-        <button class="text-button" type="button" data-export-file="itinerary.kml">下载 itinerary.kml</button>
-        <button class="text-button" type="button" data-export-file="README.md">下载 README.md</button>
+        <button class="text-button primary" id="export-all-kml" type="button" data-export-kml="all">导出全部地点并打开 My Maps</button>
+        <button class="text-button" id="export-day-kml" type="button" data-export-kml="day">导出当天地点并打开 My Maps</button>
+        <a class="text-button map-export-link" id="open-google-my-maps" href="https://www.google.com/mymaps" target="_blank" rel="noopener noreferrer">打开 Google My Maps</a>
       </div>
+      <details class="map-export-advanced"><summary>高级导出</summary><div class="map-export-files"><button class="text-button" type="button" data-export-file="places.csv">下载 places.csv</button><button class="text-button" type="button" data-export-file="itinerary.kml">下载 itinerary.kml</button><button class="text-button" type="button" data-export-file="README.md">下载 README.md</button></div></details>
       <div class="map-export-error" id="map-export-error" role="status" aria-live="polite"></div>
     </div>
   </dialog>

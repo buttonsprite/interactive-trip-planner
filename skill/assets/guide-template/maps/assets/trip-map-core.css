@@ -671,10 +671,27 @@ a {
 .detail-actions button:focus-visible,
 .day-map-actions a:focus-visible,
 .map-export-files button:focus-visible,
+.map-export-files a:focus-visible,
 .map-export-trigger:focus-visible,
 .dialog-heading .icon-button:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--trip-accent), white 50%);
   outline-offset: 2px;
+}
+
+.map-export-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.map-export-advanced {
+  margin-top: 12px;
+}
+
+.map-export-advanced summary {
+  cursor: pointer;
+  color: var(--trip-muted);
 }
 
 .priority-controls button.is-active {
@@ -977,6 +994,7 @@ dialog.dialog-backdrop::backdrop {
   .day-map-actions a,
   .map-provider-action,
   .map-export-files button,
+  .map-export-files a,
   #close-map-export,
   .map-export-trigger {
     min-height: 44px;

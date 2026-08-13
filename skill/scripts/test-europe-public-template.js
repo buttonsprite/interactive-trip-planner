@@ -64,6 +64,12 @@ assert.match(
   "public day delivery must pass the destination region into the shared runtime",
 );
 assert.match(html, /TripMapDelivery\.buildMyMapsFiles\(/);
+assert.match(html, /TripMapDelivery\.buildMyMapsKmlExport\(/);
+assert.match(html, /id="export-all-kml"[^>]+data-export-map-scope="all"/);
+assert.match(html, /id="export-day-kml"[^>]+data-export-map-scope="day"/);
+assert.match(html, /id="open-google-my-maps"[^>]+https:\/\/www\.google\.com\/mymaps/);
+assert.match(html, /appState\.dayView\.selectedDayId/);
+assert.match(html, /<details class="map-export-advanced">/);
 assert.match(html, /const currentDeliveryState = \(\) => \{/);
 assert.match(html, /assignments\[poi\.id\] = getPoiAssignment\(poi\.id\)\?\.dayId \|\| ""/);
 assert.match(html, /getDayPois\(day\.id\)\.map\(\(\{ item \}\) => item\.id\)/);

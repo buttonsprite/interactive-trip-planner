@@ -1555,6 +1555,28 @@
       cursor: pointer;
     }
 
+    .map-export-files a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: var(--ink);
+      text-decoration: none;
+      background: var(--paper);
+    }
+
+    .map-export-advanced {
+      margin-top: 12px;
+    }
+
+    .map-export-advanced summary {
+      cursor: pointer;
+      color: var(--muted);
+    }
+
     .map-export-feedback {
       min-height: 1.5em;
       color: #1f4f4a;
@@ -2150,6 +2172,7 @@
       .map-provider-action,
       .day-map-actions a,
       .map-export-files button,
+      .map-export-files a,
       .map-export-trigger {
         min-height: 44px;
       }
@@ -2550,15 +2573,16 @@
       <div class="map-export-heading">
         <div>
           <h2 id="map-export-title">导出到 Google My Maps</h2>
-          <p id="map-export-description">三个文件使用当前保存的地点顺序、日期归类和优先级；每次下载一个，避免浏览器拦截。</p>
+          <p id="map-export-description">先下载一个使用当前地图安排的 KML，再打开 Google My Maps 导入；浏览器不能替你自动上传文件。</p>
         </div>
         <button id="close-map-export" type="button" aria-label="关闭导出窗口">×</button>
       </div>
       <div class="map-export-files">
-        <button type="button" data-export-map-file="places.csv">下载 places.csv</button>
-        <button type="button" data-export-map-file="itinerary.kml">下载 itinerary.kml</button>
-        <button type="button" data-export-map-file="README.md">下载 README.md</button>
+        <button type="button" id="export-all-kml" data-export-map-scope="all">导出全部地点并打开 My Maps</button>
+        <button type="button" id="export-day-kml" data-export-map-scope="day">导出当天地点并打开 My Maps</button>
+        <a id="open-google-my-maps" href="https://www.google.com/mymaps" target="_blank" rel="noopener noreferrer">打开 Google My Maps</a>
       </div>
+      <details class="map-export-advanced"><summary>高级导出</summary><div class="map-export-files"><button type="button" data-export-map-file="places.csv">下载 places.csv</button><button type="button" data-export-map-file="itinerary.kml">下载 itinerary.kml</button><button type="button" data-export-map-file="README.md">下载 README.md</button></div></details>
       <p class="map-export-feedback" id="map-export-feedback" role="status" aria-live="polite"></p>
     </div>
   </dialog>
@@ -13618,9 +13642,15 @@
     const openMapExportDialog = (trigger) => {
       mapExportReturnFocus = trigger || document.activeElement;
       mapExportFeedback.textContent = "";
+      const selectedDay = getVisibleDay();
+      const dayExportButton = document.getElementById("export-day-kml");
+      dayExportButton.disabled = !selectedDay;
+      dayExportButton.textContent = selectedDay
+        ? `导出 ${selectedDay.short} 当天地点并打开 My Maps`
+        : "请先选择一天，再导出当天地点";
       mapExportDialog.hidden = false;
       mapExportDialog.showModal();
-      mapExportDialog.querySelector("[data-export-map-file]")?.focus();
+      document.getElementById("export-all-kml")?.focus();
     };
 
     const closeMapExportDialog = () => {
@@ -13657,6 +13687,42 @@
       }
     };
 
+    const downloadMapBlob = (fileName, content) => {
+      const objectUrl = URL.createObjectURL(new Blob([content], { type: "application/vnd.google-earth.kml+xml;charset=utf-8" }));
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = fileName;
+      anchor.click();
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    const exportKmlAndOpenMyMaps = (scope) => {
+      const selectedDay = getVisibleDay();
+      if (scope === "day" && !selectedDay) {
+        mapExportFeedback.textContent = "请先选择一天，再导出当天地点 / Select a day first";
+        return;
+      }
+      try {
+        const exported = TripMapDelivery.buildMyMapsKmlExport({
+          trip: currentDeliveryTrip(),
+          state: currentDeliveryState(),
+          locale: PUBLIC_TRIP_DATA.trip.language === "en" ? "en" : "zh-CN",
+          scope,
+          dayId: scope === "day" ? selectedDay.id : ""
+        });
+        downloadMapBlob(exported.fileName, exported.content);
+        const popup = window.open("https://www.google.com/mymaps", "_blank", "noopener,noreferrer");
+        mapExportFeedback.textContent = popup
+          ? `${exported.fileName} 已下载，请在 My Maps 中导入 / Import the downloaded KML`
+          : `${exported.fileName} 已下载；新窗口被拦截，请点击打开 My Maps / Popup blocked`;
+      } catch (error) {
+        const message = String(error?.message || "");
+        mapExportFeedback.textContent = /^My Maps export blocked: privacy issue at (?:POI|day) #\d+, field "[a-z_]+"\.$/.test(message)
+          ? message
+          : "暂时无法生成 KML，请确认有 WGS84 定位的地点 / KML unavailable";
+      }
+    };
+
     document.getElementById("open-map-export").addEventListener("click", (event) => {
       openMapExportDialog(event.currentTarget);
     });
@@ -13666,8 +13732,11 @@
       closeMapExportDialog();
     });
     mapExportDialog.addEventListener("click", (event) => {
+      const scopeButton = event.target.closest("[data-export-map-scope]");
       const fileButton = event.target.closest("[data-export-map-file]");
-      if (fileButton) {
+      if (scopeButton) {
+        exportKmlAndOpenMyMaps(scopeButton.getAttribute("data-export-map-scope"));
+      } else if (fileButton) {
         downloadMapExportFile(fileButton.getAttribute("data-export-map-file"));
       } else if (event.target === mapExportDialog) {
         closeMapExportDialog();

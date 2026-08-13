@@ -558,13 +558,19 @@
       mapExportReturnFocus = trigger || document.activeElement || $("#open-map-export");
       $("#map-export-error").textContent = "";
       const dialog = $("#map-export-dialog");
+      const activeDayId = state.view.activeDayId || "";
+      const activeDay = days.get(activeDayId);
+      $("#export-day-kml").disabled = !activeDay;
+      $("#export-day-kml").textContent = activeDay
+        ? `导出 ${shortDate(activeDay.date)} 当天地点并打开 My Maps`
+        : "请先选择一天，再导出当天地点";
       dialog.hidden = false;
       if (typeof dialog.showModal === "function") {
         if (!dialog.open) dialog.showModal();
       } else {
         dialog.setAttribute("open", "");
       }
-      $("[data-export-file]")?.focus();
+      $("#export-all-kml")?.focus();
     }
 
     function closeMapExportDialog() {
@@ -583,23 +589,57 @@
       return "text/markdown;charset=utf-8";
     }
 
+    function startFileDownload(fileName, content) {
+      const url = root.URL.createObjectURL(new root.Blob([content], { type: exportContentType(fileName) }));
+      try {
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = fileName;
+        anchor.hidden = true;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+      } finally {
+        root.URL.revokeObjectURL(url);
+      }
+    }
+
+    function exportKmlAndOpenMyMaps(scope) {
+      const feedback = $("#map-export-error");
+      const dayId = scope === "day" ? (state.view.activeDayId || "") : "";
+      if (scope === "day" && !dayId) {
+        feedback.textContent = "请先选择一天，再导出当天地点。";
+        return;
+      }
+      try {
+        const exported = root.TripMapDelivery.buildMyMapsKmlExport({
+          trip,
+          state,
+          locale: mapExportLocale(),
+          scope,
+          dayId,
+        });
+        startFileDownload(exported.fileName, exported.content);
+        const popup = typeof root.open === "function"
+          ? root.open("https://www.google.com/mymaps", "_blank", "noopener,noreferrer")
+          : null;
+        feedback.textContent = popup
+          ? `已下载 ${exported.fileName}，请在刚打开的 My Maps 中导入。`
+          : `已下载 ${exported.fileName}。浏览器拦截了新窗口，请点击“打开 Google My Maps”后导入。`;
+      } catch (error) {
+        const message = String(error?.message || "");
+        feedback.textContent = /^My Maps export blocked: privacy issue at (?:POI|day) #\d+, field "[a-z_]+"\.$/.test(message)
+          ? message
+          : "无法生成 KML；请确认当前范围至少有一个 WGS84 定位的地点。";
+      }
+    }
+
     function downloadExportFile(fileName) {
       const feedback = $("#map-export-error");
       try {
         const files = root.TripMapDelivery.buildMyMapsFiles({ trip, state, locale: mapExportLocale() });
         if (!Object.prototype.hasOwnProperty.call(files, fileName)) throw new Error("找不到导出文件");
-        const url = root.URL.createObjectURL(new root.Blob([files[fileName]], { type: exportContentType(fileName) }));
-        try {
-          const anchor = document.createElement("a");
-          anchor.href = url;
-          anchor.download = fileName;
-          anchor.hidden = true;
-          document.body.appendChild(anchor);
-          anchor.click();
-          anchor.remove();
-        } finally {
-          root.URL.revokeObjectURL(url);
-        }
+        startFileDownload(fileName, files[fileName]);
         feedback.textContent = `已开始下载 ${fileName}`;
       } catch (error) {
         const message = String(error?.message || "");
@@ -865,8 +905,10 @@
         closeMapExportDialog();
       });
       $("#map-export-dialog").addEventListener("click", (event) => {
+        const kmlExport = event.target.closest("[data-export-kml]");
         const download = event.target.closest("[data-export-file]");
-        if (download) downloadExportFile(download.dataset.exportFile);
+        if (kmlExport) exportKmlAndOpenMyMaps(kmlExport.dataset.exportKml);
+        else if (download) downloadExportFile(download.dataset.exportFile);
         else if (event.target === $("#map-export-dialog")) closeMapExportDialog();
       });
       document.addEventListener("keydown", (event) => {
@@ -896,6 +938,7 @@
       openMapExportDialog,
       closeMapExportDialog,
       downloadExportFile,
+      exportKmlAndOpenMyMaps,
     };
   }
 

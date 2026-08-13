@@ -71,12 +71,13 @@ const ids = [
   "map", "map-note", "impact-reasons", "impact-dialog", "confirm-impact", "replan-text",
   "copy-feedback", "replan-dialog", "copy-replan", "cancel-impact", "close-replan",
   "open-map-export", "map-export-dialog", "close-map-export", "map-export-error",
+  "export-all-kml", "export-day-kml", "open-google-my-maps",
 ];
 const elements = new Map(ids.map((id) => [id, new FakeElement(id)]));
 const body = new FakeElement("body");
-const firstExportButton = new FakeElement("places-export");
-firstExportButton.dataset.exportFile = "places.csv";
+const firstExportButton = elements.get("export-all-kml");
 const clickedDownloads = [];
+const openedWindows = [];
 const document = {
   body,
   activeElement: body,
@@ -86,7 +87,6 @@ const document = {
     return element;
   },
   querySelector: (selector) => {
-    if (selector === "[data-export-file]") return firstExportButton;
     return selector.startsWith("#") ? elements.get(selector.slice(1)) || null : null;
   },
   addEventListener() {},
@@ -113,6 +113,7 @@ const layer = chain({ clearLayers() {} });
 const revoked = [];
 let exportedOptions = null;
 let exportError = null;
+let scopedExportOptions = null;
 let dayHandoffOptions = null;
 const trip = {
   slug: "delivery-ui-test",
@@ -196,6 +197,16 @@ const sandbox = {
       if (exportError) throw exportError;
       return { "places.csv": "csv", "itinerary.kml": "kml", "README.md": "readme" };
     },
+    buildMyMapsKmlExport: (options) => {
+      scopedExportOptions = options;
+      if (exportError) throw exportError;
+      const suffix = options.scope === "day" ? "2026-10-13" : "all-places";
+      return { fileName: `delivery-ui-test-${suffix}.kml`, content: "kml", stats: { includedCount: 3, placemarkCount: 3, manualCount: 0 } };
+    },
+  },
+  open: (url) => {
+    openedWindows.push(url);
+    return { opener: null };
   },
 };
 sandbox.globalThis = sandbox;
@@ -221,6 +232,7 @@ mounted.openMapExportDialog(exportTrigger);
 assert.equal(elements.get("map-export-dialog").showModalCalls, 1, "export must call native showModal exactly once");
 assert.equal(elements.get("map-export-dialog").open, true, "native export dialog must be open");
 assert.equal(firstExportButton.focused, true, "modal must focus its first file action");
+assert.equal(elements.get("export-day-kml").disabled, false, "selected day export must be enabled");
 
 let cancelPrevented = false;
 const cancelHandler = elements.get("map-export-dialog").listeners.get("cancel");
@@ -231,13 +243,25 @@ assert.equal(elements.get("map-export-dialog").open, false, "cancel must close t
 assert.equal(elements.get("map-export-dialog").closeCalls, 1);
 assert.equal(document.activeElement, exportTrigger, "closing the modal must return focus to its opener");
 
+mounted.exportKmlAndOpenMyMaps("all");
+assert.equal(scopedExportOptions.scope, "all");
+assert.equal(scopedExportOptions.dayId, "");
+assert.deepEqual(clickedDownloads, ["delivery-ui-test-all-places.kml"]);
+assert.deepEqual(openedWindows, ["https://www.google.com/mymaps"]);
+
+mounted.exportKmlAndOpenMyMaps("day");
+assert.equal(scopedExportOptions.scope, "day");
+assert.equal(scopedExportOptions.dayId, "day-1");
+assert.deepEqual(clickedDownloads, ["delivery-ui-test-all-places.kml", "delivery-ui-test-2026-10-13.kml"]);
+assert.deepEqual(openedWindows, ["https://www.google.com/mymaps", "https://www.google.com/mymaps"]);
+
 mounted.downloadExportFile("places.csv");
 assert.ok(exportedOptions, "export must call TripMapDelivery.buildMyMapsFiles");
 assert.deepEqual(JSON.parse(JSON.stringify(exportedOptions.state.orders["day-1"])), ["hotel", "b", "a"]);
 assert.equal(exportedOptions.state.dirtyDays["day-1"], true);
 assert.equal(exportedOptions.locale, "zh-CN");
-assert.deepEqual(clickedDownloads, ["places.csv"], "one export action must trigger one file download");
-assert.deepEqual(revoked, ["blob:test-export"], "each download must revoke its Blob URL immediately");
+assert.deepEqual(clickedDownloads, ["delivery-ui-test-all-places.kml", "delivery-ui-test-2026-10-13.kml", "places.csv"], "one export action must trigger one file download");
+assert.equal(revoked.length, 3, "each download must revoke its Blob URL immediately");
 
 exportError = new Error('My Maps export blocked: privacy issue at POI #2, field "tip".');
 mounted.downloadExportFile("places.csv");
@@ -246,7 +270,11 @@ assert.equal(
   'My Maps export blocked: privacy issue at POI #2, field "tip".',
   "the browser must expose the stable sanitized privacy issue without echoing field content",
 );
-assert.deepEqual(clickedDownloads, ["places.csv"], "privacy rejection must not start another download");
-assert.deepEqual(revoked, ["blob:test-export"], "privacy rejection must not create a Blob URL");
+assert.deepEqual(clickedDownloads, ["delivery-ui-test-all-places.kml", "delivery-ui-test-2026-10-13.kml", "places.csv"], "privacy rejection must not start another download");
+assert.equal(revoked.length, 3, "privacy rejection must not create a Blob URL");
+
+mounted.returnToOverview();
+mounted.openMapExportDialog(exportTrigger);
+assert.equal(elements.get("export-day-kml").disabled, true, "overview must disable day-scoped export");
 
 console.log("light map delivery UI passed");

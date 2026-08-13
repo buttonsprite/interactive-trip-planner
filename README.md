@@ -109,7 +109,7 @@ itinerary.kml
 README.md
 ```
 
-这三个文件用于手动导入 Google My Maps。KML 只使用可靠 WGS84 坐标；只有高德 GCJ-02 坐标的地点保留在 CSV 中，按名称和地址人工定位。导出**不会自动写入普通 Google Maps 收藏夹**，也不会自动写入高德收藏夹。完整输入、状态、链接限制、文件安全与降级规则见[地图服务执行与交付](skill/references/map-provider-delivery.md)。
+地图页面优先提供“导出全部地点并打开 My Maps”；选择某天后还会启用“导出当天地点并打开 My Maps”。一次点击下载一个 KML 并尝试打开 My Maps，用户仍需在 My Maps 中手动导入。上面的三个文件保留为高级导出和 CLI 兼容能力。KML 只使用可靠 WGS84 坐标；只有高德 GCJ-02 坐标的地点保留在 CSV 中，按名称和地址人工定位。导出**不会自动写入普通 Google Maps 收藏夹**，也不会自动写入高德收藏夹。海外地点详情的主操作是“导航去这里”，Google URL 只携带 destination，不包含起点或强制交通方式。完整输入、状态、链接限制、文件安全与降级规则见[地图服务执行与交付](skill/references/map-provider-delivery.md)。
 
 ## 如何开始
 

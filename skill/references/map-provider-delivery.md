@@ -120,7 +120,8 @@ route mode 只接受 `driving`、`walking`、`riding`、`transit`。公交必须
 
 Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key：
 
-- 地点入口优先使用有效 WGS84 坐标；没有坐标时使用可搜索的名称和地址。
+- 海外地点详情的主操作是“导航去这里 / Navigate here”。URL 只包含目的地 `destination`，不包含起点，也不强制 `travelmode`；打开后由用户当前位置和 Google Maps 决定可用路线。优先使用有效 WGS84 坐标；没有坐标时使用可搜索的名称和地址。完整 URL 超过 2048 字符时才降级为 search；仍无法安全编码则进入 Google 手动查找项。
+- 中国大陆地点仍以高德 marker 为主入口；Google destination-only 导航可以作为次级入口。海外地点不显示高德入口，也不生成高德手动查找项。
 - 单条 directions 最多 3 个中间停靠点；更长路线拆成最多 5 个地点的短段，前一段终点与后一段起点重叠。
 - 每条 directions URL 还必须不超过 2048 个字符。runtime 从最多 5 个地点开始按顺序贪心试装，只有完整 URL 编码后仍在上限内才生成；相邻分段共享边界地点且不丢点。若单一相邻 pair 自身已经无法安全编码在 2048 字符内，则既不生成也不截断该 URL，并把两个端点列入 Google 手动查找项。
 - mixed mode 按连续相同交通方式拆分；未知 mode 不猜测。
@@ -130,7 +131,13 @@ Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key�
 
 ## Google My Maps 文件
 
-浏览器地图的导出窗口从现有 Core 当前状态读取 `assignments`、`orders`、`priorities` 和 `dirtyDays`，每次点击只下载一个文件并立即撤销临时 Blob URL：
+浏览器地图的导出窗口从现有 Core 当前状态读取 `assignments`、`orders`、`priorities` 和 `dirtyDays`。主流程提供：
+
+- “导出全部地点并打开 My Maps”：每个 POI 最多出现一次。已安排地点进入所属日期；未安排但属于一个或多个日期候选的地点进入最早候选日文件夹，description 列出其他候选日期；其余进入未安排行程。
+- “导出当天地点并打开 My Maps”：只有选中日期后可用；包含当天正式安排，以及当天候选中当前没有被安排到任何日期的地点。已安排到其他日期的地点即使同时是该日候选也会排除。
+- 每次先完成当前 scope 的字段隐私检查，再创建一个 Blob、下载一个 KML，并尝试打开 `https://www.google.com/mymaps`。浏览器阻止 popup 时下载仍成功，并提示用户使用独立的“打开 Google My Maps”链接；隐私失败时既不创建 Blob 也不打开页面。
+
+My Maps 没有在本功能中使用自动写入接口：用户需要在打开的 My Maps 页面中选择刚下载的本地 KML。高级导出继续逐个提供：
 
 ```text
 places.csv
@@ -139,10 +146,10 @@ README.md
 ```
 
 - `places.csv` 包含固定 16 列：名称、当地名称、城市、区域、地址、纬度、经度、日期、当天顺序、路线角色、分类、优先级、计划状态、为什么值得去、注意事项和地图入口。正式路线、候选和未安排地点明确区分。
-- `itinerary.kml` 按旅行日建立 Folder，并增加候选 Folder；只写 Point，不在缺少真实道路几何时输出 LineString。
+- scoped KML 和 `itinerary.kml` 都只写 Point，不在缺少真实道路几何时输出 LineString。当天正式点保持当前 `orders` 顺序。
 - `README.md` 说明手动导入、路线重算、坐标边界和需要人工定位的地点数量。
 
-KML 与 Google My Maps 只接受 POI `coords: [lat, lng]` 中的有效 WGS84。只有高德 GCJ-02 position 或缺少可靠坐标的地点仍保留在 CSV 中，用名称和地址人工定位；GCJ-02 绝不冒充 WGS84 写入 KML。
+KML 与 Google My Maps 只接受 POI `coords: [lat, lng]` 中的有效 WGS84。只有高德 GCJ-02 position 或缺少可靠坐标的地点计入当前 scope 的 `manualCount`，不会写入 KML Point；高级 CSV 仍按名称和地址保留它们。GCJ-02 绝不冒充 WGS84 写入 KML。当前 scope 没有任何可写 WGS84 点时拒绝生成空 KML，并提示人工处理。
 
 导出不会自动写入普通 Google Maps 收藏夹 / not automatically added to regular Google Maps saved lists。Google My Maps 与普通 Google Maps Saved Lists 是不同产品面；导入需要用户手动完成，也不会自动导入高德收藏夹。
 

@@ -320,6 +320,9 @@ if (repositoryReadme !== null) {
     "Google Maps URLs 不需要 API Key",
     "places.csv",
     "itinerary.kml",
+    "导出全部地点并打开 My Maps",
+    "导出当天地点并打开 My Maps",
+    "导航去这里",
     "不会自动写入普通 Google Maps 收藏夹",
   ]);
 }
@@ -350,6 +353,10 @@ assertIncludesAll("SKILL.md", skill, [
   "provider-error",
   "places.csv",
   "itinerary.kml",
+  "导出全部地点并打开 My Maps",
+  "导出当天地点并打开 My Maps",
+  "destination",
+  "不包含起点",
   ...routeStatusCopy,
 ]);
 assertIncludesAll("map-provider-delivery.md", mapProviderDelivery, [

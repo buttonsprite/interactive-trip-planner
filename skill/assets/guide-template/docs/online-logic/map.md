@@ -32,7 +32,7 @@
 
 ## 地图交接与路线状态
 
-- 地点详情通过 `buildPlaceLinks` 生成地图入口；`countryCode: "CN"` 时优先高德，其他地区优先 Google Maps。高德只有 `mapProviderRefs.amap.status: "resolved"` 时才生成直接入口；两种 provider 都没有安全链接时显示“复制地点名称和地址”的手动搜索降级。
+- 地点详情通过 `buildPlaceLinks` 生成地图入口；`countryCode: "CN"` 时优先高德，其他地区显示“导航去这里 / Navigate here”的 Google destination-only directions。这个链接不包含起点或强制交通方式。高德只有 `mapProviderRefs.amap.status: "resolved"` 时才生成直接入口；海外不生成高德入口或高德手动项；当前区域没有安全链接时显示复制地点的手动降级。
 - 每日摘要下通过 `buildDayHandoffs` 显示路线复核状态、全部地点总览、可直接打开的路线分段和需要手动查找的地点。拆分后的每一段保留 runtime 返回的序号和 provider，不会因为部分地点缺少 provider 定位而隐藏 `manualItems`。
 - `countryCode: "CN"` 才启用高德 day provider；海外日程不显示高德 overview、路线或高德手动查找项。中国大陆当天地点总览把全部安全 marker 按当前顺序连续拆分，每张最多 10 个并显示 `1/N` 序号；`overview` 保留为首块兼容字段。旧的“前 10 个、不会自动拆分、第 11 个起不进入总览”合同已经废弃。
 - Google 当天路线同时遵守最多 3 个中间停靠点（每块最多 5 点）与完整编码 URL 不超过 2048 字符两项限制。runtime 贪心选择最长安全块，块间共享边界地点；单一相邻 pair 超限时不截断链接，两个端点进入 Google 手动查找项。
@@ -44,7 +44,8 @@
 ## Google My Maps 导出
 
 - 总览中的“导出到 Google My Maps”通过原生 `dialog.showModal()` 进入浏览器 modal top layer；背景内容在窗口打开时不可聚焦，Tab / Shift+Tab 由浏览器限制在导出窗口内。Escape 触发 `cancel` 后关闭窗口，并把焦点回到原触发按钮。
-- `places.csv`、`itinerary.kml` 和 `README.md` 必须逐个下载。每次点击都即时用 `buildMyMapsFiles({ trip, state, locale })` 读取当前保存的 `assignments`、`orders`、`priorities` 和 `dirtyDays`，不会导出页面初始顺序或另存一份状态。
+- 主操作调用 `buildMyMapsKmlExport({ trip, state, locale, scope, dayId })`：可导出全部地点，或在选中日期后导出当天正式安排与仍未安排的当天候选。每次下载一个 KML 后尝试打开 My Maps；popup 被拦截时下载不回滚。用户仍需手动导入，不能把这个流程描述为自动同步 Google 账号。
+- `places.csv`、`itinerary.kml` 和 `README.md` 收入高级导出，继续用 `buildMyMapsFiles({ trip, state, locale })` 保持 CLI 与旧流程兼容。两种 builder 都读取当前保存的 `assignments`、`orders`、`priorities` 和 `dirtyDays`，不会另存一份状态。
 - 浏览器每次只创建一个 Blob URL，触发单个文件下载后立即撤销；失败时在 dialog 内显示可见错误，不影响继续浏览和修改地图。
 - 三个文件生成前由共享 builder 扫描实际 POI 输出字段与 KML 日期文件夹字段。疑似 API key、Cookie、token 或 release 私密数据会阻止整次生成；弹窗只显示稳定的 POI/日期序号和字段名，不回显原值，也不会创建 Blob URL。CLI 使用同一 builder，因此隐私失败发生在 staging 和替换之前。
 - 导出文件用于手动导入 Google My Maps，不等于 Google Maps Saved Lists，也不会自动更新个人地图。

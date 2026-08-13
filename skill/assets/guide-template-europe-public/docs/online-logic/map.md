@@ -27,12 +27,12 @@
 ## 地图交接与导出
 
 - 完整公开母版加载 `maps/assets/trip-map-delivery.js`。该文件不维护独立实现，而是在每次运行 `build-europe-public-template.js` 时从轻量母版的 canonical runtime byte-for-byte 复制；REDSkill 构建把同一份 runtime 在公开应用脚本之前内联一次，并移除外部引用。
-- 地点详情继续使用原有详情滚动面板，并在同一 action row 中加入 provider-aware 地图入口。中国大陆数据优先高德，其他目的地优先 Google Maps；高德只消费 `status: resolved` 的 provider ref，没有安全直达地址时保留手动搜索提示，不拼接模糊或未解析 POI id。
+- 地点详情继续使用原有详情滚动面板，并在同一 action row 中加入 provider-aware 地图入口。中国大陆数据优先高德；海外显示“导航去这里 / Navigate here”的 Google destination-only directions，不传起点或强制交通方式，也不显示无意义的高德入口。高德只消费 `status: resolved` 的 provider ref，不拼接模糊或未解析 POI id。
 - 当天地图交接只读取现有 `itineraryPlan`、`priorities`、`getPoiAssignment()` 与 `getDayPois()`。`currentDeliveryState()` 把当前日期归类、当前顺序、优先级和 dirty days 投影给共享 runtime，不创建第二份 storage 或另一套行程状态。交付区位于 sticky 日期标题之后、当天地点列表之前的 normal flow；桌面随面板内容滚走，移动端占用独立的紧凑布局行，provider actions 横向滚动，任何状态都不能扩大 sticky header 或覆盖地点与换序按钮。
 - day handoff 把 `PUBLIC_TRIP_DATA.trip.countryCode` 传给共享 runtime；只有 `CN` 启用高德 overview、route 和高德 manual items，海外公开母版只显示 Google day handoff。中国大陆超过 10 个安全 marker 时生成连续的 `1/N` overview 列表并全部渲染；旧的“前 10 个、不会自动拆分、第 11 个起丢弃”合同已废弃。Google 路线同时按最多 5 点和完整 URL 2048 字符上限贪心拆分，无法安全容纳的单一相邻 pair 转为 Google 手动查找项。
 - Google Maps / 高德链接的存在不代表路线已经复核。公开欧洲样例没有 provider、review date、正距离三项完整路网证据，所以初始状态仍显示“路线待复核”；加入、移出或重排后的 dirty day 继续显示“路线待重新复核”。只有当前相邻地点能对应到母版已有的明确 transport mode 时才生成该段 provider route，规划估算或未知模式不会被提升为已验证路线。
-- “导出到 Google My Maps”使用 native `<dialog>`，桌面和移动端共用一个入口与同一弹窗。打开弹窗不重绘详情、不改变地图选择或滚动位置；关闭后焦点回到触发按钮。移动端 provider、route、文件下载和关闭按钮的 touch target 至少为 44px。
-- 每次只下载一个当前状态文件：`places.csv` 保存全部地点与当前日期/顺序/优先级，`itinerary.kml` 只写 WGS84 point 并按日期和候选分组，`README.md` 说明导入步骤与必须手动定位的地点。导出不修改 Google Maps Saved Lists，也不把仅有 GCJ-02 的坐标写入 KML。
+- “导出到 Google My Maps”使用 native `<dialog>`，桌面和移动端共用一个入口与同一弹窗。总览可“导出全部地点并打开 My Maps”；选中某天后才启用“导出当天地点并打开 My Maps”。打开弹窗不重绘详情、不改变地图选择或滚动位置；关闭后焦点回到触发按钮。移动端 provider、route、导出和关闭控件的 touch target 至少为 44px。
+- 主操作每次只下载一个 scoped KML，然后尝试打开 My Maps；浏览器阻止 popup 时保留已下载文件并显示手动打开链接。全部 KML 中每个 POI 只出现一次；当天 KML 排除已安排到其他日期的候选。`places.csv`、`itinerary.kml`、`README.md` 保留在高级导出。导出不修改 Google Maps Saved Lists，也不把仅有 GCJ-02 的坐标写入 KML。
 - 浏览器和 CLI 的 My Maps 导出共用同一个字段级隐私门。builder 只扫描实际会进入导出的 POI 字段与 KML 日期文件夹字段；命中 API key、Cookie、token 或 release 私密数据模式时在生成 Blob、staging 或替换旧文件之前停止。公开 UI 只显示 allowlist 格式的 POI/日期序号和字段名，不回显命中内容。
 
 ## 修改行程

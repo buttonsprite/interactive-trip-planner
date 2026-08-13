@@ -311,6 +311,8 @@ assertIncludesAll("SKILL.md", packagedProviderDocs["SKILL.md"], [
   "provider-error",
   "places.csv",
   "itinerary.kml",
+  "导出全部地点并打开 My Maps",
+  "导出当天地点并打开 My Maps",
   ...routeStatusCopy,
 ]);
 assertIncludesAll("map-provider-delivery.md", packagedProviderDocs["map-provider-delivery.md"], [
@@ -321,6 +323,10 @@ assertIncludesAll("map-provider-delivery.md", packagedProviderDocs["map-provider
   "provider-error",
   "places.csv",
   "itinerary.kml",
+  "导出全部地点并打开 My Maps",
+  "导出当天地点并打开 My Maps",
+  "destination",
+  "不包含起点",
   ...routeStatusCopy,
 ]);
 assertIncludesAll("planning-workflow.md", packagedProviderDocs["planning-workflow.md"], [

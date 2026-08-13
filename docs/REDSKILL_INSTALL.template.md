@@ -51,7 +51,7 @@ Linux 没有 Secret Service 时不会明文保存，也不会默认创建 `.env`
 
 Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key。本包不调用 Google Places API / does not call Google Places API，也不调用 Google Routes API / does not call Google Routes API；路线在用户打开 Google Maps 后重新计算。
 
-地图可逐个下载 `places.csv`、`itinerary.kml`、`README.md`，用于手动导入 Google My Maps。导出不会自动写入普通 Google Maps 收藏夹 / not automatically added to regular Google Maps saved lists，也不会自动写入高德收藏夹。仅有高德 GCJ-02 坐标的地点不会冒充 WGS84 写入 KML，会保留在 CSV 中供人工定位。
+地图主操作是“导出全部地点并打开 My Maps”；选中某天后可用“导出当天地点并打开 My Maps”。一次点击只下载一个 KML 并尝试打开 My Maps，仍需用户手动导入；`places.csv`、`itinerary.kml`、`README.md` 位于高级导出。导出不会自动写入普通 Google Maps 收藏夹 / not automatically added to regular Google Maps saved lists，也不会自动写入高德收藏夹。仅有高德 GCJ-02 坐标的地点不会冒充 WGS84 写入 KML，会保留在 CSV 中供人工定位。海外 POI 的“导航去这里”只传 Google destination，不包含起点或强制交通方式。
 
 ## 运行条件
 

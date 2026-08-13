@@ -109,7 +109,7 @@ itinerary.kml
 README.md
 ```
 
-These files are manually imported into Google My Maps. KML contains only reliable WGS84 coordinates; places with only AMap GCJ-02 coordinates stay in CSV for manual name-and-address resolution. The files are **not automatically added to regular Google Maps saved lists**, and they are not automatically added to AMap favorites. See [map provider execution and delivery](skill/references/map-provider-delivery.md) for inputs, statuses, link limits, filesystem safety, and fallbacks.
+The map now leads with **Export all places and open My Maps**; after selecting a day it also enables **Export this day and open My Maps**. One click downloads one KML and attempts to open My Maps, but the traveler still imports that local file manually. The three files above remain available as advanced export and CLI compatibility. KML contains only reliable WGS84 coordinates; places with only AMap GCJ-02 coordinates stay in CSV for manual name-and-address resolution. The files are **not automatically added to regular Google Maps saved lists**, and they are not automatically added to AMap favorites. For overseas POIs, **Navigate here** opens a destination-only Google Maps URL with no origin or forced travel mode. See [map provider execution and delivery](skill/references/map-provider-delivery.md) for inputs, statuses, link limits, filesystem safety, and fallbacks.
 
 ## Get started
 

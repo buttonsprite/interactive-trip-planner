@@ -175,13 +175,14 @@ function arrayItinerary() {
       city: "巴黎",
       routeReview: { status: "partial" },
       routeStops: [{ poiId: "xml-stop", order: 1, role: "午餐" }],
-      candidates: [],
+      candidates: ["candidate"],
     },
   ];
 }
 
 function tripFixture() {
   return {
+    slug: "paris-art-test",
     title: "never-print private trip",
     pois: fixturePois(),
     days: arrayItinerary(),
@@ -230,6 +231,78 @@ try {
   assert.doesNotMatch(JSON.stringify(files), secretPattern);
   assert.deepEqual(trip, snapshot, "buildMyMapsFiles must not mutate trip input");
   assert.equal(Object.isFrozen(TripMapDelivery), true, "delivery API must remain immutable");
+
+  const scopedTrip = structuredClone(trip);
+  scopedTrip.days[0].candidates.push("xml-stop");
+  const scopedState = {
+    assignments: {
+      "quoted-stop": "day-1",
+      "xml-stop": "day-2",
+      "gcj-only": "day-1",
+      candidate: "",
+      unassigned: "",
+    },
+    priorities: Object.fromEntries(scopedTrip.pois.map((poi) => [poi.id, poi.priority])),
+    orders: { "day-1": ["gcj-only", "quoted-stop"], "day-2": ["xml-stop"] },
+    dirtyDays: { "day-1": true },
+  };
+  const allKml = TripMapDelivery.buildMyMapsKmlExport({
+    trip: scopedTrip,
+    state: scopedState,
+    locale: "zh-CN",
+    scope: "all",
+  });
+  assert.equal(allKml.fileName, "paris-art-test-all-places.kml");
+  assert.equal(allKml.stats.includedCount, 5);
+  assert.equal(allKml.stats.placemarkCount, 4);
+  assert.equal(allKml.stats.manualCount, 1);
+  assert.equal((allKml.content.match(/<name>候选咖啡<\/name>/g) || []).length, 1);
+  assert.match(allKml.content, /<Folder><name>2026-10-13 · 候选地点<\/name>/);
+  assert.match(allKml.content, /其他候选日期：2026-10-14/);
+  assert.match(allKml.content, /<Folder><name>尚未安排行程<\/name>/);
+  assert.doesNotMatch(allKml.content, /<LineString>/);
+  assert.doesNotMatch(allKml.content, /仅高德市场|100\.1602|25\.7001/);
+
+  const dayKml = TripMapDelivery.buildMyMapsKmlExport({
+    trip: scopedTrip,
+    state: scopedState,
+    locale: "zh-CN",
+    scope: "day",
+    dayId: "day-1",
+  });
+  assert.equal(dayKml.fileName, "paris-art-test-2026-10-13.kml");
+  assert.equal(dayKml.stats.includedCount, 3);
+  assert.equal(dayKml.stats.placemarkCount, 2);
+  assert.equal(dayKml.stats.manualCount, 1);
+  assert.match(dayKml.content, /<Folder><name>当天安排<\/name>/);
+  assert.match(dayKml.content, /<Folder><name>当天候选<\/name>/);
+  assert.ok(
+    dayKml.content.indexOf("仅高德市场") === -1 && dayKml.content.indexOf("逗号，“引号”") >= 0,
+    "manual-only formal stops must be counted but omitted from KML points",
+  );
+  assert.doesNotMatch(dayKml.content, /茶与艺术/, "a candidate assigned to another day must be excluded");
+  assert.equal((dayKml.content.match(/<name>候选咖啡<\/name>/g) || []).length, 1);
+
+  const unrelatedPrivateTrip = structuredClone(scopedTrip);
+  unrelatedPrivateTrip.pois.find((poi) => poi.id === "unassigned").tip = "Cookie: unrelated-private";
+  assert.doesNotThrow(
+    () => TripMapDelivery.buildMyMapsKmlExport({
+      trip: unrelatedPrivateTrip,
+      state: scopedState,
+      locale: "zh-CN",
+      scope: "day",
+      dayId: "day-1",
+    }),
+    "day export privacy checks must inspect only fields that can reach that export",
+  );
+  assert.throws(
+    () => TripMapDelivery.buildMyMapsKmlExport({
+      trip: { slug: "manual-only", pois: [scopedTrip.pois[2]], days: [scopedTrip.days[0]] },
+      locale: "zh-CN",
+      scope: "all",
+    }),
+    /My Maps KML export has no WGS84 locations\./,
+  );
   const privateFieldCases = [
     "AMAP_KEY=private-web-key",
     "AMAP_SECURITY_KEY=private-security-key",

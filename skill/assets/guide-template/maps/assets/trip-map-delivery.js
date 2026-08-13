@@ -652,6 +652,12 @@
     return ids;
   }
 
+  function dayCandidatePoiIds(day) {
+    return (Array.isArray(day?.candidates) ? day.candidates : [])
+      .map((item) => typeof item === "string" ? item : cleanText(item?.poiId || item?.id))
+      .filter(Boolean);
+  }
+
   function myMapsEntries(trip, state, locale) {
     const current = currentTripView(trip, state);
     const labels = MY_MAPS_LABELS[locale];
@@ -662,6 +668,7 @@
       const day = daysById.get(dayId) || null;
       const orderIndex = day ? (current.orders?.[day.id] || []).indexOf(poi.id) : -1;
       const role = day ? "formal" : (candidates.has(poi.id) ? "candidate" : "unassigned");
+      const candidateDays = current.days.filter((candidateDay) => dayCandidatePoiIds(candidateDay).includes(poi.id));
       const coords = validCoords(poi.coords) ? [Number(poi.coords[0]), Number(poi.coords[1])] : null;
       const priority = cleanText(current.priorities?.[poi.id] ?? poi.priority);
       const routeStatus = day?.dirty ? "reroute" : cleanText(day?.routeStatus);
@@ -671,6 +678,7 @@
         day,
         coords,
         role,
+        candidateDays,
         csv: {
           name: localizedName(poi, locale),
           local_name: localName(poi),
@@ -704,6 +712,7 @@
       entry.csv.category,
       entry.csv.why_worth_it,
       entry.csv.tip,
+      entry.kmlNote,
     ].filter(Boolean).join(" · ");
     return [
       "<Placemark>",
@@ -730,6 +739,99 @@
       .join("");
     folders.push(`<Folder><name>${xmlText(MY_MAPS_LABELS[locale].candidateFolder)}</name>${candidates}</Folder>`);
     return `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document>${folders.join("")}</Document></kml>\n`;
+  }
+
+  function safeFileStem(value) {
+    const stem = cleanText(value)
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    return stem || "trip";
+  }
+
+  function scopedMyMapsEntries(entries, days, scope, dayId, locale) {
+    const labels = MY_MAPS_LABELS[locale];
+    if (scope === "day") {
+      const day = days.find((item) => item.id === dayId);
+      if (!day) throw new Error("dayId must identify a trip day");
+      const formal = entries
+        .filter((entry) => entry.day?.id === day.id)
+        .sort((left, right) => Number(left.csv.day_order || 0) - Number(right.csv.day_order || 0));
+      const candidates = entries.filter(
+        (entry) => !entry.day && entry.candidateDays.some((candidateDay) => candidateDay.id === day.id),
+      );
+      return {
+        days: [day],
+        entries: [...formal, ...candidates],
+        folders: [
+          { name: locale === "en" ? "Today's plan" : "当天安排", entries: formal },
+          { name: locale === "en" ? "Today's candidates" : "当天候选", entries: candidates },
+        ],
+      };
+    }
+    if (scope !== "all") throw new Error('scope must be "all" or "day"');
+    const folders = days.map((day) => ({
+      name: [cleanText(day.date), cleanText(day.title)].filter(Boolean).join(" · "),
+      entries: entries
+        .filter((entry) => entry.day?.id === day.id)
+        .sort((left, right) => Number(left.csv.day_order || 0) - Number(right.csv.day_order || 0)),
+    }));
+    for (const day of days) {
+      const candidateEntries = entries
+        .filter((entry) => !entry.day && entry.candidateDays[0]?.id === day.id)
+        .map((entry) => {
+          const otherDates = entry.candidateDays.slice(1).map((item) => cleanText(item.date)).filter(Boolean);
+          return {
+            ...entry,
+            kmlNote: otherDates.length
+              ? `${locale === "en" ? "Other candidate dates" : "其他候选日期"}：${otherDates.join("、")}`
+              : "",
+          };
+        });
+      if (candidateEntries.length) {
+        folders.push({
+          name: `${cleanText(day.date)} · ${locale === "en" ? "Candidates" : "候选地点"}`,
+          entries: candidateEntries,
+        });
+      }
+    }
+    const unassigned = entries.filter((entry) => !entry.day && !entry.candidateDays.length);
+    folders.push({ name: labels.unassigned, entries: unassigned });
+    return { days, entries, folders };
+  }
+
+  function buildScopedKml(folders) {
+    const content = folders.map((folder) => {
+      const placemarks = folder.entries.filter((entry) => entry.coords).map(kmlPlacemark).join("");
+      return `<Folder><name>${xmlText(folder.name)}</name>${placemarks}</Folder>`;
+    }).join("");
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document>${content}</Document></kml>\n`;
+  }
+
+  function buildMyMapsKmlExport(options) {
+    const locale = cleanText(options?.locale) || "zh-CN";
+    if (!MY_MAPS_LABELS[locale]) throw new Error("locale must be zh-CN or en");
+    const trip = options?.trip;
+    if (!trip || typeof trip !== "object" || !Array.isArray(trip.pois) || !Array.isArray(trip.days)) {
+      throw new Error("trip must contain pois and days arrays");
+    }
+    const scope = cleanText(options?.scope) || "all";
+    const current = currentTripView(trip, options?.state);
+    const entries = myMapsEntries(trip, options?.state, locale);
+    const scoped = scopedMyMapsEntries(entries, current.days, scope, cleanText(options?.dayId), locale);
+    assertMyMapsExportPrivacy(scoped.entries, scoped.days);
+    const placemarkCount = scoped.entries.filter((entry) => entry.coords).length;
+    if (!placemarkCount) throw new Error("My Maps KML export has no WGS84 locations.");
+    const date = scope === "day" ? cleanText(scoped.days[0]?.date) : "all-places";
+    return {
+      fileName: `${safeFileStem(trip.slug || trip.title)}-${date || cleanText(options?.dayId) || "day"}.kml`,
+      content: buildScopedKml(scoped.folders),
+      stats: {
+        includedCount: scoped.entries.length,
+        placemarkCount,
+        manualCount: scoped.entries.length - placemarkCount,
+      },
+    };
   }
 
   function buildMyMapsReadme(entries, locale) {
@@ -761,6 +863,7 @@
     buildPlaceLinks,
     buildDayHandoffs,
     currentTripView,
+    buildMyMapsKmlExport,
     buildMyMapsFiles,
   });
 })(typeof globalThis !== "undefined" ? globalThis : window);

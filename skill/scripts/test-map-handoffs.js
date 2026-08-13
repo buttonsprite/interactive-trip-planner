@@ -67,12 +67,47 @@ const links = TripMapDelivery.buildPlaceLinks(amapPoi, {
 });
 assert.match(links.primary.url, /^https:\/\/uri\.amap\.com\/marker\?/);
 assert.match(links.amap.url, /markers=B0FFTEST01/);
-assert.match(links.google.url, /^https:\/\/www\.google\.com\/maps\/search\/\?api=1/);
+assert.match(links.google.url, /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1/);
 assert.equal(links.amap.label, "在高德地图打开 / Open in AMap");
-assert.equal(links.google.label, "在 Google Maps 打开 / Open in Google Maps");
+assert.equal(links.google.label, "导航去这里 / Navigate here");
 assert.equal(parse(links.amap.url).searchParams.get("src"), "interactive-trip-planner");
 assert.equal(parse(links.google.url).searchParams.get("api"), "1");
+assert.equal(parse(links.google.url).searchParams.get("destination"), "25.69,100.16");
+assert.equal(parse(links.google.url).searchParams.has("origin"), false);
+assert.equal(parse(links.google.url).searchParams.has("travelmode"), false);
+assert.equal(parse(links.google.url).searchParams.has("waypoints"), false);
 assert.deepEqual(amapPoi, placeSnapshot, "place links must not mutate a frozen POI");
+
+const overseasLinks = TripMapDelivery.buildPlaceLinks(amapPoi, {
+  region: "OVERSEAS",
+  source: "interactive-trip-planner",
+});
+assert.equal(overseasLinks.primary.provider, "google");
+assert.equal(overseasLinks.primary.kind, "directions");
+assert.equal(overseasLinks.amap, null, "overseas POIs must not expose irrelevant AMap place links");
+assert.ok(
+  overseasLinks.manualItems.every((item) => item.provider !== "amap"),
+  "overseas POIs must not emit AMap manual-location work",
+);
+
+const overseasTextLocation = TripMapDelivery.buildPlaceLinks({
+  id: "madrid-neighborhood-cafe",
+  name: "Cafe del Barrio",
+  address: "Calle de Example 1, Madrid",
+}, { region: "OVERSEAS" });
+assert.equal(
+  parse(overseasTextLocation.google.url).searchParams.get("destination"),
+  "Cafe del Barrio, Calle de Example 1, Madrid",
+  "POIs without WGS84 coordinates must fall back to a searchable destination",
+);
+
+const overseasMissingLocation = TripMapDelivery.buildPlaceLinks({}, { region: "OVERSEAS" });
+assert.equal(overseasMissingLocation.primary, null);
+assert.deepEqual(
+  overseasMissingLocation.manualItems.map((item) => item.provider),
+  ["google"],
+  "an unlocatable overseas POI must expose one stable Google manual item",
+);
 
 const ambiguousPoi = deepFreeze({
   ...resolvedPoi("ambiguous-market", 1),

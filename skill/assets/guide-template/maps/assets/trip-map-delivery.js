@@ -126,31 +126,49 @@
   }
 
   function googlePlaceLink(poi, options) {
-    const query = googleLocation(poi);
-    if (!query) return null;
+    const destination = googleLocation(poi);
+    if (!destination) return null;
+    const directionsUrl = buildUrl(GOOGLE_DIRECTIONS_ENDPOINT, [
+      ["api", "1"],
+      ["destination", destination],
+      ["utm_source", sourceName(options)],
+      ["utm_campaign", "place_navigation"],
+    ]);
+    if (directionsUrl.length <= 2048) {
+      return {
+        provider: "google",
+        kind: "directions",
+        label: "导航去这里 / Navigate here",
+        url: directionsUrl,
+        poiIds: [cleanText(poi.id)],
+      };
+    }
+    const searchUrl = buildUrl(GOOGLE_SEARCH_ENDPOINT, [
+      ["api", "1"],
+      ["query", destination],
+      ["utm_source", sourceName(options)],
+      ["utm_campaign", "place_details_search"],
+    ]);
+    if (searchUrl.length > 2048) return null;
     return {
       provider: "google",
       kind: "place",
       label: "在 Google Maps 打开 / Open in Google Maps",
-      url: buildUrl(GOOGLE_SEARCH_ENDPOINT, [
-        ["api", "1"],
-        ["query", query],
-        ["utm_source", sourceName(options)],
-        ["utm_campaign", "place_details_search"],
-      ]),
+      url: searchUrl,
       poiIds: [cleanText(poi.id)],
     };
   }
 
   function buildPlaceLinks(poi, options) {
     const manualItems = [];
-    const amap = amapPlaceLink(poi, options);
+    const amapEnabled = String(options?.region || "").toUpperCase() === "CN";
+    const amap = amapEnabled ? amapPlaceLink(poi, options) : null;
     const google = googlePlaceLink(poi, options);
-    if (!amap) appendManual(manualItems, poi, "amap", "manual-location-required");
+    if (amapEnabled && !amap) appendManual(manualItems, poi, "amap", "manual-location-required");
     if (!google) appendManual(manualItems, poi, "google", "manual-location-required");
-    const primary = String(options?.region || "").toUpperCase() === "CN"
+    const primary = amapEnabled
       ? (amap || google)
-      : (google || amap);
+      : google;
     return { primary, amap, google, manualItems };
   }
 

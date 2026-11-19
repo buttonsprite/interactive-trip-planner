@@ -5,17 +5,18 @@
 ## 安装
 
 1. 解压发布包。
-2. 将其中的 `interactive-trip-planner` 文件夹复制到：
+2. 将其中的 `interactive-trip-planner` 文件夹复制到当前 Agent 的 Skills 目录：
 
    ```text
-   ~/.codex/skills/interactive-trip-planner
+   WorkBuddy: ~/.workbuddy/skills/interactive-trip-planner
+   Codex:     ~/.codex/skills/interactive-trip-planner
    ```
 
 3. 重新打开对应的 Skills 环境或新建任务，让技能列表刷新。
 
 不要只复制 `SKILL.md`。模板、验证脚本和参考文件都是完整功能的一部分。
 
-通过 REDSkill 上传时，选择 `interactive-trip-planner` 文件夹中的完整内容，不要上传外层 `.DS_Store`。本包只包含 REDSkill 当前允许的 Markdown、HTML、CSS、JavaScript 和 JSON 文件；Codex 专属的 `agents/openai.yaml` 已省略。
+通过 REDSkill 或 SkillHub 上传时，选择 `interactive-trip-planner` 文件夹中的完整内容，不要上传外层 `.DS_Store`。本包只包含 Markdown、HTML、CSS、JavaScript 和 JSON 文件；Codex 专属的 `agents/openai.yaml` 已省略。
 
 两套 `maps/itinerary-map.html` 都已经内联 Leaflet CSS/JS；轻量模板还内联了本地 Core CSS/JS。复制单个 HTML 即可保留地图界面和交互，不再依赖 `maps/vendor/leaflet/`。OpenStreetMap 底图与 Wikimedia Commons 图片仍需要浏览器联网加载。
 
@@ -25,7 +26,7 @@
 
 ## 开始使用
 
-可以在 Codex 中直接说：
+可以在支持 Skills 的 Agent 客户端中直接说：
 
 ```text
 请使用 $interactive-trip-planner 帮我规划一趟旅行。
@@ -75,7 +76,7 @@ node scripts/test-skill-contract.js
 
 ## 更新
 
-更新前先备份自己修改过的 skill。然后用新版 `interactive-trip-planner` 文件夹替换旧目录，并重新打开 Codex。
+更新前先备份自己修改过的 skill。然后用新版 `interactive-trip-planner` 文件夹替换旧目录，并重新打开当前 Agent 客户端。
 
 ## 发布提醒
 

@@ -458,7 +458,7 @@
           <a href="${escapeHtml(poi.experienceUrl || `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(poi.name_zh || poi.name)}`)}" target="_blank" rel="noreferrer">体验线索</a>
         </div>
         <section class="section-block"><h3 class="section-title">优先级</h3><div class="priority-controls">${Object.entries(priorityLabels).map(([value, label]) => `<button type="button" class="${state.priorities[poi.id] === value ? "is-active" : ""}" data-action="set-priority" data-poi-id="${escapeHtml(poi.id)}" data-priority="${escapeHtml(value)}">${escapeHtml(label)}</button>`).join("")}</div></section>
-        <section class="section-block"><h3 class="section-title">安排日期</h3><div class="assignment-controls">${poi.recurring ? `<div class="empty-state compact">${poi.category === "hotel" ? "住宿片区会出现在这一行程段的每天，不需要逐日重复添加。" : `这个固定活动已安排在 ${escapeHtml(assignedLabel(poi.id).replace(" 已安排", ""))}。如需删除其中一次，请让 Codex 一并复核时间安排。`}</div>` : `<select class="filter-control" data-assign-select data-poi-id="${escapeHtml(poi.id)}" aria-label="选择安排日期">${assignmentOptions}</select>`}</div></section>`;
+        <section class="section-block"><h3 class="section-title">安排日期</h3><div class="assignment-controls">${poi.recurring ? `<div class="empty-state compact">${poi.category === "hotel" ? "住宿片区会出现在这一行程段的每天，不需要逐日重复添加。" : `这个固定活动已安排在 ${escapeHtml(assignedLabel(poi.id).replace(" 已安排", ""))}。如需删除其中一次，请让 Agent 一并复核时间安排。`}</div>` : `<select class="filter-control" data-assign-select data-poi-id="${escapeHtml(poi.id)}" aria-label="选择安排日期">${assignmentOptions}</select>`}</div></section>`;
       void loadCommonsImages(poi);
     }
 
@@ -731,7 +731,7 @@
       feedback.textContent = "正在复制…";
       try {
         await navigator.clipboard.writeText(textarea.value);
-        feedback.textContent = "已复制，可以直接粘贴给 Codex。";
+        feedback.textContent = "已复制，可以直接粘贴给Agent。";
       } catch (_error) {
         textarea.focus();
         textarea.select();

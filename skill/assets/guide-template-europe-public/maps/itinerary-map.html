@@ -2555,7 +2555,7 @@
         <button type="button" id="mobile-candidates-action" data-mobile-view="candidates">顺路备选</button>
         <button type="button" id="mobile-undo-action" disabled>撤销上一步</button>
         <button type="button" id="mobile-change-summary-action" aria-expanded="false">修改汇总</button>
-        <button type="button" id="mobile-replan-action">请 Codex 重新安排</button>
+        <button type="button" id="mobile-replan-action">请Agent重新安排</button>
       </div>
       <section class="mobile-change-summary" id="mobile-change-summary" aria-live="polite" hidden>
         <h2>修改汇总</h2>
@@ -12676,7 +12676,7 @@
     const invalidateReplanFallback = () => {
       mobileReplanFallback.value = "";
       mobileReplanFallback.hidden = true;
-      mobileReplanAction.textContent = "请 Codex 重新安排";
+      mobileReplanAction.textContent = "请Agent重新安排";
     };
 
     const setMobileSheetSnap = (snap, { persist = true } = {}) => {
@@ -12869,7 +12869,7 @@
         }
       }
       window.setTimeout(() => {
-        mobileReplanAction.textContent = "请 Codex 重新安排";
+        mobileReplanAction.textContent = "请Agent重新安排";
       }, 1800);
     };
     setMobileSheetSnap(appState.mobile.sheetSnap, { persist: false });

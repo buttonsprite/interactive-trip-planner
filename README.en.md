@@ -32,7 +32,7 @@ It goes beyond generating a list of attractions. It learns how you want to trave
 - One-click AMap / Google Maps place and route handoffs, plus portable Google My Maps files.
 - A Xiaohongshu travel library that is readable in Finder or an editor and does not download media by default.
 
-The map does not force every candidate into the itinerary. Browse by date, add or remove places, change priorities and same-day order, then ask Codex to review the consequences and rearrange the plan.
+The map does not force every candidate into the itinerary. Browse by date, add or remove places, change priorities and same-day order, then use “Ask Agent to rearrange” so the current agent can review the consequences and update the plan.
 
 ## Turn saved notes into usable research
 
@@ -97,7 +97,7 @@ node skill/scripts/amap-credentials.js remove
 
 `status` never prints a Key value or fragment. `update` replaces the old profile only after the new pair passes both real checks. `remove` deletes only this Skill's local configuration. `AMAP_KEY` plus `AMAP_SECURITY_KEY` remain an Advanced/CI complete-pair override and are never mixed with the system store or written to trip files, exports, logs, Git, or release packages. `amap-gui status/start/stop` are troubleshooting-only commands. Planning still works without AMap configuration; the route is then labeled: **AMap road-network verification was not completed. Recheck in AMap before departure.**
 
-A search result or handoff link never upgrades route status. Every formal adjacent segment must have valid route evidence for “Verified with AMap”; a day with only some valid segments is “Partially verified.” Adding, removing, moving, or reordering a place makes the affected day unverified again until Codex replans and rechecks the new adjacency.
+A search result or handoff link never upgrades route status. Every formal adjacent segment must have valid route evidence for “Verified with AMap”; a day with only some valid segments is “Partially verified.” Adding, removing, moving, or reordering a place makes the affected day unverified again until the agent replans and rechecks the new adjacency.
 
 Overseas research continues to use ordinary Web search, local-language material, and official pages. **Google Maps URLs do not require an API key.** A place or route URL opens Google Maps, which recalculates directions after opening. The current source does not call Google Places API and does not call Google Routes API; it does not require Google Cloud Billing.
 
@@ -148,15 +148,19 @@ Free-form submissions and community signals do not become trusted facts by thems
 
 ## Installation
 
+**WorkBuddy / SkillHub**
+
+After publication, install `interactive-trip-planner` from the SkillHub marketplace in WorkBuddy. Before listing, you can also copy [`skill/`](skill/) to `~/.workbuddy/skills/interactive-trip-planner/` and open a new task.
+
 **Codex / full GitHub edition**
 
 1. Clone or download this repository.
 2. Copy [`skill/`](skill/) to the Codex skills directory as `interactive-trip-planner` (the default path is `~/.codex/skills/interactive-trip-planner/`).
 3. Open a new Codex task and invoke `$interactive-trip-planner`.
 
-**REDSkill**
+**Text-and-code marketplace package**
 
-Choose the newest version directory under [`releases/`](releases/), use its complete `interactive-trip-planner/` folder, and follow the `INSTALL.zh-CN.md` in the same release directory. This edition excludes Codex metadata and private travel libraries, and keeps only file formats supported by the platform. Do not mix root source files with an older release package.
+Choose the newest version directory under [`releases/`](releases/), use its complete `interactive-trip-planner/` folder, and follow the `INSTALL.zh-CN.md` in the same release directory. This edition works for REDSkill and stays within SkillHub's text-and-code upload boundary. It excludes Codex metadata and private travel libraries. Do not mix root source files with an older release package.
 
 ## Development and verification
 

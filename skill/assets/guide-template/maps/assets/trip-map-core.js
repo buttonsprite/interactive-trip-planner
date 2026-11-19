@@ -541,7 +541,7 @@
       feedback.textContent = "正在复制…";
       try {
         await navigator.clipboard.writeText(textarea.value);
-        feedback.textContent = "已复制，可以直接粘贴给 Codex。";
+        feedback.textContent = "已复制，可以直接粘贴给Agent。";
       } catch (_error) {
         textarea.focus();
         textarea.select();

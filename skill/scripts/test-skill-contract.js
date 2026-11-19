@@ -496,7 +496,7 @@ for (const markdownFile of findMarkdownFiles(skillRoot)) {
   );
 }
 assert.match(skill, /一次旅行设计提案/);
-assert.match(skill, /请 Codex 重新安排/);
+assert.match(skill, /请Agent重新安排/);
 assert.match(skill, /全程总览、某一天和统一地点详情/);
 assert.match(skill, /用户当前主要对话语言/);
 assert.match(skill, /完整攻略默认使用[^\n]*guide-template-europe-public/);
@@ -561,7 +561,7 @@ assert.match(userLanguage, /用户明确指定/);
 assert.match(userLanguage, /简体中文/);
 assert.match(userLanguage, /繁体中文/);
 assert.match(userLanguage, /地点原名/);
-assert.match(userLanguage, /地图生成的 Codex 请求/);
+assert.match(userLanguage, /地图生成的 Agent 请求/);
 assert.match(userLanguage, /有通行译名的国家、城市、区域和著名景点/);
 assert.match(userLanguage, /首次出现[^\n]*译名[^\n]*地点原名/);
 assert.match(userLanguage, /后续[^\n]*只使用译名/);

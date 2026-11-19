@@ -62,7 +62,7 @@
         <div class="change-heading"><div><h2>行程有新调整</h2><p id="change-summary-text"></p></div></div>
         <div class="change-actions">
           <button class="text-button" id="undo-change" type="button">撤销上一步</button>
-          <button class="text-button primary" id="request-replan" type="button">请 Codex 重新安排</button>
+          <button class="text-button primary" id="request-replan" type="button">请Agent重新安排</button>
         </div>
       </section>
     </aside>
@@ -88,10 +88,10 @@
 
   <section class="dialog-backdrop" id="replan-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="replan-title">
     <div class="dialog-panel">
-      <div class="dialog-heading"><div><div class="section-kicker">我的行程调整</div><h2 id="replan-title">请 Codex 重新安排</h2></div><button class="icon-button" id="close-replan" type="button" aria-label="关闭">×</button></div>
+      <div class="dialog-heading"><div><div class="section-kicker">我的行程调整</div><h2 id="replan-title">请Agent重新安排</h2></div><button class="icon-button" id="close-replan" type="button" aria-label="关闭">×</button></div>
       <p class="muted">下面的文字包含全部修改和受影响日期，可以独立发送。</p>
       <textarea id="replan-text" readonly aria-label="重新安排行程请求"></textarea>
-      <div class="dialog-actions"><button class="text-button primary" id="copy-replan" type="button">复制给 Codex</button></div>
+      <div class="dialog-actions"><button class="text-button primary" id="copy-replan" type="button">复制给Agent</button></div>
       <div class="copy-feedback" id="copy-feedback" aria-live="polite"></div>
     </div>
   </section>

@@ -32,7 +32,7 @@
 - 可一键打开的高德 / Google Maps 地点与路线入口，以及可长期保存的 Google My Maps 文件。
 - 一个可用 Finder 或编辑器直接浏览、默认不下载素材的小红书旅行资料库。
 
-地图不是把所有候选都塞进路线。你可以按日期浏览，加入或移除地点，修改优先级和同日顺序，再把变化交给 Codex 复核并重新安排。
+地图不是把所有候选都塞进路线。你可以按日期浏览，加入或移除地点，修改优先级和同日顺序，再通过“请Agent重新安排”把变化交给当前 Agent 复核。
 
 ## 先把收藏变成可用资料
 
@@ -97,7 +97,7 @@ node skill/scripts/amap-credentials.js remove
 
 `status` 不显示 Key 值或片段；`update` 只有在新凭据同时通过真实 POI 与路线验证后才替换旧配置；`remove` 只删除本 Skill 的本机配置。`AMAP_KEY` 与 `AMAP_SECURITY_KEY` 仍是高级/CI 的完整成对覆盖入口，不与系统存储混用，也不会写入旅行文件、导出、日志、Git 或发布包。`amap-gui status/start/stop` 只保留给故障排查。不配置也可以继续规划，只是路线会明确显示：**未完成高德路网复核；请在出发前打开高德确认。**
 
-路线状态不会因为“搜索到了地点”或“生成了链接”而升级。全部正式相邻段得到有效结果时显示“已用高德复核”，只有部分完成时显示“部分移动段已复核”；你在地图里加入、移出、换日或调整顺序后，受影响日期会重新回到未复核，等待 Codex 重排和复查。
+路线状态不会因为“搜索到了地点”或“生成了链接”而升级。全部正式相邻段得到有效结果时显示“已用高德复核”，只有部分完成时显示“部分移动段已复核”；你在地图里加入、移出、换日或调整顺序后，受影响日期会重新回到未复核，等待 Agent 重排和复查。
 
 海外行程继续使用普通 Web 搜索、当地语言资料和官方页面。**Google Maps URLs 不需要 API Key**，地点和路线会在点击后交给 Google Maps 打开并重新计算；当前源码不调用 Google Places API 或 Google Routes API，也不要求 Google Cloud Billing。
 
@@ -148,15 +148,19 @@ README.md
 
 ## 安装
 
+**WorkBuddy / SkillHub**
+
+发布到 SkillHub 后，可在 WorkBuddy 的 SkillHub 市场搜索 `interactive-trip-planner` 安装。未上架前也可以把 [`skill/`](skill/) 复制到 `~/.workbuddy/skills/interactive-trip-planner/`，重新打开任务后调用。
+
 **Codex / GitHub 完整版**
 
 1. Clone 或下载此仓库。
 2. 将 [`skill/`](skill/) 复制到 Codex skills 目录，并命名为 `interactive-trip-planner`（默认路径为 `~/.codex/skills/interactive-trip-planner/`）。
 3. 重新打开 Codex task，然后用 `$interactive-trip-planner` 调用。
 
-**小红书 REDSkill**
+**文本与代码格式发布包**
 
-从 [`releases/`](releases/) 选择最新版本目录，使用其中 `interactive-trip-planner/` 的完整内容，并按同目录的 `INSTALL.zh-CN.md` 操作。这个发布面排除了 Codex metadata 和私人资料库，只保留平台支持的文件格式；不要把根目录源码与旧版本发布包混合上传。
+从 [`releases/`](releases/) 选择最新版本目录，使用其中 `interactive-trip-planner/` 的完整内容，并按同目录的 `INSTALL.zh-CN.md` 操作。这个发布面可用于 REDSkill，也满足 SkillHub 的文本与代码上传边界；它排除了 Codex metadata 和私人资料库。不要把根目录源码与旧版本发布包混合上传。
 
 ## 开发与验证
 

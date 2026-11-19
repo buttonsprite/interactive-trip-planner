@@ -292,6 +292,7 @@
         dirty: Boolean(state.dirtyDays[day.id]),
         region: destinationRegion(),
         source: trip.slug || "interactive-trip-planner",
+        locale: trip.language || "zh-CN",
       });
       const statusLabel = routeVerificationLabel(day, handoffs.routeStatus, Boolean(state.dirtyDays[day.id]));
       const overviewLinks = Array.isArray(handoffs.overviews)
@@ -361,6 +362,7 @@
       const links = root.TripMapDelivery.buildPlaceLinks(poi, {
         region: destinationRegion(),
         source: trip.slug || "interactive-trip-planner",
+        locale: trip.language || "zh-CN",
       });
       const orderedLinks = [links.primary, links.amap, links.google]
         .filter((link, index, all) => link && all.findIndex((candidate) => candidate?.url === link.url) === index);

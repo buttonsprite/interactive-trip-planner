@@ -107,7 +107,7 @@ for (const entry of registry.themes) {
   assert.match(css, /ARCHITECTURAL-COLLAGE-THEME-START/);
   assert.match(css, /--trip-bg:\s*#F7F0DF/i);
   assert.match(css, /--trip-accent:\s*#283E64/i);
-  assert.match(css, /--trip-divider-image:\s*url\("data:image\/(?:png|jpeg);base64,/i);
+  assert.match(css, /--trip-divider-image:\s*url\("data:image\/(?:svg\+xml|png|jpeg)/i);
   assert.match(css, /\.leaflet-tile-pane/);
   assert.match(css, /filter:/);
   assert.match(css, /\.poi-detail-list li::before\s*\{[\s\S]*?width:\s*7px;[\s\S]*?height:\s*7px;[\s\S]*?border-radius:\s*50%;[\s\S]*?clip-path:\s*none;/);

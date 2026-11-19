@@ -38,7 +38,7 @@
 - Global Base 的当地语言模板以 `{local:<token>}` 解析为 `{ languageTag, query }` 变体。Lexicon 用 `countryCodes` 限定可用国家，用 `defaultCountryCodes` 定义每国唯一默认语言：Spain 默认 `es`，显式 `ca` 追加在其后；Brazil 显式 `es` 不复用 Spain 内置词。调用方仍可通过 `localLanguageTerms` 提供自己的任意 language tag 词条。词条不完整的变体不会输出，并在 `missingLocalTerms` 中报告；地区包自己的无 token 模板继续使用其首个当地语言 tag。
 - `probe-source-access.js` 从 `--context <file>` 或 `--stdin` 读取 `{ sources, timeoutMs?, concurrency? }`，先校验全部 `http`/`https` URL（拒绝内嵌用户名/密码），保留原 URL 仅供内部请求、单独安全化输出 URL（移除 query/fragment），再以最多 4 并发执行 HEAD/manual redirect；仅 405/501 以 `Range: bytes=0-1023` 的 GET 降级并取消、不读取 body。输出为 `{ checkedAt, results }`；401/407 与其他非 404/429 的 4xx 是 `access-blocked`，只有 5xx 是 `server-error`。顶层 URL `fallback` 保持兼容并仅输出安全 URL；正式 `source.access.fallback` 字符串数组只输出 status、availability 和 optionCount，不回显原文。两种 fallback 都不自动访问；主访问 `reachable` 标为 `available`，其他状态标为 `fallback-required`。不会输出 headers、body、cookie、authorization 或 credentials。
 - Probe 的状态只表示当时的有限网络访问结果：`reachable`、`redirected`、`rate-limited`、`access-blocked`、`server-error`、`not-found` 或 `network-error`。它不能证明 POI 或商家存在、营业、可订、符合行程或安全，且不能取代各来源的事实复核。
-- 中国大陆进入地点定位或路线复核时先运行 `node scripts/amap-credentials.js status`；缺配置时向用户介绍一次 `node scripts/amap-credentials.js setup`。替换与删除分别使用 `node scripts/amap-credentials.js update`、`node scripts/amap-credentials.js remove`。完整凭据对进入 macOS Keychain、Windows DPAPI 或 Linux Secret Service；Linux 无 Secret Service 时系统安全存储返回 unavailable，不写明文。探测不输出密钥、不执行路线；真实请求仍可能返回 `provider-error` 并保持未复核。
+- 中国大陆进入地点定位或路线复核时运行 `node scripts/check-amap-cli.js` 探测环境；凭据通过当前终端会话的 `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 环境变量提供，不写入明文或 Git。探测不输出密钥、不执行路线；真实请求失败时返回 `provider-error` 并保持未复核。
 - 地点说明使用“为什么符合这个模板”和“为什么安排在这里”；只在真实异常时显示“需要临近复核”，不增加常驻来源 badge。
 
 ### 地图服务交接与导出

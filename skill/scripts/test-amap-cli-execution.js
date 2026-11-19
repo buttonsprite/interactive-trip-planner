@@ -12,7 +12,7 @@ const secrets = {
   AMAP_KEY: "execution-web-key-secret",
   AMAP_SECURITY_KEY: "execution-security-key-secret",
 };
-const providerErrorMessage = "高德地图调用失败，请稍后重试或使用备用复核方式。 AMap request failed. Retry later or use a fallback verification method.";
+const providerErrorMessage = "高德地图调用失败，请确认 amap-gui 已启动或使用备用复核方式。";
 const checkedAt = "2026-08-07T12:00:00.000Z";
 const searchRequest = {
   action: "search-poi",
@@ -176,62 +176,6 @@ assert.deepEqual(searchResult, {
   reviewedAt: checkedAt,
 });
 assertNoSecrets(searchResult);
-
-{
-  const savedCredentials = {
-    AMAP_KEY: "saved-execution-key-secret",
-    AMAP_SECURITY_KEY: "saved-execution-security-secret",
-  };
-  const lifecycleEvents = [];
-  let stopCount = 0;
-  const storedResult = executeAmapRequest(searchRequest, {
-    env: { PATH: "/test/bin" },
-    store: {
-      status: () => ({ status: "ready", source: "system-store", savedProfileAvailable: true }),
-      readActive: () => ({
-        status: "ready",
-        source: "system-store",
-        credentials: savedCredentials,
-        savedProfileAvailable: true,
-      }),
-    },
-    commandExists: () => true,
-    now: () => checkedAt,
-    runLifecycleCommand: (_command, args, options) => {
-      const action = args[0];
-      if (action === "stop") stopCount += 1;
-      lifecycleEvents.push(action === "stop" ? `stop-${stopCount}` : action);
-      assert.equal(options.env.AMAP_KEY, savedCredentials.AMAP_KEY);
-      assert.equal(options.env.AMAP_SECURITY_KEY, savedCredentials.AMAP_SECURITY_KEY);
-      return action === "status"
-        ? { status: 0, stdout: JSON.stringify({ success: true, data: { status: "running", mapReady: true } }), stderr: "" }
-        : { status: 0, stdout: JSON.stringify({ success: true }), stderr: "" };
-    },
-    runCommand: (_command, args, options) => {
-      lifecycleEvents.push("query");
-      assert.deepEqual(args, buildAmapArgs(searchRequest));
-      assert.equal(options.env.AMAP_KEY, savedCredentials.AMAP_KEY);
-      return {
-        status: 0,
-        stdout: JSON.stringify({
-          ...searchProviderOutput,
-          data: {
-            ...searchProviderOutput.data,
-            pois: [{
-              ...searchProviderOutput.data.pois[0],
-              name: `${savedCredentials.AMAP_KEY} 北门市场`,
-            }],
-          },
-        }),
-        stderr: "",
-      };
-    },
-  });
-  assert.equal(storedResult.status, "ok");
-  assert.equal(storedResult.items[0].name, "[REDACTED] 北门市场");
-  assert.deepEqual(lifecycleEvents, ["stop-1", "start", "status", "query", "stop-2"]);
-  assert.doesNotMatch(JSON.stringify(storedResult), /saved-execution-(?:key|security)-secret/);
-}
 
 const routeResult = executeWithoutLifecycle(routeRequest, {
   env: { ...secrets },
@@ -461,8 +405,8 @@ for (const [label, request, message] of [
 }
 
 const fallback = [
-  "使用高德公开网页或 URI 入口人工复核地点和移动关系。 Manually verify places and travel relationships with the public AMap website or URI.",
-  "使用其他可访问的公开地图搜索，并明确标记未完成 amap-gui 路网复核。 Use another accessible public map and clearly mark that amap-gui route verification was not completed.",
+  "使用高德公开网页或 URI 入口人工复核地点和移动关系。",
+  "使用其他可访问的公开地图搜索，并明确标记未完成高德路网复核。",
 ];
 for (const [expectedStatus, commandExists, env] of [
   ["missing-cli", false, { ...secrets }],

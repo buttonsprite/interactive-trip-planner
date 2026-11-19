@@ -1,12 +1,10 @@
 import { spawnSync } from "node:child_process";
-import { probeAmapCapability } from "./check-amap-cli.js";
-import { createDefaultAmapCredentialStore, resolveAmapCredentials } from "./amap-credential-store.js";
-import { withAmapProviderSession } from "./amap-provider-session.js";
+import { probeAmapCapability, resolveEnvAmapCredentials } from "./check-amap-cli.js";
 
 const INVALID_ACTION = "Invalid AMap action.";
 const INVALID_SEARCH = "Invalid AMap search request.";
 const INVALID_ROUTE = "Invalid AMap route request.";
-const PROVIDER_ERROR_MESSAGE = "高德地图调用失败，请稍后重试或使用备用复核方式。 AMap request failed. Retry later or use a fallback verification method.";
+const PROVIDER_ERROR_MESSAGE = "高德地图调用失败，请确认 amap-gui 已启动或使用备用复核方式。";
 const AMAP_COMMAND_TIMEOUT_MS = 35_000;
 const ROUTE_MODES = new Set(["driving", "walking", "riding", "transit"]);
 
@@ -398,27 +396,12 @@ function reviewedAt(now) {
 
 export function executeAmapRequest(context, {
   runCommand = defaultRunCommand,
-  runLifecycleCommand,
   env = process.env,
   now = () => new Date(),
   commandExists,
-  credentialResolution,
-  store,
-  withProviderSession = withAmapProviderSession,
 } = {}) {
   const request = validateAmapRequest(context);
-  let resolution = credentialResolution;
-  if (!resolution) {
-    try {
-      resolution = resolveAmapCredentials({
-        env,
-        store: store || createDefaultAmapCredentialStore({ env }),
-      });
-    } catch {
-      resolution = { status: "store-unavailable", source: "none", savedProfileAvailable: false };
-    }
-  }
-  const capability = probeAmapCapability({ env, commandExists, credentialResolution: resolution });
+  const capability = probeAmapCapability({ env, commandExists });
   if (capability.status !== "available") {
     return redactReturnedStrings({
       status: capability.status,
@@ -428,27 +411,22 @@ export function executeAmapRequest(context, {
     }, credentialValues(env));
   }
 
+  const resolution = resolveEnvAmapCredentials(env);
   const effectiveEnv = { ...env, ...resolution.credentials };
   try {
     const redactions = credentialValues(effectiveEnv);
     const commandRequest = redactReturnedStrings(request, redactions);
     const args = buildAmapArgs(commandRequest).map((arg) => redactString(arg, redactions));
-    return withProviderSession({
-      credentials: resolution.credentials,
-      env,
-      ...(runLifecycleCommand ? { runLifecycleCommand } : {}),
-    }, (providerEnv) => {
-      const processResult = runCommand("amap-gui", args, {
-        encoding: "utf8",
-        env: providerEnv,
-        shell: false,
-        timeout: AMAP_COMMAND_TIMEOUT_MS,
-      });
-      if (!processResult || processResult.status !== 0 || processResult.error) {
-        return providerError(capability.fallback, effectiveEnv);
-      }
-      return normalizeAmapOutput(request, processResult.stdout, reviewedAt(now), { env: effectiveEnv });
+    const processResult = runCommand("amap-gui", args, {
+      encoding: "utf8",
+      env: effectiveEnv,
+      shell: false,
+      timeout: AMAP_COMMAND_TIMEOUT_MS,
     });
+    if (!processResult || processResult.status !== 0 || processResult.error) {
+      return providerError(capability.fallback, effectiveEnv);
+    }
+    return normalizeAmapOutput(request, processResult.stdout, reviewedAt(now), { env: effectiveEnv });
   } catch {
     return providerError(capability.fallback, effectiveEnv);
   }

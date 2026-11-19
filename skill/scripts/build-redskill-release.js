@@ -31,6 +31,7 @@ const isExcluded = (sourcePath) => {
   const segments = relative.split(path.sep);
   if (segments.includes(".DS_Store")) return true;
   if (segments[0] === "agents") return true;
+  if (segments[0] === "scripts" && segments.length === 2 && /^test-.*\.js$/.test(segments[1])) return true;
   return segments.includes("vendor") && segments.includes("leaflet");
 };
 

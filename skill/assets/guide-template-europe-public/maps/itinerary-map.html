@@ -11637,12 +11637,16 @@
     const poiMapProviderActionsHtml = (item) => {
       const links = TripMapDelivery.buildPlaceLinks(item, {
         region: PUBLIC_TRIP_DATA.trip.countryCode || "",
-        source: PUBLIC_TRIP_DATA.trip.slug
+        source: PUBLIC_TRIP_DATA.trip.slug,
+        locale: userLanguage
       });
       const ordered = [links.primary, links.amap, links.google]
         .filter((link, index, items) => link && items.findIndex((candidate) => candidate?.url === link.url) === index);
       if (!ordered.length) {
-        return '<span class="map-action-disabled">请复制地点名称到地图中手动查找 / Copy the place name to your map</span>';
+        const fallbackCopy = /^en/i.test(userLanguage)
+          ? "Copy the place name to your map"
+          : "请复制地点名称到地图中手动查找";
+        return `<span class="map-action-disabled">${fallbackCopy}</span>`;
       }
       return ordered.map((link, index) => `
         <a class="map-provider-action ${index === 0 ? "is-primary" : ""}" href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" data-map-provider="${escapeHtml(link.provider)}">${escapeHtml(link.label)}</a>
@@ -13124,28 +13128,42 @@
         orderedPoiIds: deliveryDay.orderedPoiIds,
         dirty: Boolean(itineraryPlan.dirtyDays[dayId]),
         region: PUBLIC_TRIP_DATA.trip.countryCode || "",
-        source: PUBLIC_TRIP_DATA.trip.slug
+        source: PUBLIC_TRIP_DATA.trip.slug,
+        locale: userLanguage
       });
       const overviewLinks = Array.isArray(handoffs.overviews)
         ? handoffs.overviews
         : [handoffs.overview].filter(Boolean);
       const links = [...overviewLinks, ...handoffs.routeLinks].filter(Boolean);
-      const statusLabels = {
-        verified: "路线已复核 / Route verified",
-        partial: "路线部分复核 / Route partially verified",
-        unverified: itineraryPlan.dirtyDays[dayId]
-          ? "路线待重新复核 / Route needs review"
-          : "路线待复核 / Route review pending"
-      };
+      const isEn = /^en/i.test(userLanguage);
+      const statusLabels = isEn
+        ? {
+          verified: "Route verified",
+          partial: "Route partially verified",
+          unverified: itineraryPlan.dirtyDays[dayId]
+            ? "Route needs review"
+            : "Route review pending"
+        }
+        : {
+          verified: "路线已复核",
+          partial: "路线部分复核",
+          unverified: itineraryPlan.dirtyDays[dayId]
+            ? "路线待重新复核"
+            : "路线待复核"
+        };
+      const noRouteCopy = isEn
+        ? "No direct route link available for the current order"
+        : "当前顺序暂无可直接打开的路线链接";
+      const manualSummaryCopy = (count) => (isEn ? `Manual lookup (${count})` : `需要手动查找 ${count} 项`);
       const manualItems = handoffs.manualItems || [];
       container.innerHTML = `
         <div class="day-map-delivery-status ${handoffs.routeStatus === "verified" ? "" : "needs-review"}">${escapeHtml(statusLabels[handoffs.routeStatus] || statusLabels.unverified)}</div>
         <div class="day-map-actions">
           ${links.length
             ? links.map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" data-day-handoff="${escapeHtml(link.provider)}">${escapeHtml(link.label)}</a>`).join("")
-            : '<span class="map-action-disabled">当前顺序没有可安全直接打开的路线 / No safe direct route for the current order</span>'}
+            : `<span class="map-action-disabled">${escapeHtml(noRouteCopy)}</span>`}
         </div>
-        ${manualItems.length ? `<details class="day-map-manual"><summary>需要手动查找 ${manualItems.length} 项 / Manual lookup ${manualItems.length}</summary><ul>${manualItems.map((manual) => `<li>${escapeHtml(manual.name)} · ${escapeHtml(manual.provider === "amap" ? "高德地图" : "Google Maps")}</li>`).join("")}</ul></details>` : ""}
+        ${manualItems.length ? `<details class="day-map-manual"><summary>${escapeHtml(manualSummaryCopy(manualItems.length))}</summary><ul>${manualItems.map((manual) => `<li>${escapeHtml(manual.name)} · ${escapeHtml(manual.provider === "amap" ? "高德地图" : "Google Maps")}</li>`).join("")}</ul></details>` : ""}
       `;
     };
 

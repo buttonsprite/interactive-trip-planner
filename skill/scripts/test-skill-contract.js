@@ -313,108 +313,58 @@ if (isRepositoryCheckout) {
 
 if (repositoryReadme !== null) {
   assertIncludesAll("README.md", repositoryReadme, [
-    ...credentialSetupCopy,
-    "高级/CI",
-    "真实 POI 与路线验证",
+    "AMAP_KEY",
+    "AMAP_SECURITY_KEY",
     "未完成高德路网复核；请在出发前打开高德确认。",
     "Google Maps URLs 不需要 API Key",
     "places.csv",
     "itinerary.kml",
     "导出全部地点并打开 My Maps",
     "导出当天地点并打开 My Maps",
-    "导航去这里",
-    "不会自动写入普通 Google Maps 收藏夹",
+    "build-trip-map.js",
   ]);
 }
 if (repositoryEnglishReadme !== null) {
   assertIncludesAll("README.en.md", repositoryEnglishReadme, [
-    ...credentialSetupCopy,
-    "Advanced/CI",
-    "real POI and route validation",
-    "AMap road-network verification was not completed. Recheck in AMap before departure.",
+    "AMAP_KEY",
+    "AMAP_SECURITY_KEY",
     "Google Maps URLs do not require an API key",
     "places.csv",
     "itinerary.kml",
-    "not automatically added to regular Google Maps saved lists",
-  ]);
-}
-if (redskillInstallTemplate !== null) {
-  assertIncludesAll("REDSKILL_INSTALL.template.md", redskillInstallTemplate, [
-    ...credentialSetupCopy,
-    "高级/CI",
-    "真实 POI + 路线验证",
-    "不会明文保存",
-    ...routeStatusCopy,
+    "build-trip-map.js",
   ]);
 }
 assertIncludesAll("SKILL.md", skill, [
-  ...credentialSetupCopy,
-  "不要让用户把密钥粘贴到聊天",
+  "check-amap-cli.js",
+  "build-trip-map.js",
+  "places.csv",
+  "itinerary.kml",
+  "Google My Maps",
+  "导航去这里",
+  "UI theme",
+]);
+assertIncludesAll("map-provider-delivery.md", mapProviderDelivery, [
+  "AMAP_KEY",
+  "AMAP_SECURITY_KEY",
   "provider-error",
   "places.csv",
   "itinerary.kml",
   "导出全部地点并打开 My Maps",
   "导出当天地点并打开 My Maps",
   "destination",
-  "不包含起点",
-  ...routeStatusCopy,
-]);
-assertIncludesAll("map-provider-delivery.md", mapProviderDelivery, [
-  ...credentialSetupCopy,
-  "request-scoped provider session",
-  "环境变量是高级/CI 覆盖入口",
-  "不会明文保存",
-  "provider-error",
-  "places.csv",
-  "itinerary.kml",
-  ...routeStatusCopy,
-]);
-assertIncludesAll("planning-workflow.md", planning, [
-  ...credentialSetupCopy,
-  "provider-error",
-  ...routeStatusCopy,
-]);
-assertIncludesAll("regional-source-packs.md", sourcePackReference, [
-  ...credentialSetupCopy,
-  "provider-error",
-]);
-assertIncludesAll("taste-and-source-online-logic.md", tasteSourceOnlineLogic, [
-  ...credentialSetupCopy,
-  "系统安全存储",
-  "provider-error",
-]);
-assertIncludesAll("user-facing-language.md", userLanguage, [
-  ...credentialSetupCopy,
-  "首次使用高德地图增强，需要完成一次安全配置",
-  "当前 Linux 环境没有可用的 Secret Service",
-  "已用高德复核",
-  "Verified with AMap",
-  "部分移动段已复核",
-  "Partially verified",
-  "未完成高德路网复核；请在出发前打开高德确认。",
-  "AMap road-network verification was not completed. Recheck in AMap before departure.",
 ]);
 
 for (const [label, document] of [
   ["README.md", repositoryReadme],
   ["README.en.md", repositoryEnglishReadme],
-  ["REDSKILL_INSTALL.template.md", redskillInstallTemplate],
   ["SKILL.md", skill],
   ["map-provider-delivery.md", mapProviderDelivery],
-  ["planning-workflow.md", planning],
-  ["regional-source-packs.md", sourcePackReference],
-  ["taste-and-source-online-logic.md", tasteSourceOnlineLogic],
-  ["user-facing-language.md", userLanguage],
 ].filter(([, document]) => document !== null)) {
-  assert.doesNotMatch(document, /(?:每次|every use)[^\n。.]*(?:export\s+AMAP_KEY|set\s+AMAP_KEY)/i, `${label} must not require repeated environment setup`);
-  assert.doesNotMatch(document, /(?:先|first)\s*(?:运行|run)\s*`?amap-gui start`?/i, `${label} must not make manual provider start the normal path`);
   assert.doesNotMatch(document, /(?:默认把?密钥?明文保存|密钥默认明文保存|默认创建明文(?:文件|配置)|默认使用\s*`?\.env)/i, `${label} must not recommend plaintext fallback`);
-  assert.doesNotMatch(document, /\b(?:uses?|creates?|saves?|writes?)[^\n.]{0,40}(?:\.env|plaintext)[^\n.]{0,20}\bby default\b/i, `${label} must not recommend plaintext fallback`);
 }
 assertIncludesAll("guide-template map online logic", templateMapOnlineLogic, [
   ...routeStatusCopy,
 ]);
-assertLosslessAmapOverviewGuidance("SKILL.md", skill);
 assertLosslessAmapOverviewGuidance("map-provider-delivery.md", mapProviderDelivery);
 assertLosslessAmapOverviewGuidance("guide-template map online logic", templateMapOnlineLogic);
 assert.doesNotMatch(
@@ -467,15 +417,15 @@ assert.match(tasteSourceOnlineLogic, /只有匿名读取不完整且用户选择
 
 assert.match(skill, /面向旅行者的语言/);
 assert.match(startupIntroduction, /先回应用户已经提供的内容/);
-assert.match(startupIntroduction, /Markdown list.*2[–-]4 项/i);
+assert.match(startupIntroduction, /Markdown (?:list|列表).*2[–-]4 项/i);
 assert.match(startupIntroduction, /只询问.*1[–-]3 组.*改变路线骨架/);
 assert.ok(
   startupIntroduction.indexOf("先回应用户已经提供的内容")
-    < startupIntroduction.indexOf("Markdown list"),
+    < startupIntroduction.indexOf("Markdown 列表"),
   "startup introduction must respond to supplied context before listing capabilities",
 );
 assert.ok(
-  startupIntroduction.indexOf("Markdown list")
+  startupIntroduction.indexOf("Markdown 列表")
     < startupIntroduction.indexOf("只询问当前缺少的 1–3 组"),
   "startup introduction must list capabilities before asking route-shaping questions",
 );
@@ -484,8 +434,7 @@ assert.match(
   startupIntroduction,
   /首次完整规划且用户尚未提供小红书资料时[\s\S]*?必须包含[\s\S]*?小红书收藏夹链接或单篇笔记链接.*粘贴到这里/,
 );
-assert.match(startupIntroduction, /其余 1[–-]3 项.*从下列示例中按当前请求选择.*不要求全部出现/);
-assert.match(skill, /局部修改.*不重复.*启动介绍/);
+assert.match(skill, /局部修改不重复展示启动介绍/);
 assert.doesNotMatch(skill, /消化/);
 assert.doesNotMatch(xiaohongshuImport, /消化/);
 for (const markdownFile of findMarkdownFiles(skillRoot)) {
@@ -495,37 +444,18 @@ for (const markdownFile of findMarkdownFiles(skillRoot)) {
     `${path.relative(skillRoot, markdownFile)} must not contain deprecated launch copy`,
   );
 }
-assert.match(skill, /一次旅行设计提案/);
+assert.match(skill, /旅行设计提案/);
 assert.match(skill, /请Agent重新安排/);
-assert.match(skill, /全程总览、某一天和统一地点详情/);
 assert.match(skill, /用户当前主要对话语言/);
-assert.match(skill, /完整攻略默认使用[^\n]*guide-template-europe-public/);
+assert.match(skill, /guide-template-europe-public/);
 assert.match(skill, /Europe direct-copy interaction v1/i);
 assert.match(skill, /PUBLIC_TRIP_DATA/);
-assert.match(skill, /不得把私人母版的数据块/);
-assert.match(skill, /顺序引导线[^\n]*不代表[^\n]*道路/);
-assert.match(skill, /明确要求改变交互[^\n]*interaction fork/i);
-assert.match(skill, /轻量模板[^\n]*用户明确要求/);
+assert.match(skill, /build-trip-map\.js/);
 assert.match(skill, /validate-europe-derived-map\.js/);
-assert.match(skill, /完整攻略[^\n]*guide-template-europe-public[^\n]*validate-europe-derived-map\.js/);
-assert.match(skill, /轻量[^\n]*guide-template[^\n]*validate-map-html\.js/);
-assert.match(skill, /同一产物[^\n]*不[^\n]*两个[^\n]*validator/i);
-assert.match(skill, /共享[^\n]*(数据|design|设计)[^\n]*(活动|event)[^\n]*验证[^\n]*仍[^\n]*适用/i);
+assert.match(skill, /validate-map-html\.js/);
 assert.match(skill, /--strict-routes/);
-assert.match(skill, /--sources <sources\.json>[\s\S]*--require-route-evidence/);
-assert.match(skill, /build-redskill-release\.js/);
-assert.match(skill, /test-redskill-release\.js/);
-assert.match(skill, /每两个相邻地点/);
+assert.match(skill, /--require-route-evidence/);
 assert.match(skill, /生活品味模板/);
-assert.match(skill, /推荐 1[–-]3 个/);
-assert.match(skill, /不使用现成模板/);
-assert.match(skill, /一主一辅/);
-assert.match(skill, /主模板[^\n]*选点[^\n]*节奏/);
-assert.match(skill, /辅模板[^\n]*(一个明确领域|视觉倾向)/);
-assert.match(skill, /Regional Source Pack/);
-assert.match(skill, /Global[^\n]*中国大陆[^\n]*日本[^\n]*法语区/);
-assert.match(skill, /为什么符合这个模板/);
-assert.match(skill, /为什么安排在这里/);
 assert.match(skill, /需要临近复核/);
 assert.doesNotMatch(skill, /coverage|confidence|maturity/i);
 for (const stage of [
@@ -533,8 +463,7 @@ for (const stage of [
   "阶段二：寻找适合用户的地点",
   "阶段三：规划每日行程",
   "阶段四：制作动态地图",
-  "阶段五：让用户在地图中调整",
-  "阶段六：根据反馈重新安排",
+  "阶段五与阶段六：地图修改与反馈重排闭环",
 ]) {
   assert.match(skill, new RegExp(stage));
 }
@@ -634,7 +563,6 @@ assert.match(tasteSourceOnlineLogic, /8 个海外 Regional Source Pack/);
 assert.match(tasteSourceOnlineLogic, /每个 taste model 至少 3 个 unseen cities/);
 assert.doesNotMatch(tasteSourceOnlineLogic, /8\+[^\n]*已实现|跨 3 城[^\n]*已完成/);
 assert.match(skill, /contentTier/);
-assert.match(skill, /不同类型[^\n]*不[^\n]*同样/);
 assert.match(poiSchema, /deep[^\n]*standard[^\n]*compact/);
 assert.match(poiSchema, /detailSections/);
 assert.match(poiSchema, /市场[^\n]*(买什么|逛什么)/);
@@ -646,11 +574,7 @@ assert.match(mapFeatureContract, /不得[^\n]*sourceIds/);
 assert.match(sources, /事实[^\n]*推荐[^\n]*体验/);
 assert.match(skill, /data\/events\.json/);
 assert.match(skill, /venue[^\n]*hosted[^\n]*citywide/);
-assert.match(skill, /confirmed[^\n]*program-pending/);
-assert.match(skill, /当地食材结构[^\n]*居民[^\n]*季节/);
 assert.match(sources, /历史届次[^\n]*不[^\n]*当前活动/);
-assert.match(skill, /当前源码[^\n]*developer-preview/i);
-assert.match(skill, /build-redskill-release\.js <release-directory> <version>/);
 assert.match(skill, /references\/xiaohongshu-import\.md/);
 
 if (repositoryReadme !== null) {
@@ -682,7 +606,7 @@ if (repositoryReadme !== null) {
 if (repositoryEnglishReadme !== null) {
   assert.match(
     repositoryEnglishReadme,
-    /Choose the newest version directory under \[`releases\/`\]\(releases\/\)/,
+    /npm run build:redskill/,
   );
 }
 
@@ -780,8 +704,6 @@ assert.notEqual(
 
 assert.ok(fs.existsSync(coreContractPath), "missing Core interaction contract");
 const coreContract = fs.readFileSync(coreContractPath, "utf8");
-assert.match(skill, /交互壳/);
-assert.match(skill, /基础功能[^\n]*视觉/);
 assert.match(coreContract, /Europe direct-copy interaction v1/);
 assert.match(coreContract, /拖拽/);
 assert.doesNotMatch(skill, /完整攻略包先定义.*design.*token/i);

@@ -81,35 +81,21 @@ Social media, forums, and named local editorial sources are discovery and experi
 
 ## A map you can use and take with you
 
-For a mainland-China trip, the AMap enhancement appears only when place resolution or route review begins. After installing `@amap-lbs/amap-gui` and creating a Web (JS API) Key in the AMap console, a regular user runs one command once:
+For a mainland-China trip, AMap integration is optional and only used when place resolution or route verification begins. After installing `@amap-lbs/amap-gui` and creating a Web (JS API) Key in the AMap console, set the environment variables in your current shell session and start the service:
 
 ```bash
-node skill/scripts/amap-credentials.js setup
+export AMAP_KEY="<your-amap-key>"
+export AMAP_SECURITY_KEY="<your-amap-security-key>"
+amap-gui start
 ```
 
-Setup saves the complete pair in macOS Keychain, Windows DPAPI, or Linux Secret Service and performs real POI and route validation. After validation succeeds, later searches and route reviews create and clean up a request-scoped provider session automatically; users do not manually run `amap-gui start` on the normal path. On Linux, an unavailable Secret Service never falls back to plaintext storage: enable a system keyring or use the Advanced/CI environment override for the current session only.
+Credentials stay in your session environment and are never written to trip files, exports, logs, Git, or release packages. Planning still works without AMap configuration; routes are then clearly labeled as unverified.
 
-```bash
-node skill/scripts/amap-credentials.js status
-node skill/scripts/amap-credentials.js update
-node skill/scripts/amap-credentials.js remove
-```
+A search result or handoff link never upgrades route status. Every formal adjacent segment must have valid route evidence for “Verified with AMap”; adding, removing, moving, or reordering a place resets the affected day to unverified until the agent replans and rechecks.
 
-`status` never prints a Key value or fragment. `update` replaces the old profile only after the new pair passes both real checks. `remove` deletes only this Skill's local configuration. `AMAP_KEY` plus `AMAP_SECURITY_KEY` remain an Advanced/CI complete-pair override and are never mixed with the system store or written to trip files, exports, logs, Git, or release packages. `amap-gui status/start/stop` are troubleshooting-only commands. Planning still works without AMap configuration; the route is then labeled: **AMap road-network verification was not completed. Recheck in AMap before departure.**
+Overseas research uses ordinary Web search, local-language material, and official pages. **Google Maps URLs do not require an API key.** The current source does not call Google Places API and does not call Google Routes API.
 
-A search result or handoff link never upgrades route status. Every formal adjacent segment must have valid route evidence for “Verified with AMap”; a day with only some valid segments is “Partially verified.” Adding, removing, moving, or reordering a place makes the affected day unverified again until the agent replans and rechecks the new adjacency.
-
-Overseas research continues to use ordinary Web search, local-language material, and official pages. **Google Maps URLs do not require an API key.** A place or route URL opens Google Maps, which recalculates directions after opening. The current source does not call Google Places API and does not call Google Routes API; it does not require Google Cloud Billing.
-
-For portable, long-term storage, download individually or generate with the CLI:
-
-```text
-places.csv
-itinerary.kml
-README.md
-```
-
-The map now leads with **Export all places and open My Maps**; after selecting a day it also enables **Export this day and open My Maps**. One click downloads one KML and attempts to open My Maps, but the traveler still imports that local file manually. The three files above remain available as advanced export and CLI compatibility. KML contains only reliable WGS84 coordinates; places with only AMap GCJ-02 coordinates stay in CSV for manual name-and-address resolution. The files are **not automatically added to regular Google Maps saved lists**, and they are not automatically added to AMap favorites. For overseas POIs, **Navigate here** opens a destination-only Google Maps URL with no origin or forced travel mode. See [map provider execution and delivery](skill/references/map-provider-delivery.md) for inputs, statuses, link limits, filesystem safety, and fallbacks.
+For long-term portability, the map leads with **Export all places and open My Maps** and **Export this day and open My Maps** (downloading a WGS84-only KML for manual import into Google My Maps). `places.csv`, `itinerary.kml`, and `README.md` remain available under advanced export and the CLI. The files are **not automatically added to regular Google Maps saved lists**, and they are not automatically added to AMap favorites. See [map provider execution and delivery](skill/references/map-provider-delivery.md) for details.
 
 ## Get started
 
@@ -160,11 +146,11 @@ After publication, install `interactive-trip-planner` from the SkillHub marketpl
 
 **Text-and-code marketplace package**
 
-Choose the newest version directory under [`releases/`](releases/), use its complete `interactive-trip-planner/` folder, and follow the `INSTALL.zh-CN.md` in the same release directory. This edition works for REDSkill and stays within SkillHub's text-and-code upload boundary. It excludes Codex metadata and private travel libraries. Do not mix root source files with an older release package.
+Run `npm run build:redskill` to generate a clean text-and-code release package under local `releases/redskill-<version>/` (automatically excluding test scripts, Codex metadata, and private travel libraries) ready for REDSkill or SkillHub upload.
 
 ## Development and verification
 
-Development requires Node.js 18 or newer. `skill/` is the source; `releases/` contains generated output and should not be edited directly.
+Development requires Node.js 18 or newer. `skill/` is the source; `releases/` is generated locally on demand (gitignored).
 
 ```bash
 npm run build:redskill
@@ -173,9 +159,10 @@ npm test
 
 `npm test` checks Core route and state behavior, map templates, Taste Models, Regional Source Packs, discovery scripts, Xiaohongshu import and library behavior, the theme contract, the Skill contract, and REDSkill format and privacy boundaries.
 
-The agent-facing JSON CLIs live in `skill/scripts/`:
+The agent-facing CLIs live in `skill/scripts/`:
 
 ```bash
+node skill/scripts/build-trip-map.js --guide <guide-directory>
 node skill/scripts/recommend-taste-models.js --context <context.json>
 node skill/scripts/build-source-query-matrix.js --context <context.json>
 node skill/scripts/probe-source-access.js --context <sources.json>

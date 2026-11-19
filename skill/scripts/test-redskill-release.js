@@ -151,24 +151,15 @@ for (const pattern of [
   assert.doesNotMatch(publicText, pattern, `privacy scan found ${pattern}`);
 }
 
-for (const testFile of [
-  "test-redskill-package.js",
-  "test-hybrid-taste-models.js",
-  "test-regional-source-packs.js",
-  "test-amap-cli.js",
-  "test-contribution-extensibility.js",
-  "test-first-visit-balance.js",
-  "test-discovery-cli.js",
-  "test-source-access-probe.js",
-  "test-xhs-import-runtime.js",
-  "test-xhs-public-fetch.js",
-  "test-xhs-library.js",
-  "test-xhs-import-cli.js",
-  "test-skill-contract.js",
-]) {
-  const result = spawnSync(process.execPath, [path.join(skillRoot, "scripts", testFile)], { encoding: "utf8" });
-  assert.equal(result.status, 0, `${testFile} failed:\n${result.stdout}${result.stderr}`);
-}
+const packagedScriptsDir = path.join(skillRoot, "scripts");
+const packagedTestFiles = fs.existsSync(packagedScriptsDir)
+  ? fs.readdirSync(packagedScriptsDir).filter((name) => /^test-.*\.js$/.test(name))
+  : [];
+assert.deepEqual(
+  packagedTestFiles,
+  [],
+  `REDSkill release must exclude test scripts, found: ${packagedTestFiles.join(", ")}`,
+);
 
 const unsupportedFixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "redskill-format-boundary-"));
 try {

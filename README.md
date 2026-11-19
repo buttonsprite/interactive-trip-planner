@@ -81,35 +81,21 @@ Hybrid Taste Model（混合生活品味模型）记录的是可以迁移到新�
 
 ## 地图不是只看，还能带走
 
-中国大陆行程进入 POI 定位或路线复核时，可以选择使用你自己的高德 CLI。安装 `@amap-lbs/amap-gui` 并在高德控制台创建 Web端（JS API）Key 后，普通用户只需运行一次：
+中国大陆行程进入地点定位或路线复核时，可以选择使用你自己的高德 CLI（`@amap-lbs/amap-gui`）。在高德控制台创建 Web 端（JS API）Key 后，在当次终端会话中设置环境变量并启动服务即可：
 
 ```bash
-node skill/scripts/amap-credentials.js setup
+export AMAP_KEY="<your-amap-key>"
+export AMAP_SECURITY_KEY="<your-amap-security-key>"
+amap-gui start
 ```
 
-setup 会把两项凭据成对存入 macOS Keychain、Windows DPAPI 或 Linux Secret Service，并完成真实 POI 与路线验证；验证成功后，后续搜索和路线复核会自动建立并清理 request-scoped provider session，不再要求用户手动运行 `amap-gui start`。Linux 没有可用 Secret Service 时不会明文保存，可安装系统 Keyring 支持，或仅在当次会话使用高级/CI 环境变量覆盖。
-
-```bash
-node skill/scripts/amap-credentials.js status
-node skill/scripts/amap-credentials.js update
-node skill/scripts/amap-credentials.js remove
-```
-
-`status` 不显示 Key 值或片段；`update` 只有在新凭据同时通过真实 POI 与路线验证后才替换旧配置；`remove` 只删除本 Skill 的本机配置。`AMAP_KEY` 与 `AMAP_SECURITY_KEY` 仍是高级/CI 的完整成对覆盖入口，不与系统存储混用，也不会写入旅行文件、导出、日志、Git 或发布包。`amap-gui status/start/stop` 只保留给故障排查。不配置也可以继续规划，只是路线会明确显示：**未完成高德路网复核；请在出发前打开高德确认。**
+密钥仅存在于你的当次环境，不会写入旅行文件、导出、日志、Git 或发布包。不配置也可以继续规划，路线会明确提示：**未完成高德路网复核；请在出发前打开高德确认。**
 
 路线状态不会因为“搜索到了地点”或“生成了链接”而升级。全部正式相邻段得到有效结果时显示“已用高德复核”，只有部分完成时显示“部分移动段已复核”；你在地图里加入、移出、换日或调整顺序后，受影响日期会重新回到未复核，等待 Agent 重排和复查。
 
 海外行程继续使用普通 Web 搜索、当地语言资料和官方页面。**Google Maps URLs 不需要 API Key**，地点和路线会在点击后交给 Google Maps 打开并重新计算；当前源码不调用 Google Places API 或 Google Routes API，也不要求 Google Cloud Billing。
 
-需要长期保存时，可以逐个下载或用 CLI 生成：
-
-```text
-places.csv
-itinerary.kml
-README.md
-```
-
-地图页面优先提供“导出全部地点并打开 My Maps”；选择某天后还会启用“导出当天地点并打开 My Maps”。一次点击下载一个 KML 并尝试打开 My Maps，用户仍需在 My Maps 中手动导入。上面的三个文件保留为高级导出和 CLI 兼容能力。KML 只使用可靠 WGS84 坐标；只有高德 GCJ-02 坐标的地点保留在 CSV 中，按名称和地址人工定位。导出**不会自动写入普通 Google Maps 收藏夹**，也不会自动写入高德收藏夹。海外地点详情的主操作是“导航去这里”，Google URL 只携带 destination，不包含起点或强制交通方式。完整输入、状态、链接限制、文件安全与降级规则见[地图服务执行与交付](skill/references/map-provider-delivery.md)。
+需要长期保存时，地图页面优先提供“导出全部地点并打开 My Maps”与“导出当天地点并打开 My Maps”（一次点击下载一个仅含可靠 WGS84 点的 KML 并尝试打开 My Maps 手动导入）；`places.csv`、`itinerary.kml`、`README.md` 保留在高级导出和命令行入口。导出**不会自动写入普通 Google Maps 收藏夹**，也不会自动写入高德收藏夹。详细规则见[地图服务执行与交付](skill/references/map-provider-delivery.md)。
 
 ## 如何开始
 
@@ -160,11 +146,11 @@ README.md
 
 **文本与代码格式发布包**
 
-从 [`releases/`](releases/) 选择最新版本目录，使用其中 `interactive-trip-planner/` 的完整内容，并按同目录的 `INSTALL.zh-CN.md` 操作。这个发布面可用于 REDSkill，也满足 SkillHub 的文本与代码上传边界；它排除了 Codex metadata 和私人资料库。不要把根目录源码与旧版本发布包混合上传。
+运行 `npm run build:redskill` 会在本地 `releases/redskill-<version>/` 生成干净的文本与代码发布包（自动排除测试脚本、Codex metadata 和私人资料库），可用于 REDSkill 或 SkillHub 上传。
 
 ## 开发与验证
 
-开发需要 Node.js 18 或更高版本。`skill/` 是源码；`releases/` 是构建产物，请勿直接修改。
+开发需要 Node.js 18 或更高版本。`skill/` 是源码；`releases/` 为本地按需构建产物（已加入 `.gitignore`）。
 
 ```bash
 npm run build:redskill
@@ -173,9 +159,10 @@ npm test
 
 `npm test` 会验证 Core 路线与状态、地图模板、Taste Model、Regional Source Pack、发现脚本、小红书导入与资料库、主题合同、Skill contract，以及 REDSkill 的格式和隐私边界。
 
-供 Agent 使用的 JSON CLI 位于 `skill/scripts/`：
+供 Agent 使用的常用脚本位于 `skill/scripts/`：
 
 ```bash
+node skill/scripts/build-trip-map.js --guide <guide-directory>
 node skill/scripts/recommend-taste-models.js --context <context.json>
 node skill/scripts/build-source-query-matrix.js --context <context.json>
 node skill/scripts/probe-source-access.js --context <sources.json>

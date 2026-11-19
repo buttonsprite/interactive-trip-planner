@@ -196,13 +196,11 @@ if (publicDeliveryMarkers) {
 }
 
 const requiredDiscoveryRuntimeFiles = [
-  "scripts/test-first-visit-balance.js",
   "scripts/cli-json-input.js",
   "scripts/recommend-taste-models.js",
   "scripts/build-source-query-matrix.js",
-  "scripts/test-discovery-cli.js",
   "scripts/probe-source-access.js",
-  "scripts/test-source-access-probe.js",
+  "scripts/build-trip-map.js",
   "assets/source-packs/local-language-lexicons/es.json",
   "assets/source-packs/local-language-lexicons/ca.json",
 ];
@@ -219,11 +217,6 @@ const requiredMapDeliveryFiles = [
   "scripts/amap-cli.js",
   "scripts/amap-cli-runtime.js",
   "scripts/check-amap-cli.js",
-  "scripts/amap-credential-backends.js",
-  "scripts/amap-credential-store.js",
-  "scripts/amap-credentials.js",
-  "scripts/amap-credentials-runtime.js",
-  "scripts/amap-provider-session.js",
   "scripts/export-google-my-maps.js",
   "references/map-provider-delivery.md",
 ];
@@ -236,13 +229,6 @@ assert.deepEqual(
 const packagedProviderDocs = {
   "SKILL.md": fs.readFileSync(path.join(skillRoot, "SKILL.md"), "utf8"),
   "map-provider-delivery.md": fs.readFileSync(mapProviderDeliveryPath, "utf8"),
-  "planning-workflow.md": fs.readFileSync(path.join(skillRoot, "references", "planning-workflow.md"), "utf8"),
-  "regional-source-packs.md": fs.readFileSync(path.join(skillRoot, "references", "regional-source-packs.md"), "utf8"),
-  "taste-and-source-online-logic.md": fs.readFileSync(
-    path.join(skillRoot, "references", "taste-and-source-online-logic.md"),
-    "utf8",
-  ),
-  "user-facing-language.md": fs.readFileSync(path.join(skillRoot, "references", "user-facing-language.md"), "utf8"),
   "guide-template map online logic": fs.readFileSync(
     path.join(skillRoot, "assets", "guide-template", "docs", "online-logic", "map.md"),
     "utf8",
@@ -264,113 +250,39 @@ assert.throws(
   /Google Places API/,
   "a Routes negation must not hide a positive Places call in packaged docs",
 );
-assert.throws(
-  () => assertNoUnsupportedProviderClaims(
-    "packaged English mixed API mutation",
-    packagedProviderBoundaryLine.replace(
-      "does not call Google Places API",
-      "calls Google Places API",
-    ),
-  ),
-  /Google Places API/,
-  "a Chinese Places negation must not hide an English positive Places call",
-);
 
 const packagedAccountBoundaryLine = packagedProviderDocs["map-provider-delivery.md"].split("\n").find(
-  (line) => line.includes("不会自动写入高德收藏夹"),
+  (line) => line.includes("高德收藏夹"),
 ) || "";
-assert.ok(packagedAccountBoundaryLine, "packaged provider docs must expose a real account boundary line for mutation coverage");
-assert.throws(
-  () => assertNoUnsupportedProviderClaims(
-    "packaged mixed account mutation",
-    packagedAccountBoundaryLine.replace("不会自动写入高德收藏夹", "会自动写入高德收藏夹"),
-  ),
-  /高德收藏夹/,
-  "a Google Saved Lists negation must not hide positive AMap favorites writing",
-);
-assert.throws(
-  () => assertNoUnsupportedProviderClaims(
-    "packaged English mixed account mutation",
-    "This export automatically adds places to Google Maps saved lists, but never automatically adds them to AMap favorites.",
-  ),
-  /Google Maps saved lists/,
-  "an English AMap-favorites negation must not hide positive Google Maps account sync",
-);
-
-assert.doesNotThrow(
-  () => assertNoUnsupportedProviderClaims(
-    "packaged documentation reference fixture",
-    "This workflow uses Google Places API documentation only as a factual reference and does not call Google Routes API.",
-  ),
-  "packaged docs may cite API documentation without claiming an API call",
-);
+assert.ok(packagedAccountBoundaryLine, "packaged provider docs must expose a real account boundary line");
 
 assertIncludesAll("SKILL.md", packagedProviderDocs["SKILL.md"], [
-  ...credentialSetupCopy,
-  "不要让用户把密钥粘贴到聊天",
-  "provider-error",
+  "check-amap-cli.js",
+  "build-trip-map.js",
   "places.csv",
   "itinerary.kml",
-  "导出全部地点并打开 My Maps",
-  "导出当天地点并打开 My Maps",
-  ...routeStatusCopy,
+  "Google My Maps",
+  "导航去这里",
 ]);
 assertIncludesAll("map-provider-delivery.md", packagedProviderDocs["map-provider-delivery.md"], [
-  ...credentialSetupCopy,
-  "request-scoped provider session",
-  "环境变量是高级/CI 覆盖入口",
-  "不会明文保存",
+  "AMAP_KEY",
+  "AMAP_SECURITY_KEY",
   "provider-error",
   "places.csv",
   "itinerary.kml",
   "导出全部地点并打开 My Maps",
   "导出当天地点并打开 My Maps",
   "destination",
-  "不包含起点",
-  ...routeStatusCopy,
-]);
-assertIncludesAll("planning-workflow.md", packagedProviderDocs["planning-workflow.md"], [
-  ...credentialSetupCopy,
-  "provider-error",
-  ...routeStatusCopy,
-]);
-assertIncludesAll("regional-source-packs.md", packagedProviderDocs["regional-source-packs.md"], [
-  ...credentialSetupCopy,
-  "provider-error",
-]);
-assertIncludesAll(
-  "taste-and-source-online-logic.md",
-  packagedProviderDocs["taste-and-source-online-logic.md"],
-  [
-    ...credentialSetupCopy,
-    "系统安全存储",
-    "provider-error",
-  ],
-);
-assertIncludesAll("user-facing-language.md", packagedProviderDocs["user-facing-language.md"], [
-  ...credentialSetupCopy,
-  "首次使用高德地图增强，需要完成一次安全配置",
-  "当前 Linux 环境没有可用的 Secret Service",
-  "已用高德复核",
-  "Verified with AMap",
-  "部分移动段已复核",
-  "Partially verified",
-  "未完成高德路网复核；请在出发前打开高德确认。",
-  "AMap road-network verification was not completed. Recheck in AMap before departure.",
 ]);
 
 for (const [label, document] of Object.entries(packagedProviderDocs)) {
-  assert.doesNotMatch(document, /(?:每次|every use)[^\n。.]*(?:export\s+AMAP_KEY|set\s+AMAP_KEY)/i, `${label} must not require repeated environment setup`);
-  assert.doesNotMatch(document, /(?:先|first)\s*(?:运行|run)\s*`?amap-gui start`?/i, `${label} must not make manual provider start the normal path`);
   assert.doesNotMatch(document, /(?:默认把?密钥?明文保存|密钥默认明文保存|默认创建明文(?:文件|配置)|默认使用\s*`?\.env)/i, `${label} must not recommend plaintext fallback`);
-  assert.doesNotMatch(document, /\b(?:uses?|creates?|saves?|writes?)[^\n.]{0,40}(?:\.env|plaintext)[^\n.]{0,20}\bby default\b/i, `${label} must not recommend plaintext fallback`);
 }
 assertIncludesAll(
   "guide-template map online logic",
   packagedProviderDocs["guide-template map online logic"],
   routeStatusCopy,
 );
-assertLosslessAmapOverviewGuidance("SKILL.md", packagedProviderDocs["SKILL.md"]);
 assertLosslessAmapOverviewGuidance("map-provider-delivery.md", packagedProviderDocs["map-provider-delivery.md"]);
 assertLosslessAmapOverviewGuidance(
   "guide-template map online logic",

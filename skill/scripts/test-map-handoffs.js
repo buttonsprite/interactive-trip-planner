@@ -68,8 +68,11 @@ const links = TripMapDelivery.buildPlaceLinks(amapPoi, {
 assert.match(links.primary.url, /^https:\/\/uri\.amap\.com\/marker\?/);
 assert.match(links.amap.url, /markers=B0FFTEST01/);
 assert.match(links.google.url, /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1/);
-assert.equal(links.amap.label, "在高德地图打开 / Open in AMap");
-assert.equal(links.google.label, "导航去这里 / Navigate here");
+assert.equal(links.amap.label, "在高德地图打开");
+assert.equal(links.google.label, "导航去这里");
+const linksEn = TripMapDelivery.buildPlaceLinks(amapPoi, { region: "CN", locale: "en" });
+assert.equal(linksEn.amap.label, "Open in AMap");
+assert.equal(linksEn.google.label, "Navigate here");
 assert.equal(parse(links.amap.url).searchParams.get("src"), "interactive-trip-planner");
 assert.equal(parse(links.google.url).searchParams.get("api"), "1");
 assert.equal(parse(links.google.url).searchParams.get("destination"), "25.69,100.16");
@@ -193,7 +196,7 @@ assert.equal(
   parse(googleRoutes[1].url).searchParams.get("origin"),
   "split Google links must overlap at their boundary stop",
 );
-assert.equal(googleRoutes[0].label, "Google Maps 路线 1/2 / Google Maps route 1/2");
+assert.equal(googleRoutes[0].label, "Google Maps 路线 1/2");
 
 function longGooglePoi(id, length) {
   return {
@@ -263,7 +266,7 @@ assert.deepEqual(
 );
 
 assert.equal(sevenHandoffs.overview.provider, "amap");
-assert.equal(sevenHandoffs.overview.label, "在高德查看今日地点 / View today's places in AMap");
+assert.equal(sevenHandoffs.overview.label, "在高德查看今日地点");
 assert.equal(sevenHandoffs.overview.poiIds.length, 7);
 assert.ok(
   parse(sevenHandoffs.overview.url).searchParams.get("markers").split("|").length <= 10,
@@ -299,9 +302,9 @@ assert.deepEqual(manyOverviewHandoffs.overview, manyOverviewHandoffs.overviews[0
 assert.deepEqual(
   manyOverviewHandoffs.overviews.map((item) => item.label),
   [
-    "高德今日地点 1/3 / AMap day overview 1/3",
-    "高德今日地点 2/3 / AMap day overview 2/3",
-    "高德今日地点 3/3 / AMap day overview 3/3",
+    "高德今日地点 1/3",
+    "高德今日地点 2/3",
+    "高德今日地点 3/3",
   ],
 );
 for (const item of manyOverviewHandoffs.overviews) {
@@ -316,7 +319,7 @@ for (const route of walkingAmapRoutes) {
   assert.equal(parse(route.url).searchParams.has("via"), false, "walking links must never contain via");
   assert.equal(parse(route.url).searchParams.get("mode"), "walk");
 }
-assert.equal(walkingAmapRoutes[0].label, "高德路线 1/6 / AMap route 1/6");
+assert.equal(walkingAmapRoutes[0].label, "高德路线 1/6");
 assert.equal(sevenHandoffs.routeStatus, "partial");
 assert.deepEqual({ sevenPois, sevenDay }, daySnapshot, "day links must not mutate frozen fixtures");
 
@@ -340,8 +343,8 @@ const drivingGoogleRoutes = drivingHandoffs.routeLinks.filter((link) => link.pro
 assert.equal(drivingAmapRoutes.length, 1, "three driving stops may share one AMap navigation link");
 assert.ok(parse(drivingAmapRoutes[0].url).searchParams.has("via"));
 assert.equal(parse(drivingAmapRoutes[0].url).searchParams.get("mode"), "car");
-assert.equal(drivingAmapRoutes[0].label, "在高德查看这段路线 / Open this route in AMap");
-assert.equal(drivingGoogleRoutes[0].label, "在 Google Maps 打开今日路线 / Open today's route in Google Maps");
+assert.equal(drivingAmapRoutes[0].label, "在高德查看这段路线");
+assert.equal(drivingGoogleRoutes[0].label, "在 Google Maps 打开今日路线");
 
 const unknownModeHandoffs = TripMapDelivery.buildDayHandoffs(
   {
@@ -355,18 +358,13 @@ const unknownModeHandoffs = TripMapDelivery.buildDayHandoffs(
 const unknownModeAmapRoutes = unknownModeHandoffs.routeLinks.filter((link) => link.provider === "amap");
 const unknownModeGoogleRoutes = unknownModeHandoffs.routeLinks.filter((link) => link.provider === "google");
 assert.equal(unknownModeAmapRoutes.length, 0, "unknown transport cannot emit an AMap navigation URL");
-assert.equal(unknownModeGoogleRoutes.length, 0, "unknown transport cannot emit a Google directions URL");
+assert.equal(unknownModeGoogleRoutes.length, 1, "Google directions omits travelmode instead of blocking the whole day");
+assert.equal(new URL(unknownModeGoogleRoutes[0].url).searchParams.get("travelmode"), null);
 assert.ok(
   drivingPois.every((poi) => unknownModeHandoffs.manualItems.some(
     (item) => item.poiId === poi.id && item.provider === "amap" && item.reason === "route-mode-required",
   )),
   "unknown AMap edges must keep every affected POI for manual routing",
-);
-assert.ok(
-  drivingPois.every((poi) => unknownModeHandoffs.manualItems.some(
-    (item) => item.poiId === poi.id && item.provider === "google" && item.reason === "route-mode-required",
-  )),
-  "unknown Google edges must keep every affected POI for manual routing",
 );
 
 const mixedPois = deepFreeze(Array.from({ length: 4 }, (_, index) => resolvedPoi(`mixed-${index + 1}`, index + 10)));

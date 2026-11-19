@@ -20,6 +20,15 @@
     return cleanText(options?.source) || "interactive-trip-planner";
   }
 
+  function isEnglish(options) {
+    const lang = cleanText(options?.locale || options?.language).toLowerCase();
+    return lang === "en" || lang.startsWith("en-");
+  }
+
+  function text(options, zh, en) {
+    return isEnglish(options) ? en : zh;
+  }
+
   function buildUrl(endpoint, entries) {
     const url = new URL(endpoint);
     const params = new URLSearchParams();
@@ -115,7 +124,7 @@
     return {
       provider: "amap",
       kind: "place",
-      label: "在高德地图打开 / Open in AMap",
+      label: text(options, "在高德地图打开", "Open in AMap"),
       url: buildUrl(AMAP_MARKER_ENDPOINT, [
         ["markers", marker],
         ["src", sourceName(options)],
@@ -138,7 +147,7 @@
       return {
         provider: "google",
         kind: "directions",
-        label: "导航去这里 / Navigate here",
+        label: text(options, "导航去这里", "Navigate here"),
         url: directionsUrl,
         poiIds: [cleanText(poi.id)],
       };
@@ -153,7 +162,7 @@
     return {
       provider: "google",
       kind: "place",
-      label: "在 Google Maps 打开 / Open in Google Maps",
+      label: text(options, "在 Google Maps 打开", "Open in Google Maps"),
       url: searchUrl,
       poiIds: [cleanText(poi.id)],
     };
@@ -251,11 +260,11 @@
       const from = run[index];
       const to = run[index + 1];
       const mode = edgeMode(day, from.poi.id, to.poi.id, provider);
-      if (!mode) {
+      if (!mode && provider !== "google") {
         flush();
         appendManual(manualItems, from.poi, provider, "route-mode-required");
         appendManual(manualItems, to.poi, provider, "route-mode-required");
-      } else if (current?.mode === mode) {
+      } else if (current && current.mode === mode) {
         current.items.push(to);
       } else {
         flush();
@@ -313,8 +322,8 @@
         provider: "google",
         kind: "directions",
         label: chunks.length === 1
-          ? "在 Google Maps 打开今日路线 / Open today's route in Google Maps"
-          : `Google Maps 路线 ${index + 1}/${chunks.length} / Google Maps route ${index + 1}/${chunks.length}`,
+          ? text(options, "在 Google Maps 打开今日路线", "Open today's route in Google Maps")
+          : text(options, `Google Maps 路线 ${index + 1}/${chunks.length}`, `Google Maps route ${index + 1}/${chunks.length}`),
         url: chunk.url,
         poiIds: items.map((item) => item.poi.id),
       };
@@ -356,8 +365,8 @@
         provider: "amap",
         kind: "navigation",
         label: chunks.length === 1
-          ? "在高德查看这段路线 / Open this route in AMap"
-          : `高德路线 ${index + 1}/${chunks.length} / AMap route ${index + 1}/${chunks.length}`,
+          ? text(options, "在高德查看这段路线", "Open this route in AMap")
+          : text(options, `高德路线 ${index + 1}/${chunks.length}`, `AMap route ${index + 1}/${chunks.length}`),
         url: buildUrl(AMAP_NAVIGATION_ENDPOINT, [
           ["from", items[0].location],
           ["to", items[items.length - 1].location],
@@ -437,8 +446,8 @@
         provider: "amap",
         kind: "markers",
         label: overviewChunks.length === 1
-          ? "在高德查看今日地点 / View today's places in AMap"
-          : `高德今日地点 ${index + 1}/${overviewChunks.length} / AMap day overview ${index + 1}/${overviewChunks.length}`,
+          ? text(options, "在高德查看今日地点", "View today's places in AMap")
+          : text(options, `高德今日地点 ${index + 1}/${overviewChunks.length}`, `AMap day overview ${index + 1}/${overviewChunks.length}`),
         url: buildUrl(AMAP_MARKER_ENDPOINT, [
           ["markers", items.map((item) => item.marker).join("|")],
           ["src", sourceName(options)],

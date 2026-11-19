@@ -118,7 +118,6 @@ assert.equal(missingCli.mustNotSynthesizeRoutes, true);
 assert.ok(missingCli.fallback.length >= 2);
 for (const item of missingCli.fallback) {
   assert.match(item, /[\u4e00-\u9fff]/);
-  assert.match(item, /[A-Za-z]/);
 }
 assert.doesNotMatch(JSON.stringify(missingCli), /never-print/);
 
@@ -211,7 +210,7 @@ try {
     assert.equal(providerFailure.status, 0, providerFailure.stderr);
     assert.equal(providerFailure.stderr, "");
     assert.equal(JSON.parse(providerFailure.stdout).status, "provider-error");
-    assert.match(JSON.parse(providerFailure.stdout).message, /[\u4e00-\u9fff].*[A-Za-z]/);
+    assert.match(JSON.parse(providerFailure.stdout).message, /[\u4e00-\u9fff]/);
     assert.doesNotMatch(providerFailure.stdout + providerFailure.stderr, /never-print|malformed-provider-json/);
   }
 
@@ -236,7 +235,6 @@ try {
   assert.equal(JSON.parse(unavailable.stdout).status, "missing-cli");
   for (const item of JSON.parse(unavailable.stdout).fallback) {
     assert.match(item, /[\u4e00-\u9fff]/);
-    assert.match(item, /[A-Za-z]/);
   }
   assert.equal(unavailable.stderr, "");
 

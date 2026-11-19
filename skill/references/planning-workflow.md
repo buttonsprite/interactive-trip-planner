@@ -27,7 +27,7 @@
 
 用户直接粘贴小红书、旧攻略或地图时，先根据资料整理地点与路线，再询问与本次旅行关联所需的最少信息。已有旅行中的 POI、顺序、地图或设计局部修改不重复展示启动介绍。不要一开始进入酒店清单、景点清单或地图实现。
 
-高德 CLI 介绍只在两个条件同时满足时出现：目的地位于中国大陆，且已经进入地点定位或路线复核。此时先运行 `node scripts/amap-credentials.js status`；尚未配置时，说明它是可选增强并提供一次性 `node scripts/amap-credentials.js setup`。后续不再重复询问，Skill 会自动建立 request-scoped provider session。配置替换与删除分别使用 `node scripts/amap-credentials.js update` 和 `node scripts/amap-credentials.js remove`。凭据保存在 macOS Keychain、Windows DPAPI 或 Linux Secret Service；Linux 安全存储不可用时不写明文，只提示系统 Keyring 或高级/CI 环境变量覆盖。真实执行仍可能返回 `provider-error` 并进入未复核降级。不安装或暂不配置仍然继续规划。海外行程、主题提案和初步意向阶段不把地图工具作为启动问题或阻塞门。
+高德 CLI 介绍只在两个条件同时满足时出现：目的地位于中国大陆，且已经进入地点定位或路线复核。此时先运行 `node scripts/check-amap-cli.js`；尚未配置时说明它是可选增强（在终端会话中设置 `AMAP_KEY` 与 `AMAP_SECURITY_KEY` 环境变量并运行 `amap-gui start`），不安装或暂不配置仍然继续规划。真实执行仍可能返回 `provider-error` 并进入未复核降级。海外行程、主题提案和初步意向阶段不把地图工具作为启动问题或阻塞门。
 
 ## 最小启动信息
 

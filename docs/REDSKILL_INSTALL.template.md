@@ -44,22 +44,18 @@ Skill 会先尝试不带 Cookie 的公开读取。完整收藏夹若必须使用
 
 ## 可选地图增强与导出
 
-高德增强只在规划中国大陆地点和路线时出现，不是安装后的全局启动门。按[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)安装 `amap-gui` 并创建 Web端（JS API）Key 后，普通用户运行一次 `node scripts/amap-credentials.js setup`。它会把完整凭据对写入 macOS Keychain、Windows DPAPI 或 Linux Secret Service，并执行真实 POI + 路线验证；成功后查询会自动启动、检查并停止 request-scoped provider session。可用 `node scripts/amap-credentials.js status` 检查安全状态，用 `node scripts/amap-credentials.js update` 原子替换，用 `node scripts/amap-credentials.js remove` 删除本 Skill 的本机配置。
+高德增强只在规划中国大陆地点和路线时出现，不是安装后的全局启动门。按[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)安装 `amap-gui` 并创建 Web 端（JS API）Key 后，在当次终端会话中设置 `AMAP_KEY` 和 `AMAP_SECURITY_KEY` 环境变量并运行 `amap-gui start` 即可。不要把 Key 粘贴到聊天、命令参数或提交进 Git。不配置仍可继续规划，真实请求失败时保持未复核。
 
-Linux 没有 Secret Service 时不会明文保存，也不会默认创建 `.env`；请启用系统 Keyring，或只为当前会话使用高级/CI 的完整 `AMAP_KEY` + `AMAP_SECURITY_KEY` 覆盖。环境变量只配置一项时会拒绝混用系统存储。不要把 Key 粘贴到聊天或命令参数。`amap-gui status/start/stop` 仅用于故障排查；普通使用不需要手动维护容器。不配置仍可继续规划，真实请求失败时保持未复核。
+Google Maps URLs 不需要 API Key，本包不调用 Google Places API 或 Google Routes API；路线在用户打开 Google Maps 后重新计算。
 
-路线状态只使用三档：已用高德复核 / Verified with AMap；部分移动段已复核 / Partially verified；未完成高德路网复核；请在出发前打开高德确认。 / AMap road-network verification was not completed. Recheck in AMap before departure.
-
-Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key。本包不调用 Google Places API / does not call Google Places API，也不调用 Google Routes API / does not call Google Routes API；路线在用户打开 Google Maps 后重新计算。
-
-地图主操作是“导出全部地点并打开 My Maps”；选中某天后可用“导出当天地点并打开 My Maps”。一次点击只下载一个 KML 并尝试打开 My Maps，仍需用户手动导入；`places.csv`、`itinerary.kml`、`README.md` 位于高级导出。导出不会自动写入普通 Google Maps 收藏夹 / not automatically added to regular Google Maps saved lists，也不会自动写入高德收藏夹。仅有高德 GCJ-02 坐标的地点不会冒充 WGS84 写入 KML，会保留在 CSV 中供人工定位。海外 POI 的“导航去这里”只传 Google destination，不包含起点或强制交通方式。
+地图主操作是“导出全部地点并打开 My Maps”和“导出当天地点并打开 My Maps”（下载仅含可靠 WGS84 点的 KML，供用户手动导入 My Maps）；`places.csv`、`itinerary.kml`、`README.md` 位于高级导出。导出不会自动写入普通 Google Maps 收藏夹，也不会自动写入高德收藏夹。海外地点详情的“导航去这里”只传 Google destination，不包含起点或强制交通方式。
 
 ## 运行条件
 
 - 支持 Skills 的运行环境。
 - 搜索节庆、营业时间、交通和预约等最新事实时需要网络访问。
 - 生成和校验完整动态地图时建议具备 Node.js 和现代浏览器。
-- 包内不包含 API key、个人行程或用户浏览器中保存的修改状态。
+- 包内不包含 API key、测试脚本、个人行程或用户浏览器中保存的修改状态。
 - 包内不包含用户导入的小红书笔记、收藏夹、素材或登录信息。
 
 安装后可在 skill 目录运行：
@@ -67,11 +63,8 @@ Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key�
 ```bash
 node scripts/check-amap-cli.js
 node scripts/amap-cli.js --help
+node scripts/build-trip-map.js --guide <guide-directory>
 node scripts/export-google-my-maps.js --guide <guide-directory> --output <new-directory>
-node scripts/test-redskill-package.js
-node scripts/test-redskill-release.js .
-node scripts/test-core-map-route.js
-node scripts/test-skill-contract.js
 ```
 
 ## 更新

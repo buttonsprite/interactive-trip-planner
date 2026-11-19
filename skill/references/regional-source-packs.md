@@ -60,7 +60,7 @@ Global Base 的当地语言 query 使用 `{local:<token>}`，由 `assets/source-
 
 ## 中国大陆地图增强
 
-只有进入中国大陆 POI 定位或正式路线复核时才介绍并探测高德增强，不在全局启动时要求安装。安装与 Key 申请遵循[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)；本 Skill 不猜测或维护第三方安装命令。普通用户先运行 `node scripts/amap-credentials.js status`，未配置时只需一次 `node scripts/amap-credentials.js setup`；替换和删除分别使用 `node scripts/amap-credentials.js update` 与 `node scripts/amap-credentials.js remove`。凭据进入 macOS Keychain、Windows DPAPI 或 Linux Secret Service；Linux 无安全存储时不写明文。
+只有进入中国大陆 POI 定位或正式路线复核时才介绍并探测高德增强（`node scripts/check-amap-cli.js`），不在全局启动时要求安装。安装与 Key 申请遵循[高德官方 CLI 参考手册](https://developer.amap.com/api/cli/map-cli/reference)，凭据通过当前终端会话环境变量提供，不写入明文文件或 Git。
 
 `status` 与 `node scripts/check-amap-cli.js` 只报告命令和完整凭据来源是否可用，不输出值，也不执行搜索或路线。`AMAP_KEY` 与 `AMAP_SECURITY_KEY` 仅作为高级/CI 的完整成对覆盖；只提供一项时拒绝与系统存储混用。探测结果为 `available` 只表示真实请求可以开始；实际执行会自动管理 request-scoped provider session，仍可能返回 `provider-error`，此时必须降级且不得把地点或路线写成已核实。
 

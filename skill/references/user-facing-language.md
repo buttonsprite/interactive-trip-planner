@@ -161,7 +161,7 @@
 
 中国大陆只有进入地点定位或路线复核时才介绍高德增强。首次提示使用固定含义：“首次使用高德地图增强，需要完成一次安全配置。Key 和安全密钥只保存在这台设备的系统安全存储中，不会写入攻略、Git 或发布包。配置成功后，后续搜索地点和复核路线会自动使用高德；不配置也可以继续规划。 / First-time AMap enhancement requires one secure setup. Credentials stay in this device's system credential store and are never written to the guide, Git, or release package. Later place searches and route reviews use AMap automatically; planning can continue without setup.”
 
-命令入口必须完整提供：`node scripts/amap-credentials.js setup`、`node scripts/amap-credentials.js status`、`node scripts/amap-credentials.js update`、`node scripts/amap-credentials.js remove`。平台说明使用 macOS Keychain、Windows DPAPI、Linux Secret Service。成功提示：“高德地图已连接。地点搜索和路线复核以后会自动使用当前设备的安全配置。 / AMap is connected. Place search and route review will automatically use this device's secure configuration.”
+高德增强是可选能力，探测入口为 `node scripts/check-amap-cli.js`。未配置时明确告知用户不影响继续规划，仅需在出发前打开高德确认。
 
 Linux 缺存储时提示：“当前 Linux 环境没有可用的 Secret Service。Skill 不会把密钥明文保存到本地文件。你可以安装并启用 libsecret/系统 Keyring，或仅为本次会话配置环境变量。 / Secret Service is unavailable in this Linux environment. The Skill will not save credentials as plaintext. Enable libsecret/system Keyring, or use environment variables for this session only.” 不让用户把密钥贴进聊天或命令参数。海外启动介绍不要求任何 Google Key，因为“Google Maps URLs 不需要 API Key / Google Maps URLs do not require an API key”。
 
